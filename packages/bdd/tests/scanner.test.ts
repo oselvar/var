@@ -115,3 +115,28 @@ test.each(['---', '***', '___', '----', '* * *'])('recognizes thematic break: %s
   const blocks = scan(`a\n\n${mark}\n\nb`)
   expect(blocks.map((b) => b.kind)).toEqual(['paragraph', 'thematic_break', 'paragraph'])
 })
+
+test('scan recognizes unordered list items', () => {
+  const blocks = scan('- Given I have 100\n- When I withdraw 40\n- Then I should have 60')
+  expect(blocks.map((b) => b.kind)).toEqual(['list_item', 'list_item', 'list_item'])
+  const first = blocks[0]
+  if (first?.kind !== 'list_item') throw new Error('expected list_item')
+  expect(first.ordered).toBe(false)
+  expect(first.text).toBe('Given I have 100')
+})
+
+test('scan recognizes ordered list items', () => {
+  const blocks = scan('1. First step\n2. Second step')
+  expect(blocks.map((b) => b.kind)).toEqual(['list_item', 'list_item'])
+  const first = blocks[0]
+  if (first?.kind !== 'list_item') throw new Error('expected list_item')
+  expect(first.ordered).toBe(true)
+})
+
+test('scan recognizes blockquotes', () => {
+  const blocks = scan('> Given I have 100\n> When I withdraw 40')
+  expect(blocks).toHaveLength(1)
+  const bq = blocks[0]
+  if (bq?.kind !== 'blockquote') throw new Error('expected blockquote')
+  expect(bq.text).toBe('Given I have 100\nWhen I withdraw 40')
+})

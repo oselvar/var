@@ -34,9 +34,21 @@ export function scan(source: string): ReadonlyArray<Block> {
       i++
       continue
     }
+    const bqResult = tryBlockquote(source, lines, i)
+    if (bqResult) {
+      blocks.push(bqResult.quote)
+      i = bqResult.next
+      continue
+    }
     const heading = tryHeading(source, line)
     if (heading) {
       blocks.push(heading)
+      i++
+      continue
+    }
+    const listItem = tryListItem(source, line)
+    if (listItem) {
+      blocks.push(listItem)
       i++
       continue
     }
@@ -69,6 +81,9 @@ function splitLines(source: string): ReadonlyArray<RawLine> {
 }
 
 const THEMATIC_RE = /^\s*([-*_])(\s*\1){2,}\s*$/
+const UL_RE = /^(\s*)([-*+])\s+(.*)$/
+const OL_RE = /^(\s*)(\d+)([.)])\s+(.*)$/
+const BQ_RE = /^>\s?(.*)$/
 
 function tryThematic(source: string, line: RawLine): Block | undefined {
   if (!THEMATIC_RE.test(line.text)) return undefined
@@ -88,6 +103,79 @@ function tryHeading(source: string, line: RawLine): Block | undefined {
   return { kind: 'heading', level, text, span }
 }
 
+function tryListItem(source: string, line: RawLine): Block | undefined {
+  const ul = UL_RE.exec(line.text)
+  if (ul) {
+    const text = ul[3] ?? ''
+    const markerStart = line.startOffset + (ul[1] ?? '').length
+    const markerEnd = markerStart + (ul[2] ?? '').length
+    const textStart = line.startOffset + line.text.indexOf(text)
+    return {
+      kind: 'list_item',
+      ordered: false,
+      text,
+      span: spanFromOffsets(source, line.startOffset, line.endOffset),
+      inlineMap: [{ textOffset: 0, sourceOffset: textStart }],
+      markerSpan: spanFromOffsets(source, markerStart, markerEnd),
+    }
+  }
+  const ol = OL_RE.exec(line.text)
+  if (ol) {
+    const text = ol[4] ?? ''
+    const markerStart = line.startOffset + (ol[1] ?? '').length
+    const markerEnd = markerStart + (ol[2] ?? '').length + (ol[3] ?? '').length
+    const textStart = line.startOffset + line.text.indexOf(text)
+    return {
+      kind: 'list_item',
+      ordered: true,
+      text,
+      span: spanFromOffsets(source, line.startOffset, line.endOffset),
+      inlineMap: [{ textOffset: 0, sourceOffset: textStart }],
+      markerSpan: spanFromOffsets(source, markerStart, markerEnd),
+    }
+  }
+  return undefined
+}
+
+function tryBlockquote(
+  source: string,
+  lines: ReadonlyArray<RawLine>,
+  startIdx: number,
+): { quote: Block; next: number } | undefined {
+  const first = lines[startIdx]
+  if (!first) return undefined
+  const m = BQ_RE.exec(first.text)
+  if (!m) return undefined
+  const segments: string[] = [m[1] ?? '']
+  const inlineMap = [
+    { textOffset: 0, sourceOffset: first.startOffset + first.text.indexOf(m[1] ?? '') },
+  ]
+  let textOffset = (m[1] ?? '').length
+  let i = startIdx + 1
+  let endOffset = first.endOffset
+  while (i < lines.length) {
+    const ln = lines[i]
+    if (!ln) break
+    const next = BQ_RE.exec(ln.text)
+    if (!next) break
+    textOffset += 1 // newline separator inside joined text
+    inlineMap.push({ textOffset, sourceOffset: ln.startOffset + ln.text.indexOf(next[1] ?? '') })
+    segments.push(next[1] ?? '')
+    textOffset += (next[1] ?? '').length
+    endOffset = ln.endOffset
+    i++
+  }
+  return {
+    quote: {
+      kind: 'blockquote',
+      text: segments.join('\n'),
+      span: spanFromOffsets(source, first.startOffset, endOffset),
+      inlineMap,
+    },
+    next: i,
+  }
+}
+
 function consumeParagraph(
   source: string,
   lines: ReadonlyArray<RawLine>,
@@ -101,6 +189,12 @@ function consumeParagraph(
     if (!candidate) break
     if (candidate.text.trim().length === 0) break
     if (/^#{1,6}\s+/.test(candidate.text)) break
+    if (UL_RE.test(candidate.text)) break
+    if (OL_RE.test(candidate.text)) break
+    if (BQ_RE.test(candidate.text)) break
+    if (FENCE_RE.test(candidate.text)) break
+    if (ROW_RE.test(candidate.text)) break
+    if (THEMATIC_RE.test(candidate.text)) break
     endIdx++
   }
   const last = lines[endIdx]
