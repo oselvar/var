@@ -38,15 +38,15 @@ export type GenerateInput = {
 
 export function generateVirtualModule(input: GenerateInput): string {
   const sourceJson = JSON.stringify(input.source ?? '')
-  const stepImports = input.stepImports.map((p) => `import '${p}'`).join('\n')
-  const pathLiteral = `'${input.bddPath}'`
+  const stepImports = input.stepImports.map((p) => `import ${JSON.stringify(p)}`).join('\n')
+  const pathJson = JSON.stringify(input.bddPath)
   return `import { test as vitestTest } from 'vitest'
 import { runBddSource } from '@oselvar/bdd-vitest/runtime'
 ${stepImports}
 
 const SOURCE = ${sourceJson}
 
-runBddSource(SOURCE, ${pathLiteral}, {
+runBddSource(SOURCE, ${pathJson}, {
   sink: { example: (name, run) => vitestTest(name, run) },
   reporter: { diagnostic: (d) => vitestTest(\`bdd:diagnostic:\${d.code}\`, () => { throw new Error(d.message) }) },
 })

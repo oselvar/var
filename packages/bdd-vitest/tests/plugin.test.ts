@@ -9,8 +9,8 @@ describe('generateVirtualModule', () => {
     })
     expect(out).toContain("import { test as vitestTest } from 'vitest'")
     expect(out).toContain("import { runBddSource } from '@oselvar/bdd-vitest/runtime'")
-    expect(out).toContain("import '/abs/account.steps.ts'")
-    expect(out).toContain("runBddSource(SOURCE, '/abs/foo.bdd.md',")
+    expect(out).toContain('import "/abs/account.steps.ts"')
+    expect(out).toContain('runBddSource(SOURCE, "/abs/foo.bdd.md",')
   })
 })
 
