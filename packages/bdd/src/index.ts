@@ -9,3 +9,6 @@ export type { Span } from './span.js'
 export { scan } from './scanner.js'
 
 export type { Bdd, Block, Heading, Paragraph, Example, InlineOffset } from './ast.js'
+
+export { splitSentences } from './sentences.js'
+export type { Sentence } from './sentences.js'
