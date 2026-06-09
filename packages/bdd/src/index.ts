@@ -51,3 +51,6 @@ export type { StrippedInline } from './inline.js'
 export { KEYWORDS } from './keywords-data.js'
 
 export { isKeywordLed, stripLeadingKeyword } from './keywords.js'
+
+export { generateSnippet } from './snippet.js'
+export type { Snippet } from './snippet.js'
