@@ -16,6 +16,12 @@ export function scan(source: string): ReadonlyArray<Block> {
       i++
       continue
     }
+    const fence = tryFence(source, lines, i)
+    if (fence) {
+      blocks.push(fence.fence)
+      i = fence.next
+      continue
+    }
     const heading = tryHeading(source, line)
     if (heading) {
       blocks.push(heading)
@@ -89,6 +95,53 @@ function consumeParagraph(
       inlineMap,
     },
     next: endIdx + 1,
+  }
+}
+
+const FENCE_RE = /^(`{3,})\s*(\S*)\s*$/
+
+function tryFence(
+  source: string,
+  lines: ReadonlyArray<RawLine>,
+  startIdx: number,
+): { fence: Block; next: number } | undefined {
+  const start = lines[startIdx]
+  if (!start) return undefined
+  const open = FENCE_RE.exec(start.text)
+  if (!open) return undefined
+  const fenceMarker = open[1] ?? ''
+  const info = (open[2] ?? '').trim()
+  let i = startIdx + 1
+  let bodyStart: number | undefined
+  let bodyEnd: number | undefined
+  let endOffset = start.endOffset
+  while (i < lines.length) {
+    const ln = lines[i]
+    if (!ln) {
+      i++
+      continue
+    }
+    const close = FENCE_RE.exec(ln.text)
+    if (close && (close[1] ?? '').length >= fenceMarker.length) {
+      endOffset = ln.endOffset
+      break
+    }
+    if (bodyStart === undefined) bodyStart = ln.startOffset
+    bodyEnd = ln.endOffset + 1 /* include the newline that separates from next line */
+    i++
+  }
+  const body =
+    bodyStart !== undefined && bodyEnd !== undefined ? source.slice(bodyStart, bodyEnd) : ''
+  const bodySpan = spanFromOffsets(source, bodyStart ?? start.endOffset, bodyEnd ?? start.endOffset)
+  return {
+    fence: {
+      kind: 'fence',
+      info,
+      body,
+      bodySpan,
+      span: spanFromOffsets(source, start.startOffset, endOffset),
+    },
+    next: i + 1,
   }
 }
 

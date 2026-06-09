@@ -71,3 +71,26 @@ test('paragraph inlineMap maps text offsets to source offsets', () => {
   // 'hello world' lives at source offset 11 (after '# Heading\n\n')
   expect(paragraph.inlineMap[0]).toEqual({ textOffset: 0, sourceOffset: 11 })
 })
+
+test('scan recognizes a fenced code block with info string', () => {
+  const source = '# Title\n\n```json\n{ "a": 1 }\n```\n'
+  const blocks = scan(source)
+  const fence = blocks.find((b) => b.kind === 'fence')
+  if (fence?.kind !== 'fence') throw new Error('expected fence')
+  expect(fence.info).toBe('json')
+  expect(fence.body).toBe('{ "a": 1 }\n')
+})
+
+test('scan tolerates a fence with no info string', () => {
+  const blocks = scan('```\nplain body\n```')
+  const fence = blocks.find((b) => b.kind === 'fence')
+  if (fence?.kind !== 'fence') throw new Error('expected fence')
+  expect(fence.info).toBe('')
+  expect(fence.body).toBe('plain body\n')
+})
+
+test('scan does not split paragraphs across a fence', () => {
+  const source = 'paragraph above\n\n```\nbody\n```\n\nparagraph below'
+  const blocks = scan(source)
+  expect(blocks.map((b) => b.kind)).toEqual(['paragraph', 'fence', 'paragraph'])
+})
