@@ -58,3 +58,6 @@ export { generateSnippet } from './snippet.js'
 export type { Snippet } from './snippet.js'
 
 export type { TestSink, Reporter } from './ports.js'
+
+export { executePlan } from './execute.js'
+export type { ExecutePorts } from './execute.js'
