@@ -56,3 +56,5 @@ export { isKeywordLed, stripLeadingKeyword } from './keywords.js'
 
 export { generateSnippet } from './snippet.js'
 export type { Snippet } from './snippet.js'
+
+export type { TestSink, Reporter } from './ports.js'
