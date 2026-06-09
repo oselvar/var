@@ -25,6 +25,21 @@ test('map allows lifting text offsets back to source offsets', () => {
   expect(offset).toBe(104)
 })
 
+test('mid-word underscores are preserved (snake_case is not mangled)', () => {
+  const { text } = stripInline('the field do_something_now is set', 0)
+  expect(text).toBe('the field do_something_now is set')
+})
+
+test('leading underscore at a word boundary still emphasizes', () => {
+  const { text } = stripInline('Hello _world_ today', 0)
+  expect(text).toBe('Hello world today')
+})
+
+test('mid-word asterisk still strips (CommonMark allows it)', () => {
+  const { text } = stripInline('we *love* code', 0)
+  expect(text).toBe('we love code')
+})
+
 function liftOffset(
   map: ReadonlyArray<{ textOffset: number; sourceOffset: number }>,
   t: number,

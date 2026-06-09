@@ -57,15 +57,21 @@ export function stripInline(rawText: string, sourceBase: number): StrippedInline
     ) {
       const isDouble = rawText.charCodeAt(i + 1) === ch
       const markerLength = isDouble ? 2 : 1
-      const marker = isDouble ? String.fromCharCode(ch, ch) : String.fromCharCode(ch)
-      const closeAt = rawText.indexOf(marker, i + markerLength)
-      if (closeAt > i + markerLength) {
-        const inner = rawText.slice(i + markerLength, closeAt)
-        pushOffset(sourceBase + i + markerLength)
-        out.push(inner)
-        textOffset += inner.length
-        i = closeAt + markerLength
-        continue
+      // CommonMark: `_` only opens emphasis at a word boundary, so `snake_case`
+      // and `foo_bar_baz` stay intact. `*` is allowed mid-word.
+      if (ch === 0x5f /* _ */ && isWord(rawText[i - 1]) && isWord(rawText[i + markerLength])) {
+        // mid-word underscore — copy literally
+      } else {
+        const marker = isDouble ? String.fromCharCode(ch, ch) : String.fromCharCode(ch)
+        const closeAt = rawText.indexOf(marker, i + markerLength)
+        if (closeAt > i + markerLength) {
+          const inner = rawText.slice(i + markerLength, closeAt)
+          pushOffset(sourceBase + i + markerLength)
+          out.push(inner)
+          textOffset += inner.length
+          i = closeAt + markerLength
+          continue
+        }
       }
     }
     pushOffset(sourceBase + i)
@@ -75,6 +81,11 @@ export function stripInline(rawText: string, sourceBase: number): StrippedInline
   }
   if (map.length === 0) map.push({ textOffset: 0, sourceOffset: sourceBase })
   return { text: out.join(''), map }
+}
+
+function isWord(ch: string | undefined): boolean {
+  if (!ch) return false
+  return /[\p{L}\p{N}_]/u.test(ch)
 }
 
 function findMatching(text: string, start: number, open: string, close: string): number {
