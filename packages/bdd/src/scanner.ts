@@ -22,6 +22,12 @@ export function scan(source: string): ReadonlyArray<Block> {
       i = fence.next
       continue
     }
+    const tableResult = tryTable(source, lines, i)
+    if (tableResult) {
+      blocks.push(tableResult.table)
+      i = tableResult.next
+      continue
+    }
     const heading = tryHeading(source, line)
     if (heading) {
       blocks.push(heading)
@@ -143,6 +149,54 @@ function tryFence(
     },
     next: i + 1,
   }
+}
+
+const ROW_RE = /^\|(.+)\|\s*$/
+const DELIM_RE = /^\|\s*:?-+:?\s*(\|\s*:?-+:?\s*)+\|\s*$/
+
+function tryTable(
+  source: string,
+  lines: ReadonlyArray<RawLine>,
+  startIdx: number,
+): { table: Block; next: number } | undefined {
+  const headerLine = lines[startIdx]
+  const delimLine = lines[startIdx + 1]
+  if (!headerLine || !delimLine) return undefined
+  if (!ROW_RE.test(headerLine.text)) return undefined
+  if (!DELIM_RE.test(delimLine.text)) return undefined
+  const header = {
+    cells: parseCells(headerLine.text),
+    span: spanFromOffsets(source, headerLine.startOffset, headerLine.endOffset),
+  }
+  const rows: { cells: ReadonlyArray<string>; span: ReturnType<typeof spanFromOffsets> }[] = []
+  let i = startIdx + 2
+  while (i < lines.length) {
+    const ln = lines[i]
+    if (!ln) break
+    if (!ROW_RE.test(ln.text)) break
+    rows.push({
+      cells: parseCells(ln.text),
+      span: spanFromOffsets(source, ln.startOffset, ln.endOffset),
+    })
+    i++
+  }
+  const lastRow = rows[rows.length - 1]
+  const endOffset = lastRow ? lastRow.span.endOffset : delimLine.endOffset
+  return {
+    table: {
+      kind: 'table',
+      span: spanFromOffsets(source, headerLine.startOffset, endOffset),
+      header,
+      rows,
+    },
+    next: i,
+  }
+}
+
+function parseCells(line: string): ReadonlyArray<string> {
+  const m = ROW_RE.exec(line)
+  if (!m) return []
+  return (m[1] ?? '').split('|').map((c) => c.trim())
 }
 
 function buildInlineMap(

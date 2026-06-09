@@ -94,3 +94,19 @@ test('scan does not split paragraphs across a fence', () => {
   const blocks = scan(source)
   expect(blocks.map((b) => b.kind)).toEqual(['paragraph', 'fence', 'paragraph'])
 })
+
+test('scan recognizes a GFM table with header + delimiter + rows', () => {
+  const source = '| name | age |\n|------|-----|\n| Bob  | 30  |\n| Eve  | 25  |\n'
+  const blocks = scan(source)
+  const table = blocks.find((b) => b.kind === 'table')
+  if (table?.kind !== 'table') throw new Error('expected table')
+  expect(table.header.cells).toEqual(['name', 'age'])
+  expect(table.rows).toHaveLength(2)
+  expect(table.rows[0]?.cells).toEqual(['Bob', '30'])
+  expect(table.rows[1]?.cells).toEqual(['Eve', '25'])
+})
+
+test('a line that looks like a row but has no following delimiter is a paragraph', () => {
+  const blocks = scan('| not | a | table |')
+  expect(blocks[0]?.kind).toBe('paragraph')
+})
