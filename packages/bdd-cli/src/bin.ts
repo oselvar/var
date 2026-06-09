@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { parseArgv } from './argv.js'
+import { runLint } from './lint.js'
 import { runStepdef } from './stepdef.js'
 
 const parsed = parseArgv(process.argv.slice(2))
@@ -37,6 +38,17 @@ async function main(): Promise<void> {
         print,
         cwd: process.cwd(),
         writeStdout: (s) => process.stdout.write(s),
+      })
+      process.exitCode = result.exitCode
+      break
+    }
+    case 'lint': {
+      const result = await runLint({
+        cwd: process.cwd(),
+        json: parsed.flags.json === true,
+        globs: parsed.positionals.length > 0 ? parsed.positionals : undefined,
+        writeStdout: (s) => process.stdout.write(s),
+        writeStderr: (s) => process.stderr.write(s),
       })
       process.exitCode = result.exitCode
       break
