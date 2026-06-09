@@ -5,7 +5,20 @@ export type { Span } from './span.js'
 
 export { scan } from './scanner.js'
 
-export type { Bdd, Block, Heading, Paragraph, Example, InlineOffset } from './ast.js'
+export type {
+  Bdd,
+  Block,
+  Heading,
+  Paragraph,
+  ListItem,
+  Blockquote,
+  Row,
+  Table,
+  Fence,
+  ThematicBreak,
+  Example,
+  InlineOffset,
+} from './ast.js'
 
 export { structure } from './structurer.js'
 
