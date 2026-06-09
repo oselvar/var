@@ -150,3 +150,35 @@ Some interrupting prose.
   const step = result.examples[0]?.steps[0]
   expect(step?.dataTable).toBeUndefined()
 })
+
+test('a fenced code block immediately following a step-bearing block attaches as DocString', () => {
+  let r = createRegistry()
+  r = addStep(r, {
+    expression: 'I send the payload',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: () => {},
+  })
+  const source = `# Payload
+When I send the payload:
+
+\`\`\`json
+{ "action": "import" }
+\`\`\``
+  const result = plan(parse('p.bdd.md', source), r)
+  const step = result.examples[0]?.steps[0]
+  expect(step?.docString?.contentType).toBe('json')
+  expect(step?.docString?.content).toBe('{ "action": "import" }\n')
+})
+
+test('a step with NO following fence has no docString', () => {
+  let r = createRegistry()
+  r = addStep(r, {
+    expression: 'I send the payload',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: () => {},
+  })
+  const result = plan(parse('p.bdd.md', '# P\nWhen I send the payload'), r)
+  expect(result.examples[0]?.steps[0]?.docString).toBeUndefined()
+})
