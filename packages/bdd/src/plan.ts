@@ -1,4 +1,4 @@
-import type { Bdd, Block, Example } from './ast.js'
+import type { Bdd, Block } from './ast.js'
 import { type Diagnostic, ambiguousMatch } from './diagnostics.js'
 import { type Hit, findHits, resolveHits } from './matcher.js'
 import type { Registry, StepRegistration } from './registry.js'
