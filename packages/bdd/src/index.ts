@@ -47,3 +47,5 @@ export type { ExecutionPlan, PlannedExample, PlannedStep } from './plan.js'
 
 export { stripInline } from './inline.js'
 export type { StrippedInline } from './inline.js'
+
+export { KEYWORDS } from './keywords-data.js'
