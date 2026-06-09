@@ -44,3 +44,6 @@ export type { Hit, ResolvedSteps, AmbiguityCollision } from './matcher.js'
 
 export { plan } from './plan.js'
 export type { ExecutionPlan, PlannedExample, PlannedStep } from './plan.js'
+
+export { stripInline } from './inline.js'
+export type { StrippedInline } from './inline.js'

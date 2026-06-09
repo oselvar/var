@@ -1,4 +1,5 @@
 import type { Block, InlineOffset } from './ast.js'
+import { stripInline } from './inline.js'
 import { spanFromOffsets } from './span.js'
 
 export function scan(source: string): ReadonlyArray<Block> {
@@ -106,31 +107,33 @@ function tryHeading(source: string, line: RawLine): Block | undefined {
 function tryListItem(source: string, line: RawLine): Block | undefined {
   const ul = UL_RE.exec(line.text)
   if (ul) {
-    const text = ul[3] ?? ''
+    const rawText = ul[3] ?? ''
     const markerStart = line.startOffset + (ul[1] ?? '').length
     const markerEnd = markerStart + (ul[2] ?? '').length
-    const textStart = line.startOffset + line.text.indexOf(text)
+    const textStart = line.startOffset + line.text.indexOf(rawText)
+    const { text, map: inlineMap } = stripInline(rawText, textStart)
     return {
       kind: 'list_item',
       ordered: false,
       text,
       span: spanFromOffsets(source, line.startOffset, line.endOffset),
-      inlineMap: [{ textOffset: 0, sourceOffset: textStart }],
+      inlineMap,
       markerSpan: spanFromOffsets(source, markerStart, markerEnd),
     }
   }
   const ol = OL_RE.exec(line.text)
   if (ol) {
-    const text = ol[4] ?? ''
+    const rawText = ol[4] ?? ''
     const markerStart = line.startOffset + (ol[1] ?? '').length
     const markerEnd = markerStart + (ol[2] ?? '').length + (ol[3] ?? '').length
-    const textStart = line.startOffset + line.text.indexOf(text)
+    const textStart = line.startOffset + line.text.indexOf(rawText)
+    const { text, map: inlineMap } = stripInline(rawText, textStart)
     return {
       kind: 'list_item',
       ordered: true,
       text,
       span: spanFromOffsets(source, line.startOffset, line.endOffset),
-      inlineMap: [{ textOffset: 0, sourceOffset: textStart }],
+      inlineMap,
       markerSpan: spanFromOffsets(source, markerStart, markerEnd),
     }
   }
@@ -146,11 +149,15 @@ function tryBlockquote(
   if (!first) return undefined
   const m = BQ_RE.exec(first.text)
   if (!m) return undefined
-  const segments: string[] = [m[1] ?? '']
-  const inlineMap = [
-    { textOffset: 0, sourceOffset: first.startOffset + first.text.indexOf(m[1] ?? '') },
-  ]
-  let textOffset = (m[1] ?? '').length
+
+  const firstSegmentRaw = m[1] ?? ''
+  const firstSegmentSourceBase = first.startOffset + first.text.indexOf(firstSegmentRaw)
+  const firstStripped = stripInline(firstSegmentRaw, firstSegmentSourceBase)
+
+  const strippedSegments: string[] = [firstStripped.text]
+  const inlineMap: InlineOffset[] = [...firstStripped.map]
+  let joinedTextOffset = firstStripped.text.length
+
   let i = startIdx + 1
   let endOffset = first.endOffset
   while (i < lines.length) {
@@ -158,17 +165,26 @@ function tryBlockquote(
     if (!ln) break
     const next = BQ_RE.exec(ln.text)
     if (!next) break
-    textOffset += 1 // newline separator inside joined text
-    inlineMap.push({ textOffset, sourceOffset: ln.startOffset + ln.text.indexOf(next[1] ?? '') })
-    segments.push(next[1] ?? '')
-    textOffset += (next[1] ?? '').length
+    const segmentRaw = next[1] ?? ''
+    const segmentSourceBase = ln.startOffset + ln.text.indexOf(segmentRaw)
+    const stripped = stripInline(segmentRaw, segmentSourceBase)
+
+    joinedTextOffset += 1 // newline separator
+    for (const entry of stripped.map) {
+      inlineMap.push({
+        textOffset: joinedTextOffset + entry.textOffset,
+        sourceOffset: entry.sourceOffset,
+      })
+    }
+    strippedSegments.push(stripped.text)
+    joinedTextOffset += stripped.text.length
     endOffset = ln.endOffset
     i++
   }
   return {
     quote: {
       kind: 'blockquote',
-      text: segments.join('\n'),
+      text: strippedSegments.join('\n'),
       span: spanFromOffsets(source, first.startOffset, endOffset),
       inlineMap,
     },
@@ -201,8 +217,8 @@ function consumeParagraph(
   if (!last) throw new Error('invariant: endIdx out of range')
   const startOffset = first.startOffset
   const endOffset = last.endOffset
-  const text = source.slice(startOffset, endOffset)
-  const inlineMap = buildInlineMap(lines, startIdx, endIdx, startOffset)
+  const rawText = source.slice(startOffset, endOffset)
+  const { text, map: inlineMap } = stripInline(rawText, startOffset)
   return {
     paragraph: {
       kind: 'paragraph',
@@ -307,26 +323,4 @@ function parseCells(line: string): ReadonlyArray<string> {
   const m = ROW_RE.exec(line)
   if (!m) return []
   return (m[1] ?? '').split('|').map((c) => c.trim())
-}
-
-function buildInlineMap(
-  lines: ReadonlyArray<RawLine>,
-  startIdx: number,
-  endIdx: number,
-  baseSourceOffset: number,
-): ReadonlyArray<InlineOffset> {
-  const out: InlineOffset[] = []
-  let textOffset = 0
-  for (let i = startIdx; i <= endIdx; i++) {
-    const ln = lines[i]
-    if (!ln) continue
-    out.push({ textOffset, sourceOffset: ln.startOffset })
-    textOffset += ln.text.length
-    if (i < endIdx) {
-      // Account for the newline between joined lines.
-      textOffset += 1
-    }
-    void baseSourceOffset
-  }
-  return out
 }
