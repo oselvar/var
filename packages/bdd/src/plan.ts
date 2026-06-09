@@ -1,4 +1,4 @@
-import type { Bdd, Block } from './ast.js'
+import type { Bdd, Block, InlineOffset } from './ast.js'
 import { type Diagnostic, ambiguousMatch } from './diagnostics.js'
 import { type Hit, findHits, resolveHits } from './matcher.js'
 import type { Registry, StepRegistration } from './registry.js'
@@ -31,7 +31,8 @@ export function plan(bdd: Bdd, registry: Registry): ExecutionPlan {
     const steps: PlannedStep[] = []
     let hadAmbiguous = false
     for (const block of ex.body) {
-      if (block.kind !== 'paragraph') continue
+      if (block.kind !== 'paragraph' && block.kind !== 'list_item' && block.kind !== 'blockquote')
+        continue
       const result = planBlock(block.text, registry)
       for (const collision of result.ambiguities) {
         const span = liftSpan(bdd.source, block, collision.matchStart, collision.matchEnd)
@@ -109,9 +110,28 @@ function planBlock(text: string, registry: Registry): BlockPlan {
 }
 
 function liftSpan(source: string, block: Block, blockStart: number, blockEnd: number): Span {
-  // For Task 13 scope: paragraphs are the only block carrying inline content.
-  if (block.kind !== 'paragraph') return block.span
-  const sourceStart = block.span.startOffset + blockStart
-  const sourceEnd = block.span.startOffset + blockEnd
-  return spanFromOffsets(source, sourceStart, sourceEnd)
+  if (block.kind !== 'paragraph' && block.kind !== 'list_item' && block.kind !== 'blockquote') {
+    return block.span
+  }
+  return liftFromInlineMap(source, block.inlineMap, blockStart, blockEnd)
+}
+
+function liftFromInlineMap(
+  source: string,
+  inlineMap: ReadonlyArray<InlineOffset>,
+  blockStart: number,
+  blockEnd: number,
+): Span {
+  const start = liftInlineOffset(inlineMap, blockStart)
+  const end = liftInlineOffset(inlineMap, blockEnd)
+  return spanFromOffsets(source, start, end)
+}
+
+function liftInlineOffset(inlineMap: ReadonlyArray<InlineOffset>, textOffset: number): number {
+  let best = inlineMap[0]
+  for (const entry of inlineMap) {
+    if (entry.textOffset <= textOffset) best = entry
+  }
+  if (!best) throw new Error('empty inlineMap')
+  return best.sourceOffset + (textOffset - best.textOffset)
 }

@@ -72,3 +72,38 @@ test('plan skips an example heading whose body has no matches and no keyword-led
   expect(result.examples).toHaveLength(0)
   expect(result.diagnostics).toHaveLength(0)
 })
+
+test('plan walks list items as step-bearing blocks', () => {
+  let r = createRegistry()
+  r = addStep(r, {
+    expression: 'I have {int} in my account',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: () => {},
+  })
+  r = addStep(r, {
+    expression: 'I withdraw {int}',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 2,
+    handler: () => {},
+  })
+  const source = '# Bullets\n\n- Given I have 100 in my account\n- When I withdraw 40'
+  const result = plan(parse('b.bdd.md', source), r)
+  expect(result.examples[0]?.steps.map((s) => s.text)).toEqual([
+    'I have 100 in my account',
+    'I withdraw 40',
+  ])
+})
+
+test('plan walks blockquote content as step-bearing', () => {
+  let r = createRegistry()
+  r = addStep(r, {
+    expression: 'I have {int} in my account',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: () => {},
+  })
+  const source = '# Quote\n\n> Given I have 100 in my account'
+  const result = plan(parse('q.bdd.md', source), r)
+  expect(result.examples[0]?.steps).toHaveLength(1)
+})
