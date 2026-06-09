@@ -40,3 +40,34 @@ test('scan strips the optional trailing # marker', () => {
   if (h?.kind !== 'heading') throw new Error('not a heading')
   expect(h.text).toBe('Hello')
 })
+
+test('scan groups consecutive non-blank lines into a single paragraph', () => {
+  const source = 'first line\nsecond line\n\nthird line'
+  const blocks = scan(source)
+  const paragraphs = blocks.filter((b) => b.kind === 'paragraph')
+  expect(paragraphs).toHaveLength(2)
+  if (paragraphs[0]?.kind !== 'paragraph') throw new Error('expected paragraph')
+  expect(paragraphs[0].text).toBe('first line\nsecond line')
+  if (paragraphs[1]?.kind !== 'paragraph') throw new Error('expected paragraph')
+  expect(paragraphs[1].text).toBe('third line')
+})
+
+test('paragraph span covers the full multi-line range', () => {
+  const source = 'first line\nsecond line\n\nthird line'
+  const blocks = scan(source)
+  const p1 = blocks.find((b) => b.kind === 'paragraph')
+  if (p1?.kind !== 'paragraph') throw new Error('expected paragraph')
+  expect(p1.span.startOffset).toBe(0)
+  expect(p1.span.endOffset).toBe('first line\nsecond line'.length)
+  expect(p1.span.startLine).toBe(1)
+  expect(p1.span.endLine).toBe(2)
+})
+
+test('paragraph inlineMap maps text offsets to source offsets', () => {
+  const source = '# Heading\n\nhello world'
+  const blocks = scan(source)
+  const paragraph = blocks.find((b) => b.kind === 'paragraph')
+  if (paragraph?.kind !== 'paragraph') throw new Error('expected paragraph')
+  // 'hello world' lives at source offset 11 (after '# Heading\n\n')
+  expect(paragraph.inlineMap[0]).toEqual({ textOffset: 0, sourceOffset: 11 })
+})
