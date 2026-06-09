@@ -1,3 +1,5 @@
 export type { Bdd } from '@oselvar/bdd'
 export { step, defineContext, defineParameterType } from './api.js'
+export { loadBddConfig } from './config.js'
+export type { BddConfig } from './config.js'
 export const VERSION = '0.0.0'
