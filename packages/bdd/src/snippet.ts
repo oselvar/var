@@ -1,5 +1,7 @@
 import { stripLeadingKeyword } from './keywords.js'
 import type { Registry } from './registry.js'
+import { DEFAULT_SNIPPET_TEMPLATE } from './snippet-template.js'
+import { renderTemplate } from './template.js'
 
 export type Snippet = {
   readonly expression: string
@@ -51,8 +53,13 @@ function customMatches(
   return best
 }
 
-export function generateSnippet(rawText: string, registry: Registry): Snippet {
-  const text = stripLeadingKeyword(rawText.trim())
+export function generateSnippet(
+  rawText: string,
+  registry: Registry,
+  options: { readonly template?: string } = {},
+): Snippet {
+  const originalText = rawText.trim()
+  const text = stripLeadingKeyword(originalText)
   const params: Token[] = []
   let cursor = 0
   let expr = ''
@@ -132,7 +139,12 @@ export function generateSnippet(rawText: string, registry: Registry): Snippet {
     return `${argName}: ${p.tsType}`
   })
   const handlerSignature = `(ctx, ${handlerArgs.join(', ')}) => {`
-  const fullCode = `step('${expr}', ${handlerSignature}\n  // ...\n})`
+  const args = ['ctx', ...handlerArgs].join(', ')
+  const fullCode = renderTemplate(options.template ?? DEFAULT_SNIPPET_TEMPLATE, {
+    expression: expr,
+    args,
+    originalText,
+  })
 
   return { expression: expr, handlerSignature, fullCode }
 }

@@ -41,3 +41,17 @@ test('registered custom parameter types are preferred over built-ins', () => {
   expect(s.expression).toBe('the hat is {color}')
   expect(s.handlerSignature).toBe('(ctx, color: string) => {')
 })
+
+test('accepts a custom template via options.template', () => {
+  const s = generateSnippet('I have 5 cukes', createRegistry(), {
+    template: '[{{expression}}] :: ({{args}})',
+  })
+  expect(s.fullCode).toBe('[I have {int} cukes] :: (ctx, count: number)')
+})
+
+test('default template renders the "Write code here" comment and an Error throw', () => {
+  const s = generateSnippet('I have 5 cukes', createRegistry())
+  expect(s.fullCode).toContain("step('I have {int} cukes', (ctx, count: number) => {")
+  expect(s.fullCode).toContain('Write code here that turns the phrase above into concrete actions')
+  expect(s.fullCode).toContain("throw new Error('not implemented')")
+})
