@@ -5,6 +5,10 @@
       "entry": ["src/index.ts"],
       "project": ["src/**/*.ts", "tests/**/*.ts"]
     },
+    "packages/bdd-cli": {
+      "entry": ["src/index.ts", "src/bin.ts"],
+      "project": ["src/**/*.ts", "tests/**/*.ts"]
+    },
     "packages/bdd-vitest": {
       "entry": ["src/index.ts", "src/runtime.ts"],
       "project": ["src/**/*.ts", "tests/**/*.ts"]

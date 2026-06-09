@@ -45,6 +45,12 @@ importers:
         specifier: ^17.1.0
         version: 17.1.0
 
+  packages/bdd-cli:
+    dependencies:
+      '@oselvar/bdd':
+        specifier: workspace:*
+        version: link:../bdd
+
   packages/bdd-vitest:
     dependencies:
       '@cucumber/cucumber-expressions':
