@@ -30,13 +30,14 @@ export type { Sentence } from './sentences.js'
 export { createRegistry, addStep } from './registry.js'
 export type { Registry, StepRegistration, StepInput, StepHandler } from './registry.js'
 
-export { ambiguousMatch, missingStep } from './diagnostics.js'
+export { ambiguousMatch, missingStep, orphanAttachment } from './diagnostics.js'
 export type {
   AmbiguousInput,
   Candidate,
   Diagnostic,
   DiagnosticCode,
   MissingStepInput,
+  OrphanInput,
   Severity,
 } from './diagnostics.js'
 

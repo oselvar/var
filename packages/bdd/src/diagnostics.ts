@@ -1,5 +1,5 @@
-import type { Span } from './span.js'
 import type { Snippet } from './snippet.js'
+import type { Span } from './span.js'
 
 export type Severity = 'error' | 'warning'
 
@@ -51,6 +51,22 @@ export function missingStep(input: MissingStepInput): Diagnostic {
     severity: 'error',
     code: 'missing-step',
     message,
+    span: input.span,
+  }
+}
+
+export type OrphanInput = {
+  readonly text: string
+  readonly span: Span
+  readonly kind: 'table' | 'fence'
+}
+
+export function orphanAttachment(input: OrphanInput): Diagnostic {
+  const what = input.kind === 'table' ? 'table' : 'fenced code block'
+  return {
+    severity: 'warning',
+    code: 'orphan-attachment',
+    message: `Orphan ${what}: does not immediately follow a step-bearing block, so it is not attached as a DataTable/DocString.`,
     span: input.span,
   }
 }

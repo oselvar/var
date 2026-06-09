@@ -198,3 +198,25 @@ test('a sentence WITHOUT a keyword that has no match is silently treated as pros
   const result = plan(bdd, r)
   expect(result.diagnostics).toHaveLength(0)
 })
+
+test('a table not attached to a step produces an orphan-attachment warning', () => {
+  let r = createRegistry()
+  r = addStep(r, {
+    expression: 'I have {int} cukes',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: () => {},
+  })
+  const source = `# Detached
+
+Given I have 5 cukes.
+
+Some interrupting prose paragraph.
+
+| name | age |
+|------|-----|
+| Bob  | 30  |`
+  const result = plan(parse('o.bdd.md', source), r)
+  const orphan = result.diagnostics.find((d) => d.code === 'orphan-attachment')
+  expect(orphan?.severity).toBe('warning')
+})

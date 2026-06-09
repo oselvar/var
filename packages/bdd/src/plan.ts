@@ -1,5 +1,5 @@
 import type { Bdd, Block, Fence, InlineOffset, Table } from './ast.js'
-import { type Diagnostic, ambiguousMatch, missingStep } from './diagnostics.js'
+import { type Diagnostic, ambiguousMatch, missingStep, orphanAttachment } from './diagnostics.js'
 import { isKeywordLed } from './keywords.js'
 import { type Hit, findHits, resolveHits } from './matcher.js'
 import type { Registry, StepRegistration } from './registry.js'
@@ -112,6 +112,20 @@ export function plan(bdd: Bdd, registry: Registry): ExecutionPlan {
       }
     })
 
+    // Emit orphan-attachment for unattached tables/fences in this example's body.
+    ex.body.forEach((block, idx) => {
+      if (block.kind !== 'table' && block.kind !== 'fence') return
+      const prev = ex.body[idx - 1]
+      if (!prev) {
+        diagnostics.push(orphanAttachment({ text: '', span: block.span, kind: block.kind }))
+        return
+      }
+      const prevHadSteps = stepsByBlock.has(idx - 1)
+      if (!prevHadSteps) {
+        diagnostics.push(orphanAttachment({ text: '', span: block.span, kind: block.kind }))
+      }
+    })
+
     if (finalSteps.length === 0 && !hadAmbiguous && !hadMissing) {
       // Example has no matches and no diagnostics — drop it (docs).
       continue
@@ -122,6 +136,18 @@ export function plan(bdd: Bdd, registry: Registry): ExecutionPlan {
       steps: hadAmbiguous ? [] : finalSteps,
     })
   }
+
+  // Top-level orphans (tables/fences not inside any example).
+  for (const orphan of bdd.orphanAttachments) {
+    diagnostics.push(
+      orphanAttachment({
+        text: '',
+        span: orphan.span,
+        kind: orphan.kind,
+      }),
+    )
+  }
+
   return { bdd, examples, diagnostics }
 }
 
