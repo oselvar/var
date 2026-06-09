@@ -4,4 +4,9 @@ export { loadBddConfig } from './config.js'
 export type { BddConfig } from './config.js'
 export { runBddSource } from './runtime.js'
 export type { RunPorts } from './runtime.js'
+export { bddVitestPlugin, generateVirtualModule } from './plugin.js'
+export type { BddVitestPluginOptions, GenerateInput } from './plugin.js'
 export const VERSION = '0.0.0'
+
+import { bddVitestPlugin } from './plugin.js'
+export default bddVitestPlugin

@@ -38,6 +38,9 @@ importers:
 
   packages/bdd-vitest:
     dependencies:
+      '@cucumber/cucumber-expressions':
+        specifier: ^17.1.0
+        version: 17.1.0
       '@oselvar/bdd':
         specifier: workspace:*
         version: link:../bdd
