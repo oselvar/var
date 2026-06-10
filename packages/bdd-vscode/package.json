@@ -1,0 +1,37 @@
+{
+  "name": "oselvar-bdd",
+  "displayName": "oselvar BDD",
+  "description": "Markdown-native BDD: highlight matched steps, go-to step definitions, missing-step diagnostics.",
+  "publisher": "oselvar",
+  "version": "0.0.0",
+  "type": "module",
+  "engines": { "vscode": "^1.92.0", "node": ">=22" },
+  "categories": ["Programming Languages", "Linters", "Testing"],
+  "main": "./src/extension.ts",
+  "activationEvents": [
+    "onLanguage:markdown",
+    "onLanguage:typescript",
+    "workspaceContains:**/bdd.config.ts",
+    "workspaceContains:**/*.bdd.md"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "bdd-markdown",
+        "aliases": ["BDD Markdown", "bdd-md"],
+        "extensions": [".bdd.md"]
+      }
+    ]
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@oselvar/bdd-language": "workspace:*",
+    "@oselvar/bdd-lsp": "workspace:*",
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.92.0"
+  }
+}

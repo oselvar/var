@@ -21,6 +21,11 @@
       "entry": ["src/server.ts", "src/bin.ts"],
       "project": ["src/**/*.ts", "tests/**/*.ts"]
     },
+    "packages/bdd-vscode": {
+      "entry": ["src/extension.ts"],
+      "project": ["src/**/*.ts"],
+      "ignoreDependencies": ["@oselvar/bdd-language", "@oselvar/bdd-lsp", "vscode-languageclient"]
+    },
     "docs/tutorial": {
       "entry": ["**/*.bdd.md", "**/*.steps.ts", "vitest.config.ts"],
       "project": ["**/*.{ts,bdd.md}"]
