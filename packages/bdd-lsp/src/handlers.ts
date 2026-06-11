@@ -8,10 +8,14 @@ type HoverParams = { readonly uri: string; readonly position: Position }
 type HoverResult = { readonly contents: string } | null
 
 type DefinitionParams = HoverParams
-type DefinitionResult = {
-  readonly uri: string
-  readonly range: { readonly start: Position; readonly end: Position }
-} | null
+type Range = { readonly start: Position; readonly end: Position }
+type LocationLink = {
+  readonly originSelectionRange: Range
+  readonly targetUri: string
+  readonly targetRange: Range
+  readonly targetSelectionRange: Range
+}
+type DefinitionResult = ReadonlyArray<LocationLink>
 
 type Diagnostic = {
   readonly code: string
@@ -20,10 +24,13 @@ type Diagnostic = {
   readonly range: { readonly start: Position; readonly end: Position }
 }
 
+type MatchRangeEntry = { readonly range: Range; readonly params: ReadonlyArray<Range> }
+
 type Handlers = {
   hover(params: HoverParams): HoverResult
   definition(params: DefinitionParams): DefinitionResult
   diagnosticsFor(uri: string): ReadonlyArray<Diagnostic>
+  matchRanges(uri: string): ReadonlyArray<MatchRangeEntry>
 }
 
 export function buildHandlers(store: Store): Handlers {
@@ -36,20 +43,18 @@ export function buildHandlers(store: Store): Handlers {
     },
     definition({ uri, position }) {
       const m = findMatchAt(store, uri, position)
-      if (!m) return null
-      return {
-        uri: `file://${m.stepDef.file}`,
-        range: {
-          start: {
-            line: m.stepDef.expressionRange.start.line - 1,
-            character: m.stepDef.expressionRange.start.character - 1,
-          },
-          end: {
-            line: m.stepDef.expressionRange.end.line - 1,
-            character: m.stepDef.expressionRange.end.character - 1,
-          },
+      if (!m) return []
+      const targetRange = toLspRange(m.stepDef.expressionRange)
+      return [
+        {
+          // originSelectionRange tells the editor which area to underline on
+          // cmd-hover; without it, only the word under the cursor is shown.
+          originSelectionRange: toLspRange(m.range),
+          targetUri: `file://${m.stepDef.file}`,
+          targetRange,
+          targetSelectionRange: targetRange,
         },
-      }
+      ]
     },
     diagnosticsFor(uri) {
       const path = uriToPath(uri)
@@ -63,14 +68,26 @@ export function buildHandlers(store: Store): Handlers {
           range: d.range,
         }))
     },
+    matchRanges(uri) {
+      const path = uriToPath(uri)
+      return store
+        .index()
+        .matches.filter((m) => m.bddPath === path)
+        .map((m) => ({
+          range: toLspRange(m.range),
+          params: m.paramRanges.map(toLspRange),
+        }))
+    },
   }
 }
 
 function findMatchAt(store: Store, uri: string, position: Position): MatchRef | undefined {
   const path = uriToPath(uri)
+  // LSP positions are 0-based; the workspace index stores 1-based line/col.
+  const pos: Position = { line: position.line + 1, character: position.character + 1 }
   return store.index().matches.find((m) => {
     if (m.bddPath !== path) return false
-    return contains(m.range, position)
+    return contains(m.range, pos)
   })
 }
 
@@ -87,4 +104,11 @@ function uriToPath(uri: string): string {
 
 function relative(file: string, root: string): string {
   return file.startsWith(root) ? file.slice(root.length).replace(/^\//, '') : file
+}
+
+function toLspRange(range: { start: Position; end: Position }): Range {
+  return {
+    start: { line: range.start.line - 1, character: range.start.character - 1 },
+    end: { line: range.end.line - 1, character: range.end.character - 1 },
+  }
 }

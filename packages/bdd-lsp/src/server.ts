@@ -1,4 +1,4 @@
-import { type Connection, TextDocumentSyncKind } from 'vscode-languageserver'
+import { type Connection, type LocationLink, TextDocumentSyncKind } from 'vscode-languageserver'
 import { buildHandlers } from './handlers.js'
 import { type Store, createStore } from './store.js'
 
@@ -14,9 +14,7 @@ export function registerHandlers(connection: Connection): void {
   connection.onInitialize((params) => {
     const root = params.workspaceFolders?.[0]?.uri
     if (root) {
-      void store
-        .reindex(root.replace(/^file:\/\//, ''))
-        .then(() => pushDiagnostics(connection, store, handlers))
+      void store.reindex(root.replace(/^file:\/\//, '')).then(() => afterReindex())
     }
     return {
       capabilities: {
@@ -29,8 +27,15 @@ export function registerHandlers(connection: Connection): void {
 
   connection.onDidSaveTextDocument(async () => {
     await store.reindex(store.workspaceRoot())
-    pushDiagnostics(connection, store, handlers)
+    afterReindex()
   })
+
+  function afterReindex(): void {
+    pushDiagnostics(connection, store, handlers)
+    // Wake the client so it can refresh editor decorations and any other
+    // client-side projections of the workspace index.
+    void connection.sendNotification('bdd/didIndex')
+  }
 
   connection.onHover((params) => {
     const result = handlers.hover({
@@ -40,11 +45,18 @@ export function registerHandlers(connection: Connection): void {
     return result === null ? null : { contents: result.contents }
   })
 
-  connection.onDefinition((params) =>
-    handlers.definition({
+  connection.onDefinition((params) => {
+    const links = handlers.definition({
       uri: params.textDocument.uri,
       position: params.position,
-    }),
+    })
+    return links as LocationLink[]
+  })
+
+  // Custom request the client uses to drive editor decorations for matched
+  // step ranges. Returns 0-based LSP ranges.
+  connection.onRequest('bdd/matchRanges', (params: { uri: string }) =>
+    handlers.matchRanges(params.uri),
   )
 }
 

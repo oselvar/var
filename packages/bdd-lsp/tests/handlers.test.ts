@@ -29,7 +29,8 @@ test('hoverOnMd returns the matching step def expression and source location', a
     // Cursor on line 3, character 12 (somewhere inside "I have 5 cukes")
     const result = h.hover({
       uri: `file://${join(dir, 'b.bdd.md')}`,
-      position: { line: 3, character: 12 },
+      // 0-based: source line 3 (Given) → LSP line 2
+      position: { line: 2, character: 11 },
     })
     expect(result?.contents).toMatch(/I have \{int\} cukes/)
     expect(result?.contents).toContain('a.steps.ts')
@@ -54,10 +55,85 @@ test('definitionFromMd returns the steps.ts location for a matched step', async 
     const h = buildHandlers(store)
     const result = h.definition({
       uri: `file://${join(dir, 'b.bdd.md')}`,
-      position: { line: 3, character: 12 },
+      // 0-based: source line 3 (Given) → LSP line 2
+      position: { line: 2, character: 11 },
     })
-    expect(result?.uri).toBe(`file://${join(dir, 'a.steps.ts')}`)
-    expect(result?.range.start.line).toBe(0) // LSP uses 0-based lines
+    expect(result).toHaveLength(1)
+    const link = result[0]!
+    expect(link.targetUri).toBe(`file://${join(dir, 'a.steps.ts')}`)
+    expect(link.targetRange.start.line).toBe(0)
+    // originSelectionRange covers the full matched substring (not just one word).
+    expect(link.originSelectionRange.start.line).toBe(2)
+    expect(link.originSelectionRange.end.line).toBe(2)
+    expect(link.originSelectionRange.end.character - link.originSelectionRange.start.character)
+      .toBeGreaterThan(5)
+  } finally {
+    cleanup()
+  }
+})
+
+test('hover on the second of two adjacent steps returns the second step (off-by-one regression)', async () => {
+  const { dir, cleanup } = tempWorkspace((dir) => {
+    writeFileSync(join(dir, 'bdd.config.ts'), 'export default {}\n')
+    writeFileSync(
+      join(dir, 'a.steps.ts'),
+      `step('I greet {string}', () => {})
+step('the greeting is {string}', () => {})
+`,
+    )
+    writeFileSync(
+      join(dir, 'b.bdd.md'),
+      '# B\n\nGiven I greet "world"\nThen the greeting is "Hello, world!"\n',
+    )
+  })
+  try {
+    const store = createStore()
+    await store.reindex(dir)
+    const h = buildHandlers(store)
+    // 0-based: source line 4 is `Then the greeting is "Hello, world!"`, char 18 = "is"
+    const result = h.hover({
+      uri: `file://${join(dir, 'b.bdd.md')}`,
+      position: { line: 3, character: 18 },
+    })
+    expect(result?.contents).toMatch(/the greeting is \{string\}/)
+    expect(result?.contents).not.toMatch(/I greet \{string\}/)
+  } finally {
+    cleanup()
+  }
+})
+
+test('matchRanges returns 0-based ranges plus per-param ranges for a .bdd.md', async () => {
+  const { dir, cleanup } = tempWorkspace((dir) => {
+    writeFileSync(join(dir, 'bdd.config.ts'), 'export default {}\n')
+    writeFileSync(
+      join(dir, 'a.steps.ts'),
+      `step('I greet {string}', () => {})
+step('the greeting is {string}', () => {})
+`,
+    )
+    writeFileSync(
+      join(dir, 'b.bdd.md'),
+      '# B\n\nGiven I greet "world"\nThen the greeting is "Hello, world!"\n',
+    )
+  })
+  try {
+    const store = createStore()
+    await store.reindex(dir)
+    const h = buildHandlers(store)
+    const entries = h.matchRanges(`file://${join(dir, 'b.bdd.md')}`)
+    expect(entries).toHaveLength(2)
+    expect(entries[0]!.range.start.line).toBe(2)
+    expect(entries[1]!.range.start.line).toBe(3)
+    for (const e of entries) {
+      expect(e.range.end.character - e.range.start.character).toBeGreaterThan(5)
+      expect(e.params).toHaveLength(1)
+      // Each param is narrower than the full match.
+      const p = e.params[0]!
+      const pLen = p.end.character - p.start.character
+      const mLen = e.range.end.character - e.range.start.character
+      expect(pLen).toBeLessThan(mLen)
+      expect(pLen).toBeGreaterThan(0)
+    }
   } finally {
     cleanup()
   }

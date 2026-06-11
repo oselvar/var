@@ -1,11 +1,14 @@
 import type { Registry, StepRegistration } from './registry.js'
 
+export type ParamSpan = { readonly start: number; readonly end: number }
+
 export type Hit = {
   readonly expression: string
   readonly stepDef: StepRegistration
   readonly matchStart: number
   readonly matchEnd: number
   readonly args: ReadonlyArray<unknown>
+  readonly paramSpans: ReadonlyArray<ParamSpan>
 }
 
 export function findHits(sentence: string, registry: Registry): ReadonlyArray<Hit> {
@@ -14,13 +17,24 @@ export function findHits(sentence: string, registry: Registry): ReadonlyArray<Hi
     const regexp = step.compiled.regexp
     const re = cloneRegexpWithGlobal(regexp)
     for (let m = re.exec(sentence); m !== null; m = re.exec(sentence)) {
-      const args = step.compiled.match(m[0])?.map((a) => a.getValue(undefined)) ?? []
+      const matched = step.compiled.match(m[0])
+      const args = matched?.map((a) => a.getValue(undefined)) ?? []
+      // Each Argument.group carries the parameter's start/end within m[0];
+      // shift by m.index so paramSpans are sentence-relative like matchStart.
+      const paramSpans: ParamSpan[] = []
+      for (const arg of matched ?? []) {
+        const { start, end } = arg.group
+        if (typeof start === 'number' && typeof end === 'number') {
+          paramSpans.push({ start: m.index + start, end: m.index + end })
+        }
+      }
       hits.push({
         expression: step.expression,
         stepDef: step,
         matchStart: m.index,
         matchEnd: m.index + m[0].length,
         args,
+        paramSpans,
       })
       if (m[0].length === 0) re.lastIndex++
     }

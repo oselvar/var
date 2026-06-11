@@ -9,6 +9,7 @@ export type WorkspaceInput = {
 export type MatchRef = {
   readonly bddPath: string
   readonly range: Range
+  readonly paramRanges: ReadonlyArray<Range>
   readonly stepDef: StepDef
 }
 
@@ -65,6 +66,7 @@ export function buildWorkspaceIndex(input: WorkspaceInput): WorkspaceIndex {
         matches.push({
           bddPath: file.path,
           range: toRange(step.matchSpan),
+          paramRanges: step.paramSpans.map(toRange),
           stepDef: def,
         })
       }

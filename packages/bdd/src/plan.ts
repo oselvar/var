@@ -22,6 +22,7 @@ export type PlannedExample = {
 export type PlannedStep = {
   readonly text: string
   readonly matchSpan: Span
+  readonly paramSpans: ReadonlyArray<Span>
   readonly stepDef: StepRegistration
   readonly args: ReadonlyArray<unknown>
   readonly dataTable?: Table
@@ -60,6 +61,7 @@ export function plan(bdd: Bdd, registry: Registry): ExecutionPlan {
         const blockSteps: PlannedStep[] = result.steps.map((hit) => ({
           text: block.text.slice(hit.matchStart, hit.matchEnd),
           matchSpan: liftSpan(bdd.source, block, hit.matchStart, hit.matchEnd),
+          paramSpans: hit.paramSpans.map((p) => liftSpan(bdd.source, block, p.start, p.end)),
           stepDef: hit.stepDef,
           args: hit.args,
         }))
@@ -180,6 +182,10 @@ function planBlock(text: string, registry: Registry): BlockPlan {
       ...h,
       matchStart: h.matchStart + sentence.startOffset,
       matchEnd: h.matchEnd + sentence.startOffset,
+      paramSpans: h.paramSpans.map((p) => ({
+        start: p.start + sentence.startOffset,
+        end: p.end + sentence.startOffset,
+      })),
     }))
     const resolved = resolveHits(adjusted)
     if (resolved.kind === 'ambiguous') {
