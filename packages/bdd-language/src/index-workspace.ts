@@ -17,6 +17,11 @@ export type MatchRef = {
   readonly bddPath: string
   readonly range: Range
   readonly paramRanges: ReadonlyArray<Range>
+  // The captured value for each parameter, sliced from the .bdd.md source at
+  // index time. Same order as `paramRanges` and the cucumber expression's
+  // parameter list. Used by the rename refactor to preserve values across
+  // expressions whose parameter list survives the edit.
+  readonly paramValues: ReadonlyArray<string>
   readonly stepDef: StepDef
 }
 
@@ -96,6 +101,7 @@ export function buildWorkspaceIndex(input: WorkspaceInput): WorkspaceIndex {
           bddPath: file.path,
           range: toRange(step.matchSpan),
           paramRanges: step.paramSpans.map(toRange),
+          paramValues: step.paramSpans.map((s) => file.source.slice(s.startOffset, s.endOffset)),
           stepDef: def,
         })
       }

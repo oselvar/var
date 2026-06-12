@@ -35,6 +35,8 @@ export type {
   StepHandler,
   ParameterTypeInput,
 } from './registry.js'
+export { expressionSegments, diffExpressions, renderExpression } from './expression-segments.js'
+export type { ExpressionSegment, ExpressionDiff, ParamFate } from './expression-segments.js'
 
 export { ambiguousMatch, missingStep, orphanAttachment } from './diagnostics.js'
 export type {

@@ -3,11 +3,30 @@ import * as ts from 'typescript'
 export type Position = { readonly line: number; readonly character: number }
 export type Range = { readonly start: Position; readonly end: Position }
 
+export type HandlerParam = {
+  // The source text after the colon, e.g. `string` for `name: string` or
+  // empty when no annotation is present (e.g. `ctx`).
+  readonly typeText: string
+  readonly name: string
+}
+
+export type HandlerParams = {
+  // The full source range covering every parameter (commas included) inside
+  // the handler's parentheses, e.g. for `(ctx, name: string)` it spans
+  // `ctx, name: string`. 1-based.
+  readonly range: Range
+  // Each parameter's structured info, including the first (typically `ctx`).
+  readonly params: ReadonlyArray<HandlerParam>
+}
+
 export type StepDef = {
   readonly file: string
   readonly expression: string
   readonly expressionRange: Range
   readonly callRange: Range
+  // Optional because handlers in unusual forms (no parens, identifier-only
+  // arrow, etc.) are skipped: we just won't sync those signatures.
+  readonly handlerParams?: HandlerParams | undefined
 }
 
 export function discoverStepDefs(file: string, source: string): ReadonlyArray<StepDef> {
@@ -106,15 +125,45 @@ function visit(sf: ts.SourceFile, node: ts.Node, out: StepDef[], file: string): 
   if (ts.isCallExpression(node) && isStepCall(node) && node.arguments.length >= 1) {
     const arg0 = node.arguments[0]
     if (arg0 && ts.isStringLiteral(arg0)) {
+      const handler = node.arguments[1]
+      const handlerParams =
+        handler && (ts.isArrowFunction(handler) || ts.isFunctionExpression(handler))
+          ? extractHandlerParams(sf, handler)
+          : undefined
       out.push({
         file,
         expression: arg0.text,
         expressionRange: rangeOf(sf, arg0),
         callRange: rangeOf(sf, node),
+        handlerParams,
       })
     }
   }
   ts.forEachChild(node, (child) => visit(sf, child, out, file))
+}
+
+function extractHandlerParams(
+  sf: ts.SourceFile,
+  handler: ts.ArrowFunction | ts.FunctionExpression,
+): HandlerParams | undefined {
+  const params = handler.parameters
+  if (params.length === 0) return undefined
+  const first = params[0]!
+  const last = params[params.length - 1]!
+  const start = sf.getLineAndCharacterOfPosition(first.getStart(sf))
+  const end = sf.getLineAndCharacterOfPosition(last.getEnd())
+  const structured: HandlerParam[] = params.map((p) => {
+    const name = ts.isIdentifier(p.name) ? p.name.text : p.name.getText(sf)
+    const typeText = p.type ? p.type.getText(sf) : ''
+    return { name, typeText }
+  })
+  return {
+    range: {
+      start: { line: start.line + 1, character: start.character + 1 },
+      end: { line: end.line + 1, character: end.character + 1 },
+    },
+    params: structured,
+  }
 }
 
 function isStepCall(node: ts.CallExpression): boolean {

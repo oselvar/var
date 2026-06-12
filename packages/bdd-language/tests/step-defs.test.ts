@@ -72,3 +72,26 @@ defineParameterType({ name: 'x', regexp: someRe })
 `
   expect(discoverParameterTypes('p.ts', source)).toHaveLength(0)
 })
+
+test('captures the handler params range and structured (name, type) entries', () => {
+  const source = `step('I have {int} cukes', (ctx, count: number) => {})
+`
+  const defs = discoverStepDefs('s.ts', source)
+  expect(defs).toHaveLength(1)
+  expect(defs[0]?.handlerParams).toBeDefined()
+  expect(defs[0]?.handlerParams?.params).toEqual([
+    { name: 'ctx', typeText: '' },
+    { name: 'count', typeText: 'number' },
+  ])
+  // The range starts at character 27 (the 'c' of 'ctx') and ends after 'number'.
+  expect(defs[0]?.handlerParams?.range.start.line).toBe(1)
+  expect(defs[0]?.handlerParams?.range.end.line).toBe(1)
+})
+
+test('is undefined when the handler is not an arrow/function expression', () => {
+  const source = `const fn = (ctx: unknown) => {}
+step('do thing', fn)
+`
+  const defs = discoverStepDefs('s.ts', source)
+  expect(defs[0]?.handlerParams).toBeUndefined()
+})

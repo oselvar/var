@@ -1,4 +1,11 @@
-import { type Connection, type LocationLink, TextDocumentSyncKind } from 'vscode-languageserver'
+import {
+  type Connection,
+  InsertTextFormat,
+  type LocationLink,
+  TextDocuments,
+  TextDocumentSyncKind,
+} from 'vscode-languageserver'
+import { TextDocument } from 'vscode-languageserver-textdocument'
 import { buildHandlers } from './handlers.js'
 import { type Store, createStore } from './store.js'
 
@@ -10,6 +17,10 @@ export { loadBddConfig } from '@oselvar/bdd'
 export function registerHandlers(connection: Connection): void {
   const store = createStore()
   const handlers = buildHandlers(store)
+  // Track in-memory document content so completion + future cursor-aware
+  // features can read the current line without going back to disk.
+  const documents = new TextDocuments(TextDocument)
+  documents.listen(connection)
 
   connection.onInitialize((params) => {
     const root = params.workspaceFolders?.[0]?.uri
@@ -18,9 +29,12 @@ export function registerHandlers(connection: Connection): void {
     }
     return {
       capabilities: {
-        textDocumentSync: TextDocumentSyncKind.Full,
+        textDocumentSync: TextDocumentSyncKind.Incremental,
         hoverProvider: true,
         definitionProvider: true,
+        // No triggerCharacters — we want the suggestions to appear via the
+        // user's invocation (Ctrl+Space) and as they type letters.
+        completionProvider: { resolveProvider: false },
       },
     }
   })
@@ -68,6 +82,73 @@ export function registerHandlers(connection: Connection): void {
   )
 
   connection.onRequest('bdd/stepGlobs', () => handlers.stepGlobs())
+
+  // Resolve everything the Rename refactor needs from a single position —
+  // the step def's expression + every matched .bdd.md site with its current
+  // captured values. Returns null when the position isn't on a step.
+  connection.onRequest(
+    'bdd/stepAt',
+    (params: { uri: string; position: { line: number; character: number } }) =>
+      handlers.stepAt(params),
+  )
+
+  // Drive the cross-file rename. The server resolves the step, derives the
+  // new expression, diffs, and returns ready-to-apply edits — or an error.
+  // Phase 3 path: refuses when any parameter is added/removed/type-changed.
+  connection.onRequest(
+    'bdd/renameStep',
+    (params: {
+      uri: string
+      position: { line: number; character: number }
+      newName: string
+    }) => handlers.renameStep(params),
+  )
+
+  // Phase 4 path: returns the rename plan (param fates + matches) so the
+  // client can drive per-occurrence prompts for added / type-changed
+  // parameters before applying anything.
+  connection.onRequest(
+    'bdd/planRename',
+    (params: {
+      uri: string
+      position: { line: number; character: number }
+      newName: string
+    }) => handlers.planRename(params),
+  )
+
+  // Render a (new) expression with a list of values into a literal string
+  // suitable for splicing into a .bdd.md document.
+  connection.onRequest(
+    'bdd/renderExpressionText',
+    (params: { expression: string; values: ReadonlyArray<string> }) =>
+      handlers.renderExpressionText(params),
+  )
+
+  connection.onCompletion((params) => {
+    const doc = documents.get(params.textDocument.uri)
+    const line = doc
+      ? doc.getText({
+          start: { line: params.position.line, character: 0 },
+          end: { line: params.position.line, character: params.position.character },
+        })
+      : ''
+    const items = handlers.completions({
+      uri: params.textDocument.uri,
+      position: params.position,
+      linePrefix: line,
+    })
+    // Re-shape to the LSP CompletionItem types the SDK expects.
+    return items.map((item) => ({
+      label: item.label,
+      kind: 15, // CompletionItemKind.Snippet
+      insertTextFormat: InsertTextFormat.Snippet,
+      filterText: item.filterText,
+      textEdit: {
+        range: item.range,
+        newText: item.insertText,
+      },
+    }))
+  })
 }
 
 function pushDiagnostics(
