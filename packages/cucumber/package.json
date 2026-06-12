@@ -1,0 +1,19 @@
+{
+  "name": "@oselvar/cucumber",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "NODE_OPTIONS=\"--import tsx\" cucumber-js && NODE_OPTIONS=\"--import tsx\" vitest run",
+    "test:cucumber": "NODE_OPTIONS=\"--import tsx\" cucumber-js",
+    "test:bdd": "NODE_OPTIONS=\"--import tsx\" vitest run"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^11.0.0",
+    "@oselvar/bdd": "workspace:*",
+    "@oselvar/bdd-vitest": "workspace:*",
+    "@types/node": "^22.9.0",
+    "tsx": "^4.22.4",
+    "vitest": "^2.1.5"
+  }
+}

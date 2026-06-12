@@ -26,6 +26,9 @@ test('runBddSource emits one sink.example call per BDD example, executes its han
     reporter: { diagnostic: () => {} },
   })
   for (const r of runs) await r()
-  expect(seen).toEqual(['Eating'])
+  // Paragraph-as-test: one paragraph becomes one example; the heading just
+  // forms a `describe` scope. The example name is the first sentence (with
+  // the trailing terminator stripped).
+  expect(seen).toEqual(['I have 5 cukes'])
   expect(calls).toEqual(['have:5', 'eat:2'])
 })

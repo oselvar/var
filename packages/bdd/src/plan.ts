@@ -13,6 +13,9 @@ export type ExecutionPlan = {
 
 export type PlannedExample = {
   readonly name: string
+  // Heading texts above this example, outer→inner. The runtime renders this
+  // as a stack of `describe(...)` calls around the test.
+  readonly scopeStack: ReadonlyArray<string>
   readonly span: Span
   readonly steps: ReadonlyArray<PlannedStep>
 }
@@ -120,7 +123,8 @@ export function plan(bdd: Bdd, registry: Registry): ExecutionPlan {
       continue
     }
     examples.push({
-      name: ex.name,
+      name: deriveExampleName(ex.body),
+      scopeStack: ex.scopeStack,
       span: ex.span,
       steps: hadAmbiguous ? [] : finalSteps,
     })
@@ -177,6 +181,21 @@ function planBlock(text: string, registry: Registry): BlockPlan {
     // generation is selection-driven only, never inferred from sentence shape.
   }
   return { steps: allSteps, ambiguities: allAmbiguities }
+}
+
+function deriveExampleName(body: ReadonlyArray<Block>): string {
+  const primary = body.find(
+    (b) => b.kind === 'paragraph' || b.kind === 'list_item' || b.kind === 'blockquote',
+  )
+  if (!primary || (primary.kind !== 'paragraph' && primary.kind !== 'list_item' && primary.kind !== 'blockquote')) {
+    return ''
+  }
+  const sentences = splitSentences(primary.text)
+  const first = sentences[0]
+  if (!first) return ''
+  // Strip a single trailing . ! ? for the test name; embedded terminators
+  // (e.g. inside `i.e.` or a quoted string) are left alone.
+  return first.text.replace(/[.!?]$/, '')
 }
 
 function liftSpan(source: string, block: Block, blockStart: number, blockEnd: number): Span {

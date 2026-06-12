@@ -38,7 +38,11 @@ export function createStore(): Store {
         path,
         source: readFileSync(path, 'utf8'),
       }))
-      current = buildWorkspaceIndex({ stepFiles, bddFiles })
+      current = buildWorkspaceIndex({
+        stepFiles,
+        bddFiles,
+        scannerPlugins: cfg.scannerPlugins,
+      })
     },
     index() {
       return current

@@ -533,7 +533,7 @@ step('I greet {string}', () => {})
   }
 })
 
-test('completions: replace range skips a leading "Given " keyword', async () => {
+test('completions: replace range starts at the first non-whitespace of the line (no keyword sniffing)', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
     writeFileSync(join(dir, 'bdd.config.ts'), 'export default {}\n')
     writeFileSync(
@@ -546,15 +546,18 @@ test('completions: replace range skips a leading "Given " keyword', async () => 
     const store = createStore()
     await store.reindex(dir)
     const h = buildHandlers(store)
+    // The line is indented by two spaces (e.g. inside a list item). The
+    // replace range should start AT the first non-whitespace character; any
+    // leading "Given" / "When" etc. gets replaced too — the user owns the
+    // narration around the snippet.
     const items = h.completions({
       uri: `file://${join(dir, 'b.bdd.md')}`,
-      position: { line: 2, character: 10 },
-      linePrefix: 'Given I gr',
+      position: { line: 2, character: 12 },
+      linePrefix: '  Given I gr',
     })
     expect(items).toHaveLength(1)
-    // 'Given ' = 6 chars; replace should start at character 6.
-    expect(items[0]?.range.start.character).toBe(6)
-    expect(items[0]?.range.end.character).toBe(10)
+    expect(items[0]?.range.start.character).toBe(2)
+    expect(items[0]?.range.end.character).toBe(12)
   } finally {
     cleanup()
   }
@@ -609,7 +612,7 @@ test('completions: returns nothing for non-.bdd.md files', async () => {
   }
 })
 
-test('generateSnippet turns selected text into a step-definition stub', async () => {
+test('generateSnippet turns selected text into a step-definition stub (verbatim, no keyword strip)', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
     writeFileSync(join(dir, 'bdd.config.ts'), 'export default {}\n')
   })
@@ -618,8 +621,9 @@ test('generateSnippet turns selected text into a step-definition stub', async ()
     await store.reindex(dir)
     const h = buildHandlers(store)
     const snippet = h.generateSnippet('Given I greet "world"')
-    expect(snippet.expression).toBe('I greet {string}')
-    expect(snippet.fullCode).toContain("step('I greet {string}'")
+    // No Given/When/Then heuristics — the selection IS the expression.
+    expect(snippet.expression).toBe('Given I greet {string}')
+    expect(snippet.fullCode).toContain("step('Given I greet {string}'")
   } finally {
     cleanup()
   }

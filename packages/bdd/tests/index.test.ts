@@ -22,10 +22,8 @@ test('end-to-end: parse + plan with a simple expression', () => {
   expect(result.examples[0]?.steps[0]?.args).toEqual([5])
 })
 
-test('public surface re-exports snippet, keyword detection, and new diagnostic factories', () => {
+test('public surface re-exports snippet + diagnostic factories', () => {
   expect(typeof bdd.generateSnippet).toBe('function')
-  expect(typeof bdd.isKeywordLed).toBe('function')
-  expect(typeof bdd.stripLeadingKeyword).toBe('function')
   expect(typeof bdd.missingStep).toBe('function')
   expect(typeof bdd.orphanAttachment).toBe('function')
 })

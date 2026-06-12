@@ -12,13 +12,16 @@ test('executePlan calls sink.example for each PlannedExample', () => {
     expressionSourceLine: 1,
     handler: () => {},
   })
+  // With the paragraph-as-test model, each paragraph is its own example and
+  // its name comes from the first sentence (with the trailing terminator
+  // stripped). Two paragraphs → two named tests.
   const p = plan(parse('e.bdd.md', '# A\n\nGiven I have 5 cukes\n\n# B\n\nGiven I have 9 cukes'), r)
   const names: string[] = []
   executePlan(p, {
     sink: { example: (name) => names.push(name) },
     reporter: { diagnostic: () => {} },
   })
-  expect(names).toEqual(['A', 'B'])
+  expect(names).toEqual(['Given I have 5 cukes', 'Given I have 9 cukes'])
 })
 
 test('executePlan reports all diagnostics through reporter.diagnostic', () => {
@@ -147,4 +150,68 @@ test('executePlan invokes createContext once per example and passes the result t
   expect(calls).toBe(2)
   expect(ctxSeen[0]).toEqual({ greeting: '', n: 1 })
   expect(ctxSeen[1]).toEqual({ greeting: '', n: 2 })
+})
+
+test('executePlan appends a data table as the last handler arg (after cucumber args)', async () => {
+  let r = createRegistry()
+  let captured: unknown[] = []
+  r = addStep(r, {
+    expression: 'these books exist:',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: (_ctx, ...args) => {
+      captured = args
+    },
+  })
+  const source = `# Library
+
+these books exist:
+
+| title  | author  |
+|--------|---------|
+| Lolita | Nabokov |
+| Anna   | Tolstoy |
+`
+  const p = plan(parse('l.bdd.md', source), r)
+  const runs: Array<() => unknown | Promise<unknown>> = []
+  executePlan(p, {
+    sink: { example: (_n, run) => runs.push(run) },
+    reporter: { diagnostic: () => {} },
+  })
+  for (const run of runs) await run()
+  expect(captured).toHaveLength(1)
+  expect(captured[0]).toEqual([
+    ['title', 'author'],
+    ['Lolita', 'Nabokov'],
+    ['Anna', 'Tolstoy'],
+  ])
+})
+
+test('executePlan appends a docstring as the last handler arg', async () => {
+  let r = createRegistry()
+  let captured: unknown[] = []
+  r = addStep(r, {
+    expression: 'the receipt is:',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: (_ctx, ...args) => {
+      captured = args
+    },
+  })
+  const source = `# Library
+
+the receipt is:
+
+\`\`\`json
+{"ok": true}
+\`\`\`
+`
+  const p = plan(parse('l.bdd.md', source), r)
+  const runs: Array<() => unknown | Promise<unknown>> = []
+  executePlan(p, {
+    sink: { example: (_n, run) => runs.push(run) },
+    reporter: { diagnostic: () => {} },
+  })
+  for (const run of runs) await run()
+  expect(captured).toEqual(['{"ok": true}\n'])
 })

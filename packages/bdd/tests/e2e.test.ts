@@ -55,19 +55,27 @@ When I send the payload:
 
   const result = plan(parse('e.bdd.md', source), r)
   expect(result.diagnostics).toHaveLength(0)
-  expect(result.examples).toHaveLength(2)
+  // 3 paragraphs across 2 headings → 3 examples:
+  //   1. "Withdrawing cash" scope, one paragraph with all 3 banking steps
+  //   2. "Importing users" scope, "these users exist" paragraph + attached table
+  //   3. "Importing users" scope, "send the payload" paragraph + attached fence
+  expect(result.examples).toHaveLength(3)
 
   const withdraw = result.examples[0]
-  expect(withdraw?.name).toBe('Withdrawing cash')
+  expect(withdraw?.scopeStack).toEqual(['Withdrawing cash'])
   expect(withdraw?.steps.map((s) => s.text)).toEqual([
     'I have 100 in my account',
     'I withdraw 40',
     'I should have 60 left',
   ])
 
-  const importing = result.examples[1]
-  expect(importing?.name).toBe('Importing users')
-  expect(importing?.steps).toHaveLength(2)
-  expect(importing?.steps[0]?.dataTable?.rows).toHaveLength(2)
-  expect(importing?.steps[1]?.docString?.contentType).toBe('json')
+  const users = result.examples[1]
+  expect(users?.scopeStack).toEqual(['Importing users'])
+  expect(users?.steps).toHaveLength(1)
+  expect(users?.steps[0]?.dataTable?.rows).toHaveLength(2)
+
+  const payload = result.examples[2]
+  expect(payload?.scopeStack).toEqual(['Importing users'])
+  expect(payload?.steps).toHaveLength(1)
+  expect(payload?.steps[0]?.docString?.contentType).toBe('json')
 })

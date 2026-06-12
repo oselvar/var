@@ -47,11 +47,23 @@ test('the final sentence does not require a terminator', () => {
 })
 
 test('does not split on terminators inside a double-quoted string', () => {
+  const text = 'Alpha "with . and ? inside" beta. Gamma.'
+  const result = splitSentences(text)
+  // Both `.` and `?` inside the quoted string are no-split zones.
+  expect(result.map((s) => s.text)).toEqual([
+    'Alpha "with . and ? inside" beta.',
+    'Gamma.',
+  ])
+})
+
+test('splits on a single newline (Gherkin-style line-per-step)', () => {
   const text = 'Given I greet "world"\nThen the greeting is "Hello, world!"'
   const result = splitSentences(text)
-  // The `!` is inside the `"Hello, world!"` literal — it must not break the sentence.
+  // Each line is now its own sentence. The `!` inside the quoted string on
+  // line 2 stays a no-split zone.
   expect(result.map((s) => s.text)).toEqual([
-    'Given I greet "world"\nThen the greeting is "Hello, world!"',
+    'Given I greet "world"',
+    'Then the greeting is "Hello, world!"',
   ])
 })
 

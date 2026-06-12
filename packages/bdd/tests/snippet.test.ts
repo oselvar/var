@@ -27,9 +27,11 @@ test('multiple parameters infer distinct names', () => {
   expect(s.handlerSignature).toBe('(ctx, count: number, count2: number) => {')
 })
 
-test('leading keyword is stripped before snippet generation', () => {
+test('leading keyword is NOT stripped — the selection is the expression verbatim', () => {
+  // No Given/When/Then heuristics. If the user selects narration, they keep
+  // it in the generated cucumber expression.
   const s = generateSnippet('Given I have 5 cukes', createRegistry())
-  expect(s.expression).toBe('I have {int} cukes')
+  expect(s.expression).toBe('Given I have {int} cukes')
 })
 
 test('registered custom parameter types are preferred over built-ins', () => {

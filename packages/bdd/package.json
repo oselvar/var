@@ -8,8 +8,7 @@
   "files": ["dist", "README.md"],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "vitest run",
-    "sync:keywords": "tsx scripts/sync-keywords.ts"
+    "test": "vitest run"
   },
   "dependencies": {
     "@cucumber/cucumber-expressions": "^17.1.0"

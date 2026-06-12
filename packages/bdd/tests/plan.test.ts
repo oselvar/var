@@ -27,6 +27,8 @@ function reg() {
 }
 
 test('plan produces a PlannedExample with steps in document order', () => {
+  // The first sentence becomes the example name (terminator stripped) AND
+  // is also matched as a step. The heading becomes a `describe` scope.
   const source =
     '# Withdrawing\n\nGiven I have 100 in my account. When I withdraw 40. Then I should have 60 left.'
   const bdd = parse('w.bdd.md', source)
@@ -35,7 +37,8 @@ test('plan produces a PlannedExample with steps in document order', () => {
   expect(result.examples).toHaveLength(1)
   const ex = result.examples[0]
   if (!ex) throw new Error('no example')
-  expect(ex.name).toBe('Withdrawing')
+  expect(ex.name).toBe('Given I have 100 in my account')
+  expect(ex.scopeStack).toEqual(['Withdrawing'])
   expect(ex.steps.map((s) => s.text)).toEqual([
     'I have 100 in my account',
     'I withdraw 40',
@@ -73,7 +76,7 @@ test('plan skips an example heading whose body has no matches and no keyword-led
   expect(result.diagnostics).toHaveLength(0)
 })
 
-test('plan walks list items as step-bearing blocks', () => {
+test('plan turns each list item into its own example (one matched step per item)', () => {
   let r = createRegistry()
   r = addStep(r, {
     expression: 'I have {int} in my account',
@@ -89,9 +92,10 @@ test('plan walks list items as step-bearing blocks', () => {
   })
   const source = '# Bullets\n\n- Given I have 100 in my account\n- When I withdraw 40'
   const result = plan(parse('b.bdd.md', source), r)
-  expect(result.examples[0]?.steps.map((s) => s.text)).toEqual([
-    'I have 100 in my account',
-    'I withdraw 40',
+  expect(result.examples).toHaveLength(2)
+  expect(result.examples.map((e) => e.steps.map((s) => s.text))).toEqual([
+    ['I have 100 in my account'],
+    ['I withdraw 40'],
   ])
 })
 

@@ -4,7 +4,6 @@ import {
   expressionSegments,
   generateSnippet,
   renderExpression,
-  stripLeadingKeyword,
 } from '@oselvar/bdd'
 import type { MatchRef } from '@oselvar/bdd-language'
 import type { Store } from './store.js'
@@ -394,14 +393,13 @@ export function buildHandlers(store: Store): Handlers {
       // completions from VSCode's TypeScript service.
       if (!uriToPath(uri).endsWith('.bdd.md')) return []
 
-      // Compute the replace range: from after the leading keyword (if any) to
-      // the cursor. That way picking a suggestion keeps the author-side
-      // narration (Given/When/Then/And/But) intact while replacing the
-      // partial expression text the user already typed.
-      const stripped = stripLeadingKeyword(linePrefix)
-      const stripStart = linePrefix.length - stripped.length
+      // Compute the replace range: from the first non-whitespace character of
+      // the current line to the cursor. No Given/When/Then heuristics — if
+      // the user wants narration kept around the inserted snippet, they
+      // either insert it after typing or edit the result.
+      const leadingWs = linePrefix.length - linePrefix.trimStart().length
       const range: Range = {
-        start: { line: position.line, character: stripStart },
+        start: { line: position.line, character: leadingWs },
         end: position,
       }
 

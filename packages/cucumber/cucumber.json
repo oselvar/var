@@ -1,0 +1,6 @@
+{
+  "default": {
+    "import": ["cucumber/steps/**/*.ts"],
+    "paths": ["features/**/*.feature"]
+  }
+}

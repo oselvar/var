@@ -11,6 +11,24 @@ describe('generateVirtualModule', () => {
     expect(out).toContain("import { runBddSource } from '@oselvar/bdd-vitest/runtime'")
     expect(out).toContain('import "/abs/account.steps.ts"')
     expect(out).toContain('runBddSource(SOURCE, "/abs/foo.bdd.md",')
+    expect(out).toContain('scannerPlugins: bddConfig?.scannerPlugins ?? []')
+  })
+
+  test('imports bdd.config.ts when configPath is provided so scannerPlugins reach the runtime', () => {
+    const out = generateVirtualModule({
+      bddPath: '/abs/foo.bdd.md',
+      stepImports: [],
+      configPath: '/abs/bdd.config.ts',
+    })
+    expect(out).toContain('import bddConfig from "/abs/bdd.config.ts"')
+  })
+
+  test('falls back to an empty bddConfig when no bdd.config.ts is found', () => {
+    const out = generateVirtualModule({
+      bddPath: '/abs/foo.bdd.md',
+      stepImports: [],
+    })
+    expect(out).toContain('const bddConfig = {}')
   })
 })
 

@@ -60,9 +60,15 @@ export type ThematicBreak = {
 export type Block = Heading | Paragraph | ListItem | Blockquote | Table | Fence | ThematicBreak
 
 export type Example = {
-  readonly name: string
+  // The chain of heading texts above this block, outer→inner. An example
+  // directly at file scope (no enclosing heading) has an empty stack. The
+  // runtime turns this into nested `describe` calls.
+  readonly scopeStack: ReadonlyArray<string>
   readonly span: Span
-  readonly headingSpan: Span
+  // Always non-empty. First entry is the candidate primary block
+  // (paragraph / list_item / blockquote). Any trailing tables or fences are
+  // appended by the structurer so the planner can attach them to the last
+  // matched step.
   readonly body: ReadonlyArray<Block>
 }
 

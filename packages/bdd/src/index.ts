@@ -58,9 +58,8 @@ export type { ExecutionPlan, PlannedExample, PlannedStep } from './plan.js'
 export { stripInline } from './inline.js'
 export type { StrippedInline } from './inline.js'
 
-export { KEYWORDS } from './keywords-data.js'
-
-export { isKeywordLed, stripLeadingKeyword } from './keywords.js'
+export type { ScannerPlugin, RawLine } from './scanner.js'
+export { gherkinTables, gherkinDocStrings } from './plugins/gherkin/index.js'
 
 export { generateSnippet } from './snippet.js'
 export type { Snippet } from './snippet.js'

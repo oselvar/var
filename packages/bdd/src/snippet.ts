@@ -1,5 +1,4 @@
 import { CucumberExpressionGenerator } from '@cucumber/cucumber-expressions'
-import { stripLeadingKeyword } from './keywords.js'
 import type { Registry } from './registry.js'
 import { DEFAULT_SNIPPET_TEMPLATE } from './snippet-template.js'
 import { renderTemplate } from './template.js'
@@ -23,8 +22,10 @@ export function generateSnippet(
   registry: Registry,
   options: { readonly template?: string } = {},
 ): Snippet {
+  // The expression is the selection verbatim — no Given/When/Then stripping
+  // and no other narration heuristics. The user owns what they selected.
   const originalText = rawText.trim()
-  const text = stripLeadingKeyword(originalText)
+  const text = originalText
 
   // Defer to the cucumber-expressions generator: it knows how to rank
   // candidate parameter types (including custom ones registered on the

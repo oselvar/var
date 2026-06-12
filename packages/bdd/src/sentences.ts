@@ -36,13 +36,12 @@ export function splitSentences(text: string): ReadonlyArray<Sentence> {
       continue
     }
     const ch = text.charCodeAt(i)
-    if (ch === 0x0a /* \n */ && i + 1 < text.length && text.charCodeAt(i + 1) === 0x0a) {
-      pushSegment(out, text, segmentStart, i)
-      i += 2
-      segmentStart = i
-      continue
-    }
-    if (ch === 0x2e /* . */ || ch === 0x21 /* ! */ || ch === 0x3f /* ? */) {
+    if (
+      ch === 0x0a /* \n */ ||
+      ch === 0x2e /* . */ ||
+      ch === 0x21 /* ! */ ||
+      ch === 0x3f /* ? */
+    ) {
       if (ch === 0x2e && isInsideNumberOrAbbrev(text, i)) {
         i++
         continue
@@ -50,6 +49,8 @@ export function splitSentences(text: string): ReadonlyArray<Sentence> {
       const end = i + 1
       pushSegment(out, text, segmentStart, end)
       i = end
+      // Skip any following whitespace (spaces + newlines) so the next sentence
+      // starts at its first content character.
       while (i < text.length && (text.charCodeAt(i) === 0x20 || text.charCodeAt(i) === 0x0a)) i++
       segmentStart = i
       continue

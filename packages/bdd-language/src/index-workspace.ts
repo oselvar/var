@@ -5,12 +5,16 @@ import {
   parse,
   plan,
   type Registry,
+  type ScannerPlugin,
 } from '@oselvar/bdd'
 import { type Range, type StepDef, discoverParameterTypes, discoverStepDefs } from './step-defs.js'
 
 export type WorkspaceInput = {
   readonly stepFiles: ReadonlyArray<{ readonly path: string; readonly source: string }>
   readonly bddFiles: ReadonlyArray<{ readonly path: string; readonly source: string }>
+  // Optional: opt-in scanner extensions (e.g. Gherkin tables, Gherkin doc
+  // strings) sourced from bdd.config.ts. Empty/omitted = pure markdown.
+  readonly scannerPlugins?: ReadonlyArray<ScannerPlugin>
 }
 
 export type MatchRef = {
@@ -87,7 +91,7 @@ export function buildWorkspaceIndex(input: WorkspaceInput): WorkspaceIndex {
   const diagnostics: DiagnosticRef[] = []
 
   for (const file of input.bddFiles) {
-    const bdd = parse(file.path, file.source)
+    const bdd = parse(file.path, file.source, input.scannerPlugins ?? [])
     const result = plan(bdd, registry)
     for (const ex of result.examples) {
       for (const step of ex.steps) {

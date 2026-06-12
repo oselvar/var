@@ -27,8 +27,22 @@ export function executePlan(plan: ExecutionPlan, ports: ExecutePorts): void {
           ctx = await createContext(file)
           ctxByFile.set(file, ctx)
         }
+        // A trailing data table or doc string is passed as the LAST handler
+        // argument, after whatever the cucumber expression captured. Tables
+        // arrive as a plain `string[][]` (header row first); doc strings as
+        // a plain string. Either form is small enough that callers can
+        // shape it however they like.
+        const extra: unknown[] = []
+        if (step.dataTable) {
+          extra.push([
+            step.dataTable.header.cells,
+            ...step.dataTable.rows.map((r) => r.cells),
+          ] as ReadonlyArray<ReadonlyArray<string>>)
+        } else if (step.docString) {
+          extra.push(step.docString.content)
+        }
         try {
-          await step.stepDef.handler(ctx, ...step.args)
+          await step.stepDef.handler(ctx, ...step.args, ...extra)
         } catch (err) {
           throw augmentStack(err, step, path)
         }
