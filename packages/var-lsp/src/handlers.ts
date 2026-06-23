@@ -206,9 +206,9 @@ export function buildHandlers(store: Store): Handlers {
       // new cucumber expression via the live workspace registry (so custom
       // param types like {airport} apply). In a .steps.ts, `newName` is the
       // expression text directly.
-      const isBdd = uriToPath(uri).endsWith('.var.md')
+      const isVarDoc = uriToPath(uri).endsWith('.var.md')
       let newExpression: string
-      if (isBdd) {
+      if (isVarDoc) {
         try {
           newExpression = generateSnippet(newName, store.index().registry, {
             template: store.snippetTemplate(),
@@ -290,9 +290,9 @@ export function buildHandlers(store: Store): Handlers {
       const stepAt = resolveStepAt(store, uri, position)
       if (!stepAt) return { ok: false, error: 'No step under cursor.' }
 
-      const isBdd = uriToPath(uri).endsWith('.var.md')
+      const isVarDoc = uriToPath(uri).endsWith('.var.md')
       let newExpression: string
-      if (isBdd) {
+      if (isVarDoc) {
         try {
           newExpression = generateSnippet(newName, store.index().registry, {
             template: store.snippetTemplate(),
