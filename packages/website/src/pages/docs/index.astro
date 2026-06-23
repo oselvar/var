@@ -18,14 +18,46 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '')
     <h1>docs</h1>
     <p class="lede">Organised by <a href="https://diataxis.fr/">Diátaxis</a>.</p>
 
+    <p class="lede">
+      Vár is executable documentation for software systems. 
+      You can run the documentation, and if the system does something else, you will get an error.
+    </p>
+
+    <p class="lede">
+      The documentation typically starts its life as a specification,
+      answering the question: *What should the system do*, illustrated by
+      *concrete examples*.
+    </p>
+
+    <p class="lede">
+      As the programmer/coding agent makes progress towards implementing the
+      specification, they get continuous feedback about their progress.
+    </p>
+
+    <p class="lede">
+      Sidebar: Try letting the stack traces from failing Vár examples guide you
+      in what to do next. This helps you build a more maintainable system.
+      Read more *here*.
+    </p>
+
+    <p class="lede">
+      When the programmer/coding agent is done, the specification takes on a new life.
+
+      Documentation.
+
+      Remove all the details you don't care about, but keep the examples. Rephrase a little
+      and voilá - you have *living documentation* - documentation that never goes out of date
+      and tells you when your system's behaviour drifts.
+    </p>
+
     <div class="docs-quadrants">
       <section class="docs-quadrant">
         <p class="kind">Learning</p>
         <h2>tutorials</h2>
         <ul>
           <li>
-            <a href="https://github.com/oselvar/var/tree/main/docs/tutorial">
-              hello-var — your first spec
+            <a href={`${base}/docs/tutorials/hello-var-your-first-spec`}>
+              Hello Vár — your first spec
             </a>
           </li>
         </ul>

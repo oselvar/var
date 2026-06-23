@@ -256,7 +256,7 @@ footer a:hover {
 /* Doc pages */
 
 main.doc {
-  max-width: 720px;
+  max-width: 900px;
   padding-top: calc(var(--inset-5) + 24px);
   padding-bottom: calc(var(--inset-5) + 24px);
 }
