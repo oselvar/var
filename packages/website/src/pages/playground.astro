@@ -1,0 +1,11 @@
+---
+import Base from '../layouts/Base.astro'
+import Editor from '../components/Editor.astro'
+const hello = `# Hello, Vár\n\nFirst I greet "world" okay? I think the greeting should be "Hello, world!"\n`
+---
+<Base title="Vár playground" description="Run Vár in the browser.">
+  <main class="doc">
+    <h1>playground</h1>
+    <Editor uri="file:///hello.var.md" lang="markdown" doc={hello} />
+  </main>
+</Base>

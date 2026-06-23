@@ -14,6 +14,8 @@
   },
   "dependencies": {
     "@astrojs/mdx": "^4",
-    "@oselvar/var-language": "workspace:*"
+    "@codemirror/lang-markdown": "^6.3.0",
+    "@oselvar/var-language": "workspace:*",
+    "codemirror": "^6.0.1"
   }
 }

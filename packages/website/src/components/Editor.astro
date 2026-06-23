@@ -1,0 +1,17 @@
+---
+interface Props {
+  uri: string
+  lang?: 'markdown' | 'typescript'
+  doc?: string
+}
+const { uri, lang = 'markdown', doc = '' } = Astro.props
+---
+<div class="cm-mount" data-uri={uri} data-lang={lang} data-doc={doc}></div>
+<style>
+  .cm-mount { border: 2px solid var(--ink); border-radius: var(--radius-5); overflow: hidden; margin: 24px 0; }
+  .cm-mount :global(.cm-editor) { font-size: 14px; }
+  .cm-mount :global(.cm-editor.cm-focused) { outline: none; }
+</style>
+<script>
+  import '../scripts/editor-mount.ts'
+</script>
