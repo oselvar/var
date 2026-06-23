@@ -7,8 +7,9 @@ export type HighlightedLine = ReadonlyArray<Segment>
 type StepFile = { readonly path: string; readonly source: string }
 
 // Astro escapes a fixed set of characters when it renders a text expression
-// into a slot. Reverse exactly that set to recover the raw source. `&amp;`
-// must be decoded last so we never double-decode.
+// into a slot. Reverse the set Astro emits plus `&apos;` defensively (Astro
+// does not emit `&apos;` but some tooling does). `&amp;` must be decoded last
+// so we never double-decode.
 export function decodeEntities(s: string): string {
   return s
     .replace(/&lt;/g, '<')
@@ -85,6 +86,15 @@ type Range = { start: { line: number; character: number }; end: { line: number; 
 
 // Shrink a single-line range inward by one character on each side.
 // Used to strip the surrounding quotes from a {string} parameter range.
+//
+// ENGINE ASSUMPTION: the var-language matching engine INCLUDES the surrounding
+// quotes inside the paramRange it returns for `{string}` parameters — i.e. the
+// range covers `"world"`, not just `world`. This is the opposite of what the
+// original design spec assumed, but it is what the engine actually does.
+// step-highlight.test.ts pins this behaviour: its assertions check that the
+// param chip text equals `world` (the inner value), not `"world"`. If the
+// engine ever changes to exclude quotes from paramRanges, remove the shrink
+// call in `highlightSteps` AND update those test assertions accordingly.
 function shrinkRange(range: Range): Range {
   // Only handle single-line ranges (multi-line quoted strings are not expected).
   if (range.start.line !== range.end.line) return range
