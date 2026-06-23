@@ -151,6 +151,9 @@ importers:
       '@astrojs/mdx':
         specifier: ^4
         version: 4.3.14(astro@5.18.2(@types/node@25.9.3)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(typescript@6.0.3)(yaml@2.9.0))
+      '@oselvar/var-language':
+        specifier: workspace:*
+        version: link:../var-language
     devDependencies:
       astro:
         specifier: ^5.0.0

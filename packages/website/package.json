@@ -13,6 +13,7 @@
     "astro": "^5.0.0"
   },
   "dependencies": {
-    "@astrojs/mdx": "^4"
+    "@astrojs/mdx": "^4",
+    "@oselvar/var-language": "workspace:*"
   }
 }
