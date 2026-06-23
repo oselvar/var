@@ -82,13 +82,6 @@ export function registerHandlers(
     return links as LocationLink[]
   })
 
-  // Custom request the client uses to drive editor decorations for matched
-  // step ranges. Returns 0-based LSP ranges.
-  connection.onRequest('var/matchRanges', (params: { uri: string }) => {
-    if (!handlers) return []
-    return handlers.matchRanges(params.uri)
-  })
-
   // Custom request for selection-driven step-definition generation. The
   // client is responsible for source (the user's selection) and target
   // (the steps file to append to); the server only knows how to translate

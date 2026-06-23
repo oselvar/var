@@ -109,42 +109,6 @@ step('the greeting is {string}', () => {})
   }
 })
 
-test('matchRanges returns 0-based ranges plus per-param ranges for a .var.md', async () => {
-  const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), 'export default {}\n')
-    writeFileSync(
-      join(dir, 'a.steps.ts'),
-      `step('I greet {string}', () => {})
-step('the greeting is {string}', () => {})
-`,
-    )
-    writeFileSync(
-      join(dir, 'b.var.md'),
-      '# B\n\nGiven I greet "world"\nThen the greeting is "Hello, world!"\n',
-    )
-  })
-  try {
-    const store = await makeStore(dir)
-    const h = buildHandlers(store)
-    const entries = h.matchRanges(`file://${join(dir, 'b.var.md')}`)
-    expect(entries).toHaveLength(2)
-    expect(entries[0]!.range.start.line).toBe(2)
-    expect(entries[1]!.range.start.line).toBe(3)
-    for (const e of entries) {
-      expect(e.range.end.character - e.range.start.character).toBeGreaterThan(5)
-      expect(e.params).toHaveLength(1)
-      // Each param is narrower than the full match.
-      const p = e.params[0]!
-      const pLen = p.end.character - p.start.character
-      const mLen = e.range.end.character - e.range.start.character
-      expect(pLen).toBeLessThan(mLen)
-      expect(pLen).toBeGreaterThan(0)
-    }
-  } finally {
-    cleanup()
-  }
-})
-
 test('stepAt resolves the step from a .var.md match and returns every matched site with values', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
     writeFileSync(join(dir, 'var.config.ts'), 'export default {}\n')

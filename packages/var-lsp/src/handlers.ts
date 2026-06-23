@@ -30,8 +30,6 @@ type Diagnostic = {
   readonly range: { readonly start: Position; readonly end: Position }
 }
 
-type MatchRangeEntry = { readonly range: Range; readonly params: ReadonlyArray<Range> }
-
 type SnippetResult = { readonly fullCode: string; readonly expression: string }
 
 // Output of `var/stepAt`: everything the Rename refactor needs to compute a
@@ -129,7 +127,6 @@ type Handlers = {
   hover(params: HoverParams): HoverResult
   definition(params: DefinitionParams): DefinitionResult
   diagnosticsFor(uri: string): ReadonlyArray<Diagnostic>
-  matchRanges(uri: string): ReadonlyArray<MatchRangeEntry>
   generateSnippet(text: string): SnippetResult
   stepGlobs(): ReadonlyArray<string>
   stepAt(params: HoverParams): StepAtResult
@@ -175,16 +172,6 @@ export function buildHandlers(store: Store): Handlers {
           severity: d.severity,
           message: d.message,
           range: d.range,
-        }))
-    },
-    matchRanges(uri) {
-      const path = uriToPath(uri)
-      return store
-        .index()
-        .matches.filter((m) => m.varPath === path)
-        .map((m) => ({
-          range: toLspRange(m.range),
-          params: m.paramRanges.map(toLspRange),
         }))
     },
     generateSnippet(text) {
