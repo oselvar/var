@@ -11,9 +11,9 @@
   },
   "devDependencies": {
     "@cucumber/cucumber": "^13.0.0",
-    "@oselvar/bdd": "workspace:*",
-    "@oselvar/bdd-cli": "workspace:*",
-    "@oselvar/bdd-vitest": "workspace:*",
+    "@oselvar/var": "workspace:*",
+    "@oselvar/var-cli": "workspace:*",
+    "@oselvar/var-vitest": "workspace:*",
     "@types/node": "^25.9.3",
     "tsx": "^4.22.4",
     "vitest": "^4.1.8"

@@ -32,43 +32,43 @@ importers:
 
   docs/tutorial:
     devDependencies:
-      '@oselvar/bdd-vitest':
+      '@oselvar/var-vitest':
         specifier: workspace:*
-        version: link:../../packages/bdd-vitest
+        version: link:../../packages/var-vitest
       vitest:
         specifier: ^2.1.5
         version: 2.1.9(@types/node@25.9.3)(lightningcss@1.32.0)
 
-  packages/bdd:
+  packages/var:
     dependencies:
       '@cucumber/cucumber-expressions':
         specifier: ^17.1.0
         version: 17.1.0
 
-  packages/bdd-cli:
+  packages/var-cli:
     dependencies:
-      '@oselvar/bdd':
+      '@oselvar/var':
         specifier: workspace:*
         version: link:../bdd
-      '@oselvar/bdd-runtime':
+      '@oselvar/var-runtime':
         specifier: workspace:*
         version: link:../bdd-runtime
 
-  packages/bdd-language:
+  packages/var-language:
     dependencies:
-      '@oselvar/bdd':
+      '@oselvar/var':
         specifier: workspace:*
         version: link:../bdd
       typescript:
         specifier: ^5.6.3
         version: 5.9.3
 
-  packages/bdd-lsp:
+  packages/var-lsp:
     dependencies:
-      '@oselvar/bdd':
+      '@oselvar/var':
         specifier: workspace:*
         version: link:../bdd
-      '@oselvar/bdd-language':
+      '@oselvar/var-language':
         specifier: workspace:*
         version: link:../bdd-language
       vscode-languageserver:
@@ -78,9 +78,9 @@ importers:
         specifier: ^1.0.12
         version: 1.0.12
 
-  packages/bdd-runtime:
+  packages/var-runtime:
     dependencies:
-      '@oselvar/bdd':
+      '@oselvar/var':
         specifier: workspace:*
         version: link:../bdd
     devDependencies:
@@ -88,15 +88,15 @@ importers:
         specifier: ^4.1.8
         version: 4.1.8(@types/node@25.9.3)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(yaml@2.9.0))
 
-  packages/bdd-vitest:
+  packages/var-vitest:
     dependencies:
       '@cucumber/cucumber-expressions':
         specifier: ^17.1.0
         version: 17.1.0
-      '@oselvar/bdd':
+      '@oselvar/var':
         specifier: workspace:*
         version: link:../bdd
-      '@oselvar/bdd-runtime':
+      '@oselvar/var-runtime':
         specifier: workspace:*
         version: link:../bdd-runtime
       vite:
@@ -106,12 +106,12 @@ importers:
         specifier: ^2.0.0
         version: 2.1.9(@types/node@25.9.3)(lightningcss@1.32.0)
 
-  packages/bdd-vscode:
+  packages/var-vscode:
     dependencies:
-      '@oselvar/bdd-language':
+      '@oselvar/var-language':
         specifier: workspace:*
         version: link:../bdd-language
-      '@oselvar/bdd-lsp':
+      '@oselvar/var-lsp':
         specifier: workspace:*
         version: link:../bdd-lsp
       vscode-languageclient:
@@ -127,13 +127,13 @@ importers:
       '@cucumber/cucumber':
         specifier: ^13.0.0
         version: 13.0.0
-      '@oselvar/bdd':
+      '@oselvar/var':
         specifier: workspace:*
         version: link:../bdd
-      '@oselvar/bdd-cli':
+      '@oselvar/var-cli':
         specifier: workspace:*
         version: link:../bdd-cli
-      '@oselvar/bdd-vitest':
+      '@oselvar/var-vitest':
         specifier: workspace:*
         version: link:../bdd-vitest
       '@types/node':

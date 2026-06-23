@@ -1,5 +1,5 @@
 {
-  "name": "@oselvar/bdd-vitest",
+  "name": "@oselvar/var-vitest",
   "version": "0.0.0",
   "type": "module",
   "exports": {
@@ -15,8 +15,8 @@
   },
   "dependencies": {
     "@cucumber/cucumber-expressions": "^17.1.0",
-    "@oselvar/bdd": "workspace:*",
-    "@oselvar/bdd-runtime": "workspace:*"
+    "@oselvar/var": "workspace:*",
+    "@oselvar/var-runtime": "workspace:*"
   },
   "peerDependencies": {
     "vite": "^5.0.0 || ^6.0.0",

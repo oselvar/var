@@ -1,5 +1,5 @@
 {
-  "name": "@oselvar/bdd-runtime",
+  "name": "@oselvar/var-runtime",
   "version": "0.0.0",
   "type": "module",
   "exports": {
@@ -13,7 +13,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@oselvar/bdd": "workspace:*"
+    "@oselvar/var": "workspace:*"
   },
   "devDependencies": {
     "vitest": "^4.1.8"

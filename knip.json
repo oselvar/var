@@ -1,30 +1,30 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "workspaces": {
-    "packages/bdd": {
+    "packages/var": {
       "entry": ["src/index.ts"],
       "project": ["src/**/*.ts", "tests/**/*.ts"]
     },
-    "packages/bdd-cli": {
+    "packages/var-cli": {
       "entry": ["src/index.ts", "src/bin.ts"],
       "project": ["src/**/*.ts", "tests/**/*.ts"]
     },
-    "packages/bdd-vitest": {
+    "packages/var-vitest": {
       "entry": ["src/index.ts", "src/runtime.ts"],
       "project": ["src/**/*.ts", "tests/**/*.ts"]
     },
-    "packages/bdd-language": {
+    "packages/var-language": {
       "entry": ["src/index.ts"],
       "project": ["src/**/*.ts", "tests/**/*.ts"]
     },
-    "packages/bdd-lsp": {
+    "packages/var-lsp": {
       "entry": ["src/server.ts", "src/bin.ts"],
       "project": ["src/**/*.ts", "tests/**/*.ts"]
     },
-    "packages/bdd-vscode": {
+    "packages/var-vscode": {
       "entry": ["src/extension.ts"],
       "project": ["src/**/*.ts"],
-      "ignoreDependencies": ["@oselvar/bdd-language", "@oselvar/bdd-lsp"]
+      "ignoreDependencies": ["@oselvar/var-language", "@oselvar/var-lsp"]
     },
     "docs/tutorial": {
       "entry": ["**/*.bdd.md", "**/*.steps.ts", "vitest.config.ts"],

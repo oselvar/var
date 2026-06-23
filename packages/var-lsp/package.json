@@ -1,19 +1,19 @@
 {
-  "name": "@oselvar/bdd-lsp",
+  "name": "@oselvar/var-lsp",
   "version": "0.0.0",
   "type": "module",
   "exports": { ".": { "types": "./src/server.ts", "import": "./src/server.ts" } },
   "main": "./src/server.ts",
   "types": "./src/server.ts",
-  "bin": { "bdd-lsp": "./dist/bin.js" },
+  "bin": { "var-lsp": "./dist/bin.js" },
   "files": ["dist", "README.md"],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "vitest run"
   },
   "dependencies": {
-    "@oselvar/bdd": "workspace:*",
-    "@oselvar/bdd-language": "workspace:*",
+    "@oselvar/var": "workspace:*",
+    "@oselvar/var-language": "workspace:*",
     "vscode-languageserver": "^9.0.1",
     "vscode-languageserver-textdocument": "^1.0.12"
   },

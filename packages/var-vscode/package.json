@@ -1,5 +1,5 @@
 {
-  "name": "oselvar-bdd",
+  "name": "oselvar-var",
   "displayName": "oselvar BDD",
   "description": "Markdown-native BDD: highlight matched steps, go-to step definitions, missing-step diagnostics.",
   "publisher": "oselvar",
@@ -24,7 +24,7 @@
     ],
     "commands": [
       {
-        "command": "oselvar-bdd.generateStepDefinition",
+        "command": "oselvar-var.generateStepDefinition",
         "title": "BDD: Generate Step Definition from Selection",
         "category": "BDD"
       }
@@ -32,14 +32,14 @@
     "menus": {
       "editor/context": [
         {
-          "command": "oselvar-bdd.generateStepDefinition",
+          "command": "oselvar-var.generateStepDefinition",
           "when": "editorHasSelection && resourceExtname == .md",
           "group": "bdd@1"
         }
       ],
       "commandPalette": [
         {
-          "command": "oselvar-bdd.generateStepDefinition",
+          "command": "oselvar-var.generateStepDefinition",
           "when": "editorHasSelection"
         }
       ]
@@ -49,8 +49,8 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@oselvar/bdd-language": "workspace:*",
-    "@oselvar/bdd-lsp": "workspace:*",
+    "@oselvar/var-language": "workspace:*",
+    "@oselvar/var-lsp": "workspace:*",
     "vscode-languageclient": "^9.0.1"
   },
   "devDependencies": {

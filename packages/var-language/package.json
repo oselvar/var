@@ -1,5 +1,5 @@
 {
-  "name": "@oselvar/bdd-language",
+  "name": "@oselvar/var-language",
   "version": "0.0.0",
   "type": "module",
   "exports": { ".": { "types": "./src/index.ts", "import": "./src/index.ts" } },
@@ -11,7 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@oselvar/bdd": "workspace:*",
+    "@oselvar/var": "workspace:*",
     "typescript": "^5.6.3"
   },
   "publishConfig": {

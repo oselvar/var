@@ -1,10 +1,10 @@
 {
-  "name": "@oselvar/bdd-tutorial",
+  "name": "@oselvar/var-tutorial",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "devDependencies": {
-    "@oselvar/bdd-vitest": "workspace:*",
+    "@oselvar/var-vitest": "workspace:*",
     "vitest": "^2.1.5"
   }
 }

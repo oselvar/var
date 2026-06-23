@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const SRC = join(ROOT, 'packages', 'bdd-vscode')
-const NAME = 'oselvar.oselvar-bdd-0.0.0'
+const NAME = 'oselvar.oselvar-var-0.0.0'
 const TARGETS = [
   join(homedir(), '.vscode', 'extensions', NAME),
   join(homedir(), '.cursor', 'extensions', NAME),
@@ -62,7 +62,7 @@ function registerExtension(jsonPath, dstPath, name) {
     }
     if (!Array.isArray(data)) return
   }
-  const id = 'oselvar.oselvar-bdd'
+  const id = 'oselvar.oselvar-var'
   const filtered = data.filter((e) => e?.identifier?.id !== id)
   filtered.push({
     identifier: { id, uuid: EXTENSION_UUID },
