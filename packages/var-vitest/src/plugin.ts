@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { glob as nativeGlob } from 'node:fs/promises'
 import { resolve } from 'node:path'
-import { loadVarConfig } from '@oselvar/var'
+import { loadVarConfig } from '@oselvar/var/node'
 import type { Plugin } from 'vite'
 
 const glob = nativeGlob as unknown as (

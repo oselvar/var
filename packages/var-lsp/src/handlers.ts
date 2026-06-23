@@ -1,4 +1,3 @@
-import { fileURLToPath } from 'node:url'
 import {
   diffExpressions,
   expressionSegments,
@@ -7,6 +6,7 @@ import {
 } from '@oselvar/var'
 import type { MatchRef } from '@oselvar/var-language'
 import type { Store } from './store.js'
+import { uriToPath } from './uri.js'
 
 type Position = { readonly line: number; readonly character: number }
 
@@ -599,11 +599,6 @@ function tsTypeFor(ptName: string, index: Map<string, { type: unknown }>): strin
   const pt = index.get(ptName)
   return pt && (pt.type as unknown) === Number ? 'number' : 'string'
 }
-
-function uriToPath(uri: string): string {
-  return uri.startsWith('file://') ? fileURLToPath(uri) : uri
-}
-
 
 function toLspRange(range: { start: Position; end: Position }): Range {
   return {

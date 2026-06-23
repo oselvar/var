@@ -8,11 +8,11 @@ import {
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { buildHandlers } from './handlers.js'
 import { type Store, type StoreDeps, createStore } from './store.js'
+import { uriToPath } from './uri.js'
 
 // Keep these re-exports so knip continues to count the workspace deps as used
 // in the build. T6 onward uses them directly.
 export type { StepDef } from '@oselvar/var-language'
-export { loadVarConfig } from '@oselvar/var'
 
 export function registerHandlers(
   connection: Connection,
@@ -175,10 +175,6 @@ export function registerHandlers(
       },
     }))
   })
-}
-
-function uriToPath(uri: string): string {
-  return uri.startsWith('file://') ? uri.slice('file://'.length) : uri
 }
 
 function pushDiagnostics(

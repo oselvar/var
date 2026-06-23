@@ -1,7 +1,7 @@
 export type { VarDoc } from '@oselvar/var'
 export { step, defineContext, defineParameterType } from './api.js'
 export type { Step } from './api.js'
-export { loadVarConfig } from '@oselvar/var'
+export { loadVarConfig } from '@oselvar/var/node'
 export type { VarConfig } from '@oselvar/var'
 export { runVarSource } from './runtime.js'
 export type { RunPorts } from './runtime.js'

@@ -73,5 +73,4 @@ export type { ExecutePorts } from './execute.js'
 
 export { renderTemplate } from './template.js'
 
-export { loadVarConfig } from './config.js'
-export type { VarConfig } from './config.js'
+export type { VarConfig } from './config-types.js'

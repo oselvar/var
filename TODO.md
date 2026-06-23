@@ -15,6 +15,7 @@
       back to every matched .var.md caller.
 - [ ] Find References (reverse): from a step def → all matched .var.md sites.
 - [ ] Package .vsix and publish to the VSCode Marketplace + Open VSX.
+- [ ] Run button for each example.
 
 ## Runtime adapters & CI
 

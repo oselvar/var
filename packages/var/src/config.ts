@@ -1,17 +1,11 @@
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import type { ScannerPlugin } from './scanner.js'
 import { DEFAULT_SNIPPET_TEMPLATE } from './snippet-template.js'
+import type { ScannerPlugin } from './scanner.js'
+import type { VarConfig } from './config-types.js'
 
-export type VarConfig = {
-  readonly vars: ReadonlyArray<string>
-  readonly steps: ReadonlyArray<string>
-  readonly snippet: { readonly template: string }
-  // Opt-in scanner extensions. Empty by default — projects migrating from
-  // Cucumber typically add `[gherkinTables(), gherkinDocStrings()]` here.
-  readonly scannerPlugins: ReadonlyArray<ScannerPlugin>
-}
+export type { VarConfig } from './config-types.js'
 
 const DEFAULT_CONFIG: VarConfig = {
   vars: ['**/*.var.md'],

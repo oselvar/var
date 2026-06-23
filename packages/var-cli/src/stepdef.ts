@@ -1,5 +1,6 @@
 import { appendFileSync, existsSync } from 'node:fs'
-import { createRegistry, generateSnippet, loadVarConfig } from '@oselvar/var'
+import { createRegistry, generateSnippet } from '@oselvar/var'
+import { loadVarConfig } from '@oselvar/var/node'
 
 export type StepdefOptions = {
   readonly text: string
