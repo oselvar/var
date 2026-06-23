@@ -2,6 +2,7 @@
 import { parseArgv } from './argv.js'
 import { runInit } from './init.js'
 import { runLint } from './lint.js'
+import { runRun } from './run.js'
 import { runStepdef } from './stepdef.js'
 
 const parsed = parseArgv(process.argv.slice(2))
@@ -17,6 +18,7 @@ async function main(): Promise<void> {
           'bdd — markdown-native BDD',
           '',
           'Usage:',
+          '  bdd run [globs]        run .bdd.md examples (no test runner)',
           '  bdd stepdef "<text>"   generate a step definition',
           '  bdd lint [globs]       check for missing/ambiguous/orphan steps',
           '  bdd init               scaffold a new project',
@@ -58,6 +60,16 @@ async function main(): Promise<void> {
       const result = await runInit({
         cwd: process.cwd(),
         writeStdout: (s) => process.stdout.write(s),
+      })
+      process.exitCode = result.exitCode
+      break
+    }
+    case 'run': {
+      const result = await runRun({
+        cwd: process.cwd(),
+        globs: parsed.positionals.length > 0 ? parsed.positionals : undefined,
+        writeStdout: (s) => process.stdout.write(s),
+        writeStderr: (s) => process.stderr.write(s),
       })
       process.exitCode = result.exitCode
       break

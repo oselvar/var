@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "@cucumber/cucumber-expressions": "^17.1.0",
-    "@oselvar/bdd": "workspace:*"
+    "@oselvar/bdd": "workspace:*",
+    "@oselvar/bdd-runtime": "workspace:*"
   },
   "peerDependencies": {
     "vite": "^5.0.0 || ^6.0.0",

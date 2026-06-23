@@ -6,7 +6,7 @@ import {
   parse,
   plan,
 } from '@oselvar/bdd'
-import { buildRegistry, contextFactory } from './api.js'
+import { buildRegistry, contextFactory } from '@oselvar/bdd-runtime'
 
 export type RunPorts = {
   readonly sink: TestSink
