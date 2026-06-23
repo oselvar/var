@@ -13,8 +13,6 @@ import {
   Range,
   type Selection,
   type TextDocument,
-  type TextEditor,
-  type TextEditorDecorationType,
   Uri,
   window,
   workspace,
@@ -53,7 +51,6 @@ export function activate(context: ExtensionContext): void {
   }
   client = new LanguageClient('oselvar-var', 'Vár', serverOptions, clientOptions)
   const started = client.start()
-  registerMatchDecorations(context, client, started)
   registerGenerateStepDefinition(context, client, started)
   registerGenerateCodeAction(context)
   registerStepRename(context, client, started)
@@ -64,75 +61,8 @@ type LspRange = {
   readonly end: { readonly line: number; readonly character: number }
 }
 
-type MatchRangeEntry = { readonly range: LspRange; readonly params: ReadonlyArray<LspRange> }
-
 function toVscodeRange(r: LspRange): Range {
   return new Range(r.start.line, r.start.character, r.end.line, r.end.character)
-}
-
-function registerMatchDecorations(
-  context: ExtensionContext,
-  lspClient: LanguageClient,
-  started: Promise<void>,
-): void {
-  // Greenish wash for the whole matched substring — clearly visible against
-  // both light and dark themes without competing with selection or search.
-  const matchDecoration: TextEditorDecorationType = window.createTextEditorDecorationType({
-    backgroundColor: 'rgba(80, 200, 120, 0.18)',
-  })
-  // Stronger green + bold weight on the parameter spans (e.g. the `"world"`
-  // captured by `{string}`).
-  const paramDecoration: TextEditorDecorationType = window.createTextEditorDecorationType({
-    backgroundColor: 'rgba(80, 200, 120, 0.42)',
-    fontWeight: 'bold',
-  })
-  context.subscriptions.push(matchDecoration, paramDecoration)
-
-  const refresh = async (editor: TextEditor | undefined): Promise<void> => {
-    if (!editor) return
-    if (!editor.document.fileName.endsWith('.var.md')) return
-    try {
-      const entries = await lspClient.sendRequest<ReadonlyArray<MatchRangeEntry>>(
-        'var/matchRanges',
-        { uri: editor.document.uri.toString() },
-      )
-      editor.setDecorations(
-        matchDecoration,
-        entries.map((e) => toVscodeRange(e.range)),
-      )
-      editor.setDecorations(
-        paramDecoration,
-        entries.flatMap((e) => e.params.map(toVscodeRange)),
-      )
-    } catch {
-      // Server may be initializing; the next 'var/didIndex' will retry.
-    }
-  }
-
-  const refreshAll = (): void => {
-    for (const ed of window.visibleTextEditors) void refresh(ed)
-  }
-
-  context.subscriptions.push(
-    window.onDidChangeActiveTextEditor((ed) => void refresh(ed)),
-    window.onDidChangeVisibleTextEditors(refreshAll),
-    workspace.onDidChangeTextDocument((e) => {
-      for (const ed of window.visibleTextEditors) {
-        if (ed.document === e.document) void refresh(ed)
-      }
-    }),
-  )
-
-  // `onNotification` requires the client to be started; wait, then register
-  // the handler and do an initial paint.
-  started
-    .then(() => {
-      lspClient.onNotification('var/didIndex', refreshAll)
-      refreshAll()
-    })
-    .catch(() => {
-      // start failure is already surfaced by the language client itself.
-    })
 }
 
 function registerGenerateCodeAction(context: ExtensionContext): void {
