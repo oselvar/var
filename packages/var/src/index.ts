@@ -38,13 +38,12 @@ export type {
 export { expressionSegments, diffExpressions, renderExpression } from './expression-segments.js'
 export type { ExpressionSegment, ExpressionDiff, ParamFate } from './expression-segments.js'
 
-export { ambiguousMatch, missingStep, orphanAttachment } from './diagnostics.js'
+export { ambiguousMatch, orphanAttachment } from './diagnostics.js'
 export type {
   AmbiguousInput,
   Candidate,
   Diagnostic,
   DiagnosticCode,
-  MissingStepInput,
   OrphanInput,
   Severity,
 } from './diagnostics.js'
