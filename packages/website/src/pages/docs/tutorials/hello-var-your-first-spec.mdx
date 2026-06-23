@@ -5,8 +5,11 @@ description: Write your first Vár spec — a plain Markdown file describing a b
 ---
 
 import FileEditor from '../../../components/FileEditor.astro'
+import helloSteps from '../../../../../../docs/tutorial/steps/01-hello.steps.ts?raw'
 
-# Hello Vár: your first spec
+# Hello Vár: your first punishment
+
+The best way to understand Vár is to see something *not* working as expected.
 
 A Vár spec is just a Markdown file. You create a file ending in `.var.md` and
 write what you expect to happen in plain English, with concrete examples inline. There is
@@ -16,7 +19,7 @@ content, and you have a spec.
 
 Add this to a new file:
 
-<FileEditor filename="hello.var.md">{`
+<FileEditor filename="hello.var.md" steps={[{ path: '01-hello.steps.ts', source: helloSteps }]}>{`
 # Hello, Vár
 Run \`pnpm test\` and watch this file run as tests.
 
