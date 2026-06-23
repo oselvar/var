@@ -1,5 +1,5 @@
-import { RangeSetBuilder } from '@codemirror/state'
-import { Decoration, type DecorationSet, EditorView, ViewPlugin, type ViewUpdate } from '@codemirror/view'
+import { RangeSetBuilder, StateEffect, StateField } from '@codemirror/state'
+import { Decoration, type DecorationSet, EditorView, ViewPlugin } from '@codemirror/view'
 import { type LSPClientExtension, LSPPlugin } from '@codemirror/lsp-client'
 
 export type DecodedToken = { line: number; char: number; length: number; type: string }
@@ -24,40 +24,67 @@ export function decodeSemanticTokens(
   return out
 }
 
+// Effect carrying a freshly-built decoration set.
+const setTokens = StateEffect.define<DecorationSet>()
+
+// Holds the decorations, mapped through every edit so they survive typing,
+// and replaced when a setTokens effect arrives.
+const tokenField = StateField.define<DecorationSet>({
+  create: () => Decoration.none,
+  update(deco, tr) {
+    deco = deco.map(tr.changes)
+    for (const e of tr.effects) if (e.is(setTokens)) deco = e.value
+    return deco
+  },
+  provide: (f) => EditorView.decorations.from(f),
+})
+
+// Module-level registry so a single client-level `var/didIndex` notification
+// can refresh every open editor.
+const refreshers = new Set<() => void>()
+
 // Generic, server-agnostic semantic-tokens extension for @codemirror/lsp-client.
 // Renders `cm-token-<type>` mark decorations; theme the classes separately.
 export function semanticTokens(options: { legend: { tokenTypes: string[] } }): LSPClientExtension {
   const tokenTypes = options.legend.tokenTypes
+
+  const build = (view: EditorView, data: number[]): DecorationSet => {
+    const doc = view.state.doc
+    const builder = new RangeSetBuilder<Decoration>()
+    for (const t of decodeSemanticTokens(data, tokenTypes)) {
+      if (t.line + 1 > doc.lines) continue
+      const from = doc.line(t.line + 1).from + t.char
+      const to = from + t.length
+      if (to <= doc.length) builder.add(from, to, Decoration.mark({ class: `cm-token-${t.type}` }))
+    }
+    return builder.finish()
+  }
+
   const plugin = ViewPlugin.fromClass(
     class {
-      decorations: DecorationSet = Decoration.none
+      readonly refresh: () => void
       constructor(readonly view: EditorView) {
-        void this.refresh()
+        this.refresh = () => {
+          void this.run()
+        }
+        refreshers.add(this.refresh)
+        this.refresh()
       }
-      update(u: ViewUpdate) {
-        if (u.docChanged) void this.refresh()
+      destroy() {
+        refreshers.delete(this.refresh)
       }
-      async refresh() {
+      async run() {
         const lsp = LSPPlugin.get(this.view)
         if (!lsp) return
         const result = (await lsp.client.request('textDocument/semanticTokens/full', {
           textDocument: { uri: lsp.uri },
         })) as { data: number[] } | null
         if (!result) return
-        const doc = this.view.state.doc
-        const builder = new RangeSetBuilder<Decoration>()
-        for (const t of decodeSemanticTokens(result.data, tokenTypes)) {
-          if (t.line + 1 > doc.lines) continue
-          const from = doc.line(t.line + 1).from + t.char
-          const to = from + t.length
-          if (to <= doc.length) builder.add(from, to, Decoration.mark({ class: `cm-token-${t.type}` }))
-        }
-        this.decorations = builder.finish()
-        this.view.update([]) // nudge a redraw of the new decorations
+        this.view.dispatch({ effects: setTokens.of(build(this.view, result.data)) })
       }
     },
-    { decorations: (v) => v.decorations },
   )
+
   return {
     clientCapabilities: {
       textDocument: {
@@ -70,6 +97,12 @@ export function semanticTokens(options: { legend: { tokenTypes: string[] } }): L
         },
       },
     },
-    editorExtension: plugin,
+    notificationHandlers: {
+      'var/didIndex': (_client, _params) => {
+        for (const r of refreshers) r()
+        return true
+      },
+    },
+    editorExtension: [tokenField, plugin],
   }
 }
