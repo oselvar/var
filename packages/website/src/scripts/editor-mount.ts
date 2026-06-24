@@ -27,17 +27,21 @@ function lspClient(): LSPClient {
   return sharedClient
 }
 
-async function runAll(view: EditorView): Promise<void> {
-  const varPath = '/hello.var.md'
-  const varSource = view.state.doc.toString()
+// Run the spec (from the current contents of both editors) and paint the
+// results into the markdown editor.
+async function runSpecNow(): Promise<void> {
+  const md = [...views.entries()].find(([u]) => u.endsWith('.var.md'))
+  if (!md) return
+  const mdView = md[1]
+  const varSource = mdView.state.doc.toString()
   const stepFiles = [...views.entries()]
     .filter(([u]) => u.endsWith('.steps.ts'))
     .map(([u, v]) => ({ path: u.replace(/^file:\/\//, ''), source: v.state.doc.toString() }))
   try {
-    const results = await runSpec({ varPath, varSource, stepFiles })
-    view.dispatch({ effects: setRunResults.of(results) })
+    const results = await runSpec({ varPath: '/hello.var.md', varSource, stepFiles })
+    mdView.dispatch({ effects: setRunResults.of(results) })
   } catch (err) {
-    view.dispatch({
+    mdView.dispatch({
       effects: setRunResults.of({
         examples: [
           {
@@ -52,14 +56,25 @@ async function runAll(view: EditorView): Promise<void> {
   }
 }
 
+let runTimer: ReturnType<typeof setTimeout> | undefined
+function scheduleRun(): void {
+  clearTimeout(runTimer)
+  runTimer = setTimeout(() => void runSpecNow(), 300)
+}
+
+// Re-run (debounced) whenever any editor's document changes — no run buttons.
+const autoRun = EditorView.updateListener.of((u) => {
+  if (u.docChanged) scheduleRun()
+})
+
 export function mountEditor(el: HTMLElement): EditorView {
   const doc = el.dataset.doc ?? ''
   const uri = el.dataset.uri ?? 'file:///untitled.var.md'
   const lang = el.dataset.lang ?? 'markdown'
   const language = lang === 'typescript' ? javascript({ typescript: true }) : markdown()
   const client = lspClient()
-  const ext = [basicSetup, language, varTokenTheme, client.plugin(uri)]
-  if (lang === 'markdown') ext.push(varRunExtension(runAll))
+  const ext = [basicSetup, language, varTokenTheme, client.plugin(uri), autoRun]
+  if (lang === 'markdown') ext.push(varRunExtension())
   const view = new EditorView({ doc, extensions: ext, parent: el })
   views.set(uri, view)
   return view
@@ -74,3 +89,5 @@ function mountAll(): void {
 }
 
 mountAll()
+// Initial run once both editors are mounted.
+scheduleRun()

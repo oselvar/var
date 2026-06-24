@@ -1,13 +1,5 @@
 import { RangeSetBuilder, StateEffect, StateField, type Extension } from '@codemirror/state'
-import {
-  Decoration,
-  type DecorationSet,
-  EditorView,
-  GutterMarker,
-  type Panel,
-  gutter,
-  showPanel,
-} from '@codemirror/view'
+import { Decoration, type DecorationSet, EditorView, GutterMarker, gutter } from '@codemirror/view'
 import type { RunResults } from './run-types.ts'
 
 // Effect carrying the latest run results (null clears them).
@@ -99,19 +91,7 @@ const errorGutter = gutter({
     update.transactions.some((tr) => tr.effects.some((e) => e.is(setRunResults))),
 })
 
-function runPanel(view: EditorView, onRunAll: (view: EditorView) => void): Panel {
-  const dom = document.createElement('div')
-  dom.className = 'cm-run-bar'
-  const btn = document.createElement('button')
-  btn.textContent = '▶ Run all'
-  btn.onclick = () => onRunAll(view)
-  dom.appendChild(btn)
-  return { dom, top: true }
-}
-
 const runTheme = EditorView.baseTheme({
-  '.cm-run-bar': { padding: '4px 8px', borderBottom: '2px solid var(--ink)', background: 'var(--yellow)' },
-  '.cm-run-bar button': { font: 'inherit', cursor: 'pointer' },
   '.cm-run-pass': { background: 'rgba(40, 167, 69, 0.18)' },
   '.cm-run-fail': { background: 'rgba(255, 46, 136, 0.18)' },
   '.cm-run-errmark': { color: 'var(--accent)', cursor: 'pointer', fontWeight: '700' },
@@ -127,13 +107,8 @@ const runTheme = EditorView.baseTheme({
   },
 })
 
-// `onRunAll` is injected so Task 3 can swap the stub for the real runner.
-export function varRunExtension(onRunAll: (view: EditorView) => void): Extension {
-  return [
-    resultsField,
-    decoField,
-    errorGutter,
-    showPanel.of((view) => runPanel(view, onRunAll)),
-    runTheme,
-  ]
+// Renders run results (line backgrounds + error gutter). Runs are triggered by
+// the host (debounced on every edit) — no buttons.
+export function varRunExtension(): Extension {
+  return [resultsField, decoField, errorGutter, runTheme]
 }
