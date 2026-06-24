@@ -1,13 +1,15 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-  "files": { "ignore": ["**/dist/**", "**/node_modules/**", "**/.astro/**", "**/*.timestamp*"] },
-  "organizeImports": { "enabled": true },
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "files": {
+    "includes": ["**", "!**/dist/**", "!**/node_modules/**", "!**/.astro/**", "!**/*.timestamp*"]
+  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "style": { "useImportType": "error", "useNodejsImportProtocol": "error" },
-      "suspicious": { "noConsoleLog": "error" }
+      "suspicious": { "noConsole": "error" }
     }
   },
   "formatter": {
