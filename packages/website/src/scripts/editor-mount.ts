@@ -3,14 +3,17 @@ import { markdown } from '@codemirror/lang-markdown'
 import { LSPClient, languageServerExtensions } from '@codemirror/lsp-client'
 import { EditorView, basicSetup } from 'codemirror'
 import { setRunResults, varRunExtension } from '../lib/cm-run.ts'
+import { runSpec } from '../lib/run-client.ts'
 import { semanticTokens } from '../lib/cm-semantic-tokens.ts'
-import type { RunResults } from '../lib/run-types.ts'
 import { varTokenTheme } from '../lib/var-token-theme.ts'
 import { workerTransport } from '../lib/worker-transport.ts'
 
 // One shared LSP client (one worker) for the page. Phase C generalises this to
 // a registry keyed by an `lsp=` attribute.
 let sharedClient: LSPClient | null = null
+
+// Module-level map of all mounted editors, keyed by uri.
+const views = new Map<string, EditorView>()
 
 function lspClient(): LSPClient {
   if (sharedClient) return sharedClient
@@ -24,19 +27,29 @@ function lspClient(): LSPClient {
   return sharedClient
 }
 
-function stubRunAll(view: EditorView): void {
-  const results: RunResults = {
-    examples: [
-      { name: 'first', status: 'passed', lines: [3] },
-      {
-        name: 'second',
-        status: 'failed',
-        lines: [5],
-        failure: { line: 5, message: 'boom', stack: 'Error: boom\n    at second (/hello.var.md:5:1)' },
-      },
-    ],
+async function runAll(view: EditorView): Promise<void> {
+  const varPath = '/hello.var.md'
+  const varSource = view.state.doc.toString()
+  const stepFiles = [...views.entries()]
+    .filter(([u]) => u.endsWith('.steps.ts'))
+    .map(([u, v]) => ({ path: u.replace(/^file:\/\//, ''), source: v.state.doc.toString() }))
+  try {
+    const results = await runSpec({ varPath, varSource, stepFiles })
+    view.dispatch({ effects: setRunResults.of(results) })
+  } catch (err) {
+    view.dispatch({
+      effects: setRunResults.of({
+        examples: [
+          {
+            name: 'error',
+            status: 'failed',
+            lines: [1],
+            failure: { line: 1, message: String(err), stack: String(err) },
+          },
+        ],
+      }),
+    })
   }
-  view.dispatch({ effects: setRunResults.of(results) })
 }
 
 export function mountEditor(el: HTMLElement): EditorView {
@@ -46,8 +59,10 @@ export function mountEditor(el: HTMLElement): EditorView {
   const language = lang === 'typescript' ? javascript({ typescript: true }) : markdown()
   const client = lspClient()
   const ext = [basicSetup, language, varTokenTheme, client.plugin(uri)]
-  if (lang === 'markdown') ext.push(varRunExtension(stubRunAll))
-  return new EditorView({ doc, extensions: ext, parent: el })
+  if (lang === 'markdown') ext.push(varRunExtension(runAll))
+  const view = new EditorView({ doc, extensions: ext, parent: el })
+  views.set(uri, view)
+  return view
 }
 
 function mountAll(): void {

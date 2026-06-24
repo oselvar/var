@@ -60,11 +60,14 @@ class ErrorMarker extends GutterMarker {
     el.onclick = () => {
       // Simple popover: a <pre> appended near the editor. (A CM tooltip is an
       // alternative — see note below.)
+      const editor = el.closest('.cm-editor')
+      // Remove any existing popover in this editor to prevent stacking on repeated clicks.
+      editor?.querySelectorAll('.cm-run-stack').forEach((existing) => existing.remove())
       const pop = document.createElement('pre')
       pop.className = 'cm-run-stack'
       pop.textContent = this.stack
       pop.onclick = () => pop.remove()
-      el.closest('.cm-editor')?.appendChild(pop)
+      editor?.appendChild(pop)
     }
     return el
   }
