@@ -3,6 +3,7 @@ import { markdown } from '@codemirror/lang-markdown'
 import { LSPClient, languageServerExtensions } from '@codemirror/lsp-client'
 import { EditorView, basicSetup } from 'codemirror'
 import { setRunResults, varRunExtension } from '../lib/cm-run.ts'
+import { type GenerateSnippet, stepGenAffordance } from '../lib/cm-generate-step.ts'
 import { runSpec } from '../lib/run-client.ts'
 import { semanticTokens } from '../lib/cm-semantic-tokens.ts'
 import { varTokenTheme } from '../lib/var-token-theme.ts'
@@ -74,7 +75,13 @@ export function mountEditor(el: HTMLElement): EditorView {
   const language = lang === 'typescript' ? javascript({ typescript: true }) : markdown()
   const client = lspClient()
   const ext = [basicSetup, language, varTokenTheme, client.plugin(uri), autoRun]
-  if (lang === 'markdown') ext.push(varRunExtension())
+  if (lang === 'markdown') {
+    ext.push(varRunExtension())
+    const generate: GenerateSnippet = (text) =>
+      client.request('var/generateSnippet', { text }) as Promise<{ fullCode: string; expression: string }>
+    const stepsView = () => [...views.entries()].find(([u]) => u.endsWith('.steps.ts'))?.[1] ?? null
+    ext.push(stepGenAffordance({ generate, stepsView }))
+  }
   const view = new EditorView({ doc, extensions: ext, parent: el })
   views.set(uri, view)
   return view
