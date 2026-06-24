@@ -1,5 +1,4 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { realpathSync } from 'node:fs'
+import { mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { loadVarConfig } from '@oselvar/var/node'
@@ -73,8 +72,9 @@ test('definitionFromMd returns the steps.ts location for a matched step', async 
     // originSelectionRange covers the full matched substring (not just one word).
     expect(link.originSelectionRange.start.line).toBe(2)
     expect(link.originSelectionRange.end.line).toBe(2)
-    expect(link.originSelectionRange.end.character - link.originSelectionRange.start.character)
-      .toBeGreaterThan(5)
+    expect(
+      link.originSelectionRange.end.character - link.originSelectionRange.start.character,
+    ).toBeGreaterThan(5)
   } finally {
     cleanup()
   }
@@ -117,14 +117,8 @@ test('stepAt resolves the step from a .var.md match and returns every matched si
       `step('I greet {string}', () => {})
 `,
     )
-    writeFileSync(
-      join(dir, 'a.var.md'),
-      '# A\n\nGiven I greet "world"\n',
-    )
-    writeFileSync(
-      join(dir, 'b.var.md'),
-      '# B\n\nWhen I greet "Aslak"\n',
-    )
+    writeFileSync(join(dir, 'a.var.md'), '# A\n\nGiven I greet "world"\n')
+    writeFileSync(join(dir, 'b.var.md'), '# B\n\nWhen I greet "Aslak"\n')
   })
   try {
     const store = await makeStore(dir)

@@ -7,7 +7,10 @@ export const SEMANTIC_LEGEND = {
 const FUNCTION = 0
 const PARAMETER = 1
 
-type Range = { start: { line: number; character: number }; end: { line: number; character: number } }
+type Range = {
+  start: { line: number; character: number }
+  end: { line: number; character: number }
+}
 
 export function semanticTokenData(
   matches: ReadonlyArray<MatchRef>,

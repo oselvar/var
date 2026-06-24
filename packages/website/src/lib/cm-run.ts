@@ -1,4 +1,4 @@
-import { RangeSetBuilder, StateEffect, StateField, type Extension } from '@codemirror/state'
+import { type Extension, RangeSetBuilder, StateEffect, StateField } from '@codemirror/state'
 import { Decoration, type DecorationSet, EditorView, GutterMarker, gutter } from '@codemirror/view'
 import type { RunResults } from './run-types.ts'
 
@@ -28,7 +28,11 @@ const decoField = StateField.define<DecorationSet>({
       .sort((a, b) => a.ln - b.ln)
     for (const { ln, status } of lines) {
       if (ln >= 1 && ln <= tr.state.doc.lines) {
-        builder.add(tr.state.doc.line(ln).from, tr.state.doc.line(ln).from, Decoration.line({ class: cls(status) }))
+        builder.add(
+          tr.state.doc.line(ln).from,
+          tr.state.doc.line(ln).from,
+          Decoration.line({ class: cls(status) }),
+        )
       }
     }
     return builder.finish()
@@ -119,14 +123,23 @@ const runTheme = EditorView.baseTheme({
   '.cm-run-errmark': { color: 'var(--accent)', cursor: 'pointer', fontWeight: '700' },
   '.cm-run-passmark': { color: '#28a745', fontWeight: '700' },
   '.cm-run-dialog': {
-    padding: '0', border: '2px solid var(--ink)', borderRadius: '8px',
-    maxWidth: 'min(90vw, 800px)', background: 'var(--ink)',
+    padding: '0',
+    border: '2px solid var(--ink)',
+    borderRadius: '8px',
+    maxWidth: 'min(90vw, 800px)',
+    background: 'var(--ink)',
   },
   '.cm-run-dialog::backdrop': { background: 'rgba(26, 26, 26, 0.5)' },
   '.cm-run-stack': {
-    margin: '0', padding: '16px', maxHeight: '70vh', overflow: 'auto',
-    background: 'var(--ink)', color: 'var(--cream)', borderRadius: '6px',
-    fontSize: '13px', whiteSpace: 'pre-wrap',
+    margin: '0',
+    padding: '16px',
+    maxHeight: '70vh',
+    overflow: 'auto',
+    background: 'var(--ink)',
+    color: 'var(--cream)',
+    borderRadius: '6px',
+    fontSize: '13px',
+    whiteSpace: 'pre-wrap',
   },
 })
 

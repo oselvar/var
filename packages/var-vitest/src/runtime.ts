@@ -1,10 +1,10 @@
 import {
-  type Reporter,
-  type ScannerPlugin,
-  type TestSink,
   executePlan,
   parse,
   plan,
+  type Reporter,
+  type ScannerPlugin,
+  type TestSink,
 } from '@oselvar/var'
 import { buildRegistry, contextFactory } from '@oselvar/var-runtime'
 

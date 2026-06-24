@@ -1,6 +1,13 @@
-import { describe, expect, it } from 'vitest'
 import { EditorState, type TransactionSpec } from '@codemirror/state'
-import { affordanceField, appendStepDef, flashField, flashRange, runGenerateStepDef, setAffordance } from './cm-generate-step.js'
+import { describe, expect, it } from 'vitest'
+import {
+  affordanceField,
+  appendStepDef,
+  flashField,
+  flashRange,
+  runGenerateStepDef,
+  setAffordance,
+} from './cm-generate-step.js'
 
 // Apply the returned change to the original string the way CodeMirror would,
 // so we can assert on the resulting document and the [from, to) slice.

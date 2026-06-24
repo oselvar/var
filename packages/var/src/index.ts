@@ -1,44 +1,20 @@
 export const VERSION = '0.0.0'
 
-export { spanFromOffsets } from './span.js'
-export type { Span } from './span.js'
-
-export { scan } from './scanner.js'
-
 export type {
-  VarDoc,
   Block,
-  Heading,
-  Paragraph,
-  ListItem,
   Blockquote,
+  Example,
+  Fence,
+  Heading,
+  InlineOffset,
+  ListItem,
+  Paragraph,
   Row,
   Table,
-  Fence,
   ThematicBreak,
-  Example,
-  InlineOffset,
+  VarDoc,
 } from './ast.js'
-
-export { structure } from './structurer.js'
-
-export { parse } from './parse.js'
-
-export { splitSentences } from './sentences.js'
-export type { Sentence } from './sentences.js'
-
-export { createRegistry, addStep, defineParameterType } from './registry.js'
-export type {
-  Registry,
-  StepRegistration,
-  StepInput,
-  StepHandler,
-  ParameterTypeInput,
-} from './registry.js'
-export { expressionSegments, diffExpressions, renderExpression } from './expression-segments.js'
-export type { ExpressionSegment, ExpressionDiff, ParamFate } from './expression-segments.js'
-
-export { ambiguousMatch, orphanAttachment } from './diagnostics.js'
+export type { VarConfig } from './config-types.js'
 export type {
   AmbiguousInput,
   Candidate,
@@ -47,29 +23,36 @@ export type {
   OrphanInput,
   Severity,
 } from './diagnostics.js'
-
-export { findHits, resolveHits } from './matcher.js'
-export type { Hit, ResolvedSteps, AmbiguityCollision } from './matcher.js'
-
-export { plan } from './plan.js'
-export type { ExecutionPlan, PlannedExample, PlannedStep } from './plan.js'
-
-export { stripInline } from './inline.js'
-export type { StrippedInline } from './inline.js'
-
-export type { ScannerPlugin, RawLine } from './scanner.js'
-export { gherkinTables, gherkinDocStrings } from './plugins/gherkin/index.js'
-
-export { generateSnippet } from './snippet.js'
-export type { Snippet } from './snippet.js'
-
-export { DEFAULT_SNIPPET_TEMPLATE } from './snippet-template.js'
-
-export type { TestSink, Reporter } from './ports.js'
-
-export { executePlan } from './execute.js'
+export { ambiguousMatch, orphanAttachment } from './diagnostics.js'
 export type { ExecutePorts } from './execute.js'
-
+export { executePlan } from './execute.js'
+export type { ExpressionDiff, ExpressionSegment, ParamFate } from './expression-segments.js'
+export { diffExpressions, expressionSegments, renderExpression } from './expression-segments.js'
+export type { StrippedInline } from './inline.js'
+export { stripInline } from './inline.js'
+export type { AmbiguityCollision, Hit, ResolvedSteps } from './matcher.js'
+export { findHits, resolveHits } from './matcher.js'
+export { parse } from './parse.js'
+export type { ExecutionPlan, PlannedExample, PlannedStep } from './plan.js'
+export { plan } from './plan.js'
+export { gherkinDocStrings, gherkinTables } from './plugins/gherkin/index.js'
+export type { Reporter, TestSink } from './ports.js'
+export type {
+  ParameterTypeInput,
+  Registry,
+  StepHandler,
+  StepInput,
+  StepRegistration,
+} from './registry.js'
+export { addStep, createRegistry, defineParameterType } from './registry.js'
+export type { RawLine, ScannerPlugin } from './scanner.js'
+export { scan } from './scanner.js'
+export type { Sentence } from './sentences.js'
+export { splitSentences } from './sentences.js'
+export type { Snippet } from './snippet.js'
+export { generateSnippet } from './snippet.js'
+export { DEFAULT_SNIPPET_TEMPLATE } from './snippet-template.js'
+export type { Span } from './span.js'
+export { spanFromOffsets } from './span.js'
+export { structure } from './structurer.js'
 export { renderTemplate } from './template.js'
-
-export type { VarConfig } from './config-types.js'

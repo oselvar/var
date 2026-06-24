@@ -1,17 +1,29 @@
 import { defineContext, defineParameterType } from '@oselvar/var-vitest'
 import { expect } from 'vitest'
+
 // import { Library } from '../src/library'
 
 const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ] as const
 
 defineParameterType({
   name: 'date',
-  regexp: /(January|February|March|April|May|June|July|August|September|October|November|December) (\d{1,2})(?:st|nd|rd|th)/,
+  regexp:
+    /(January|February|March|April|May|June|July|August|September|October|November|December) (\d{1,2})(?:st|nd|rd|th)/,
   transformer: (month, day) =>
-    new Date(Date.UTC(2026, MONTHS.indexOf(month as typeof MONTHS[number]), Number(day))),
+    new Date(Date.UTC(2026, MONTHS.indexOf(month as (typeof MONTHS)[number]), Number(day))),
 })
 
 defineParameterType({

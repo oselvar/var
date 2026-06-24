@@ -1,6 +1,6 @@
 import { strict as assert } from 'node:assert'
 import { After, Before, type DataTable, Given, Then, When } from '@cucumber/cucumber'
-import { type Book, Library, type BorrowError, type Receipt } from '../../src/library.js'
+import { type Book, type BorrowError, Library, type Receipt } from '../../src/library.js'
 
 // Cucumber gives you stateful step bodies via module-scope variables (or a
 // World). The Before/After hooks reset between scenarios.

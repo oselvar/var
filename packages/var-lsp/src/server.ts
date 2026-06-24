@@ -2,13 +2,13 @@ import {
   type Connection,
   InsertTextFormat,
   type LocationLink,
-  TextDocuments,
   TextDocumentSyncKind,
+  TextDocuments,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { buildHandlers } from './handlers.js'
 import { SEMANTIC_LEGEND, semanticTokenData } from './semantic-tokens.js'
-import { type Store, type StoreDeps, createStore } from './store.js'
+import { createStore, type Store, type StoreDeps } from './store.js'
 import { uriToPath } from './uri.js'
 
 // Keep these re-exports so knip continues to count the workspace deps as used
@@ -42,7 +42,10 @@ export function registerHandlers(
         // user's invocation (Ctrl+Space) and as they type letters.
         completionProvider: { resolveProvider: false },
         semanticTokensProvider: {
-          legend: { tokenTypes: [...SEMANTIC_LEGEND.tokenTypes], tokenModifiers: [...SEMANTIC_LEGEND.tokenModifiers] },
+          legend: {
+            tokenTypes: [...SEMANTIC_LEGEND.tokenTypes],
+            tokenModifiers: [...SEMANTIC_LEGEND.tokenModifiers],
+          },
           full: true,
         },
       },
@@ -114,11 +117,7 @@ export function registerHandlers(
   // Phase 3 path: refuses when any parameter is added/removed/type-changed.
   connection.onRequest(
     'var/renameStep',
-    (params: {
-      uri: string
-      position: { line: number; character: number }
-      newName: string
-    }) => {
+    (params: { uri: string; position: { line: number; character: number }; newName: string }) => {
       if (!handlers) return null
       return handlers.renameStep(params)
     },
@@ -129,11 +128,7 @@ export function registerHandlers(
   // parameters before applying anything.
   connection.onRequest(
     'var/planRename',
-    (params: {
-      uri: string
-      position: { line: number; character: number }
-      newName: string
-    }) => {
+    (params: { uri: string; position: { line: number; character: number }; newName: string }) => {
       if (!handlers) return null
       return handlers.planRename(params)
     },

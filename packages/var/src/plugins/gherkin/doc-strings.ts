@@ -44,12 +44,13 @@ export function gherkinDocStrings(): ScannerPlugin {
       // Strip the common indent (the indent of the opening marker) from each
       // body line so the handler doesn't get gherkin's leading whitespace.
       const rawBody = source.slice(bodyStart, bodyEnd ?? bodyStart)
-      const body = indent.length > 0
-        ? rawBody
-            .split('\n')
-            .map((line) => (line.startsWith(indent) ? line.slice(indent.length) : line))
-            .join('\n')
-        : rawBody
+      const body =
+        indent.length > 0
+          ? rawBody
+              .split('\n')
+              .map((line) => (line.startsWith(indent) ? line.slice(indent.length) : line))
+              .join('\n')
+          : rawBody
       const fence: Fence = {
         kind: 'fence',
         info,

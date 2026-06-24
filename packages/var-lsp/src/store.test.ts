@@ -1,6 +1,6 @@
 import { DEFAULT_SNIPPET_TEMPLATE } from '@oselvar/var'
 import { describe, expect, it } from 'vitest'
-import { type FileSystem, createStore } from './store.js'
+import { createStore, type FileSystem } from './store.js'
 
 function fakeFs(files: Record<string, string>): FileSystem {
   const map = new Map(Object.entries(files))

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { varVitestPlugin, generateVirtualModule } from '../src/plugin.js'
+import { generateVirtualModule, varVitestPlugin } from '../src/plugin.js'
 
 describe('generateVirtualModule', () => {
   test('produces TS that imports runtime, step files, and invokes runVarSource', () => {

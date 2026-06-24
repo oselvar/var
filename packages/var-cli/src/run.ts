@@ -73,9 +73,7 @@ export async function runRun(opts: RunOptions): Promise<RunResult> {
     `\n${total} example${total === 1 ? '' : 's'}, ${passed} passed, ${failed} failed`,
   )
   if (errorDiagnostics > 0) {
-    opts.writeStdout(
-      `, ${errorDiagnostics} diagnostic${errorDiagnostics === 1 ? '' : 's'}`,
-    )
+    opts.writeStdout(`, ${errorDiagnostics} diagnostic${errorDiagnostics === 1 ? '' : 's'}`)
   }
   opts.writeStdout('\n')
 

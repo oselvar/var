@@ -14,16 +14,16 @@ import {
   type Selection,
   type TextDocument,
   Uri,
+  WorkspaceEdit,
   window,
   workspace,
-  WorkspaceEdit,
 } from 'vscode'
 import {
+  LanguageClient,
   type LanguageClientOptions,
   type ServerOptions,
   TransportKind,
 } from 'vscode-languageclient/node.js'
-import { LanguageClient } from 'vscode-languageclient/node.js'
 
 let client: LanguageClient | undefined
 
@@ -87,11 +87,9 @@ function registerGenerateCodeAction(context: ExtensionContext): void {
     },
   }
   context.subscriptions.push(
-    languages.registerCodeActionsProvider(
-      { scheme: 'file', pattern: '**/*.var.md' },
-      provider,
-      { providedCodeActionKinds: [CodeActionKind.RefactorExtract] },
-    ),
+    languages.registerCodeActionsProvider({ scheme: 'file', pattern: '**/*.var.md' }, provider, {
+      providedCodeActionKinds: [CodeActionKind.RefactorExtract],
+    }),
   )
 }
 
@@ -307,7 +305,7 @@ function registerStepRename(
             value:
               fate.kind === 'added'
                 ? ''
-                : site.paramValues[(fate as { oldIndex: number }).oldIndex] ?? '',
+                : (site.paramValues[(fate as { oldIndex: number }).oldIndex] ?? ''),
             ignoreFocusOut: true,
           })
           if (answer === undefined) {
@@ -316,10 +314,10 @@ function registerStepRename(
           }
           values.push(answer)
         }
-        const rendered = await lspClient.sendRequest<RenderTextResult>(
-          'var/renderExpressionText',
-          { expression: plan.newExpression, values },
-        )
+        const rendered = await lspClient.sendRequest<RenderTextResult>('var/renderExpressionText', {
+          expression: plan.newExpression,
+          values,
+        })
         if (!rendered.ok) throw new Error(rendered.error)
         edit.replace(Uri.parse(site.uri), toVscodeRange(site.range), rendered.text)
       }
@@ -342,10 +340,7 @@ function innerStringRange(document: TextDocument, fullRange: Range): Range {
     const first = text[0]
     const last = text[text.length - 1]
     if ((first === '"' || first === "'" || first === '`') && first === last) {
-      return new Range(
-        fullRange.start.translate(0, 1),
-        fullRange.end.translate(0, -1),
-      )
+      return new Range(fullRange.start.translate(0, 1), fullRange.end.translate(0, -1))
     }
   }
   return fullRange

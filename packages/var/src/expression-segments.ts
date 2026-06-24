@@ -5,7 +5,12 @@ import type { Registry } from './registry.js'
 // (`start`/`end`) are character offsets within the original expression
 // string, so callers can splice/replace portions safely.
 export type ExpressionSegment =
-  | { readonly kind: 'literal'; readonly text: string; readonly start: number; readonly end: number }
+  | {
+      readonly kind: 'literal'
+      readonly text: string
+      readonly start: number
+      readonly end: number
+    }
   | {
       readonly kind: 'param'
       readonly name: string
@@ -34,10 +39,7 @@ export function expressionSegments(
   return childrenToSegments(root, expression)
 }
 
-function childrenToSegments(
-  root: Node,
-  source: string,
-): ReadonlyArray<ExpressionSegment> {
+function childrenToSegments(root: Node, source: string): ReadonlyArray<ExpressionSegment> {
   // The cucumber-expressions AST splits text into per-token children
   // (word/whitespace), so we walk children and coalesce neighboring TEXT_NODEs
   // into a single literal segment whose positions span the whole run.
@@ -163,11 +165,11 @@ export function diffExpressions(
   const oldSegments = expressionSegments(oldExpression, registry)
   const newSegments = expressionSegments(newExpression, registry)
 
-  const oldParams = oldSegments.filter((s): s is Extract<ExpressionSegment, { kind: 'param' }> =>
-    s.kind === 'param',
+  const oldParams = oldSegments.filter(
+    (s): s is Extract<ExpressionSegment, { kind: 'param' }> => s.kind === 'param',
   )
-  const newParams = newSegments.filter((s): s is Extract<ExpressionSegment, { kind: 'param' }> =>
-    s.kind === 'param',
+  const newParams = newSegments.filter(
+    (s): s is Extract<ExpressionSegment, { kind: 'param' }> => s.kind === 'param',
   )
 
   const paramFates: ParamFate[] = []

@@ -35,9 +35,7 @@ test('segments preserve start/end so callers can splice the expression source', 
 test('diffExpressions reports identical expressions as no changes', () => {
   const r = createRegistry()
   const d = diffExpressions('I greet {string}', 'I greet {string}', r)
-  expect(d.paramFates).toEqual([
-    { kind: 'kept', oldIndex: 0, newIndex: 0, nameUnchanged: true },
-  ])
+  expect(d.paramFates).toEqual([{ kind: 'kept', oldIndex: 0, newIndex: 0, nameUnchanged: true }])
   expect(d.literalChanged).toBe(false)
 })
 
@@ -45,9 +43,7 @@ test('diffExpressions detects literal-only changes', () => {
   const r = createRegistry()
   const d = diffExpressions('I greet {string}', 'I welcome {string}', r)
   expect(d.literalChanged).toBe(true)
-  expect(d.paramFates).toEqual([
-    { kind: 'kept', oldIndex: 0, newIndex: 0, nameUnchanged: true },
-  ])
+  expect(d.paramFates).toEqual([{ kind: 'kept', oldIndex: 0, newIndex: 0, nameUnchanged: true }])
 })
 
 test('diffExpressions detects an added parameter at the end', () => {
@@ -72,9 +68,7 @@ test('diffExpressions reports a type change as kept-but-nameChanged', () => {
   let r = createRegistry()
   r = defineParameterType(r, { name: 'airport', regexp: /[A-Z]{3}/ })
   const d = diffExpressions('I fly to {string}', 'I fly to {airport}', r)
-  expect(d.paramFates).toEqual([
-    { kind: 'kept', oldIndex: 0, newIndex: 0, nameUnchanged: false },
-  ])
+  expect(d.paramFates).toEqual([{ kind: 'kept', oldIndex: 0, newIndex: 0, nameUnchanged: false }])
 })
 
 test('renderExpression rebuilds the matched text from a new expression + captured values', () => {

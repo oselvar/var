@@ -1,9 +1,9 @@
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { DEFAULT_SNIPPET_TEMPLATE } from './snippet-template.js'
-import type { ScannerPlugin } from './scanner.js'
 import type { VarConfig } from './config-types.js'
+import type { ScannerPlugin } from './scanner.js'
+import { DEFAULT_SNIPPET_TEMPLATE } from './snippet-template.js'
 
 export type { VarConfig } from './config-types.js'
 

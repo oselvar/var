@@ -1,4 +1,4 @@
-import { type TestSink, executePlan, parse, plan } from '@oselvar/var'
+import { executePlan, parse, plan, type TestSink } from '@oselvar/var'
 import { buildRegistry, contextFactory } from '@oselvar/var-runtime'
 import type { ExampleResult, RunResults } from './run-types.ts'
 

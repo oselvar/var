@@ -59,11 +59,7 @@ function visitForParameterTypes(
   out: ParameterTypeDef[],
   file: string,
 ): void {
-  if (
-    ts.isCallExpression(node) &&
-    isDefineParameterTypeCall(node) &&
-    node.arguments.length >= 1
-  ) {
+  if (ts.isCallExpression(node) && isDefineParameterTypeCall(node) && node.arguments.length >= 1) {
     const arg0 = node.arguments[0]
     if (arg0 && ts.isObjectLiteralExpression(arg0)) {
       const name = readStringProperty(arg0, 'name')
@@ -88,10 +84,7 @@ function isDefineParameterTypeCall(node: ts.CallExpression): boolean {
   return ts.isIdentifier(node.expression) && node.expression.text === 'defineParameterType'
 }
 
-function readStringProperty(
-  obj: ts.ObjectLiteralExpression,
-  name: string,
-): string | undefined {
+function readStringProperty(obj: ts.ObjectLiteralExpression, name: string): string | undefined {
   for (const prop of obj.properties) {
     if (!ts.isPropertyAssignment(prop)) continue
     if (!ts.isIdentifier(prop.name) || prop.name.text !== name) continue
@@ -101,10 +94,7 @@ function readStringProperty(
   return undefined
 }
 
-function readRegexpProperty(
-  obj: ts.ObjectLiteralExpression,
-  name: string,
-): string | undefined {
+function readRegexpProperty(obj: ts.ObjectLiteralExpression, name: string): string | undefined {
   for (const prop of obj.properties) {
     if (!ts.isPropertyAssignment(prop)) continue
     if (!ts.isIdentifier(prop.name) || prop.name.text !== name) continue

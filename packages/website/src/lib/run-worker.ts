@@ -49,7 +49,11 @@ self.onmessage = async (e: MessageEvent<RunInput>) => {
           name: 'run error',
           status: 'failed',
           lines: [1],
-          failure: { line: 1, message: e2?.message ?? String(err), stack: e2?.stack ?? String(err) },
+          failure: {
+            line: 1,
+            message: e2?.message ?? String(err),
+            stack: e2?.stack ?? String(err),
+          },
         },
       ],
     }

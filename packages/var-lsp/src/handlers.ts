@@ -339,8 +339,7 @@ export function buildHandlers(store: Store): Handlers {
       const stepDefRecord = store
         .index()
         .stepDefs.find(
-          (d) =>
-            d.expression === stepAt.expression && `file://${d.file}` === stepAt.stepDefUri,
+          (d) => d.expression === stepAt.expression && `file://${d.file}` === stepAt.stepDefUri,
         )
       const handlerSync = stepDefRecord?.handlerParams
         ? buildHandlerSync({
@@ -408,7 +407,6 @@ export function buildHandlers(store: Store): Handlers {
   }
 }
 
-
 function findMatchAt(store: Store, uri: string, position: Position): MatchRef | undefined {
   const path = uriToPath(uri)
   // LSP positions are 0-based; the workspace index stores 1-based line/col.
@@ -430,9 +428,7 @@ function resolveStepAt(store: Store, uri: string, position: Position): StepAtRes
   const path = uriToPath(uri)
   const pos: Position = { line: position.line + 1, character: position.character + 1 }
   const index = store.index()
-  let stepDef = index.stepDefs.find(
-    (d) => d.file === path && contains(d.expressionRange, pos),
-  )
+  let stepDef = index.stepDefs.find((d) => d.file === path && contains(d.expressionRange, pos))
   if (!stepDef) {
     const m = index.matches.find((m) => m.varPath === path && contains(m.range, pos))
     if (m) stepDef = m.stepDef
@@ -440,10 +436,7 @@ function resolveStepAt(store: Store, uri: string, position: Position): StepAtRes
   if (!stepDef) return null
 
   const matches: StepAtMatch[] = index.matches
-    .filter(
-      (m) =>
-        m.stepDef.expression === stepDef.expression && m.stepDef.file === stepDef.file,
-    )
+    .filter((m) => m.stepDef.expression === stepDef.expression && m.stepDef.file === stepDef.file)
     .map((m) => ({
       uri: `file://${m.varPath}`,
       range: toLspRange(m.range),
@@ -506,14 +499,19 @@ function expressionLiteralText(
 
 function buildHandlerSync(input: {
   stepDefUri: string
-  old: { range: { start: Position; end: Position }; params: ReadonlyArray<{ name: string; typeText: string }> }
+  old: {
+    range: { start: Position; end: Position }
+    params: ReadonlyArray<{ name: string; typeText: string }>
+  }
   paramFates: ReadonlyArray<
     | { kind: 'kept'; oldIndex: number; newIndex: number; nameUnchanged: boolean }
     | { kind: 'added'; newIndex: number; name: string }
     | { kind: 'removed'; oldIndex: number }
   >
   newExpressionParams: ReadonlyArray<string>
-  registry: { parameterTypes: { parameterTypes: Iterable<{ name?: string | undefined; type: unknown }> } }
+  registry: {
+    parameterTypes: { parameterTypes: Iterable<{ name?: string | undefined; type: unknown }> }
+  }
 }): HandlerSync {
   const { old, paramFates, newExpressionParams, registry } = input
   // Index parameter types by name once so per-fate lookup is O(1).
@@ -550,9 +548,7 @@ function buildHandlerSync(input: {
     newUserParams.push({ name: baseName, typeText })
   }
 
-  const ctxText = ctxParam
-    ? renderHandlerParam(ctxParam)
-    : 'ctx'
+  const ctxText = ctxParam ? renderHandlerParam(ctxParam) : 'ctx'
   const userText = newUserParams.map(renderHandlerParam).join(', ')
   const newText = userText.length > 0 ? `${ctxText}, ${userText}` : ctxText
 

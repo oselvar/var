@@ -12,7 +12,11 @@ function open(): Promise<IDBDatabase> {
   })
 }
 
-function tx<T>(db: IDBDatabase, mode: IDBTransactionMode, fn: (s: IDBObjectStore) => IDBRequest<T>): Promise<T> {
+function tx<T>(
+  db: IDBDatabase,
+  mode: IDBTransactionMode,
+  fn: (s: IDBObjectStore) => IDBRequest<T>,
+): Promise<T> {
   return new Promise((resolve, reject) => {
     const req = fn(db.transaction(STORE, mode).objectStore(STORE))
     req.onsuccess = () => resolve(req.result)
@@ -22,7 +26,11 @@ function tx<T>(db: IDBDatabase, mode: IDBTransactionMode, fn: (s: IDBObjectStore
 
 export async function createIdbFileSystem(seed: Record<string, string> = {}): Promise<FileSystem> {
   const db = await open()
-  const keys = await tx<IDBValidKey[]>(db, 'readonly', (s) => s.getAllKeys() as IDBRequest<IDBValidKey[]>)
+  const keys = await tx<IDBValidKey[]>(
+    db,
+    'readonly',
+    (s) => s.getAllKeys() as IDBRequest<IDBValidKey[]>,
+  )
   if (keys.length === 0) {
     for (const [path, content] of Object.entries(seed)) {
       await tx(db, 'readwrite', (s) => s.put(content, path))
@@ -30,13 +38,21 @@ export async function createIdbFileSystem(seed: Record<string, string> = {}): Pr
   }
   return {
     async list(globs) {
-      const all = await tx<IDBValidKey[]>(db, 'readonly', (s) => s.getAllKeys() as IDBRequest<IDBValidKey[]>)
+      const all = await tx<IDBValidKey[]>(
+        db,
+        'readonly',
+        (s) => s.getAllKeys() as IDBRequest<IDBValidKey[]>,
+      )
       const paths = all.map(String)
       const exts = globs.map((g) => g.slice(g.lastIndexOf('.')))
       return paths.filter((p) => exts.some((e) => p.endsWith(e)))
     },
     async read(path) {
-      const v = await tx<string | undefined>(db, 'readonly', (s) => s.get(path) as IDBRequest<string | undefined>)
+      const v = await tx<string | undefined>(
+        db,
+        'readonly',
+        (s) => s.get(path) as IDBRequest<string | undefined>,
+      )
       if (v === undefined) throw new Error(`no such file: ${path}`)
       return v
     },

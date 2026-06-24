@@ -1,4 +1,4 @@
-import type { VarDoc, Block, Example, Fence, Table } from './ast.js'
+import type { Block, Example, Fence, Table, VarDoc } from './ast.js'
 import { spanFromOffsets } from './span.js'
 
 // Every paragraph / list item / blockquote becomes a candidate example. The
@@ -83,4 +83,3 @@ export function structure(path: string, source: string, blocks: ReadonlyArray<Bl
 
   return { path, source, examples, orphanAttachments }
 }
-

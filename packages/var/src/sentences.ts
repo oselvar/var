@@ -36,12 +36,7 @@ export function splitSentences(text: string): ReadonlyArray<Sentence> {
       continue
     }
     const ch = text.charCodeAt(i)
-    if (
-      ch === 0x0a /* \n */ ||
-      ch === 0x2e /* . */ ||
-      ch === 0x21 /* ! */ ||
-      ch === 0x3f /* ? */
-    ) {
+    if (ch === 0x0a /* \n */ || ch === 0x2e /* . */ || ch === 0x21 /* ! */ || ch === 0x3f /* ? */) {
       if (ch === 0x2e && isInsideNumberOrAbbrev(text, i)) {
         i++
         continue

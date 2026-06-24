@@ -14,7 +14,8 @@ describe('runRegisteredSpec', () => {
       ctx.greeting = `Hello, ${name}!`
     })
     step('the greeting should be {string}', (ctx: { greeting: string }, expected: string) => {
-      if (ctx.greeting !== expected) throw new Error(`expected "${expected}" but was "${ctx.greeting}"`)
+      if (ctx.greeting !== expected)
+        throw new Error(`expected "${expected}" but was "${ctx.greeting}"`)
     })
     const results = await runRegisteredSpec('/spec.var.md', SPEC)
     expect(results.examples).toHaveLength(1)
@@ -29,7 +30,8 @@ describe('runRegisteredSpec', () => {
       ctx.greeting = `Hi ${name}`
     })
     step('the greeting should be {string}', (ctx: { greeting: string }, expected: string) => {
-      if (ctx.greeting !== expected) throw new Error(`expected "${expected}" but was "${ctx.greeting}"`)
+      if (ctx.greeting !== expected)
+        throw new Error(`expected "${expected}" but was "${ctx.greeting}"`)
     })
     const results = await runRegisteredSpec('/spec.var.md', SPEC)
     expect(results.examples[0]?.status).toBe('failed')

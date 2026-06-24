@@ -15,7 +15,8 @@ function lineText(line: ReadonlyArray<{ text: string }>): string {
 
 describe('highlightSteps', () => {
   it('preserves every line verbatim across segments', () => {
-    const source = '# Hi\n\nFirst I greet "world" okay? I think the greeting should be "Hello, world!"\n'
+    const source =
+      '# Hi\n\nFirst I greet "world" okay? I think the greeting should be "Hello, world!"\n'
     const lines = highlightSteps({ varPath: 'hello.var.md', source, steps })
     const original = source.split('\n')
     expect(lines.length).toBe(original.length)

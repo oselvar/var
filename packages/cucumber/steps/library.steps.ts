@@ -1,6 +1,6 @@
 import { defineContext } from '@oselvar/var-vitest'
 import { expect } from 'vitest'
-import { type Book, Library, type BorrowError, type Receipt } from '../src/library.js'
+import { type Book, type BorrowError, Library, type Receipt } from '../src/library.js'
 
 // Cucumber's Before/After hooks → var-vitest's defineContext factory. The
 // factory runs once per example (vitest runs each example as its own test),

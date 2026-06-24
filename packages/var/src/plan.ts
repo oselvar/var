@@ -1,6 +1,6 @@
-import type { VarDoc, Block, Fence, InlineOffset, Table } from './ast.js'
-import { type Diagnostic, ambiguousMatch, orphanAttachment } from './diagnostics.js'
-import { type Hit, findHits, resolveHits } from './matcher.js'
+import type { Block, Fence, InlineOffset, Table, VarDoc } from './ast.js'
+import { ambiguousMatch, type Diagnostic, orphanAttachment } from './diagnostics.js'
+import { findHits, type Hit, resolveHits } from './matcher.js'
 import type { Registry, StepRegistration } from './registry.js'
 import { splitSentences } from './sentences.js'
 import { type Span, spanFromOffsets } from './span.js'
@@ -187,7 +187,10 @@ function deriveExampleName(body: ReadonlyArray<Block>): string {
   const primary = body.find(
     (b) => b.kind === 'paragraph' || b.kind === 'list_item' || b.kind === 'blockquote',
   )
-  if (!primary || (primary.kind !== 'paragraph' && primary.kind !== 'list_item' && primary.kind !== 'blockquote')) {
+  if (
+    !primary ||
+    (primary.kind !== 'paragraph' && primary.kind !== 'list_item' && primary.kind !== 'blockquote')
+  ) {
     return ''
   }
   const sentences = splitSentences(primary.text)

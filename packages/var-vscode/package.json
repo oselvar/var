@@ -5,8 +5,15 @@
   "publisher": "oselvar",
   "version": "0.0.0",
   "type": "module",
-  "engines": { "vscode": "^1.92.0", "node": ">=22" },
-  "categories": ["Programming Languages", "Linters", "Testing"],
+  "engines": {
+    "vscode": "^1.92.0",
+    "node": ">=22"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Testing"
+  ],
   "main": "./dist/extension.js",
   "activationEvents": [
     "onLanguage:markdown",
@@ -18,8 +25,13 @@
     "languages": [
       {
         "id": "var-markdown",
-        "aliases": ["Vár Markdown", "var-md"],
-        "extensions": [".var.md"]
+        "aliases": [
+          "Vár Markdown",
+          "var-md"
+        ],
+        "extensions": [
+          ".var.md"
+        ]
       }
     ],
     "commands": [

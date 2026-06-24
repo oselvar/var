@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import type { MatchRef } from '@oselvar/var-language'
+import { describe, expect, it } from 'vitest'
 import { SEMANTIC_LEGEND, semanticTokenData } from './semantic-tokens.js'
 
 function r(sl: number, sc: number, el: number, ec: number) {
@@ -20,9 +20,21 @@ describe('semanticTokenData', () => {
     ]
     const data = semanticTokenData(matches, '/a.var.md', source)
     expect(data).toEqual([
-      0, 0, 9, 0, 0, // function "I greet \"" (0..9)
-      0, 9, 1, 1, 0, // parameter "x" (9..10)
-      0, 1, 1, 0, 0, // function "\"" (10..11)
+      0,
+      0,
+      9,
+      0,
+      0, // function "I greet \"" (0..9)
+      0,
+      9,
+      1,
+      1,
+      0, // parameter "x" (9..10)
+      0,
+      1,
+      1,
+      0,
+      0, // function "\"" (10..11)
     ])
   })
 

@@ -72,8 +72,7 @@ export function highlightSteps(input: {
       // only the inner content (without quotes) is highlighted as a param.
       const isQuoted =
         val.length >= 2 &&
-        ((val.startsWith('"') && val.endsWith('"')) ||
-          (val.startsWith("'") && val.endsWith("'")))
+        ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'")))
       const paramRange = isQuoted ? shrinkRange(p) : p
       paint(paramRange, 'param')
     }
@@ -82,7 +81,10 @@ export function highlightSteps(input: {
   return lines.map((text, li) => coalesce(text, kinds[li] as SegmentKind[]))
 }
 
-type Range = { start: { line: number; character: number }; end: { line: number; character: number } }
+type Range = {
+  start: { line: number; character: number }
+  end: { line: number; character: number }
+}
 
 // Shrink a single-line range inward by one character on each side.
 // Used to strip the surrounding quotes from a {string} parameter range.

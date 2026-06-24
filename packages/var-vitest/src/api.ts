@@ -3,12 +3,13 @@
 // runtimes) all share the same module-scope registry. This file stays as
 // a re-export so step files that import from @oselvar/var-vitest don't
 // have to change.
+
+export type { Step } from '@oselvar/var-runtime'
 export {
-  step,
-  defineContext,
-  defineParameterType,
+  _resetBuilder,
   buildRegistry,
   contextFactory,
-  _resetBuilder,
+  defineContext,
+  defineParameterType,
+  step,
 } from '@oselvar/var-runtime'
-export type { Step } from '@oselvar/var-runtime'

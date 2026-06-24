@@ -85,7 +85,10 @@ export function createTsDiagnostics() {
       const s = sf?.getLineAndCharacterOfPosition(start) ?? { line: 0, character: 0 }
       const e = sf?.getLineAndCharacterOfPosition(start + (d.length ?? 0)) ?? s
       return {
-        range: { start: { line: s.line, character: s.character }, end: { line: e.line, character: e.character } },
+        range: {
+          start: { line: s.line, character: s.character },
+          end: { line: e.line, character: e.character },
+        },
         message: ts.flattenDiagnosticMessageText(d.messageText, '\n'),
         severity:
           d.category === ts.DiagnosticCategory.Error

@@ -1,8 +1,8 @@
 import {
-  type ParameterTypeDef,
-  type StepDef,
   discoverParameterTypes,
   discoverStepDefs,
+  type ParameterTypeDef,
+  type StepDef,
 } from './step-defs.js'
 
 export interface StepDefScanner {

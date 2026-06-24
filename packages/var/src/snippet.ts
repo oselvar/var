@@ -30,9 +30,7 @@ export function generateSnippet(
   // Defer to the cucumber-expressions generator: it knows how to rank
   // candidate parameter types (including custom ones registered on the
   // registry), and it returns the most-preferred expression at index 0.
-  const generator = new CucumberExpressionGenerator(
-    () => registry.parameterTypes.parameterTypes,
-  )
+  const generator = new CucumberExpressionGenerator(() => registry.parameterTypes.parameterTypes)
   const generated = generator.generateExpressions(text)[0]
   const expression = generated?.source ?? text
 

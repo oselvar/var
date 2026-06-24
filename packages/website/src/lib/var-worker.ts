@@ -1,6 +1,10 @@
 import { DEFAULT_SNIPPET_TEMPLATE } from '@oselvar/var'
 import { registerHandlers } from '@oselvar/var-lsp'
-import { BrowserMessageReader, BrowserMessageWriter, createConnection } from 'vscode-languageserver/browser.js'
+import {
+  BrowserMessageReader,
+  BrowserMessageWriter,
+  createConnection,
+} from 'vscode-languageserver/browser.js'
 import { createIdbFileSystem } from './idb-file-system.ts'
 import { SEED_FILES } from './seed-files.ts'
 import { createTsDiagnostics } from './ts-diagnostics.ts'
@@ -32,9 +36,7 @@ function onDidChangeDocument(uri: string, text: string): void {
   )
 }
 
-registerHandlers(
-  connection,
-  async () => ({ fs: await createIdbFileSystem(SEED_FILES), config }),
-  { onDidChangeDocument },
-)
+registerHandlers(connection, async () => ({ fs: await createIdbFileSystem(SEED_FILES), config }), {
+  onDidChangeDocument,
+})
 connection.listen()

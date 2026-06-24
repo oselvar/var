@@ -1,5 +1,23 @@
-import { EditorSelection, Prec, StateEffect, StateField, type ChangeSpec, type EditorState, type Extension, type TransactionSpec } from '@codemirror/state'
-import { Decoration, EditorView, ViewPlugin, keymap, showTooltip, type DecorationSet, type Tooltip, type ViewUpdate } from '@codemirror/view'
+import {
+  type ChangeSpec,
+  EditorSelection,
+  type EditorState,
+  type Extension,
+  Prec,
+  StateEffect,
+  StateField,
+  type TransactionSpec,
+} from '@codemirror/state'
+import {
+  Decoration,
+  type DecorationSet,
+  EditorView,
+  keymap,
+  showTooltip,
+  type Tooltip,
+  ViewPlugin,
+  type ViewUpdate,
+} from '@codemirror/view'
 
 // Pure: compute the change that appends `fullCode` to the end of `stepsDoc`,
 // separated from existing content by exactly one blank line, with a trailing
@@ -12,11 +30,19 @@ export function appendStepDef(
   const block = fullCode.trim()
   const body = stepsDoc.replace(/\s*$/, '') // existing content without trailing whitespace
   if (body.length === 0) {
-    return { changes: { from: 0, to: stepsDoc.length, insert: `${block}\n` }, from: 0, to: block.length }
+    return {
+      changes: { from: 0, to: stepsDoc.length, insert: `${block}\n` },
+      from: 0,
+      to: block.length,
+    }
   }
   const insert = `\n\n${block}\n`
   const from = body.length + 2
-  return { changes: { from: body.length, to: stepsDoc.length, insert }, from, to: from + block.length }
+  return {
+    changes: { from: body.length, to: stepsDoc.length, insert },
+    from,
+    to: from + block.length,
+  }
 }
 
 // A subset of EditorView this module needs — so the orchestration can be
@@ -60,7 +86,9 @@ export const flashField = StateField.define<DecorationSet>({
     deco = deco.map(tr.changes)
     for (const e of tr.effects) {
       if (e.is(flashRange)) {
-        deco = e.value ? Decoration.set([flashMark.range(e.value.from, e.value.to)]) : Decoration.none
+        deco = e.value
+          ? Decoration.set([flashMark.range(e.value.from, e.value.to)])
+          : Decoration.none
       }
     }
     return deco
@@ -183,7 +211,10 @@ export function stepGenAffordance(deps: {
           return
         }
         const { from, to } = sel
-        this.timer = setTimeout(() => this.view.dispatch({ effects: setAffordance.of({ from, to }) }), 200)
+        this.timer = setTimeout(
+          () => this.view.dispatch({ effects: setAffordance.of({ from, to }) }),
+          200,
+        )
       }
       destroy(): void {
         clearTimeout(this.timer)

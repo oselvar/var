@@ -50,10 +50,7 @@ test('does not split on terminators inside a double-quoted string', () => {
   const text = 'Alpha "with . and ? inside" beta. Gamma.'
   const result = splitSentences(text)
   // Both `.` and `?` inside the quoted string are no-split zones.
-  expect(result.map((s) => s.text)).toEqual([
-    'Alpha "with . and ? inside" beta.',
-    'Gamma.',
-  ])
+  expect(result.map((s) => s.text)).toEqual(['Alpha "with . and ? inside" beta.', 'Gamma.'])
 })
 
 test('splits on a single newline (Gherkin-style line-per-step)', () => {

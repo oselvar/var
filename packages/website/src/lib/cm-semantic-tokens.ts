@@ -1,6 +1,12 @@
-import { RangeSetBuilder, StateEffect, StateField } from '@codemirror/state'
-import { Decoration, type DecorationSet, EditorView, ViewPlugin, type ViewUpdate } from '@codemirror/view'
 import { type LSPClientExtension, LSPPlugin } from '@codemirror/lsp-client'
+import { RangeSetBuilder, StateEffect, StateField } from '@codemirror/state'
+import {
+  Decoration,
+  type DecorationSet,
+  EditorView,
+  ViewPlugin,
+  type ViewUpdate,
+} from '@codemirror/view'
 
 export type DecodedToken = { line: number; char: number; length: number; type: string }
 

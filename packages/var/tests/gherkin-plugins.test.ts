@@ -74,7 +74,8 @@ test('both plugins compose without conflict', () => {
 })
 
 test('without the plugins, the same Gherkin syntax produces only paragraphs', () => {
-  const source = '      | a | b |\n      | 1 | 2 |\n\n      """json\n      {"hi": true}\n      """\n'
+  const source =
+    '      | a | b |\n      | 1 | 2 |\n\n      """json\n      {"hi": true}\n      """\n'
   const blocks = scan(source)
   expect(blocks.every((b) => b.kind === 'paragraph')).toBe(true)
 })
