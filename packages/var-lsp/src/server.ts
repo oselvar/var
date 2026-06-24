@@ -18,6 +18,7 @@ export type { StepDef } from '@oselvar/var-language'
 export function registerHandlers(
   connection: Connection,
   makeDeps: (rootUri?: string) => Promise<StoreDeps>,
+  opts?: { onDidChangeDocument?: (uri: string, text: string) => void | Promise<void> },
 ): void {
   let store: Store | null = null
   let handlers: ReturnType<typeof buildHandlers> | null = null
@@ -50,6 +51,7 @@ export function registerHandlers(
 
   // Write-through: persist edited docs to the FileSystem, then reindex.
   documents.onDidChangeContent(async (e) => {
+    await opts?.onDidChangeDocument?.(e.document.uri, e.document.getText())
     if (!store) return
     await store.fs().write(uriToPath(e.document.uri), e.document.getText())
     await store.reindex()
