@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { EditorSelection, EditorState, type TransactionSpec } from '@codemirror/state'
-import { appendStepDef, flashField, flashRange, runGenerateStepDef } from './cm-generate-step.js'
+import { affordanceField, appendStepDef, flashField, flashRange, runGenerateStepDef, setAffordance } from './cm-generate-step.js'
 
 // Apply the returned change to the original string the way CodeMirror would,
 // so we can assert on the resulting document and the [from, to) slice.
@@ -92,5 +92,23 @@ describe('flashField', () => {
     expect(state.field(flashField).size).toBe(1)
     state = state.update({ effects: flashRange.of(null) }).state
     expect(state.field(flashField).size).toBe(0)
+  })
+})
+
+describe('affordanceField', () => {
+  it('shows on setAffordance and hides when the selection later changes', () => {
+    let state = EditorState.create({ doc: 'I greet world', extensions: [affordanceField] })
+    state = state.update({ effects: setAffordance.of({ from: 2, to: 7 }) }).state
+    expect(state.field(affordanceField)).toEqual({ from: 2, to: 7 })
+    // A subsequent selection move (without a setAffordance effect) hides it.
+    state = state.update({ selection: { anchor: 0 } }).state
+    expect(state.field(affordanceField)).toBeNull()
+  })
+
+  it('hides on explicit setAffordance(null)', () => {
+    let state = EditorState.create({ doc: 'abc', extensions: [affordanceField] })
+    state = state.update({ effects: setAffordance.of({ from: 0, to: 3 }) }).state
+    state = state.update({ effects: setAffordance.of(null) }).state
+    expect(state.field(affordanceField)).toBeNull()
   })
 })

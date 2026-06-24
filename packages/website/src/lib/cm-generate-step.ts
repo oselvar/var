@@ -1,5 +1,5 @@
-import { EditorSelection, StateEffect, StateField, type ChangeSpec, type EditorState, type Extension, type TransactionSpec } from '@codemirror/state'
-import { Decoration, EditorView, ViewPlugin, type DecorationSet, type ViewUpdate } from '@codemirror/view'
+import { EditorSelection, Prec, StateEffect, StateField, type ChangeSpec, type EditorState, type Extension, type TransactionSpec } from '@codemirror/state'
+import { Decoration, EditorView, ViewPlugin, keymap, showTooltip, type DecorationSet, type Tooltip, type ViewUpdate } from '@codemirror/view'
 
 // Pure: compute the change that appends `fullCode` to the end of `stepsDoc`,
 // separated from existing content by exactly one blank line, with a trailing
@@ -98,4 +98,119 @@ const flashTheme = EditorView.baseTheme({
 
 export function flashExtension(): Extension {
   return [flashField, flashClearPlugin, flashTheme]
+}
+
+export const setAffordance = StateEffect.define<{ from: number; to: number } | null>()
+
+export const affordanceField = StateField.define<{ from: number; to: number } | null>({
+  create: () => null,
+  update(value, tr) {
+    for (const e of tr.effects) if (e.is(setAffordance)) return e.value
+    // A selection change that didn't explicitly set the affordance dismisses it.
+    if (tr.selection) return null
+    return value
+  },
+})
+
+async function confirmAffordance(
+  view: EditorView,
+  deps: { generate: GenerateSnippet; stepsView: () => EditorView | null },
+): Promise<void> {
+  const stepsView = deps.stepsView()
+  view.dispatch({ effects: setAffordance.of(null) })
+  if (!stepsView) return
+  await runGenerateStepDef({ specView: view, stepsView, generate: deps.generate })
+}
+
+const affordanceTheme = EditorView.baseTheme({
+  '.cm-stepgen-tooltip': { border: 'none', background: 'transparent' },
+  '.cm-stepgen-btn': {
+    font: 'inherit',
+    fontSize: '13px',
+    fontWeight: '600',
+    padding: '4px 10px',
+    cursor: 'pointer',
+    color: 'var(--ink)',
+    background: 'var(--yellow)',
+    border: '2px solid var(--ink)',
+    borderRadius: 'var(--radius-5, 6px)',
+    boxShadow: '3px 3px 0 0 var(--ink)',
+  },
+})
+
+export function stepGenAffordance(deps: {
+  generate: GenerateSnippet
+  stepsView: () => EditorView | null
+}): Extension {
+  // The tooltip's button needs the spec EditorView to run the command. Resolve
+  // it via the tooltip create() argument (CodeMirror passes the view).
+  const tooltipFromField = showTooltip.compute([affordanceField], (state): Tooltip | null => {
+    const range = state.field(affordanceField)
+    if (!range) return null
+    return {
+      pos: range.to,
+      above: true,
+      strictSide: false,
+      create(view) {
+        const dom = document.createElement('div')
+        dom.className = 'cm-stepgen-tooltip'
+        const btn = document.createElement('button')
+        btn.type = 'button'
+        btn.className = 'cm-stepgen-btn'
+        btn.textContent = '✨ Create step definition'
+        btn.addEventListener('mousedown', (e) => e.preventDefault())
+        btn.addEventListener('click', () => void confirmAffordance(view, deps))
+        dom.appendChild(btn)
+        return { dom }
+      },
+    }
+  })
+
+  // Show the affordance only once a non-empty selection settles (debounced),
+  // and hide it immediately when the selection clears.
+  const debouncePlugin = ViewPlugin.fromClass(
+    class {
+      timer: ReturnType<typeof setTimeout> | undefined
+      constructor(readonly view: EditorView) {}
+      update(u: ViewUpdate): void {
+        if (!u.selectionSet && !u.docChanged) return
+        const sel = u.state.selection.main
+        clearTimeout(this.timer)
+        if (sel.empty) {
+          if (this.view.state.field(affordanceField)) {
+            this.view.dispatch({ effects: setAffordance.of(null) })
+          }
+          return
+        }
+        const { from, to } = sel
+        this.timer = setTimeout(() => this.view.dispatch({ effects: setAffordance.of({ from, to }) }), 200)
+      }
+      destroy(): void {
+        clearTimeout(this.timer)
+      }
+    },
+  )
+
+  const confirmKeymap = Prec.highest(
+    keymap.of([
+      {
+        key: 'Enter',
+        run: (view) => {
+          if (!view.state.field(affordanceField)) return false
+          void confirmAffordance(view, deps)
+          return true
+        },
+      },
+      {
+        key: 'Escape',
+        run: (view) => {
+          if (!view.state.field(affordanceField)) return false
+          view.dispatch({ effects: setAffordance.of(null) })
+          return true
+        },
+      },
+    ]),
+  )
+
+  return [affordanceField, tooltipFromField, debouncePlugin, confirmKeymap, affordanceTheme, flashExtension()]
 }
