@@ -29,7 +29,7 @@ describe('appendStepDef', () => {
     const existing = "step('a', (ctx) => {\n})\n"
     const { changes, from, to } = appendStepDef(existing, BLOCK)
     const result = apply(existing, changes as { from: number; to: number; insert: string })
-    expect(result).toBe("step('a', (ctx) => {\n})\n\n" + BLOCK.trim() + '\n')
+    expect(result).toBe(`step('a', (ctx) => {\n})\n\n${BLOCK.trim()}\n`)
     expect(result.slice(from, to)).toBe(BLOCK.trim())
   })
 
@@ -37,7 +37,7 @@ describe('appendStepDef', () => {
     const existing = "step('a', (ctx) => {\n})\n\n\n"
     const { changes, from, to } = appendStepDef(existing, BLOCK)
     const result = apply(existing, changes as { from: number; to: number; insert: string })
-    expect(result).toBe("step('a', (ctx) => {\n})\n\n" + BLOCK.trim() + '\n')
+    expect(result).toBe(`step('a', (ctx) => {\n})\n\n${BLOCK.trim()}\n`)
     expect(result.slice(from, to)).toBe(BLOCK.trim())
   })
 
@@ -46,7 +46,7 @@ describe('appendStepDef', () => {
     const doc1 = apply('', first.changes as { from: number; to: number; insert: string })
     const second = appendStepDef(doc1, BLOCK)
     const doc2 = apply(doc1, second.changes as { from: number; to: number; insert: string })
-    expect(doc2).toBe(BLOCK.trim() + '\n\n' + BLOCK.trim() + '\n')
+    expect(doc2).toBe(`${BLOCK.trim()}\n\n${BLOCK.trim()}\n`)
     expect(doc2.slice(second.from, second.to)).toBe(BLOCK.trim())
   })
 })

@@ -1,4 +1,3 @@
-import { ParameterType } from '@cucumber/cucumber-expressions'
 import { beforeEach, expect, test } from 'vitest'
 import {
   _resetBuilder,

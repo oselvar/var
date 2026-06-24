@@ -216,7 +216,7 @@ export function buildHandlers(store: Store): Handlers {
 
       // Validate via the diff. Phase 3 supports only the literal-only path;
       // adding/removing/typed-changing a parameter is the Phase 4 territory.
-      let diff
+      let diff: ReturnType<typeof diffExpressions>
       try {
         diff = diffExpressions(stepAt.expression, newExpression, store.index().registry)
       } catch (e) {
@@ -297,7 +297,7 @@ export function buildHandlers(store: Store): Handlers {
         return { ok: false, error: 'Nothing to rename — the expression is unchanged.' }
       }
 
-      let diff
+      let diff: ReturnType<typeof diffExpressions>
       try {
         diff = diffExpressions(stepAt.expression, newExpression, store.index().registry)
       } catch (e) {

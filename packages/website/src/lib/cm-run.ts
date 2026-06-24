@@ -59,7 +59,9 @@ class ErrorMarker extends GutterMarker {
       // it for free, and click-outside is one line. Appending it inside the
       // editor keeps the baseTheme styling.
       const host = el.closest('.cm-editor') ?? document.body
-      host.querySelectorAll('dialog.cm-run-dialog').forEach((d) => d.remove())
+      host.querySelectorAll('dialog.cm-run-dialog').forEach((d) => {
+        d.remove()
+      })
       const dialog = document.createElement('dialog')
       dialog.className = 'cm-run-dialog'
       const pre = document.createElement('pre')

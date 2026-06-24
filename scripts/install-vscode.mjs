@@ -30,7 +30,7 @@ for (const DST of TARGETS) {
   }
   mkdirSync(dirname(DST), { recursive: true })
   symlinkSync(SRC, DST, 'dir')
-  // biome-ignore lint/suspicious/noConsoleLog: dev script
+  // biome-ignore lint/suspicious/noConsole: dev script
   console.log(`linked: ${DST} → ${SRC}`)
   // The editor tracks uninstalled extensions in `.obsolete`; that flag wins
   // over the symlink, so clear our entry on every (re)install.
@@ -39,7 +39,7 @@ for (const DST of TARGETS) {
   // (the registry). Re-register so the editor treats it as installed.
   registerExtension(join(dirname(DST), 'extensions.json'), DST, NAME)
 }
-// biome-ignore lint/suspicious/noConsoleLog: dev script
+// biome-ignore lint/suspicious/noConsole: dev script
 console.log('Reload the editor (Cmd+Shift+P → "Reload Window") to pick up the extension.')
 
 function isBrokenSymlink(p) {
@@ -56,7 +56,7 @@ function registerExtension(jsonPath, dstPath, name) {
     try {
       data = JSON.parse(readFileSync(jsonPath, 'utf8'))
     } catch {
-      // biome-ignore lint/suspicious/noConsoleLog: dev script
+      // biome-ignore lint/suspicious/noConsole: dev script
       console.log(`warning: ${jsonPath} is not valid JSON; skipping registration`)
       return
     }
@@ -81,7 +81,7 @@ function registerExtension(jsonPath, dstPath, name) {
     },
   })
   writeFileSync(jsonPath, JSON.stringify(filtered))
-  // biome-ignore lint/suspicious/noConsoleLog: dev script
+  // biome-ignore lint/suspicious/noConsole: dev script
   console.log(`registered ${id} in ${jsonPath}`)
 }
 
@@ -96,6 +96,6 @@ function clearObsoleteFlag(obsoletePath, name) {
   if (!data || typeof data !== 'object' || !(name in data)) return
   delete data[name]
   writeFileSync(obsoletePath, JSON.stringify(data))
-  // biome-ignore lint/suspicious/noConsoleLog: dev script
+  // biome-ignore lint/suspicious/noConsole: dev script
   console.log(`cleared .obsolete entry for ${name} in ${obsoletePath}`)
 }

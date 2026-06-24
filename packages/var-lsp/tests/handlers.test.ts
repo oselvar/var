@@ -474,6 +474,7 @@ step('I greet {string}', () => {})
     })
     expect(items).toHaveLength(2)
     const greet = items.find((i) => i.label === 'I greet {string}')!
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: VSCode snippet tab-stop syntax, not a template literal
     expect(greet.insertText).toBe('I greet ${1:"value"}')
     expect(greet.filterText).toBe('I greet')
     // No leading keyword → replace from the start of the line.
@@ -531,6 +532,7 @@ step('I fly to {airport}', () => {})
       position: { line: 0, character: 0 },
       linePrefix: '',
     })
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: VSCode snippet tab-stop syntax, not a template literal
     expect(items[0]?.insertText).toBe('I fly to ${1:airport}')
   } finally {
     cleanup()

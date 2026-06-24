@@ -20,7 +20,9 @@ describe('highlightSteps', () => {
     const lines = highlightSteps({ varPath: 'hello.var.md', source, steps })
     const original = source.split('\n')
     expect(lines.length).toBe(original.length)
-    lines.forEach((line, i) => expect(lineText(line)).toBe(original[i]))
+    lines.forEach((line, i) => {
+      expect(lineText(line)).toBe(original[i])
+    })
   })
 
   it('marks captured parameters as param segments', () => {
