@@ -80,7 +80,7 @@ class PassMarker extends GutterMarker {
   }
   toDOM(_view: EditorView): Node {
     const el = document.createElement('span')
-    el.textContent = '✅'
+    el.textContent = '✓'
     el.className = 'cm-run-passmark'
     el.title = 'This example passes'
     return el
@@ -117,7 +117,7 @@ const runTheme = EditorView.baseTheme({
   '.cm-run-gutter': { width: '1.4em', minWidth: '1.4em' },
   '.cm-run-gutter .cm-gutterElement': { textAlign: 'center' },
   '.cm-run-errmark': { color: 'var(--accent)', cursor: 'pointer', fontWeight: '700' },
-  '.cm-run-passmark': { fontSize: '0.8em' },
+  '.cm-run-passmark': { color: '#28a745', fontWeight: '700' },
   '.cm-run-dialog': {
     padding: '0', border: '2px solid var(--ink)', borderRadius: '8px',
     maxWidth: 'min(90vw, 800px)', background: 'var(--ink)',
