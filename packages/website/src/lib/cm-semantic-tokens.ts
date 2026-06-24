@@ -1,5 +1,5 @@
 import { RangeSetBuilder, StateEffect, StateField } from '@codemirror/state'
-import { Decoration, type DecorationSet, EditorView, ViewPlugin } from '@codemirror/view'
+import { Decoration, type DecorationSet, EditorView, ViewPlugin, type ViewUpdate } from '@codemirror/view'
 import { type LSPClientExtension, LSPPlugin } from '@codemirror/lsp-client'
 
 export type DecodedToken = { line: number; char: number; length: number; type: string }
@@ -46,16 +46,36 @@ const refreshers = new Set<() => void>()
 // Generic, server-agnostic semantic-tokens extension for @codemirror/lsp-client.
 // Renders `cm-token-<type>` mark decorations; theme the classes separately.
 export function semanticTokens(options: { legend: { tokenTypes: string[] } }): LSPClientExtension {
-  const tokenTypes = options.legend.tokenTypes
+  // The passed-in legend is the advertised capability list and also the fallback
+  // when the server has not yet reported its own capabilities.
+  const fallbackTokenTypes = options.legend.tokenTypes
+
+  const resolveTokenTypes = (view: EditorView): ReadonlyArray<string> => {
+    // Fix 1: prefer the token-type list from the server's advertised capabilities
+    // (LSPClient.serverCapabilities is typed as lsp.ServerCapabilities | null).
+    const lsp = LSPPlugin.get(view)
+    const serverTypes = (
+      lsp?.client.serverCapabilities as
+        | { semanticTokensProvider?: { legend?: { tokenTypes?: string[] } } }
+        | null
+        | undefined
+    )?.semanticTokensProvider?.legend?.tokenTypes
+    return serverTypes && serverTypes.length > 0 ? serverTypes : fallbackTokenTypes
+  }
 
   const build = (view: EditorView, data: number[]): DecorationSet => {
     const doc = view.state.doc
     const builder = new RangeSetBuilder<Decoration>()
+    const tokenTypes = resolveTokenTypes(view)
     for (const t of decodeSemanticTokens(data, tokenTypes)) {
       if (t.line + 1 > doc.lines) continue
-      const from = doc.line(t.line + 1).from + t.char
-      const to = from + t.length
-      if (to <= doc.length) builder.add(from, to, Decoration.mark({ class: `cm-token-${t.type}` }))
+      // Fix 3: clamp token position to line bounds so a mismatched token
+      // never bleeds into the next line.
+      const lineObj = doc.line(t.line + 1)
+      const from = Math.min(lineObj.to, lineObj.from + t.char)
+      const to = Math.min(lineObj.to, from + t.length)
+      if (from >= to) continue
+      builder.add(from, to, Decoration.mark({ class: `cm-token-${t.type}` }))
     }
     return builder.finish()
   }
@@ -63,6 +83,9 @@ export function semanticTokens(options: { legend: { tokenTypes: string[] } }): L
   const plugin = ViewPlugin.fromClass(
     class {
       readonly refresh: () => void
+      // Fix 2: debounce timer for doc-change-driven refresh.
+      private debounceTimer: ReturnType<typeof setTimeout> | null = null
+
       constructor(readonly view: EditorView) {
         this.refresh = () => {
           void this.run()
@@ -70,9 +93,27 @@ export function semanticTokens(options: { legend: { tokenTypes: string[] } }): L
         refreshers.add(this.refresh)
         this.refresh()
       }
+
+      // Fix 2: schedule a debounced refresh on every doc change so the
+      // extension works against any LSP server, not only ones that push
+      // `var/didIndex`.
+      update(u: ViewUpdate) {
+        if (!u.docChanged) return
+        if (this.debounceTimer !== null) clearTimeout(this.debounceTimer)
+        this.debounceTimer = setTimeout(() => {
+          this.debounceTimer = null
+          void this.run()
+        }, 150)
+      }
+
       destroy() {
         refreshers.delete(this.refresh)
+        if (this.debounceTimer !== null) {
+          clearTimeout(this.debounceTimer)
+          this.debounceTimer = null
+        }
       }
+
       async run() {
         const lsp = LSPPlugin.get(this.view)
         if (!lsp) return
@@ -92,7 +133,8 @@ export function semanticTokens(options: { legend: { tokenTypes: string[] } }): L
           dynamicRegistration: false,
           requests: { full: true },
           formats: ['relative'],
-          tokenTypes,
+          // Advertise the caller-supplied legend to the server.
+          tokenTypes: fallbackTokenTypes,
           tokenModifiers: [],
         },
       },
