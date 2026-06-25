@@ -5,15 +5,7 @@
   --orange: #e67d00;
   --accent: #ff2e88;
 
-  --inset-1: 8px;
-  --inset-2: 22px;
-  --inset-3: 32px;
-  --inset-4: 46px;
-  --inset-5: 56px;
-  --radius-1: 62px;
-  --radius-2: 48px;
-  --radius-3: 38px;
-  --radius-4: 24px;
+  --page-gutter: 16px;
   --radius-5: 14px;
 
   --content-max: 960px;
@@ -21,15 +13,7 @@
 
 @media (max-width: 720px) {
   :root {
-    --inset-1: 4px;
-    --inset-2: 11px;
-    --inset-3: 16px;
-    --inset-4: 23px;
-    --inset-5: 28px;
-    --radius-1: 31px;
-    --radius-2: 24px;
-    --radius-3: 19px;
-    --radius-4: 12px;
+    --page-gutter: 8px;
     --radius-5: 7px;
   }
 }
@@ -55,51 +39,10 @@ body {
   min-height: 100vh;
 }
 
-.frame {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 100;
-}
-
-.frame-layer {
-  position: absolute;
-}
-
-.frame-layer--1 {
-  inset: var(--inset-1);
-  background: var(--yellow);
-  border-radius: var(--radius-1);
-}
-
-.frame-layer--2 {
-  inset: var(--inset-2);
-  background: var(--orange);
-  border-radius: var(--radius-2);
-}
-
-.frame-layer--3 {
-  inset: var(--inset-3);
-  background: var(--yellow);
-  border-radius: var(--radius-3);
-}
-
-.frame-layer--4 {
-  inset: var(--inset-4);
-  background: var(--orange);
-  border-radius: var(--radius-4);
-}
-
-.frame-layer--5 {
-  inset: var(--inset-5);
-  background: var(--cream);
-  border-radius: var(--radius-5);
-}
-
 main {
   position: relative;
   z-index: 101;
-  padding: calc(var(--inset-5) + 32px) calc(var(--inset-5) + 32px);
+  padding: calc(var(--page-gutter) + 32px) calc(var(--page-gutter) + 32px);
   max-width: var(--content-max);
   margin: 0 auto;
 }
@@ -257,8 +200,8 @@ footer a:hover {
 
 main.doc {
   max-width: 900px;
-  padding-top: calc(var(--inset-5) + 24px);
-  padding-bottom: calc(var(--inset-5) + 24px);
+  padding-top: calc(var(--page-gutter) + 24px);
+  padding-bottom: calc(var(--page-gutter) + 24px);
 }
 
 .doc-nav {
