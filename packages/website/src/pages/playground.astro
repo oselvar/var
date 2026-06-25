@@ -11,10 +11,25 @@ import { SEED_FILES } from '../lib/seed-files.ts'
       server, so the highlighting in the spec updates live as you change either file.
     </p>
 
+    <p>
+      TIP: Install the VSCode extension or the LSP server to get Vár in your own editor.
+    </p>
+
     <h2>the spec</h2>
     <Editor uri="file:///hello.var.md" lang="markdown">{SEED_FILES['/hello.var.md']}</Editor>
 
     <h2>the step definitions</h2>
     <Editor uri="file:///01-hello.steps.ts" lang="typescript">{SEED_FILES['/01-hello.steps.ts']}</Editor>
+
+    <p>
+      If you have ever written a unit test, this will be familiar. The main difference between
+      examples and unit tests are:
+
+      <ul>
+        <li>Examples are written in human language</li>
+        <li>Examples often have 3 steps: a context, an action, and an expected outcome</li>
+        <li>Each step is linked to a function through an expression</li>
+      </ul>
+    </p>
   </main>
 </Base>
