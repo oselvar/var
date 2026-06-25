@@ -757,7 +757,8 @@ const { Content } = await render(doc)
 const base = import.meta.env.BASE_URL.replace(/\/$/, '')
 
 const entries = await loadDocEntries()
-const entry = entries.find((e) => e.id === doc.id)!
+const entry = entries.find((e) => e.id === doc.id)
+if (!entry) throw new Error(`No DocEntry for doc id "${doc.id}"`)
 const groups = buildNav(entries, base, doc.id)
 const breadcrumb = breadcrumbFor(entry)
 const next = nextInArea(entries, base, doc.id)
