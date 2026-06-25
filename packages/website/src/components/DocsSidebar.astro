@@ -1,0 +1,70 @@
+---
+import type { NavGroup } from '../lib/docs-nav'
+interface Props {
+  groups: ReadonlyArray<NavGroup>
+}
+const { groups } = Astro.props
+---
+
+<nav class="docs-sidebar" aria-label="Docs sections">
+  {groups.map((group) => (
+    <section class="docs-sidebar__group">
+      <p class="docs-sidebar__label">
+        {group.area.label}
+        <span class="docs-sidebar__caption">{group.area.diataxis}</span>
+      </p>
+      {group.links.length > 0 ? (
+        <ul>
+          {group.links.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class={link.current ? 'is-current' : undefined}
+                aria-current={link.current ? 'page' : undefined}
+              >{link.title}</a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="docs-sidebar__empty">Coming soon</p>
+      )}
+    </section>
+  ))}
+</nav>
+
+<style>
+  .docs-sidebar { font-size: 15px; }
+  .docs-sidebar__group { margin: 0 0 24px; }
+  .docs-sidebar__label {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    margin: 0 0 8px;
+    color: var(--ink);
+  }
+  .docs-sidebar__caption {
+    display: block;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 11px;
+    opacity: 0.55;
+  }
+  .docs-sidebar ul { list-style: none; padding: 0; margin: 0; }
+  .docs-sidebar li { margin: 2px 0; }
+  .docs-sidebar a {
+    display: block;
+    padding: 4px 8px;
+    color: var(--ink);
+    text-decoration: none;
+    border-radius: 6px;
+    border-left: 2px solid transparent;
+  }
+  .docs-sidebar a:hover { color: var(--accent); }
+  .docs-sidebar a.is-current {
+    border-left-color: var(--orange);
+    background: var(--yellow);
+    font-weight: 600;
+  }
+  .docs-sidebar__empty { margin: 0; padding: 4px 8px; font-size: 14px; opacity: 0.5; }
+</style>

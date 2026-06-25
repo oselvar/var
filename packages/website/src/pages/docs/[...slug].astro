@@ -1,7 +1,8 @@
 ---
 import { getCollection, render } from 'astro:content'
-import Base from '../../layouts/Base.astro'
-import { breadcrumbFor } from '../../lib/docs-nav'
+import DocsLayout from '../../layouts/DocsLayout.astro'
+import Search from '../../components/Search.astro'
+import { breadcrumbFor, buildNav, nextInArea } from '../../lib/docs-nav'
 import { loadDocEntries } from '../../lib/docs-collection'
 
 export async function getStaticPaths() {
@@ -16,25 +17,19 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '')
 const entries = await loadDocEntries()
 const entry = entries.find((e) => e.id === doc.id)
 if (!entry) throw new Error(`No DocEntry for doc id "${doc.id}"`)
-const crumb = breadcrumbFor(entry)
+const groups = buildNav(entries, base, doc.id)
+const breadcrumb = breadcrumbFor(entry)
+const next = nextInArea(entries, base, doc.id)
 ---
 
-<Base title={`${doc.data.title} — Vár docs`} description={doc.data.description ?? 'Vár documentation.'}>
-  <main class="doc">
-    <nav class="doc-nav" aria-label="Breadcrumb">
-      <a href={`${base}/`}>Vár</a>
-      <span aria-hidden="true">›</span>
-      <a href={`${base}/docs/`}>docs</a>
-      <span aria-hidden="true">›</span>
-      <span>{crumb.area.label}</span>
-    </nav>
-    <article class="doc-body" data-pagefind-body>
-      <Content />
-    </article>
-    <footer class="doc-footer">
-      <a href={`${base}/docs/`}>← back to docs</a>
-      <span> · </span>
-      <a href="https://github.com/oselvar/var">github.com/oselvar/var</a>
-    </footer>
-  </main>
-</Base>
+<DocsLayout
+  title={doc.data.title}
+  description={doc.data.description}
+  base={base}
+  groups={groups}
+  breadcrumb={breadcrumb}
+  next={next}
+>
+  <Search slot="search" />
+  <Content />
+</DocsLayout>

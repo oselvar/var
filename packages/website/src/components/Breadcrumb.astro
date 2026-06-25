@@ -1,0 +1,26 @@
+---
+interface Props {
+  base: string
+  area?: string
+  title?: string
+}
+const { base, area, title } = Astro.props
+---
+
+<nav class="doc-nav" aria-label="Breadcrumb">
+  <a href={`${base}/`}>Vár</a>
+  <span aria-hidden="true">›</span>
+  <a href={`${base}/docs/`}>docs</a>
+  {area && (
+    <>
+      <span aria-hidden="true">›</span>
+      <span>{area}</span>
+    </>
+  )}
+  {title && (
+    <>
+      <span aria-hidden="true">›</span>
+      <span aria-current="page">{title}</span>
+    </>
+  )}
+</nav>
