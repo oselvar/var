@@ -23,6 +23,10 @@ If a function in `packages/var/src/` needs to read a file, it doesn't — it tak
 
 pnpm workspace · biome · vitest (for the core's own tests) · knip · jscpd · TypeScript (ESM-only, `node:` imports, Node ≥ 22 LTS).
 
+## Workflow
+
+- **Trunk-based development.** We commit small, working increments straight to `main` — no long-lived feature branches. Keep each commit self-contained and green (build + tests pass), so trunk is always releasable.
+
 ## Conventions
 
 - Test files in the project's own test suite: `*.test.ts` (vitest).
