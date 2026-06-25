@@ -1,108 +1,70 @@
 ---
-import Base from '../../layouts/Base.astro'
+import DocsLayout from '../../layouts/DocsLayout.astro'
+import Search from '../../components/Search.astro'
+import { AREAS } from '../../lib/docs-areas'
+import { buildNav } from '../../lib/docs-nav'
+import { loadDocEntries } from '../../lib/docs-collection'
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '')
+const entries = await loadDocEntries()
+const groups = buildNav(entries, base, null)
 ---
 
-<Base
-  title="Vár docs"
-  description="Vár documentation organised by Diátaxis: tutorials, how-to guides, reference, and explanation."
+<DocsLayout
+  title="Docs"
+  description="Vár documentation: tutorials, how-to guides, reference, and explanation."
+  base={base}
+  groups={groups}
+  breadcrumb={null}
 >
-  <main class="doc docs-index">
-    <nav class="doc-nav" aria-label="Breadcrumb">
-      <a href={`${base}/`}>Vár</a>
-      <span aria-hidden="true">›</span>
-      <span>docs</span>
-    </nav>
+  <Search slot="search" />
 
-    <h1>docs</h1>
-    <p class="lede">Organised by <a href="https://diataxis.fr/">Diátaxis</a>.</p>
+  <h1>Docs</h1>
+  <p class="lede">
+    Vár is executable documentation. Run the docs against your system; if behaviour drifts,
+    you get an error. Organised with <a href="https://diataxis.fr/">Diátaxis</a>.
+  </p>
 
-    <p class="lede">
-      Vár is executable documentation for software systems. 
-      You can run the documentation, and if the system does something else, you will get an error.
-    </p>
+  <div class="docs-cards">
+    {AREAS.map((area) => {
+      const group = groups.find((g) => g.area.id === area.id)!
+      return (
+        <section class="docs-card">
+          <p class="docs-card__kind">{area.diataxis}</p>
+          <h2>{area.label}</h2>
+          {group.links.length > 0 ? (
+            <ul>
+              {group.links.map((link) => (
+                <li><a href={link.href}>{link.title}</a></li>
+              ))}
+            </ul>
+          ) : (
+            <p class="docs-card__empty">Coming soon — spec syntax, step matching, CLI flags.</p>
+          )}
+        </section>
+      )
+    })}
+  </div>
+</DocsLayout>
 
-    <p class="lede">
-      The documentation typically starts its life as a specification,
-      answering the question: *What should the system do*, illustrated by
-      *concrete examples*.
-    </p>
-
-    <p class="lede">
-      As the programmer/coding agent makes progress towards implementing the
-      specification, they get continuous feedback about their progress.
-    </p>
-
-    <p class="lede">
-      Sidebar: Try letting the stack traces from failing Vár examples guide you
-      in what to do next. This helps you build a more maintainable system.
-      Read more *here*.
-    </p>
-
-    <p class="lede">
-      When the programmer/coding agent is done, the specification takes on a new life.
-
-      Documentation.
-
-      Remove all the details you don't care about, but keep the examples. Rephrase a little
-      and voilá - you have *living documentation* - documentation that never goes out of date
-      and tells you when your system's behaviour drifts.
-    </p>
-
-    <div class="docs-quadrants">
-      <section class="docs-quadrant">
-        <p class="kind">Learning</p>
-        <h2>tutorials</h2>
-        <ul>
-          <li>
-            <a href={`${base}/docs/tutorials/hello-var-your-first-spec`}>
-              Hello Vár — your first spec
-            </a>
-          </li>
-        </ul>
-      </section>
-
-      <section class="docs-quadrant">
-        <p class="kind">Tasks</p>
-        <h2>how-to guides</h2>
-        <ul>
-          <li>
-            <a href={`${base}/docs/how-to/wire-var-into-agent-instructions`}>
-              Wire Vár into your AI agent's instructions
-            </a>
-          </li>
-          <li>
-            <a href={`${base}/docs/how-to/drive-features-with-var-and-an-agent`}>
-              Drive a feature with Vár and an AI agent
-            </a>
-          </li>
-        </ul>
-      </section>
-
-      <section class="docs-quadrant">
-        <p class="kind">Information</p>
-        <h2>reference</h2>
-        <p class="empty">Coming soon — spec syntax, step matching, CLI flags.</p>
-      </section>
-
-      <section class="docs-quadrant">
-        <p class="kind">Understanding</p>
-        <h2>explanation</h2>
-        <ul>
-          <li>
-            <a href={`${base}/docs/explanation/why-var-with-ai-agents`}>
-              Why Vár pairs well with AI coding agents
-            </a>
-          </li>
-        </ul>
-      </section>
-    </div>
-
-    <footer class="doc-footer">
-      <a href={`${base}/`}>← back to home</a>
-      <span> · </span>
-      <a href="https://github.com/oselvar/var">github.com/oselvar/var</a>
-    </footer>
-  </main>
-</Base>
+<style>
+  .docs-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin: 40px 0;
+  }
+  .docs-card {
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-5);
+    padding: 20px;
+  }
+  .docs-card__kind {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    text-transform: uppercase; font-size: 11px; letter-spacing: 0.06em; opacity: 0.6; margin: 0;
+  }
+  .docs-card h2 { font-family: "Monoton", cursive; font-weight: 400; font-size: 24px; margin: 4px 0 12px; }
+  .docs-card ul { list-style: none; padding: 0; margin: 0; }
+  .docs-card li { margin: 6px 0; }
+  .docs-card__empty { font-size: 14px; opacity: 0.6; margin: 0; }
+</style>
