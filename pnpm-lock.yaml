@@ -157,6 +157,9 @@ importers:
       '@codemirror/lang-markdown':
         specifier: ^6.3.0
         version: 6.5.0
+      '@codemirror/language':
+        specifier: ^6.12.3
+        version: 6.12.3
       '@codemirror/lsp-client':
         specifier: ^6.0.0
         version: 6.2.5
@@ -166,6 +169,9 @@ importers:
       '@codemirror/view':
         specifier: ^6.43.2
         version: 6.43.2
+      '@lezer/highlight':
+        specifier: ^1.2.3
+        version: 1.2.3
       '@navikt/aksel-icons':
         specifier: ^8.13.1
         version: 8.13.1

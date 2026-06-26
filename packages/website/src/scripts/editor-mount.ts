@@ -5,6 +5,7 @@ import { basicSetup, EditorView } from 'codemirror'
 import { flashExtension, type GenerateSnippet, stepGenAffordance } from '../lib/cm-generate-step.ts'
 import { setRunResults, varRunExtension } from '../lib/cm-run.ts'
 import { semanticTokens } from '../lib/cm-semantic-tokens.ts'
+import { varEditorThemeExt } from '../lib/cm-var-theme.ts'
 import { runSpec } from '../lib/run-client.ts'
 import { varTokenTheme } from '../lib/var-token-theme.ts'
 import { workerTransport } from '../lib/worker-transport.ts'
@@ -74,7 +75,15 @@ function mountEditor(el: HTMLElement): EditorView {
   const lang = el.dataset.lang ?? 'markdown'
   const language = lang === 'typescript' ? javascript({ typescript: true }) : markdown()
   const client = lspClient()
-  const ext = [basicSetup, language, varTokenTheme, client.plugin(uri), autoRun, flashExtension()]
+  const ext = [
+    basicSetup,
+    language,
+    varEditorThemeExt(),
+    varTokenTheme,
+    client.plugin(uri),
+    autoRun,
+    flashExtension(),
+  ]
   if (lang === 'markdown') {
     ext.push(varRunExtension())
     const generate: GenerateSnippet = (text) =>
