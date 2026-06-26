@@ -62,8 +62,8 @@ main {
 }
 
 .wordmark {
-  font-family: "Monoton", cursive;
-  font-weight: 400;
+  font-family: var(--ax-font-family);
+  font-weight: var(--ax-font-weight-bold);
   font-size: clamp(72px, 18vw, 220px);
   line-height: 0.95;
   letter-spacing: 0.02em;
@@ -105,8 +105,8 @@ main {
 }
 
 .pitch h2 {
-  font-family: "Monoton", cursive;
-  font-weight: 400;
+  font-family: var(--ax-font-family);
+  font-weight: var(--ax-font-weight-bold);
   font-size: clamp(28px, 4vw, 40px);
   margin: 0 0 12px;
   letter-spacing: 0.02em;
@@ -143,8 +143,8 @@ main {
 }
 
 .quotes h2 {
-  font-family: "Monoton", cursive;
-  font-weight: 400;
+  font-family: var(--ax-font-family);
+  font-weight: var(--ax-font-weight-bold);
   font-size: clamp(32px, 5vw, 56px);
   text-align: center;
   margin: 0 0 32px;
@@ -227,8 +227,8 @@ main.doc {
 }
 
 .doc-body h1 {
-  font-family: "Monoton", cursive;
-  font-weight: 400;
+  font-family: var(--ax-font-family);
+  font-weight: var(--ax-font-weight-bold);
   font-size: clamp(36px, 6vw, 64px);
   line-height: 1.05;
   letter-spacing: 0.02em;
@@ -236,8 +236,8 @@ main.doc {
 }
 
 .doc-body h2 {
-  font-family: "Monoton", cursive;
-  font-weight: 400;
+  font-family: var(--ax-font-family);
+  font-weight: var(--ax-font-weight-bold);
   font-size: clamp(24px, 3.2vw, 32px);
   letter-spacing: 0.02em;
   margin: 48px 0 12px;
