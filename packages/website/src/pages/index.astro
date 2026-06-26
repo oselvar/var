@@ -63,41 +63,62 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '')
   </main>
 </Base>
 
-<style is:global>
-  /*
-   * Front-page overrides — these are <style is:global> in index.astro.
-   * Astro inlines page global styles BEFORE the linked stylesheet (<link rel="stylesheet">),
-   * so we use `main` as a prefix (element specificity bump) to win the cascade over
-   * the same-named rules in global.css that load via the linked stylesheet.
-   */
+<style>
+  /* Front-page styles — single source of truth (scoped to this page). */
 
   /* ── Hero ── */
-  /* Note: keeping responsive clamp for font-size; --ax-font-size-heading-2xlarge (2.5rem/40px)
-     would be too small for the hero identity mark next to the logo image */
-  main .wordmark {
+  .hero {
+    text-align: center;
+    padding: var(--ax-space-48) 0 var(--ax-space-24);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(12px, 3vw, 40px);
+  }
+
+  .logo {
+    height: clamp(72px, 16vw, 200px);
+    width: auto;
+  }
+
+  /* Keep the responsive clamp: --ax-font-size-heading-2xlarge (40px) would be too
+     small for the hero identity mark next to the logo image. */
+  .wordmark {
+    font-family: var(--ax-font-family);
     font-weight: var(--ax-font-weight-bold);
+    font-size: clamp(72px, 18vw, 220px);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    margin: 0;
     color: var(--ax-text-default);
   }
 
-  main .rune {
-    color: var(--var-accent);
-    opacity: 1;
-  }
-
-  main .tagline {
-    color: var(--ax-text-subtle);
+  .tagline {
+    font-size: clamp(18px, 2.4vw, 24px);
+    font-style: italic;
+    margin: var(--ax-space-16) auto 0;
     max-width: 46rem;
-    margin: 16px auto 0;
+    color: var(--ax-text-subtle);
   }
 
-  /* ── CTA buttons — no global.css competition, no `main` prefix needed ── */
+  .rune {
+    font-size: 2rem;
+    letter-spacing: 0.3em;
+    margin: var(--ax-space-8) 0 0;
+    color: var(--var-accent);
+  }
+
+  /* ── CTA ── */
   .cta {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--ax-space-16, 16px);
+    gap: var(--ax-space-16);
     align-items: center;
     justify-content: center;
-    margin: var(--ax-space-8, 8px) 0 var(--ax-space-24, 24px);
+    margin: var(--ax-space-8) 0 var(--ax-space-24);
   }
 
   .cta__primary {
@@ -124,7 +145,20 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '')
   }
 
   /* ── Pitch ── */
-  main .pitch article {
+  .pitch {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--ax-space-24);
+    padding: var(--ax-space-48) 0;
+  }
+
+  @media (max-width: 720px) {
+    .pitch {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .pitch article {
     background: var(--ax-bg-raised);
     border: 1px solid var(--ax-border-subtle);
     border-radius: var(--ax-radius-12);
@@ -132,39 +166,81 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '')
     color: var(--ax-text-default);
   }
 
-  main .pitch h2 {
-    font-size: var(--ax-font-size-heading-medium);
+  .pitch h2 {
+    font-family: var(--ax-font-family);
     font-weight: var(--ax-font-weight-bold);
+    font-size: var(--ax-font-size-heading-medium);
+    margin: 0 0 var(--ax-space-12);
+    letter-spacing: 0.02em;
+  }
+
+  .pitch p {
+    margin: 0;
+    font-size: 17px;
   }
 
   /* ── Install ── */
-  main .install pre {
+  .install {
+    padding: var(--ax-space-24) 0 var(--ax-space-48);
+    text-align: center;
+  }
+
+  .install pre {
+    display: inline-block;
+    margin: 0;
+    padding: var(--ax-space-16) var(--ax-space-24);
     background: var(--ax-bg-raised);
     border: 1px solid var(--ax-border-subtle);
     border-radius: var(--ax-radius-12);
     color: var(--ax-text-default);
-    padding: var(--ax-space-16) var(--ax-space-24);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 17px;
   }
 
-  main .install pre::before {
+  .install pre::before {
+    content: "$ ";
     color: var(--var-accent);
   }
 
   /* ── Quotes ── */
-  main .quotes h2 {
-    font-size: var(--ax-font-size-heading-medium);
-    font-weight: var(--ax-font-weight-bold);
+  .quotes {
+    padding: var(--ax-space-48) 0;
   }
 
-  main .quotes li {
+  .quotes h2 {
+    font-family: var(--ax-font-family);
+    font-weight: var(--ax-font-weight-bold);
+    font-size: var(--ax-font-size-heading-medium);
+    text-align: center;
+    margin: 0 0 var(--ax-space-32);
+    letter-spacing: 0.02em;
+  }
+
+  .quotes ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: var(--ax-space-16);
+  }
+
+  .quotes li {
     background: var(--ax-bg-raised);
     border: 1px solid var(--ax-border-subtle);
     border-radius: var(--ax-radius-12);
     padding: var(--ax-space-20);
     color: var(--ax-text-default);
+    font-style: italic;
+    font-size: 18px;
   }
 
-  main .quotes li::before {
+  .quotes li::before {
+    content: "“";
+    font-size: 36px;
+    line-height: 0;
+    vertical-align: -10px;
+    margin-right: 4px;
     color: var(--var-accent);
   }
 </style>
