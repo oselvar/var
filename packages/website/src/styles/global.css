@@ -130,8 +130,6 @@ body {
 }
 
 main {
-  position: relative;
-  z-index: 101;
   padding: calc(var(--page-gutter) + 32px) calc(var(--page-gutter) + 32px);
   max-width: var(--content-max);
   margin: 0 auto;
