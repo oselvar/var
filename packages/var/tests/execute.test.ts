@@ -215,3 +215,74 @@ the receipt is:
   for (const run of runs) await run()
   expect(captured).toEqual(['{"ok": true}\n'])
 })
+
+test('executePlan runs a header-bound table once per row, passing the row object', async () => {
+  let r = createRegistry()
+  const rows: unknown[] = []
+  r = addStep(r, {
+    expression: 'each row lists the dice, the category and the score',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: (_ctx, ...args) => {
+      rows.push(args[args.length - 1])
+    },
+  })
+  const source = `# Yahtzee
+
+each row lists the dice, the category and the score:
+
+| dice          | category   | score |
+| ------------- | ---------- | ----- |
+| 3, 3, 3, 4, 4 | full house | 17    |
+| 3, 3, 3, 3, 3 | Yahtzee    | 50    |`
+  const p = plan(parse('y.var.md', source), r)
+  const named: Array<{ name: string; run: () => unknown | Promise<unknown> }> = []
+  executePlan(p, {
+    sink: { example: (name, run) => named.push({ name, run }) },
+    reporter: { diagnostic: () => {} },
+  })
+  expect(named.map((e) => e.name)).toEqual([
+    '3, 3, 3, 4, 4 / full house / 17',
+    '3, 3, 3, 3, 3 / Yahtzee / 50',
+  ])
+  for (const e of named) await e.run()
+  expect(rows).toEqual([
+    { dice: '3, 3, 3, 4, 4', category: 'full house', score: '17' },
+    { dice: '3, 3, 3, 3, 3', category: 'Yahtzee', score: '50' },
+  ])
+})
+
+test('a failing header-bound row points the stack frame at that row line', async () => {
+  let r = createRegistry()
+  r = addStep(r, {
+    expression: 'each row lists the dice, the category and the score',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: (_ctx, row: { score: string }) => {
+      if (row.score === '50') throw new Error('boom')
+    },
+  })
+  // Rows sit on source lines 7 and 8 (header=5, separator=6).
+  const source = `# Yahtzee
+
+each row lists the dice, the category and the score:
+
+| dice          | category   | score |
+| ------------- | ---------- | ----- |
+| 3, 3, 3, 4, 4 | full house | 17    |
+| 3, 3, 3, 3, 3 | Yahtzee    | 50    |`
+  const p = plan(parse('y.var.md', source), r)
+  const runs: Array<() => unknown | Promise<unknown>> = []
+  executePlan(p, {
+    sink: { example: (_n, run) => runs.push(run) },
+    reporter: { diagnostic: () => {} },
+  })
+  await runs[0]?.() // row on line 7 passes
+  let stack = ''
+  try {
+    await runs[1]?.() // row on line 8 throws
+  } catch (err) {
+    stack = (err as Error).stack ?? ''
+  }
+  expect(stack).toContain('y.var.md:8:')
+})

@@ -23,22 +23,25 @@ test('exit code 0 when no diagnostics found', async () => {
     rmSync(dir, { recursive: true, force: true })
   }
 })
-
-test('human-readable output (no --json) lists path:line for an orphan-attachment', async () => {
+test('a standalone table or fenced code block is not a lint error', async () => {
+  // Tables and fenced code blocks that do not attach to a step are valid
+  // Markdown content, not mistakes — `var lint` stays quiet about them.
   const dir = mkdtempSync(join(tmpdir(), 'var-lint-text-'))
   try {
-    writeFileSync(join(dir, 'a.var.md'), '# A\n\n```js\nx=1\n```\n')
+    writeFileSync(
+      join(dir, 'a.var.md'),
+      '# A\n\n```js\nx=1\n```\n\n| a | b |\n|---|---|\n| 1 | 2 |\n',
+    )
     const captured: string[] = []
-    await runLint({
+    const result = await runLint({
       cwd: dir,
       json: false,
       globs: undefined,
       writeStdout: (s) => captured.push(s),
       writeStderr: () => {},
     })
-    const out = captured.join('')
-    expect(out).toContain('a.var.md')
-    expect(out).toContain('orphan-attachment')
+    expect(captured.join('')).toBe('')
+    expect(result.exitCode).toBe(0)
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }

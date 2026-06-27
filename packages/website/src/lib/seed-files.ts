@@ -1,17 +1,29 @@
+// The step definitions + score() live in exactly one place — the dogfood
+// tutorial file — and are imported verbatim. The file runs unchanged in both
+// the vitest suite and the browser runner (the browser maps the
+// `@oselvar/var-vitest` import to the runtime, and the step throws plain
+// Errors rather than using vitest's `expect`).
+import yahtzeeSteps from '../../../../docs/tutorial/steps/04-yahtzee.steps.ts?raw'
+
 export const SEED_FILES: Record<string, string> = {
-  '/hello.var.md': `# Hello, Vár\n\nFirst I greet "world" okay? I think the greeting should be "Hello, world!"\n\nOk.\n`,
-  '/01-hello.steps.ts': `import { defineContext } from '@oselvar/var-runtime'
+  '/yahtzee.var.md': `# Yahtzee
 
-const { step } = defineContext(() => ({ greeting: '' }))
+Five dice, one scorecard — and the same roll is worth wildly different things
+depending on which box you score it in.
 
-step('I greet {string}', (ctx, name) => {
-  ctx.greeting = \`Hello, \${name}!\`
-})
+Each row lists the dice, the category, and the score:
 
-step('the greeting should be {string}', (ctx, expected) => {
-  if (ctx.greeting !== expected) {
-    throw new Error(\`expected the greeting to be "\${expected}" but it was "\${ctx.greeting}"\`)
-  }
-})
+| dice          | category       | score |
+| ------------- | -------------- | ----- |
+| 3, 3, 3, 4, 4 | full house     | 17    |
+| 3, 3, 3, 4, 4 | threes         | 9     |
+| 3, 3, 3, 4, 4 | fours          | 8     |
+| 3, 3, 3, 3, 3 | full house     | 0     |
+| 3, 3, 3, 3, 3 | Yahtzee        | 50    |
+| 1, 2, 3, 4, 5 | small straight | 15    |
+
+Five of a kind is **not** a full house — that box scores 0. Written under
+Yahtzee, the same roll is a flat 50.
 `,
+  '/yahtzee.steps.ts': yahtzeeSteps,
 }

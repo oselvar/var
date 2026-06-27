@@ -1,5 +1,5 @@
 import type { Block, Fence, InlineOffset, Table, VarDoc } from './ast.js'
-import { ambiguousMatch, type Diagnostic, orphanAttachment } from './diagnostics.js'
+import { ambiguousMatch, type Diagnostic } from './diagnostics.js'
 import { findHits, type Hit, resolveHits } from './matcher.js'
 import type { Registry, StepRegistration } from './registry.js'
 import { splitSentences } from './sentences.js'
@@ -18,6 +18,19 @@ export type PlannedExample = {
   readonly scopeStack: ReadonlyArray<string>
   readonly span: Span
   readonly steps: ReadonlyArray<PlannedStep>
+  // Present when this example is one row of a header-bound table. It describes
+  // the binding paragraph above the table (shared by every row of that table)
+  // so editor tooling can highlight the paragraph and its header-cell words
+  // instead of the per-row table lines the executor runs against.
+  readonly headerBinding?: HeaderBinding
+}
+
+export type HeaderBinding = {
+  // The matched-step span in the binding paragraph.
+  readonly matchSpan: Span
+  // One span per header cell, located where it appears in the paragraph.
+  readonly paramSpans: ReadonlyArray<Span>
+  readonly stepDef: StepRegistration
 }
 
 export type PlannedStep = {
@@ -69,6 +82,39 @@ export function plan(varDoc: VarDoc, registry: Registry): ExecutionPlan {
       }
     })
 
+    // Header-bound table: a table whose every header cell is named (whole word,
+    // case-sensitive) in the matched paragraph above it iterates row by row.
+    // The matched step runs once per data row, receiving the row as an object
+    // keyed by header cell, and each row becomes its own example.
+    const bound = !hadAmbiguous ? detectHeaderBound(ex, stepsByBlock, varDoc.source) : null
+    if (bound) {
+      const headerBinding: HeaderBinding = {
+        matchSpan: bound.step.matchSpan,
+        paramSpans: bound.headerSpans,
+        stepDef: bound.step.stepDef,
+      }
+      for (const row of bound.table.rows) {
+        const rowObject: Record<string, string> = {}
+        bound.table.header.cells.forEach((cell, i) => {
+          rowObject[cell] = row.cells[i] ?? ''
+        })
+        const rowStep: PlannedStep = {
+          ...bound.step,
+          matchSpan: row.span,
+          args: [...bound.step.args, rowObject],
+        }
+        examples.push({
+          name: row.cells.join(' / '),
+          // Nest the rows under the binding paragraph as an extra describe scope.
+          scopeStack: [...ex.scopeStack, bound.step.text],
+          span: row.span,
+          steps: [rowStep],
+          headerBinding,
+        })
+      }
+      continue
+    }
+
     // Pass 2: look for table/fence immediately after a step-bearing block.
     const attachments = new Map<
       number,
@@ -104,20 +150,6 @@ export function plan(varDoc: VarDoc, registry: Registry): ExecutionPlan {
       }
     })
 
-    // Emit orphan-attachment for unattached tables/fences in this example's body.
-    ex.body.forEach((block, idx) => {
-      if (block.kind !== 'table' && block.kind !== 'fence') return
-      const prev = ex.body[idx - 1]
-      if (!prev) {
-        diagnostics.push(orphanAttachment({ text: '', span: block.span, kind: block.kind }))
-        return
-      }
-      const prevHadSteps = stepsByBlock.has(idx - 1)
-      if (!prevHadSteps) {
-        diagnostics.push(orphanAttachment({ text: '', span: block.span, kind: block.kind }))
-      }
-    })
-
     if (finalSteps.length === 0 && !hadAmbiguous) {
       // Example has no matches and no diagnostics — drop it (docs).
       continue
@@ -130,16 +162,8 @@ export function plan(varDoc: VarDoc, registry: Registry): ExecutionPlan {
     })
   }
 
-  // Top-level orphans (tables/fences not inside any example).
-  for (const orphan of varDoc.orphanAttachments) {
-    diagnostics.push(
-      orphanAttachment({
-        text: '',
-        span: orphan.span,
-        kind: orphan.kind,
-      }),
-    )
-  }
+  // A table or fence that doesn't attach to a step is just Markdown content,
+  // not a mistake — it produces no diagnostic.
 
   return { varDoc, examples, diagnostics }
 }
@@ -151,6 +175,43 @@ type BlockPlan = {
     readonly matchEnd: number
     readonly candidates: ReadonlyArray<Hit>
   }>
+}
+
+// Find the first table in this example whose every header cell appears as a
+// whole word (case-sensitive) in the step-bearing block immediately above it.
+// Returns that table together with the step it binds to (the block's last
+// matched step — the one a trailing table would otherwise attach to).
+function detectHeaderBound(
+  ex: { body: ReadonlyArray<Block> },
+  stepsByBlock: ReadonlyMap<number, PlannedStep[]>,
+  source: string,
+): { table: Table; step: PlannedStep; headerSpans: ReadonlyArray<Span> } | null {
+  for (let idx = 1; idx < ex.body.length; idx++) {
+    const here = ex.body[idx]
+    if (here?.kind !== 'table') continue
+    const above = ex.body[idx - 1]
+    if (
+      !above ||
+      (above.kind !== 'paragraph' && above.kind !== 'list_item' && above.kind !== 'blockquote')
+    )
+      continue
+    const steps = stepsByBlock.get(idx - 1)
+    if (!steps || steps.length === 0) continue
+    const offsets = here.header.cells.map((cell) => wordOffset(above.text, cell))
+    if (offsets.some((o) => o < 0)) continue
+    const headerSpans = here.header.cells.map((cell, i) =>
+      liftSpan(source, above, offsets[i] as number, (offsets[i] as number) + cell.length),
+    )
+    return { table: here, step: steps[steps.length - 1] as PlannedStep, headerSpans }
+  }
+  return null
+}
+
+// Offset of `word` in `haystack` as a whole word (case-sensitive), or -1.
+function wordOffset(haystack: string, word: string): number {
+  const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const m = new RegExp(`(?<![\\p{L}\\p{N}_])${escaped}(?![\\p{L}\\p{N}_])`, 'u').exec(haystack)
+  return m ? m.index : -1
 }
 
 function planBlock(text: string, registry: Registry): BlockPlan {

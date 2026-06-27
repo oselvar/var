@@ -78,3 +78,34 @@ step('I fly to {airport}', (ctx, code) => {})
   const names = [...idx.registry.parameterTypes.parameterTypes].map((p) => p.name)
   expect(names).toContain('airport')
 })
+
+test('a header-bound table highlights the binding paragraph with header words as parameters', () => {
+  const idx = buildWorkspaceIndex({
+    stepFiles: [
+      {
+        path: '/yahtzee.steps.ts',
+        source: `step('each row lists the dice, the category and the score', (ctx, row) => {})\n`,
+      },
+    ],
+    varFiles: [
+      {
+        path: '/yahtzee.var.md',
+        source: `# Yahtzee
+
+each row lists the dice, the category and the score:
+
+| dice          | category   | score |
+| ------------- | ---------- | ----- |
+| 3, 3, 3, 4, 4 | full house | 17    |
+| 3, 3, 3, 3, 3 | Yahtzee    | 50    |`,
+      },
+    ],
+  })
+  // One match — the binding paragraph — not one per data row.
+  expect(idx.matches).toHaveLength(1)
+  const m = idx.matches[0]!
+  expect(m.stepDef.expression).toBe('each row lists the dice, the category and the score')
+  expect(m.range.start.line).toBe(3) // the paragraph, not a table row
+  // The three header cells are painted as parameters inside the paragraph.
+  expect(m.paramValues).toEqual(['dice', 'category', 'score'])
+})

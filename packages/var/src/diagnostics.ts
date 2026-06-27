@@ -9,7 +9,7 @@ export type Diagnostic = {
   readonly span: Span
 }
 
-export type DiagnosticCode = 'ambiguous-match' | 'orphan-attachment'
+export type DiagnosticCode = 'ambiguous-match'
 
 export type Candidate = {
   readonly expression: string
@@ -31,22 +31,6 @@ export function ambiguousMatch(input: AmbiguousInput): Diagnostic {
     severity: 'error',
     code: 'ambiguous-match',
     message: `Ambiguous step: "${input.text}"\nMatched by:\n${lines}`,
-    span: input.span,
-  }
-}
-
-export type OrphanInput = {
-  readonly text: string
-  readonly span: Span
-  readonly kind: 'table' | 'fence'
-}
-
-export function orphanAttachment(input: OrphanInput): Diagnostic {
-  const what = input.kind === 'table' ? 'table' : 'fenced code block'
-  return {
-    severity: 'warning',
-    code: 'orphan-attachment',
-    message: `Orphan ${what}: does not immediately follow a step-bearing block, so it is not attached as a DataTable/DocString.`,
     span: input.span,
   }
 }

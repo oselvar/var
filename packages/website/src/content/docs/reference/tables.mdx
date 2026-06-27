@@ -1,0 +1,87 @@
+---
+title: Tables
+description: How Markdown tables attach to steps in a Vár spec — whole-table mode, and header-bound row iteration.
+area: reference
+order: 1
+---
+
+import FileEditor from '../../../components/FileEditor.astro'
+import yahtzeeSteps from '../../../../../../docs/tutorial/steps/04-yahtzee.steps.ts?raw'
+
+# Tables
+
+A Markdown table attaches to the step matched in the paragraph **immediately
+above it**. There are two ways that table reaches your step definition, and Vár
+chooses between them based on what the paragraph says.
+
+## Whole-table mode (the default)
+
+By default the whole table is handed to the step **once**, as an array of rows
+(the header row first). You decide how to read it.
+
+```markdown
+These users exist:
+
+| name | age |
+| ---- | --- |
+| Bob  | 30  |
+| Eve  | 25  |
+```
+
+```ts
+step('These users exist:', (ctx, rows) => {
+  // rows === [['name', 'age'], ['Bob', '30'], ['Eve', '25']]
+})
+```
+
+## Header-bound mode (row iteration)
+
+If the paragraph above the table **names every header cell**, the table flips
+into row mode: the step runs **once per row**, and each row arrives as an object
+keyed by header cell. Every row becomes its own independently passing-or-failing
+example.
+
+There is no new syntax — the opt-in *is* the prose naming its columns. Here the
+sentence mentions `dice`, `category`, and `score`, which are exactly the table's
+headers:
+
+<FileEditor filename="yahtzee.var.md" steps={[{ path: '04-yahtzee.steps.ts', source: yahtzeeSteps }]}>{`
+# Yahtzee
+
+Each row lists the dice, the category, and the score:
+
+| dice          | category       | score |
+| ------------- | -------------- | ----- |
+| 3, 3, 3, 4, 4 | full house     | 17    |
+| 3, 3, 3, 4, 4 | threes         | 9     |
+| 3, 3, 3, 3, 3 | full house     | 0     |
+| 3, 3, 3, 3, 3 | Yahtzee        | 50    |
+| 1, 2, 3, 4, 5 | small straight | 15    |
+`}</FileEditor>
+
+The step receives one row at a time, as raw strings — parse them however you
+like:
+
+```ts
+step('Each row lists the dice, the category, and the score', (ctx, row) => {
+  // row === { dice: '3, 3, 3, 4, 4', category: 'full house', score: '17' }
+  const dice = row.dice.split(',').map((d) => Number(d.trim()))
+  expect(score(dice, row.category)).toBe(Number(row.score))
+})
+```
+
+Because each row is its own example, a single wrong cell turns just that row red
+— the rest stay green.
+
+### When does row mode trigger?
+
+Row mode engages only when **all** of these hold:
+
+- the paragraph names **every** header cell, as a **whole word** and
+  **case-sensitive** (a `dice` header matches `dice`, not `Dice` and not
+  `dicey`);
+- the paragraph matches exactly one step; and
+- the table immediately follows that paragraph.
+
+Miss any header cell — or change its case — and the table falls back to
+whole-table mode.

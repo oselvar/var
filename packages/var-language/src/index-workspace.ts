@@ -99,7 +99,30 @@ export function buildWorkspaceIndex(input: WorkspaceInput): WorkspaceIndex {
   for (const file of input.varFiles) {
     const varDoc = parse(file.path, file.source, input.scannerPlugins ?? [])
     const result = plan(varDoc, registry)
+    // Header-bound tables expand to one example per row, all sharing the same
+    // binding paragraph. For highlighting we want the paragraph (with its
+    // header-cell words as parameters) once — not the per-row table lines the
+    // executor runs against. Dedupe by the paragraph's start position.
+    const seenBindings = new Set<string>()
     for (const ex of result.examples) {
+      if (ex.headerBinding) {
+        const b = ex.headerBinding
+        const key = `${b.matchSpan.startLine}:${b.matchSpan.startCol}`
+        if (seenBindings.has(key)) continue
+        seenBindings.add(key)
+        const def = stepDefs.find(
+          (d) => d.expression === b.stepDef.expression && d.file === b.stepDef.expressionSourceFile,
+        )
+        if (!def) continue
+        matches.push({
+          varPath: file.path,
+          range: toRange(b.matchSpan),
+          paramRanges: b.paramSpans.map(toRange),
+          paramValues: b.paramSpans.map((s) => file.source.slice(s.startOffset, s.endOffset)),
+          stepDef: def,
+        })
+        continue
+      }
       for (const step of ex.steps) {
         const def = stepDefs.find(
           (d) =>

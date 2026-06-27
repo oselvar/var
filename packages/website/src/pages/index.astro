@@ -1,5 +1,7 @@
 ---
+import Editor from '../components/Editor.astro'
 import Base from '../layouts/Base.astro'
+import { SEED_FILES } from '../lib/seed-files.ts'
 
 const quotes = [
   'Move over vibeslop, here comes Vár',
@@ -31,6 +33,20 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '')
     <section class="cta" aria-label="Get started">
       <a class="cta__primary" href={`${base}/docs/start-here/hello-var-your-first-spec`}>Get started →</a>
       <a class="cta__secondary" href={`${base}/docs/`}>Browse docs</a>
+    </section>
+
+    <section class="demo" aria-label="See it live">
+      <h2>the same five dice, five different scores</h2>
+      <p class="demo__lead">
+        This isn’t a screenshot — it’s a runnable spec. The table reads like a
+        Yahtzee scoresheet, yet every row is a precise, independent test. Change a
+        die and watch a single row turn red.
+      </p>
+      <Editor uri="file:///yahtzee.var.md" lang="markdown">{SEED_FILES['/yahtzee.var.md']}</Editor>
+      <div class="demo__steps" aria-hidden="true">
+        <Editor uri="file:///yahtzee.steps.ts" lang="typescript">{SEED_FILES['/yahtzee.steps.ts']}</Editor>
+      </div>
+      <p class="demo__more"><a href={`${base}/playground`}>Open it in the playground →</a></p>
     </section>
 
     <section class="pitch" aria-label="What Vár gives you">
@@ -142,6 +158,49 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '')
 
   .cta__secondary:hover {
     color: var(--ax-text-default);
+  }
+
+  /* ── Live demo ── */
+  .demo {
+    padding: var(--ax-space-24) 0 var(--ax-space-48);
+  }
+
+  .demo h2 {
+    font-family: var(--ax-font-family);
+    font-weight: var(--ax-font-weight-bold);
+    font-size: var(--ax-font-size-heading-medium);
+    text-align: center;
+    margin: 0 0 var(--ax-space-12);
+    letter-spacing: 0.02em;
+  }
+
+  .demo__lead {
+    margin: 0 auto var(--ax-space-24);
+    max-width: 42rem;
+    text-align: center;
+    font-size: 17px;
+    color: var(--ax-text-subtle);
+  }
+
+  .demo__more {
+    text-align: center;
+    margin: var(--ax-space-16) 0 0;
+  }
+
+  .demo__more a {
+    color: var(--ax-text-default);
+    text-decoration: underline;
+    text-decoration-color: var(--var-accent);
+  }
+
+  /* The step definitions still drive the run + highlighting, but the front page
+     shows only the spec — render the steps editor off-screen (kept in the DOM
+     and measurable so CodeMirror and the language server work). */
+  .demo__steps {
+    position: absolute;
+    left: -99999px;
+    top: 0;
+    width: 700px;
   }
 
   /* ── Pitch ── */

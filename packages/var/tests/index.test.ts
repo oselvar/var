@@ -24,5 +24,5 @@ test('end-to-end: parse + plan with a simple expression', () => {
 
 test('public surface re-exports snippet + diagnostic factories', () => {
   expect(typeof varApi.generateSnippet).toBe('function')
-  expect(typeof varApi.orphanAttachment).toBe('function')
+  expect(typeof varApi.ambiguousMatch).toBe('function')
 })

@@ -20,10 +20,9 @@ export type {
   Candidate,
   Diagnostic,
   DiagnosticCode,
-  OrphanInput,
   Severity,
 } from './diagnostics.js'
-export { ambiguousMatch, orphanAttachment } from './diagnostics.js'
+export { ambiguousMatch } from './diagnostics.js'
 export type { ExecutePorts } from './execute.js'
 export { executePlan } from './execute.js'
 export type { ExpressionDiff, ExpressionSegment, ParamFate } from './expression-segments.js'

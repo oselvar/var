@@ -5,9 +5,9 @@ import { basicSetup, EditorView } from 'codemirror'
 import { flashExtension, type GenerateSnippet, stepGenAffordance } from '../lib/cm-generate-step.ts'
 import { setRunResults, varRunExtension } from '../lib/cm-run.ts'
 import { semanticTokens } from '../lib/cm-semantic-tokens.ts'
-import { joinStepParamTokens } from '../lib/var-capsule-tokens.ts'
 import { varEditorThemeExt } from '../lib/cm-var-theme.ts'
 import { runSpec } from '../lib/run-client.ts'
+import { joinStepParamTokens } from '../lib/var-capsule-tokens.ts'
 import { varTokenTheme } from '../lib/var-token-theme.ts'
 import { workerTransport } from '../lib/worker-transport.ts'
 
@@ -39,12 +39,13 @@ async function runSpecNow(): Promise<void> {
   const md = [...views.entries()].find(([u]) => u.endsWith('.var.md'))
   if (!md) return
   const mdView = md[1]
+  const varPath = md[0].replace(/^file:\/\//, '')
   const varSource = mdView.state.doc.toString()
   const stepFiles = [...views.entries()]
     .filter(([u]) => u.endsWith('.steps.ts'))
     .map(([u, v]) => ({ path: u.replace(/^file:\/\//, ''), source: v.state.doc.toString() }))
   try {
-    const results = await runSpec({ varPath: '/hello.var.md', varSource, stepFiles })
+    const results = await runSpec({ varPath, varSource, stepFiles })
     mdView.dispatch({ effects: setRunResults.of(results) })
   } catch (err) {
     mdView.dispatch({

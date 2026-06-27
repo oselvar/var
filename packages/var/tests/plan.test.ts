@@ -203,7 +203,120 @@ test('an unmatched sentence without a keyword is also silently treated as prose'
   expect(result.diagnostics).toHaveLength(0)
 })
 
-test('a table not attached to a step produces an orphan-attachment warning', () => {
+test('a header-bound table (paragraph names every header cell) expands into one example per row', () => {
+  let r = createRegistry()
+  r = addStep(r, {
+    expression: 'each row lists the dice, the category and the score',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: () => {},
+  })
+  const source = `# Yahtzee
+
+each row lists the dice, the category and the score:
+
+| dice          | category   | score |
+| ------------- | ---------- | ----- |
+| 3, 3, 3, 4, 4 | full house | 17    |
+| 3, 3, 3, 3, 3 | Yahtzee    | 50    |`
+  const result = plan(parse('y.var.md', source), r)
+  expect(result.diagnostics).toHaveLength(0)
+  // One example per data row (the header row is the binding, not an example).
+  expect(result.examples).toHaveLength(2)
+  const [first, second] = result.examples
+  // Each row example runs the matched step once, with the row object — keyed by
+  // header cell, raw string values — as the trailing handler argument.
+  expect(first?.steps).toHaveLength(1)
+  expect(first?.steps[0]?.args).toEqual([
+    { dice: '3, 3, 3, 4, 4', category: 'full house', score: '17' },
+  ])
+  expect(second?.steps[0]?.args).toEqual([
+    { dice: '3, 3, 3, 3, 3', category: 'Yahtzee', score: '50' },
+  ])
+  // The whole table is NOT also handed over in row mode.
+  expect(first?.steps[0]?.dataTable).toBeUndefined()
+})
+
+test('a table whose paragraph names only SOME header cells keeps whole-table behaviour', () => {
+  let r = createRegistry()
+  r = addStep(r, {
+    expression: 'these users exist',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: () => {},
+  })
+  // "these users exist" names neither `name` nor `age` — no row mode.
+  const source = `# Users
+these users exist:
+
+| name | age |
+| ---- | --- |
+| Bob  | 30  |
+| Eve  | 25  |`
+  const result = plan(parse('u.var.md', source), r)
+  expect(result.examples).toHaveLength(1)
+  const step = result.examples[0]?.steps[0]
+  expect(step?.dataTable?.header.cells).toEqual(['name', 'age'])
+  expect(step?.dataTable?.rows).toHaveLength(2)
+})
+
+test('header-bound matching is case-sensitive — the paragraph must echo the header exactly', () => {
+  let r = createRegistry()
+  r = addStep(r, {
+    expression: 'each row lists the Dice and the Score',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: () => {},
+  })
+  // Headers are lower-case `dice`/`score`; the prose says `Dice`/`Score`.
+  const source = `# Case
+each row lists the Dice and the Score:
+
+| dice      | score |
+| --------- | ----- |
+| 1,1,1,1,1 | 5     |`
+  const result = plan(parse('c.var.md', source), r)
+  // No exact-case match → falls back to a single whole-table example.
+  expect(result.examples).toHaveLength(1)
+  expect(result.examples[0]?.steps[0]?.dataTable?.rows).toHaveLength(1)
+})
+
+test('header-bound rows are named by their cells and nested under the paragraph', () => {
+  let r = createRegistry()
+  r = addStep(r, {
+    expression: 'each row lists the dice, the category and the score',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: () => {},
+  })
+  const source = `# Yahtzee
+
+each row lists the dice, the category and the score:
+
+| dice          | category   | score |
+| ------------- | ---------- | ----- |
+| 3, 3, 3, 4, 4 | full house | 17    |
+| 3, 3, 3, 3, 3 | Yahtzee    | 50    |`
+  const result = plan(parse('y.var.md', source), r)
+  expect(result.examples.map((e) => e.name)).toEqual([
+    '3, 3, 3, 4, 4 / full house / 17',
+    '3, 3, 3, 3, 3 / Yahtzee / 50',
+  ])
+  for (const ex of result.examples) {
+    expect(ex.scopeStack).toEqual([
+      'Yahtzee',
+      'each row lists the dice, the category and the score',
+    ])
+  }
+  // Each row example maps to its own (distinct, ascending) source line.
+  const lines = result.examples.map((e) => e.span.startLine)
+  expect(new Set(lines).size).toBe(2)
+  expect(lines[0]).toBeLessThan(lines[1] as number)
+})
+
+test('a table not attached to a step is allowed — no diagnostic', () => {
+  // Tables are valid Markdown on their own. A table that happens not to follow
+  // a step-bearing paragraph is just content, not a mistake.
   let r = createRegistry()
   r = addStep(r, {
     expression: 'I have {int} cukes',
@@ -221,6 +334,5 @@ Some interrupting prose paragraph.
 |------|-----|
 | Bob  | 30  |`
   const result = plan(parse('o.var.md', source), r)
-  const orphan = result.diagnostics.find((d) => d.code === 'orphan-attachment')
-  expect(orphan?.severity).toBe('warning')
+  expect(result.diagnostics).toHaveLength(0)
 })
