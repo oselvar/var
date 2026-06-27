@@ -1,9 +1,10 @@
 # Yahtzee
 
-Five dice, one scorecard — and the same roll is worth wildly different things
-depending on which box you score it in.
+Five dice, one scorecard — and the same roll is 
+worth wildly different things depending on which 
+box you score it in.
 
-Each row lists the dice, the category, and the score:
+Examples of dice, category and score:
 
 | dice          | category        | score |
 | ------------- | --------------- | ----- |

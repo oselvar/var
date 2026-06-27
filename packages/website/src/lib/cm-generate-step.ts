@@ -185,7 +185,7 @@ export function stepGenAffordance(deps: {
         const btn = document.createElement('button')
         btn.type = 'button'
         btn.className = 'cm-stepgen-btn'
-        btn.textContent = '✨ Create step definition'
+        btn.textContent = '✨ Define step definition'
         btn.addEventListener('mousedown', (e) => e.preventDefault())
         btn.addEventListener('click', () => void confirmAffordance(view, deps))
         dom.appendChild(btn)

@@ -1,7 +1,8 @@
 ---
+import yahtzeeSpec from '../../../../docs/tutorial/04-yahtzee.var.md?raw'
+import yahtzeeSteps from '../../../../docs/tutorial/steps/04-yahtzee.steps.ts?raw'
 import Editor from '../components/Editor.astro'
 import Base from '../layouts/Base.astro'
-import { SEED_FILES } from '../lib/seed-files.ts'
 
 const quotes = [
   'Move over vibeslop, here comes Vár',
@@ -19,7 +20,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '')
   title="Vár — Behaviour-Driven Development that doesn’t make you cry"
   description="Vár turns plain-English examples into runnable specs. Discover misunderstandings, clear your head."
 >
-  <main>
+  <main class="landing">
     <section class="hero">
       <div class="brand">
         <img class="logo" src={`${base}/logo2-transparent.png`} alt="Vár logo" />
@@ -27,55 +28,64 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '')
       </div>
 
       <p class="pitch-line">Executable documentation for people and agents</p>
+    </section>
 
-      <p class="hero__lead">
-        Vár hard-wires your documentation to your software. 
-        When they go out of sync, you'll know.
-      </p>
+    <section class="split" aria-label="What Vár is, and a live example">
+      <div class="split__explain">
+        <p class="hero__lead">
+          Vár hard-wires your documentation to your software.
+          When they go out of sync, you'll know.
+        </p>
 
-      <p class="hero__lead">
-        The documentation is both <a href="#">signal</a> and <a href="#">sensor</a> for programmers and coding agents.
-      </p>
+        <p class="hero__lead">
+          The documentation is both <a href="#">signal</a> and <a href="#">sensor</a> for programmers and coding agents.
+        </p>
 
-      <p class="hero__lead">
-        <pre>
+        <p class="hero__lead">
+          <pre>
       ----signal---&gt;
 [documentation]      [software]
       &lt;---sensor---
-        </pre>
-      </p>
+          </pre>
+        </p>
 
-      <p class="hero__lead">
-        This is different from how it's usually done.
-      </p>
+        <p class="hero__lead">
+          This is different from how it's usually done.
+        </p>
 
-      <p class="hero__lead">
-        <pre>DRIFT
-        [specifications] ----signal---&gt;      
+        <p class="hero__lead">
+          <pre>DRIFT
+        [specifications] ----signal---&gt;
         [documentation] --describes--&gt; [software]
         [tests]     &lt;-------sensor-----
-        </pre>
-      </p>
+          </pre>
+        </p>
+      </div>
 
+      <section class="demo" aria-label="See it live">
+        <h2>the same five dice, five different scores</h2>
+        <p class="demo__lead">
+          This isn’t a screenshot — it’s a runnable spec. The table reads like a
+          Yahtzee scoresheet, yet every row is a precise, independent test. Change a
+          die and watch a single row turn red.
+        </p>
+        <Editor
+          uri="file:///yahtzee.var.md"
+          lang="markdown"
+          lineNumbers={false}
+          folding={false}
+          define={false}
+          >{yahtzeeSpec}</Editor>
+        <div class="demo__steps" aria-hidden="true">
+          <Editor uri="file:///yahtzee.steps.ts" lang="typescript">{yahtzeeSteps}</Editor>
+        </div>
+        <p class="demo__more"><a href={`${base}/playground`}>Open it in the playground →</a></p>
+      </section>
     </section>
 
     <section class="cta" aria-label="Get started">
       <a class="cta__primary" href={`${base}/docs/start-here/hello-var-your-first-spec`}>Get started →</a>
       <a class="cta__secondary" href={`${base}/docs/`}>Browse docs</a>
-    </section>
-
-    <section class="demo" aria-label="See it live">
-      <h2>the same five dice, five different scores</h2>
-      <p class="demo__lead">
-        This isn’t a screenshot — it’s a runnable spec. The table reads like a
-        Yahtzee scoresheet, yet every row is a precise, independent test. Change a
-        die and watch a single row turn red.
-      </p>
-      <Editor uri="file:///yahtzee.var.md" lang="markdown">{SEED_FILES['/yahtzee.var.md']}</Editor>
-      <div class="demo__steps" aria-hidden="true">
-        <Editor uri="file:///yahtzee.steps.ts" lang="typescript">{SEED_FILES['/yahtzee.steps.ts']}</Editor>
-      </div>
-      <p class="demo__more"><a href={`${base}/playground`}>Open it in the playground →</a></p>
     </section>
 
     <section class="pitch" aria-label="What Vár gives you">
@@ -226,6 +236,44 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '')
 
   .cta__secondary:hover {
     color: var(--ax-text-default);
+  }
+
+  /* The two-column split needs more horizontal room than the default prose
+     measure; widen just the landing page. */
+  .landing {
+    max-width: 70rem;
+  }
+
+  /* ── Two-column split: explanation | live demo ── */
+  .split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--ax-space-40, 40px);
+    align-items: start;
+    padding: var(--ax-space-24) 0 var(--ax-space-48);
+  }
+
+  .split__explain {
+    text-align: center;
+  }
+
+  /* Shrink the ASCII diagrams so they fit a column without overflowing. */
+  .split__explain pre {
+    margin: var(--ax-space-16) 0 0;
+    font-size: clamp(11px, 1.6vw, 14px);
+    overflow-x: auto;
+  }
+
+  /* The demo sits inside the split now; the grid owns its spacing. */
+  .split .demo {
+    padding: 0;
+  }
+
+  @media (max-width: 880px) {
+    .split {
+      grid-template-columns: 1fr;
+      gap: var(--ax-space-24);
+    }
   }
 
   /* ── Live demo ── */

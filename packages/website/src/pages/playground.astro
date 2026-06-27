@@ -1,7 +1,8 @@
 ---
+import yahtzeeSpec from '../../../../docs/tutorial/04-yahtzee.var.md?raw'
+import yahtzeeSteps from '../../../../docs/tutorial/steps/04-yahtzee.steps.ts?raw'
 import Editor from '../components/Editor.astro'
 import Base from '../layouts/Base.astro'
-import { SEED_FILES } from '../lib/seed-files.ts'
 ---
 <Base title="Vár playground" description="Run Vár in the browser.">
   <main class="doc playground">
@@ -16,10 +17,10 @@ import { SEED_FILES } from '../lib/seed-files.ts'
     </p>
 
     <h2>the spec</h2>
-    <Editor uri="file:///yahtzee.var.md" lang="markdown">{SEED_FILES['/yahtzee.var.md']}</Editor>
+    <Editor uri="file:///yahtzee.var.md" lang="markdown">{yahtzeeSpec}</Editor>
 
     <h2>the step definitions</h2>
-    <Editor uri="file:///yahtzee.steps.ts" lang="typescript">{SEED_FILES['/yahtzee.steps.ts']}</Editor>
+    <Editor uri="file:///yahtzee.steps.ts" lang="typescript">{yahtzeeSteps}</Editor>
 
     <p>
       If you have ever written a unit test, this will be familiar. The main difference between

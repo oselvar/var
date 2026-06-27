@@ -4,8 +4,15 @@ import { decodeEntities } from '../lib/step-highlight.js'
 interface Props {
   uri: string
   lang?: 'markdown' | 'typescript'
+  // Show the line-number gutter (default true).
+  lineNumbers?: boolean
+  // Show the fold (collapse/expand) gutter (default true).
+  folding?: boolean
+  // Offer the "Define step definition" affordance on a settled selection
+  // (default true). Markdown editors only.
+  define?: boolean
 }
-const { uri, lang = 'markdown' } = Astro.props
+const { uri, lang = 'markdown', lineNumbers = true, folding = true, define = true } = Astro.props
 
 // The document is the default slot. Author it as a raw string child —
 // `<Editor uri="…">{`line one\nline two`}</Editor>` — so MDX/Astro passes the
@@ -15,7 +22,15 @@ const doc = decodeEntities(
   (await Astro.slots.render('default')).replace(/^\n+/, '').replace(/\n+$/, ''),
 )
 ---
-<div class="cm-mount" data-uri={uri} data-lang={lang} data-doc={doc}></div>
+<div
+  class="cm-mount"
+  data-uri={uri}
+  data-lang={lang}
+  data-doc={doc}
+  data-line-numbers={String(lineNumbers)}
+  data-folding={String(folding)}
+  data-define={String(define)}
+></div>
 <style>
   .cm-mount { border: 1px solid var(--ax-border-subtle); border-radius: var(--radius-5); overflow: hidden; margin: 24px 0; }
   .cm-mount :global(.cm-editor) { font-size: 14px; }

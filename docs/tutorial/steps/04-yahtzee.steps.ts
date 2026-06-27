@@ -6,7 +6,7 @@ const { step } = defineContext(() => ({}))
 // header cell (dice, category, score), the runner calls this step once per row,
 // handing it the row as an object of raw strings.
 step(
-  'Each row lists the dice, the category, and the score',
+  'Examples of dice, category and score',
   (_ctx, row: { dice: string; category: string; score: string }) => {
     const dice = row.dice.split(',').map((d) => Number(d.trim()))
     const actual = score(dice, row.category)

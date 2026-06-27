@@ -1,7 +1,10 @@
 import { javascript } from '@codemirror/lang-javascript'
 import { markdown } from '@codemirror/lang-markdown'
+import { foldGutter } from '@codemirror/language'
 import { LSPClient, languageServerExtensions } from '@codemirror/lsp-client'
-import { basicSetup, EditorView } from 'codemirror'
+import type { Extension } from '@codemirror/state'
+import { lineNumbers } from '@codemirror/view'
+import { basicSetup, EditorView, minimalSetup } from 'codemirror'
 import { flashExtension, type GenerateSnippet, stepGenAffordance } from '../lib/cm-generate-step.ts'
 import { setRunResults, varRunExtension } from '../lib/cm-run.ts'
 import { semanticTokens } from '../lib/cm-semantic-tokens.ts'
@@ -80,8 +83,17 @@ function mountEditor(el: HTMLElement): EditorView {
   const lang = el.dataset.lang ?? 'markdown'
   const language = lang === 'typescript' ? javascript({ typescript: true }) : markdown()
   const client = lspClient()
+  // basicSetup bundles the line-number and fold gutters. When either is turned
+  // off we can't subtract from it, so drop to minimalSetup and add back only the
+  // gutters that are wanted. (The run-result gutter is added separately below.)
+  const wantLineNumbers = el.dataset.lineNumbers !== 'false'
+  const wantFolding = el.dataset.folding !== 'false'
+  const setup: Extension =
+    wantLineNumbers && wantFolding
+      ? basicSetup
+      : [minimalSetup, wantLineNumbers ? lineNumbers() : [], wantFolding ? foldGutter() : []]
   const ext = [
-    basicSetup,
+    setup,
     language,
     varEditorThemeExt(),
     varTokenTheme,
@@ -91,13 +103,16 @@ function mountEditor(el: HTMLElement): EditorView {
   ]
   if (lang === 'markdown') {
     ext.push(varRunExtension())
-    const generate: GenerateSnippet = (text) =>
-      client.request('var/generateSnippet', { text }) as Promise<{
-        fullCode: string
-        expression: string
-      }>
-    const stepsView = () => [...views.entries()].find(([u]) => u.endsWith('.steps.ts'))?.[1] ?? null
-    ext.push(stepGenAffordance({ generate, stepsView }))
+    if (el.dataset.define !== 'false') {
+      const generate: GenerateSnippet = (text) =>
+        client.request('var/generateSnippet', { text }) as Promise<{
+          fullCode: string
+          expression: string
+        }>
+      const stepsView = () =>
+        [...views.entries()].find(([u]) => u.endsWith('.steps.ts'))?.[1] ?? null
+      ext.push(stepGenAffordance({ generate, stepsView }))
+    }
   }
   const view = new EditorView({ doc, extensions: ext, parent: el })
   views.set(uri, view)
