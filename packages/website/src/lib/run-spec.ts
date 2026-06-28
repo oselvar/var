@@ -1,4 +1,11 @@
-import { executePlan, parse, plan, type TestSink } from '@oselvar/var'
+import {
+  executePlan,
+  isCellMismatchError,
+  isDocStringMismatchError,
+  parse,
+  plan,
+  type TestSink,
+} from '@oselvar/var'
 import { buildRegistry, contextFactory } from '@oselvar/var-runtime'
 import type { ExampleResult, RunResults } from './run-types.ts'
 
@@ -39,6 +46,22 @@ export async function runRegisteredSpec(
           } catch (err) {
             const e = err as Error
             const stack = e?.stack ?? String(err)
+            const cells = isCellMismatchError(err)
+              ? err.cells
+                  .filter((c) => !c.ok)
+                  .map((c) => ({
+                    from: c.span.startOffset,
+                    to: c.span.endOffset,
+                    actual: c.actual,
+                  }))
+              : undefined
+            const doc = isDocStringMismatchError(err)
+              ? {
+                  from: err.diff.span.startOffset,
+                  to: err.diff.span.endOffset,
+                  actual: err.diff.actual,
+                }
+              : undefined
             out[idx] = {
               name,
               status: 'failed',
@@ -47,6 +70,8 @@ export async function runRegisteredSpec(
                 line: failingLine(stack, varPath) ?? lines[0] ?? 0,
                 message: e?.message ?? String(err),
                 stack,
+                ...(cells && { cells }),
+                ...(doc && { doc }),
               },
             }
           }

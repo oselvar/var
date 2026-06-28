@@ -38,4 +38,54 @@ describe('runRegisteredSpec', () => {
     expect(results.examples[0]?.failure?.message).toContain('expected "Hello, world!"')
     expect(results.examples[0]?.failure?.line).toBe(3)
   })
+
+  it('attaches cells (source span + actual) for a header-bound row mismatch', async () => {
+    _resetBuilder()
+    const { step } = defineContext(() => ({}))
+    step('Each row lists the n and the double', (_ctx, row: { n: string; double: string }) => ({
+      double: Number(row.n) * 2,
+    }))
+    const spec = `# Doubling
+
+Each row lists the n and the double:
+
+| n | double |
+| - | ------ |
+| 2 | 5 |
+`
+    const results = await runRegisteredSpec('/d.var.md', spec)
+    const failed = results.examples.find((e) => e.status === 'failed')
+    const cells = failed?.failure?.cells
+    if (!cells) throw new Error('no cells on the failure')
+    expect(cells).toHaveLength(1)
+    // The span covers the EXPECTED cell text (the source), and `actual` is the runtime value.
+    expect(spec.slice(cells[0]!.from, cells[0]!.to)).toBe('5')
+    expect(cells[0]!.actual).toBe('4')
+  })
+
+  it('attaches doc (body span + actual) for a doc-string mismatch', async () => {
+    _resetBuilder()
+    const { step } = defineContext(() => ({}))
+    step('the greeting is', () => 'Goodbye!\n')
+    const spec = '# G\n\nthe greeting is:\n\n```text\nHello!\n```\n'
+    const results = await runRegisteredSpec('/g.var.md', spec)
+    const doc = results.examples[0]?.failure?.doc
+    if (!doc) throw new Error('no doc on the failure')
+    expect(spec.slice(doc.from, doc.to)).toBe('Hello!\n')
+    expect(doc.actual).toBe('Goodbye!\n')
+  })
+
+  it('leaves cells/doc undefined for a plain thrown error', async () => {
+    _resetBuilder()
+    const { step } = defineContext(() => ({ greeting: '' }))
+    step('I greet {string}', (ctx: { greeting: string }, name: string) => {
+      ctx.greeting = `Hi ${name}`
+    })
+    step('the greeting should be {string}', (ctx: { greeting: string }, expected: string) => {
+      if (ctx.greeting !== expected) throw new Error('nope')
+    })
+    const results = await runRegisteredSpec('/spec.var.md', SPEC)
+    expect(results.examples[0]?.failure?.cells).toBeUndefined()
+    expect(results.examples[0]?.failure?.doc).toBeUndefined()
+  })
 })
