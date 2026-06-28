@@ -1,0 +1,95 @@
+{
+  "examples": [
+    {
+      "body": [
+        {
+          "inlineMap": [
+            {
+              "sourceOffset": 9,
+              "textOffset": 0
+            },
+            {
+              "sourceOffset": 10,
+              "textOffset": 1
+            },
+            {
+              "sourceOffset": 11,
+              "textOffset": 2
+            },
+            {
+              "sourceOffset": 12,
+              "textOffset": 3
+            },
+            {
+              "sourceOffset": 13,
+              "textOffset": 4
+            },
+            {
+              "sourceOffset": 14,
+              "textOffset": 5
+            },
+            {
+              "sourceOffset": 15,
+              "textOffset": 6
+            },
+            {
+              "sourceOffset": 16,
+              "textOffset": 7
+            },
+            {
+              "sourceOffset": 17,
+              "textOffset": 8
+            },
+            {
+              "sourceOffset": 18,
+              "textOffset": 9
+            },
+            {
+              "sourceOffset": 19,
+              "textOffset": 10
+            },
+            {
+              "sourceOffset": 20,
+              "textOffset": 11
+            },
+            {
+              "sourceOffset": 21,
+              "textOffset": 12
+            },
+            {
+              "sourceOffset": 22,
+              "textOffset": 13
+            },
+            {
+              "sourceOffset": 23,
+              "textOffset": 14
+            }
+          ],
+          "kind": "paragraph",
+          "span": {
+            "endCol": 16,
+            "endLine": 3,
+            "endOffset": 24,
+            "startCol": 1,
+            "startLine": 3,
+            "startOffset": 9
+          },
+          "text": "I have 5 cukes."
+        }
+      ],
+      "scopeStack": [
+        "Cukes"
+      ],
+      "span": {
+        "endCol": 16,
+        "endLine": 3,
+        "endOffset": 24,
+        "startCol": 1,
+        "startLine": 3,
+        "startOffset": 9
+      }
+    }
+  ],
+  "orphanAttachments": [],
+  "path": "example.var.md"
+}

@@ -1,0 +1,49 @@
+{
+  "diagnostics": [],
+  "examples": [
+    {
+      "expectedOutcome": "pass",
+      "name": "I echo the following:",
+      "scopeStack": [
+        "Echo",
+        "It echoes the doc string"
+      ],
+      "span": {
+        "endCol": 4,
+        "endLine": 9,
+        "endOffset": 73,
+        "startCol": 1,
+        "startLine": 5,
+        "startOffset": 37
+      },
+      "steps": [
+        {
+          "args": [],
+          "docString": {
+            "content": "hello\n",
+            "contentType": "",
+            "span": {
+              "endCol": 1,
+              "endLine": 9,
+              "endOffset": 70,
+              "startCol": 1,
+              "startLine": 8,
+              "startOffset": 64
+            }
+          },
+          "matchSpan": {
+            "endCol": 22,
+            "endLine": 5,
+            "endOffset": 58,
+            "startCol": 1,
+            "startLine": 5,
+            "startOffset": 37
+          },
+          "matchedExpression": "I echo the following:",
+          "paramSpans": [],
+          "text": "I echo the following:"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "examples": [
+    {
+      "name": "I increment",
+      "outcome": "pass",
+      "steps": [
+        {
+          "contextKey": {
+            "exampleName": "I increment",
+            "stepFile": "counter.steps"
+          },
+          "exampleName": "I increment",
+          "matchedExpression": "I increment",
+          "ordinal": 1,
+          "outcome": "pass",
+          "stepText": "I increment"
+        },
+        {
+          "contextKey": {
+            "exampleName": "I increment",
+            "stepFile": "counter.steps"
+          },
+          "exampleName": "I increment",
+          "matchedExpression": "The count is {int}",
+          "ordinal": 2,
+          "outcome": "pass",
+          "stepText": "The count is 1"
+        }
+      ]
+    },
+    {
+      "name": "I increment the count",
+      "outcome": "pass",
+      "steps": [
+        {
+          "contextKey": {
+            "exampleName": "I increment the count",
+            "stepFile": "counter.steps"
+          },
+          "exampleName": "I increment the count",
+          "matchedExpression": "I increment",
+          "ordinal": 1,
+          "outcome": "pass",
+          "stepText": "I increment"
+        },
+        {
+          "contextKey": {
+            "exampleName": "I increment the count",
+            "stepFile": "counter.steps"
+          },
+          "exampleName": "I increment the count",
+          "matchedExpression": "The count is {int}",
+          "ordinal": 2,
+          "outcome": "pass",
+          "stepText": "The count is 1"
+        }
+      ]
+    }
+  ]
+}

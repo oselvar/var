@@ -1,0 +1,15 @@
+{
+  "parameterTypes": [],
+  "steps": [
+    {
+      "expression": "I have {int} cukes",
+      "parameterTypeNames": [
+        "int"
+      ]
+    },
+    {
+      "expression": "I have 5 cukes",
+      "parameterTypeNames": []
+    }
+  ]
+}

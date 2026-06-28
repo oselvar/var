@@ -1,0 +1,63 @@
+{
+  "diagnostics": [],
+  "examples": [
+    {
+      "expectedOutcome": "fail",
+      "name": "I divide 1 by 0",
+      "scopeStack": [
+        "Division",
+        "Dividing by zero is rejected"
+      ],
+      "span": {
+        "endCol": 4,
+        "endLine": 9,
+        "endOffset": 92,
+        "startCol": 1,
+        "startLine": 5,
+        "startOffset": 45
+      },
+      "steps": [
+        {
+          "args": [
+            {
+              "parameterType": "int",
+              "value": "1"
+            },
+            {
+              "parameterType": "int",
+              "value": "0"
+            }
+          ],
+          "matchSpan": {
+            "endCol": 16,
+            "endLine": 5,
+            "endOffset": 60,
+            "startCol": 1,
+            "startLine": 5,
+            "startOffset": 45
+          },
+          "matchedExpression": "I divide {int} by {int}",
+          "paramSpans": [
+            {
+              "endCol": 11,
+              "endLine": 5,
+              "endOffset": 55,
+              "startCol": 10,
+              "startLine": 5,
+              "startOffset": 54
+            },
+            {
+              "endCol": 16,
+              "endLine": 5,
+              "endOffset": 60,
+              "startCol": 15,
+              "startLine": 5,
+              "startOffset": 59
+            }
+          ],
+          "text": "I divide 1 by 0"
+        }
+      ]
+    }
+  ]
+}

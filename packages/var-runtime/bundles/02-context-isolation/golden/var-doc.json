@@ -1,0 +1,330 @@
+{
+  "examples": [
+    {
+      "body": [
+        {
+          "inlineMap": [
+            {
+              "sourceOffset": 42,
+              "textOffset": 0
+            },
+            {
+              "sourceOffset": 43,
+              "textOffset": 1
+            },
+            {
+              "sourceOffset": 44,
+              "textOffset": 2
+            },
+            {
+              "sourceOffset": 45,
+              "textOffset": 3
+            },
+            {
+              "sourceOffset": 46,
+              "textOffset": 4
+            },
+            {
+              "sourceOffset": 47,
+              "textOffset": 5
+            },
+            {
+              "sourceOffset": 48,
+              "textOffset": 6
+            },
+            {
+              "sourceOffset": 49,
+              "textOffset": 7
+            },
+            {
+              "sourceOffset": 50,
+              "textOffset": 8
+            },
+            {
+              "sourceOffset": 51,
+              "textOffset": 9
+            },
+            {
+              "sourceOffset": 52,
+              "textOffset": 10
+            },
+            {
+              "sourceOffset": 53,
+              "textOffset": 11
+            },
+            {
+              "sourceOffset": 54,
+              "textOffset": 12
+            },
+            {
+              "sourceOffset": 55,
+              "textOffset": 13
+            },
+            {
+              "sourceOffset": 56,
+              "textOffset": 14
+            },
+            {
+              "sourceOffset": 57,
+              "textOffset": 15
+            },
+            {
+              "sourceOffset": 58,
+              "textOffset": 16
+            },
+            {
+              "sourceOffset": 59,
+              "textOffset": 17
+            },
+            {
+              "sourceOffset": 60,
+              "textOffset": 18
+            },
+            {
+              "sourceOffset": 61,
+              "textOffset": 19
+            },
+            {
+              "sourceOffset": 62,
+              "textOffset": 20
+            },
+            {
+              "sourceOffset": 63,
+              "textOffset": 21
+            },
+            {
+              "sourceOffset": 64,
+              "textOffset": 22
+            },
+            {
+              "sourceOffset": 65,
+              "textOffset": 23
+            },
+            {
+              "sourceOffset": 66,
+              "textOffset": 24
+            },
+            {
+              "sourceOffset": 67,
+              "textOffset": 25
+            },
+            {
+              "sourceOffset": 68,
+              "textOffset": 26
+            },
+            {
+              "sourceOffset": 69,
+              "textOffset": 27
+            }
+          ],
+          "kind": "paragraph",
+          "span": {
+            "endCol": 29,
+            "endLine": 5,
+            "endOffset": 70,
+            "startCol": 1,
+            "startLine": 5,
+            "startOffset": 42
+          },
+          "text": "I increment. The count is 1."
+        }
+      ],
+      "scopeStack": [
+        "Counter",
+        "First example starts fresh"
+      ],
+      "span": {
+        "endCol": 29,
+        "endLine": 5,
+        "endOffset": 70,
+        "startCol": 1,
+        "startLine": 5,
+        "startOffset": 42
+      }
+    },
+    {
+      "body": [
+        {
+          "inlineMap": [
+            {
+              "sourceOffset": 104,
+              "textOffset": 0
+            },
+            {
+              "sourceOffset": 105,
+              "textOffset": 1
+            },
+            {
+              "sourceOffset": 106,
+              "textOffset": 2
+            },
+            {
+              "sourceOffset": 107,
+              "textOffset": 3
+            },
+            {
+              "sourceOffset": 108,
+              "textOffset": 4
+            },
+            {
+              "sourceOffset": 109,
+              "textOffset": 5
+            },
+            {
+              "sourceOffset": 110,
+              "textOffset": 6
+            },
+            {
+              "sourceOffset": 111,
+              "textOffset": 7
+            },
+            {
+              "sourceOffset": 112,
+              "textOffset": 8
+            },
+            {
+              "sourceOffset": 113,
+              "textOffset": 9
+            },
+            {
+              "sourceOffset": 114,
+              "textOffset": 10
+            },
+            {
+              "sourceOffset": 115,
+              "textOffset": 11
+            },
+            {
+              "sourceOffset": 116,
+              "textOffset": 12
+            },
+            {
+              "sourceOffset": 117,
+              "textOffset": 13
+            },
+            {
+              "sourceOffset": 118,
+              "textOffset": 14
+            },
+            {
+              "sourceOffset": 119,
+              "textOffset": 15
+            },
+            {
+              "sourceOffset": 120,
+              "textOffset": 16
+            },
+            {
+              "sourceOffset": 121,
+              "textOffset": 17
+            },
+            {
+              "sourceOffset": 122,
+              "textOffset": 18
+            },
+            {
+              "sourceOffset": 123,
+              "textOffset": 19
+            },
+            {
+              "sourceOffset": 124,
+              "textOffset": 20
+            },
+            {
+              "sourceOffset": 125,
+              "textOffset": 21
+            },
+            {
+              "sourceOffset": 126,
+              "textOffset": 22
+            },
+            {
+              "sourceOffset": 127,
+              "textOffset": 23
+            },
+            {
+              "sourceOffset": 128,
+              "textOffset": 24
+            },
+            {
+              "sourceOffset": 129,
+              "textOffset": 25
+            },
+            {
+              "sourceOffset": 130,
+              "textOffset": 26
+            },
+            {
+              "sourceOffset": 131,
+              "textOffset": 27
+            },
+            {
+              "sourceOffset": 132,
+              "textOffset": 28
+            },
+            {
+              "sourceOffset": 133,
+              "textOffset": 29
+            },
+            {
+              "sourceOffset": 134,
+              "textOffset": 30
+            },
+            {
+              "sourceOffset": 135,
+              "textOffset": 31
+            },
+            {
+              "sourceOffset": 136,
+              "textOffset": 32
+            },
+            {
+              "sourceOffset": 137,
+              "textOffset": 33
+            },
+            {
+              "sourceOffset": 138,
+              "textOffset": 34
+            },
+            {
+              "sourceOffset": 139,
+              "textOffset": 35
+            },
+            {
+              "sourceOffset": 140,
+              "textOffset": 36
+            },
+            {
+              "sourceOffset": 141,
+              "textOffset": 37
+            }
+          ],
+          "kind": "paragraph",
+          "span": {
+            "endCol": 39,
+            "endLine": 9,
+            "endOffset": 142,
+            "startCol": 1,
+            "startLine": 9,
+            "startOffset": 104
+          },
+          "text": "I increment the count. The count is 1."
+        }
+      ],
+      "scopeStack": [
+        "Counter",
+        "Second example starts fresh"
+      ],
+      "span": {
+        "endCol": 39,
+        "endLine": 9,
+        "endOffset": 142,
+        "startCol": 1,
+        "startLine": 9,
+        "startOffset": 104
+      }
+    }
+  ],
+  "orphanAttachments": [],
+  "path": "example.var.md"
+}

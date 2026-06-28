@@ -1,0 +1,25 @@
+{
+  "examples": [
+    {
+      "name": "I divide 1 by 0",
+      "outcome": "pass",
+      "steps": [
+        {
+          "contextKey": {
+            "exampleName": "I divide 1 by 0",
+            "stepFile": "division.steps"
+          },
+          "exampleName": "I divide 1 by 0",
+          "failure": {
+            "kind": "thrown",
+            "line": 5
+          },
+          "matchedExpression": "I divide {int} by {int}",
+          "ordinal": 1,
+          "outcome": "fail",
+          "stepText": "I divide 1 by 0"
+        }
+      ]
+    }
+  ]
+}

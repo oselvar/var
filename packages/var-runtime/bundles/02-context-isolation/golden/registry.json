@@ -1,0 +1,15 @@
+{
+  "parameterTypes": [],
+  "steps": [
+    {
+      "expression": "I increment",
+      "parameterTypeNames": []
+    },
+    {
+      "expression": "The count is {int}",
+      "parameterTypeNames": [
+        "int"
+      ]
+    }
+  ]
+}

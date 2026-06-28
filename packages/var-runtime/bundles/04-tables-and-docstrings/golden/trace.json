@@ -1,0 +1,21 @@
+{
+  "examples": [
+    {
+      "name": "I echo the following:",
+      "outcome": "pass",
+      "steps": [
+        {
+          "contextKey": {
+            "exampleName": "I echo the following:",
+            "stepFile": "echo.steps"
+          },
+          "exampleName": "I echo the following:",
+          "matchedExpression": "I echo the following:",
+          "ordinal": 1,
+          "outcome": "pass",
+          "stepText": "I echo the following:"
+        }
+      ]
+    }
+  ]
+}

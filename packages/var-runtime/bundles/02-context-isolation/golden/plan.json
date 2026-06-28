@@ -1,0 +1,125 @@
+{
+  "diagnostics": [],
+  "examples": [
+    {
+      "expectedOutcome": "pass",
+      "name": "I increment",
+      "scopeStack": [
+        "Counter",
+        "First example starts fresh"
+      ],
+      "span": {
+        "endCol": 29,
+        "endLine": 5,
+        "endOffset": 70,
+        "startCol": 1,
+        "startLine": 5,
+        "startOffset": 42
+      },
+      "steps": [
+        {
+          "args": [],
+          "matchSpan": {
+            "endCol": 12,
+            "endLine": 5,
+            "endOffset": 53,
+            "startCol": 1,
+            "startLine": 5,
+            "startOffset": 42
+          },
+          "matchedExpression": "I increment",
+          "paramSpans": [],
+          "text": "I increment"
+        },
+        {
+          "args": [
+            {
+              "parameterType": "int",
+              "value": "1"
+            }
+          ],
+          "matchSpan": {
+            "endCol": 28,
+            "endLine": 5,
+            "endOffset": 69,
+            "startCol": 14,
+            "startLine": 5,
+            "startOffset": 55
+          },
+          "matchedExpression": "The count is {int}",
+          "paramSpans": [
+            {
+              "endCol": 28,
+              "endLine": 5,
+              "endOffset": 69,
+              "startCol": 27,
+              "startLine": 5,
+              "startOffset": 68
+            }
+          ],
+          "text": "The count is 1"
+        }
+      ]
+    },
+    {
+      "expectedOutcome": "pass",
+      "name": "I increment the count",
+      "scopeStack": [
+        "Counter",
+        "Second example starts fresh"
+      ],
+      "span": {
+        "endCol": 39,
+        "endLine": 9,
+        "endOffset": 142,
+        "startCol": 1,
+        "startLine": 9,
+        "startOffset": 104
+      },
+      "steps": [
+        {
+          "args": [],
+          "matchSpan": {
+            "endCol": 12,
+            "endLine": 9,
+            "endOffset": 115,
+            "startCol": 1,
+            "startLine": 9,
+            "startOffset": 104
+          },
+          "matchedExpression": "I increment",
+          "paramSpans": [],
+          "text": "I increment"
+        },
+        {
+          "args": [
+            {
+              "parameterType": "int",
+              "value": "1"
+            }
+          ],
+          "matchSpan": {
+            "endCol": 38,
+            "endLine": 9,
+            "endOffset": 141,
+            "startCol": 24,
+            "startLine": 9,
+            "startOffset": 127
+          },
+          "matchedExpression": "The count is {int}",
+          "paramSpans": [
+            {
+              "endCol": 38,
+              "endLine": 9,
+              "endOffset": 141,
+              "startCol": 37,
+              "startLine": 9,
+              "startOffset": 140
+            }
+          ],
+          "text": "The count is 1"
+        }
+      ]
+    }
+  ]
+}
