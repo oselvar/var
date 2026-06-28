@@ -1,4 +1,5 @@
-import { CellMismatchError, compareRow } from './cell-diff.js'
+import { CellMismatchError, compareRow, compareTable } from './cell-diff.js'
+import { compareDocString, DocStringMismatchError } from './doc-string-diff.js'
 import type { ExecutionPlan, PlannedStep } from './plan.js'
 import type { Reporter, TestSink } from './ports.js'
 
@@ -50,6 +51,17 @@ export function executePlan(plan: ExecutionPlan, ports: ExecutePorts): void {
           throw augmentStack(err, step, path)
         }
         lastReturn = returned
+        try {
+          if (step.dataTable) {
+            const bad = compareTable(returned, step.dataTable).filter((d) => !d.ok)
+            if (bad.length > 0) throw new CellMismatchError(bad)
+          } else if (step.docString) {
+            const diff = compareDocString(returned, step.docString.content, step.docString.span)
+            if (diff) throw new DocStringMismatchError(diff)
+          }
+        } catch (err) {
+          throw augmentStack(err, step, path)
+        }
       }
       if (ex.rowChecks && ex.rowChecks.length > 0) {
         const bad = compareRow(lastReturn, ex.rowChecks).filter((d) => !d.ok)

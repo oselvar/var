@@ -1,6 +1,7 @@
 import { expect, test } from 'vitest'
-import { type CellMismatchError, isCellMismatchError } from '../src/cell-diff.js'
+import { type CellMismatchError, isCellMismatchError, ReturnShapeError } from '../src/cell-diff.js'
 import type { Diagnostic } from '../src/diagnostics.js'
+import { type DocStringMismatchError, isDocStringMismatchError } from '../src/doc-string-diff.js'
 import { executePlan } from '../src/execute.js'
 import { parse } from '../src/parse.js'
 import { plan } from '../src/plan.js'
@@ -350,4 +351,111 @@ each row lists the dice, the category and the score:
     reporter: { diagnostic: () => {} },
   })
   await expect(runs[0]?.()).resolves.toBeUndefined()
+})
+
+function runsFor(source: string, reg: ReturnType<typeof createRegistry>) {
+  const p = plan(parse('w.var.md', source), reg)
+  const runs: Array<() => unknown | Promise<unknown>> = []
+  executePlan(p, {
+    sink: { example: (_n, run) => runs.push(run) },
+    reporter: { diagnostic: () => {} },
+  })
+  return runs
+}
+
+const TABLE_DOC = `# T
+
+uppercase each one:
+
+| before | after |
+| ------ | ----- |
+| var    | VAR   |
+| bdd    | BDD   |`
+
+test('a whole-table step returning a mismatched table throws CellMismatchError at the cell span', async () => {
+  const r = addStep(createRegistry(), {
+    expression: 'uppercase each one',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: () => [
+      ['var', 'WRONG'],
+      ['bdd', 'BDD'],
+    ],
+  })
+  const source = TABLE_DOC
+  const runs = runsFor(source, r)
+  let caught: unknown
+  try {
+    await runs[0]?.()
+  } catch (e) {
+    caught = e
+  }
+  expect(isCellMismatchError(caught)).toBe(true)
+  const cells = (caught as CellMismatchError).cells
+  expect(cells).toHaveLength(1)
+  expect(cells[0]?.expected).toBe('VAR')
+  expect(cells[0]?.actual).toBe('WRONG')
+  expect(source.slice(cells[0]!.span.startOffset, cells[0]!.span.endOffset)).toBe('VAR')
+})
+
+test('a whole-table step returning a matching table passes', async () => {
+  const r = addStep(createRegistry(), {
+    expression: 'uppercase each one',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: () => [
+      { before: 'var', after: 'VAR' },
+      { before: 'bdd', after: 'BDD' },
+    ],
+  })
+  await expect(runsFor(TABLE_DOC, r)[0]?.()).resolves.toBeUndefined()
+})
+
+test('a whole-table step returning the wrong type throws ReturnShapeError', async () => {
+  const r = addStep(createRegistry(), {
+    expression: 'uppercase each one',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: () => 'not a table',
+  })
+  await expect(runsFor(TABLE_DOC, r)[0]?.()).rejects.toBeInstanceOf(ReturnShapeError)
+})
+
+const DOCSTRING_DOC = `# T
+
+the greeting is:
+
+\`\`\`text
+Hello, world!
+\`\`\``
+
+test('a doc-string step returning a different string throws DocStringMismatchError at the body span', async () => {
+  const r = addStep(createRegistry(), {
+    expression: 'the greeting is',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: () => 'Goodbye!\n',
+  })
+  const source = DOCSTRING_DOC
+  let caught: unknown
+  try {
+    await runsFor(source, r)[0]?.()
+  } catch (e) {
+    caught = e
+  }
+  expect(isDocStringMismatchError(caught)).toBe(true)
+  const diff = (caught as DocStringMismatchError).diff
+  expect(diff.expected).toBe('Hello, world!\n')
+  expect(diff.actual).toBe('Goodbye!\n')
+  expect(source.slice(diff.span.startOffset, diff.span.endOffset)).toBe('Hello, world!\n')
+})
+
+test('a doc-string step returning the exact body passes', async () => {
+  const r = addStep(createRegistry(), {
+    expression: 'the greeting is',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: (_ctx, body: string) => body, // echo the exact content
+  })
+  await expect(runsFor(DOCSTRING_DOC, r)[0]?.()).resolves.toBeUndefined()
 })
