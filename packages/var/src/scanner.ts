@@ -321,7 +321,7 @@ function tryFence(
 }
 
 const ROW_RE = /^\|(.+)\|\s*$/
-const DELIM_RE = /^\|\s*:?-+:?\s*(\|\s*:?-+:?\s*)+\|\s*$/
+const DELIM_RE = /^\|\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|\s*$/
 
 function tryTable(
   source: string,

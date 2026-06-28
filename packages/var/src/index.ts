@@ -15,7 +15,13 @@ export type {
   VarDoc,
 } from './ast.js'
 export type { CellDiff, RowCheck } from './cell-diff.js'
-export { CellMismatchError, compareRow, isCellMismatchError } from './cell-diff.js'
+export {
+  CellMismatchError,
+  compareRow,
+  compareTable,
+  isCellMismatchError,
+  ReturnShapeError,
+} from './cell-diff.js'
 export type { VarConfig } from './config-types.js'
 export type {
   AmbiguousInput,
