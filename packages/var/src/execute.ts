@@ -45,6 +45,8 @@ export function executePlan(plan: ExecutionPlan, ports: ExecutePorts): void {
     ports.sink.example(
       ex.name,
       async () => {
+        // Cache one context per stepfile within this example. Lazy creation
+        // keeps the cost zero for stepfiles whose steps don't run.
         const ctxByFile = new Map<string, unknown>()
         let lastReturn: unknown
         let thrown: unknown
@@ -56,6 +58,10 @@ export function executePlan(plan: ExecutionPlan, ports: ExecutePorts): void {
             ctx = await createContext(file)
             ctxByFile.set(file, ctx)
           }
+          // A trailing data table or doc string is passed as the LAST handler
+          // argument, after whatever the cucumber expression captured. Tables
+          // arrive as a plain `string[][]` (header row first); doc strings as a
+          // plain string.
           const extra: unknown[] = []
           if (step.dataTable) {
             extra.push([
@@ -75,7 +81,6 @@ export function executePlan(plan: ExecutionPlan, ports: ExecutePorts): void {
               const diff = compareDocString(returned, step.docString.content, step.docString.span)
               if (diff) throw new DocStringMismatchError(diff)
             }
-            ports.observer?.step({ exampleName: ex.name, ordinal: i + 1, stepFile: file, outcome: 'pass' })
           } catch (err) {
             const augmented = augmentStack(err, step, path)
             ports.observer?.step({
@@ -88,6 +93,7 @@ export function executePlan(plan: ExecutionPlan, ports: ExecutePorts): void {
             thrown = augmented
             break
           }
+          ports.observer?.step({ exampleName: ex.name, ordinal: i + 1, stepFile: file, outcome: 'pass' })
         }
         if (thrown === undefined && ex.rowChecks && ex.rowChecks.length > 0) {
           const bad = compareRow(lastReturn, ex.rowChecks).filter((d) => !d.ok)

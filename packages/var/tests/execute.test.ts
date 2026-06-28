@@ -559,3 +559,20 @@ test('observer receives a pass observation per executed step', async () => {
     { exampleName: 'I add 5', ordinal: 1, stepFile: 's.ts', outcome: 'pass' },
   ])
 })
+
+test('observer receives a fail observation when a step throws', async () => {
+  const r = addStep(createRegistry(), {
+    expression: 'I blow up',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: () => { throw new Error('kaboom') },
+  })
+  const obs: StepObservation[] = []
+  const run = await runOnly(plan(parse('e.var.md', '# A\n\nI blow up.'), r), {
+    step: (o) => obs.push(o),
+  })
+  await run?.().catch(() => {})
+  expect(obs).toHaveLength(1)
+  expect(obs[0]?.outcome).toBe('fail')
+  expect(obs[0]?.error).toBeDefined()
+})
