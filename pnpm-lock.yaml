@@ -160,6 +160,9 @@ importers:
       '@codemirror/language':
         specifier: ^6.12.3
         version: 6.12.3
+      '@codemirror/lint':
+        specifier: ^6.9.0
+        version: 6.9.7
       '@codemirror/lsp-client':
         specifier: ^6.0.0
         version: 6.2.5

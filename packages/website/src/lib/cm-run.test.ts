@@ -1,78 +1,29 @@
-import type { SpecResults } from '@oselvar/var'
+import { hashSource, type SpecResults } from '@oselvar/var'
 import { describe, expect, it } from 'vitest'
-import { actualAt, cellFailRanges } from './cm-run.js'
+import { varDiagnostics } from './cm-run.js'
 
+const SOURCE = 'x 6 y'
 const results: SpecResults = {
   version: 1,
-  specPath: 'spec.var.md',
-  sourceHash: 'fnv1a:00000000',
+  specPath: 's.var.md',
+  sourceHash: hashSource(SOURCE),
   examples: [
-    {
-      name: 'row',
-      status: 'failed',
-      lines: [5],
-      failure: {
-        line: 5,
-        message: 'm',
-        stack: 's',
-        cells: [
-          { from: 10, to: 11, actual: '4' },
-          { from: 20, to: 22, actual: '17' },
-        ],
-      },
-    },
-    {
-      name: 'docstring',
-      status: 'failed',
-      lines: [9],
-      failure: {
-        line: 9,
-        message: 'm',
-        stack: 's',
-        doc: { from: 30, to: 39, actual: 'Goodbye!\n' },
-      },
-    },
-    { name: 'ok', status: 'passed', lines: [3] },
+    { name: 'r', status: 'failed', lines: [1], failure: { line: 1, message: 'm', stack: 's', cells: [{ from: 2, to: 3, actual: '50' }] } },
   ],
 }
 
-describe('cellFailRanges', () => {
-  it('collects every failing cell range and the doc range, sorted by from', () => {
-    expect(cellFailRanges(results)).toEqual([
-      { from: 10, to: 11 },
-      { from: 20, to: 22 },
-      { from: 30, to: 39 },
+describe('varDiagnostics', () => {
+  it('maps a cell mismatch to a CodeMirror error diagnostic', () => {
+    expect(varDiagnostics(results, SOURCE)).toEqual([
+      { from: 2, to: 3, severity: 'error', message: 'expected 6 but was 50' },
     ])
   })
 
-  it('is empty when nothing failed with cell info', () => {
-    expect(
-      cellFailRanges({
-        version: 1,
-        specPath: 'spec.var.md',
-        sourceHash: 'fnv1a:00000000',
-        examples: [{ name: 'ok', status: 'passed', lines: [1] }],
-      }),
-    ).toEqual([])
-  })
-})
-
-describe('actualAt', () => {
-  it('returns the actual value for a position inside a failing cell or doc span', () => {
-    expect(actualAt(results, 10)).toBe('4')
-    expect(actualAt(results, 21)).toBe('17')
-    expect(actualAt(results, 35)).toBe('Goodbye!\n')
+  it('returns nothing when results are null', () => {
+    expect(varDiagnostics(null, SOURCE)).toEqual([])
   })
 
-  it('returns null outside any failing range', () => {
-    expect(actualAt(results, 0)).toBeNull()
-    expect(actualAt(results, 15)).toBeNull()
-    expect(actualAt(results, 100)).toBeNull()
-  })
-
-  it('treats the upper bound as exclusive, matching the CodeMirror mark [from,to) convention', () => {
-    // exclusive at `to`: the position AFTER the last marked char is outside
-    expect(actualAt(results, 22)).toBeNull() // cell {from:20,to:22} marks [20,22)
-    expect(actualAt(results, 11)).toBeNull() // cell {from:10,to:11} marks [10,11)
+  it('returns nothing when the doc no longer hash-matches (stale)', () => {
+    expect(varDiagnostics(results, `${SOURCE} edited`)).toEqual([])
   })
 })
