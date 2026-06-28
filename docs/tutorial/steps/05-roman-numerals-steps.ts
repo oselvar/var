@@ -1,8 +1,8 @@
-import { defineContext } from '@oselvar/var-vitest'
+import { defineState } from '@oselvar/var-vitest'
 
-const { step } = defineContext(() => ({}))
+const { sensor } = defineState(() => ({}))
 
-step('a decimal and a roman number', (ctx) => {
+sensor('a decimal and a roman number', (_ctx) => {
   // Write code here that turns the phrase above into concrete actions
   throw new Error('not implemented')
 })

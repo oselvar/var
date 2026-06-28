@@ -1,13 +1,9 @@
-import { defineContext } from '@oselvar/var-runtime'
+import { defineState } from '@oselvar/var-runtime'
 
-const { step } = defineContext(() => ({ greeting: '' }))
+const { action, sensor } = defineState(() => ({ greeting: '' }))
 
-step('I greet {string}', (ctx, name: string) => {
+action('I greet {string}', (ctx, name: string) => {
   ctx.greeting = `Hello, ${name}!`
 })
 
-step('the greeting is {string}', (ctx, expected: string) => {
-  if (ctx.greeting !== expected) {
-    throw new Error(`expected ${expected}, got ${ctx.greeting}`)
-  }
-})
+sensor('the greeting is {string}', (ctx, _expected: string) => [ctx.greeting] as [string])
