@@ -31,9 +31,16 @@ export type PlanArtifact = {
       readonly matchSpan: Span
       readonly paramSpans: ReadonlyArray<Span>
       readonly matchedExpression: string
-      readonly args: ReadonlyArray<{ readonly value: string; readonly parameterType: string | null }>
+      readonly args: ReadonlyArray<{
+        readonly value: string
+        readonly parameterType: string | null
+      }>
       readonly dataTable?: Table
-      readonly docString?: { readonly content: string; readonly contentType: string; readonly span: Span }
+      readonly docString?: {
+        readonly content: string
+        readonly contentType: string
+        readonly span: Span
+      }
     }>
   }>
   readonly diagnostics: ReadonlyArray<Diagnostic>
