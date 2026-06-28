@@ -22,6 +22,8 @@ export {
   isCellMismatchError,
   ReturnShapeError,
 } from './cell-diff.js'
+export { compareParams } from './param-diff.js'
+export { deepEqual } from './deep-equal.js'
 export type { VarConfig } from './config-types.js'
 export type {
   AmbiguousInput,
