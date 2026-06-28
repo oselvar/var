@@ -2,8 +2,8 @@ import type { Fence, Table, VarDoc } from './ast.js'
 import { isCellMismatchError, ReturnShapeError } from './cell-diff.js'
 import type { Diagnostic } from './diagnostics.js'
 import { isDocStringMismatchError } from './doc-string-diff.js'
-import { isUnexpectedPassError } from './execute.js'
-import type { ExecutionPlan } from './plan.js'
+import { executePlan, isUnexpectedPassError, type StepObservation } from './execute.js'
+import { plan as buildPlan, type ExecutionPlan } from './plan.js'
 import type { Registry } from './registry.js'
 import type { Span } from './span.js'
 
@@ -207,4 +207,63 @@ export function toFailureArtifact(
   if (error instanceof ReturnShapeError) return { kind: 'return-shape', line }
   if (isUnexpectedPassError(error)) return { kind: 'unexpected-pass', line }
   return { kind: 'thrown', line }
+}
+
+export async function runConformance(
+  varDoc: VarDoc,
+  registry: Registry,
+  createContext: (stepFile: string) => unknown | Promise<unknown>,
+  parameterTypes: ReadonlyArray<{ name: string; regexp: string }> = [],
+): Promise<BundleArtifacts> {
+  const execution = buildPlan(varDoc, registry)
+
+  const observed = new Map<string, StepObservation[]>()
+  const queue: { name: string; run: () => void | Promise<void> }[] = []
+  executePlan(execution, {
+    sink: { example: (name, run) => queue.push({ name, run }) },
+    reporter: { diagnostic: () => {} }, // diagnostics are captured in the plan artifact
+    createContext,
+    observer: {
+      step: (o) => {
+        const list = observed.get(o.exampleName) ?? []
+        list.push(o)
+        observed.set(o.exampleName, list)
+      },
+    },
+  })
+
+  const traceExamples = []
+  for (const { name, run } of queue) {
+    let outcome: 'pass' | 'fail' = 'pass'
+    try {
+      await run()
+    } catch {
+      outcome = 'fail'
+    }
+    const planned = execution.examples.find((e) => e.name === name)
+    const obs = observed.get(name) ?? []
+    const steps: StepTrace[] = (planned?.steps ?? []).map((step, i) => {
+      const o = obs.find((x) => x.ordinal === i + 1)
+      const stepOutcome = o ? o.outcome : 'skipped'
+      return {
+        exampleName: name,
+        ordinal: i + 1,
+        stepText: step.text,
+        matchedExpression: step.stepDef.expression,
+        contextKey: { exampleName: name, stepFile: fileStem(step.stepDef.expressionSourceFile) },
+        outcome: stepOutcome,
+        ...(stepOutcome === 'fail'
+          ? { failure: toFailureArtifact(o?.error, varDoc.path, step.matchSpan.startLine) }
+          : {}),
+      }
+    })
+    traceExamples.push({ name, outcome, steps })
+  }
+
+  return {
+    varDoc: toVarDocArtifact(varDoc),
+    registry: toRegistryArtifact(registry, parameterTypes),
+    plan: toPlanArtifact(execution),
+    trace: { examples: traceExamples },
+  }
 }

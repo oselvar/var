@@ -2,6 +2,7 @@ import { expect, test } from 'vitest'
 import { CellMismatchError } from '../src/cell-diff.js'
 import {
   canonicalStringify,
+  runConformance,
   toFailureArtifact,
   toPlanArtifact,
   toRegistryArtifact,
@@ -87,4 +88,45 @@ test('toVarDocArtifact keeps path, examples and orphanAttachments', () => {
   const art = toVarDocArtifact(parse('e.var.md', '# A\n\nI have 5 cukes.'))
   expect(art.path).toBe('e.var.md')
   expect(Array.isArray(art.examples)).toBe(true)
+})
+
+test('runConformance: passing example yields pass steps with structural contextKey', async () => {
+  const r = addStep(createRegistry(), {
+    expression: 'I have {int} cukes',
+    expressionSourceFile: '/abs/s.ts',
+    expressionSourceLine: 1,
+    handler: () => {},
+  })
+  const out = await runConformance(parse('e.var.md', '# A\n\nI have 5 cukes.'), r, () => ({}))
+  expect(out.trace.examples[0]).toEqual({
+    name: 'I have 5 cukes',
+    outcome: 'pass',
+    steps: [
+      {
+        exampleName: 'I have 5 cukes',
+        ordinal: 1,
+        stepText: 'I have 5 cukes',
+        matchedExpression: 'I have {int} cukes',
+        contextKey: { exampleName: 'I have 5 cukes', stepFile: 's' },
+        outcome: 'pass',
+      },
+    ],
+  })
+})
+
+test('runConformance: expected-failure example reads pass but the step carries the failure', async () => {
+  const r = addStep(createRegistry(), {
+    expression: 'I divide {int} by {int}',
+    expressionSourceFile: '/abs/s.ts',
+    expressionSourceLine: 1,
+    handler: (_c, _a, b) => {
+      if (b === 0) throw new Error('division by zero')
+    },
+  })
+  const src = '# D\n\nI divide 1 by 0.\n\n```error\ndivision by zero\n```\n'
+  const out = await runConformance(parse('e.var.md', src), r, () => ({}))
+  const ex = out.trace.examples[0]
+  expect(ex?.outcome).toBe('pass')
+  expect(ex?.steps[0]?.outcome).toBe('fail')
+  expect(ex?.steps[0]?.failure?.kind).toBe('thrown')
 })

@@ -32,7 +32,14 @@ export type {
   TraceArtifact,
   VarDocArtifact,
 } from './conformance.js'
-export { canonicalStringify } from './conformance.js'
+export {
+  canonicalStringify,
+  runConformance,
+  toFailureArtifact,
+  toPlanArtifact,
+  toRegistryArtifact,
+  toVarDocArtifact,
+} from './conformance.js'
 export type {
   AmbiguousInput,
   Candidate,
