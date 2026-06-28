@@ -9,11 +9,7 @@ step(
   'Examples of dice, category and score',
   (_ctx, row: { dice: string; category: string; score: string }) => {
     const dice = row.dice.split(',').map((d) => Number(d.trim()))
-    const actual = score(dice, row.category)
-    const expected = Number(row.score)
-    if (actual !== expected) {
-      throw new Error(`${row.dice} scored as ${row.category}: expected ${expected}, got ${actual}`)
-    }
+    return { score: score(dice, row.category) }
   },
 )
 
