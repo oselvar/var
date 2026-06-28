@@ -33,6 +33,7 @@ test('a returned key that is not a column is ignored', () => {
 
 test('undefined / non-object return checks nothing', () => {
   expect(compareRow(undefined, checks)).toEqual([])
+  expect(compareRow(null, checks)).toEqual([])
   expect(compareRow(42, checks)).toEqual([])
 })
 

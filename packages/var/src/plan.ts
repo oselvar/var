@@ -107,7 +107,7 @@ export function plan(varDoc: VarDoc, registry: Registry): ExecutionPlan {
           matchSpan: row.span,
           args: [...bound.step.args, rowObject],
         }
-        const rowChecks: RowCheck[] = bound.table.header.cells.map((column, i) => ({
+        const rowChecks: ReadonlyArray<RowCheck> = bound.table.header.cells.map((column, i) => ({
           column,
           value: row.cells[i] ?? '',
           span: row.cellSpans[i] ?? row.span,
