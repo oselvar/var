@@ -27,6 +27,11 @@ export type PlannedExample = {
   // Present on each row of a header-bound table: one check per column, used by
   // the executor to compare the step's returned columns against the cells.
   readonly rowChecks?: ReadonlyArray<RowCheck>
+  // Set when the example carries an ```error fence: the example is
+  // expected to fail. The executor inverts the outcome (a pass becomes a
+  // failure). An optional message substring the actual failure must contain.
+  readonly expectedOutcome?: 'fail'
+  readonly expectedErrorMessage?: string
 }
 
 export type HeaderBinding = {
@@ -129,6 +134,13 @@ export function plan(varDoc: VarDoc, registry: Registry): ExecutionPlan {
       continue
     }
 
+    // An ```error fence anywhere in this example marks it expected-to-fail and
+    // is consumed here (never attached to a step as a doc string).
+    // `Fence` is already imported at the top of plan.ts.
+    const errorFence = ex.body.find(
+      (b): b is Fence => b.kind === 'fence' && b.info === 'error',
+    )
+
     // Pass 2: look for table/fence immediately after a step-bearing block.
     const attachments = new Map<
       number,
@@ -142,7 +154,7 @@ export function plan(varDoc: VarDoc, registry: Registry): ExecutionPlan {
       if (!here) continue
       if (here.kind === 'table' && stepsByBlock.has(idx - 1)) {
         attachments.set(idx - 1, { ...(attachments.get(idx - 1) ?? {}), dataTable: here })
-      } else if (here.kind === 'fence' && stepsByBlock.has(idx - 1)) {
+      } else if (here.kind === 'fence' && here.info !== 'error' && stepsByBlock.has(idx - 1)) {
         const fence = here as Fence
         attachments.set(idx - 1, {
           ...(attachments.get(idx - 1) ?? {}),
@@ -176,6 +188,14 @@ export function plan(varDoc: VarDoc, registry: Registry): ExecutionPlan {
       scopeStack: ex.scopeStack,
       span: ex.span,
       steps: hadAmbiguous ? [] : finalSteps,
+      ...(errorFence
+        ? {
+            expectedOutcome: 'fail' as const,
+            ...(errorFence.body.trim().length > 0
+              ? { expectedErrorMessage: errorFence.body.trim() }
+              : {}),
+          }
+        : {}),
     })
   }
 

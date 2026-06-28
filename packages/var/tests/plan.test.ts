@@ -362,6 +362,32 @@ each row lists the dice, the category and the score:
   expect(source.slice(scoreCheck.span.startOffset, scoreCheck.span.endOffset)).toBe('17')
 })
 
+test('an `error` fence marks the example expectedOutcome=fail with a message substring', () => {
+  const r = addStep(createRegistry(), {
+    expression: 'I divide {int} by {int}',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: () => {},
+  })
+  const src = '# Division\n\nI divide 1 by 0.\n\n```error\ndivision by zero\n```\n'
+  const ex = plan(parse('e.var.md', src), r).examples[0]
+  expect(ex?.expectedOutcome).toBe('fail')
+  expect(ex?.expectedErrorMessage).toBe('division by zero')
+  // The error fence must NOT become a docString attachment on the step.
+  expect(ex?.steps[0]?.docString).toBeUndefined()
+})
+
+test('no `error` fence leaves expectedOutcome undefined', () => {
+  const r = addStep(createRegistry(), {
+    expression: 'I divide {int} by {int}',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: () => {},
+  })
+  const ex = plan(parse('e.var.md', '# Division\n\nI divide 1 by 1.'), r).examples[0]
+  expect(ex?.expectedOutcome).toBeUndefined()
+})
+
 test('a doc-string step carries the fence body span on its plan', () => {
   const r = addStep(createRegistry(), {
     expression: 'the payload is',
