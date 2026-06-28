@@ -26,6 +26,8 @@ pnpm workspace · biome · vitest (for the core's own tests) · knip · jscpd ·
 ## Workflow
 
 - **Trunk-based development.** We commit small, working increments straight to `main` — no long-lived feature branches. Keep each commit self-contained and green (build + tests pass), so trunk is always releasable.
+- **Type-check is a separate gate.** vitest runs source through esbuild/tsx, which strips types without checking them — a fully green suite can still fail `tsc`. Run `pnpm -r build` (exit 0) before calling any change done, especially after touching a shared type, an AST node, or a package's public exports (new required fields and new exports are the usual culprits). The website has its own Astro build: `pnpm --filter @oselvar/website build`.
+- **Dogfood specs** in `docs/tutorial/**` (`*.var.md` + `*.steps.ts`) run via `NODE_OPTIONS="--import tsx" npx vitest run`; `var.config.ts` globs them.
 
 ## Conventions
 
@@ -33,6 +35,17 @@ pnpm workspace · biome · vitest (for the core's own tests) · knip · jscpd ·
 - BDD example files (dogfood + docs): `*.var.md`.
 - Step definition files: `*.steps.ts`.
 - Config: `var.config.ts` at repo root.
+
+## Return-based comparison
+
+A step may `return` a value; the pure core compares it against what the Markdown says and fails with span-anchored errors:
+
+- **header-bound table row** — the step returns its computed columns; compared cell-by-cell → `CellMismatchError` (`CellDiff[]`, each with a source `span` + `expected` + `actual`).
+- **whole table** — the step returns the full reproduced table; exact string compare per cell → `CellMismatchError`.
+- **doc string** — the step returns the exact text (including the trailing `\n`); exact equality → `DocStringMismatchError`.
+- **wrong shape/type** → `ReturnShapeError`; **`undefined` return** → pass (no assertion).
+
+Because the diffs are anchored to source spans (`startOffset`/`endOffset`), editors render them directly (the website CodeMirror reddens the failing source span and shows `actual: …` on hover). These diffs are the basis of the emerging shared run-result format consumed by the editor, the LSP, and future HTML overlays.
 
 ## What's intentionally absent
 
