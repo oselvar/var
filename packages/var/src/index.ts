@@ -1,5 +1,7 @@
 export const VERSION = '0.0.0'
 
+export { hashSource } from './hash.js'
+
 export type {
   Block,
   Blockquote,
