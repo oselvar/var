@@ -70,7 +70,7 @@ export async function runRegisteredSpec(
                 line: failingLine(stack, varPath) ?? lines[0] ?? 0,
                 message: e?.message ?? String(err),
                 stack,
-                ...(cells && { cells }),
+                ...(cells?.length && { cells }),
                 ...(doc && { doc }),
               },
             }

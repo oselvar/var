@@ -59,4 +59,10 @@ describe('actualAt', () => {
     expect(actualAt(results, 15)).toBeNull()
     expect(actualAt(results, 100)).toBeNull()
   })
+
+  it('treats the upper bound as exclusive, matching the CodeMirror mark [from,to) convention', () => {
+    // exclusive at `to`: the position AFTER the last marked char is outside
+    expect(actualAt(results, 22)).toBeNull() // cell {from:20,to:22} marks [20,22)
+    expect(actualAt(results, 11)).toBeNull() // cell {from:10,to:11} marks [10,11)
+  })
 })

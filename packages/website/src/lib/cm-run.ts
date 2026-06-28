@@ -40,7 +40,7 @@ export function actualAt(results: RunResults, pos: number): string | null {
     const f = ex.failure
     if (!f) continue
     const spans = [...(f.cells ?? []), ...(f.doc ? [f.doc] : [])]
-    for (const s of spans) if (pos >= s.from && pos <= s.to) return s.actual
+    for (const s of spans) if (pos >= s.from && pos < s.to) return s.actual
   }
   return null
 }
