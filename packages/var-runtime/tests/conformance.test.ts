@@ -18,6 +18,9 @@ const ARTIFACTS = [
 
 // NOTE: these tests share @oselvar/var-runtime module-scope state, so they must
 // run sequentially within this file. Do NOT mark them `test.concurrent`.
+// Run with `vitest run` (one-shot), NOT watch mode: bundles are loaded via
+// dynamic import(), which is cached, so a watch re-run would re-clear the
+// builder without re-registering steps and compare against an empty registry.
 for (const name of readdirSync(BUNDLES, { withFileTypes: true })
   .filter((e) => e.isDirectory())
   .map((e) => e.name)
@@ -39,6 +42,11 @@ for (const name of readdirSync(BUNDLES, { withFileTypes: true })
 
       const goldenDir = resolve(dir, 'golden')
       if (UPDATE && !existsSync(goldenDir)) mkdirSync(goldenDir, { recursive: true })
+      if (!UPDATE && !existsSync(goldenDir)) {
+        throw new Error(
+          `Missing goldens for bundle "${name}" — generate with VAR_UPDATE_GOLDENS=1: ${goldenDir}`,
+        )
+      }
       for (const [fileName, key] of ARTIFACTS) {
         const json = canonicalStringify(artifacts[key])
         const file = resolve(goldenDir, `${fileName}.json`)
