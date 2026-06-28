@@ -213,6 +213,8 @@ const runTheme = EditorView.baseTheme({
     borderRadius: '4px',
     fontFamily: 'monospace',
     fontSize: '13px',
+    // Doc-string actuals can be multi-line — preserve their structure.
+    whiteSpace: 'pre',
   },
   '.cm-run-stack': {
     margin: '0',
