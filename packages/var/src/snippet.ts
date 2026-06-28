@@ -1,6 +1,7 @@
 import { CucumberExpressionGenerator } from '@cucumber/cucumber-expressions'
 import type { Registry } from './registry.js'
 import { DEFAULT_SNIPPET_TEMPLATE } from './snippet-template.js'
+import type { StepKind } from './step-role.js'
 import { renderTemplate } from './template.js'
 
 export type Snippet = {
@@ -20,7 +21,7 @@ const FRIENDLY_NAMES: Record<string, string> = {
 export function generateSnippet(
   rawText: string,
   registry: Registry,
-  options: { readonly template?: string } = {},
+  options: { readonly template?: string; readonly role?: StepKind } = {},
 ): Snippet {
   // The expression is the selection verbatim — no Given/When/Then stripping
   // and no other narration heuristics. The user owns what they selected.
@@ -49,7 +50,12 @@ export function generateSnippet(
 
   const handlerSignature = `(ctx, ${handlerArgs.join(', ')}) => {`
   const args = ['ctx', ...handlerArgs].join(', ')
+  const role: StepKind = options.role ?? 'action'
+  const others = (['context', 'action', 'sensor'] as const).filter((k) => k !== role)
   const fullCode = renderTemplate(options.template ?? DEFAULT_SNIPPET_TEMPLATE, {
+    role,
+    altA: others[0] as string,
+    altB: others[1] as string,
     expression,
     args,
     originalText,

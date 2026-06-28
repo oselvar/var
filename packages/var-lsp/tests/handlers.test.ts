@@ -26,7 +26,7 @@ test('hoverOnMd returns the matching step def expression and source location', a
     writeFileSync(join(dir, 'var.config.ts'), 'export default {}\n')
     writeFileSync(
       join(dir, 'a.steps.ts'),
-      `step('I have {int} cukes', () => {})
+      `action('I have {int} cukes', () => {})
 `,
     )
     writeFileSync(join(dir, 'b.var.md'), '# B\n\nGiven I have 5 cukes')
@@ -52,7 +52,7 @@ test('definitionFromMd returns the steps.ts location for a matched step', async 
     writeFileSync(join(dir, 'var.config.ts'), 'export default {}\n')
     writeFileSync(
       join(dir, 'a.steps.ts'),
-      `step('I have {int} cukes', () => {})
+      `action('I have {int} cukes', () => {})
 `,
     )
     writeFileSync(join(dir, 'b.var.md'), '# B\n\nGiven I have 5 cukes')
@@ -85,8 +85,8 @@ test('hover on the second of two adjacent steps returns the second step (off-by-
     writeFileSync(join(dir, 'var.config.ts'), 'export default {}\n')
     writeFileSync(
       join(dir, 'a.steps.ts'),
-      `step('I greet {string}', () => {})
-step('the greeting is {string}', () => {})
+      `action('I greet {string}', () => {})
+sensor('the greeting is {string}', () => {})
 `,
     )
     writeFileSync(
@@ -114,7 +114,7 @@ test('stepAt resolves the step from a .var.md match and returns every matched si
     writeFileSync(join(dir, 'var.config.ts'), 'export default {}\n')
     writeFileSync(
       join(dir, 'a.steps.ts'),
-      `step('I greet {string}', () => {})
+      `action('I greet {string}', () => {})
 `,
     )
     writeFileSync(join(dir, 'a.var.md'), '# A\n\nGiven I greet "world"\n')
@@ -145,7 +145,7 @@ test('stepAt resolves the step from a .ts cucumber-expression literal position',
     writeFileSync(join(dir, 'var.config.ts'), 'export default {}\n')
     writeFileSync(
       join(dir, 'a.steps.ts'),
-      `step('I greet {string}', () => {})
+      `action('I greet {string}', () => {})
 `,
     )
     writeFileSync(join(dir, 'a.var.md'), '# A\n\nGiven I greet "world"\n')
@@ -190,7 +190,7 @@ test('renameStep (literal-only) produces a cascade across the step def + every m
     writeFileSync(join(dir, 'var.config.ts'), 'export default {}\n')
     writeFileSync(
       join(dir, 'a.steps.ts'),
-      `step('I greet {string}', () => {})
+      `action('I greet {string}', () => {})
 `,
     )
     writeFileSync(join(dir, 'a.var.md'), '# A\n\nGiven I greet "world"\n')
@@ -223,7 +223,7 @@ test('planRename returns added/removed fates so the client can prompt', async ()
     writeFileSync(join(dir, 'var.config.ts'), 'export default {}\n')
     writeFileSync(
       join(dir, 'a.steps.ts'),
-      `step('I greet {string}', () => {})
+      `action('I greet {string}', () => {})
 `,
     )
     writeFileSync(join(dir, 'a.var.md'), '# A\n\nGiven I greet "world"\n')
@@ -263,7 +263,7 @@ test('planRename surfaces a type change as kept + nameUnchanged:false (the clien
     writeFileSync(
       join(dir, 'a.steps.ts'),
       `defineParameterType({ name: 'airport', regexp: /[A-Z]{3}/ })
-step('I fly to {string}', () => {})
+action('I fly to {string}', () => {})
 `,
     )
     writeFileSync(join(dir, 'a.var.md'), '# A\n\nGiven I fly to "world"\n')
@@ -298,7 +298,7 @@ test('planRename emits a handlerSync that adds a new typed arg when a parameter 
     writeFileSync(join(dir, 'var.config.ts'), 'export default {}\n')
     writeFileSync(
       join(dir, 'a.steps.ts'),
-      `step('I greet {string}', (ctx, name: string) => {})
+      `action('I greet {string}', (ctx, name: string) => {})
 `,
     )
     writeFileSync(join(dir, 'a.var.md'), '# A\n\nGiven I greet "world"\n')
@@ -326,7 +326,7 @@ test('planRename emits a handlerSync that drops a removed arg', async () => {
     writeFileSync(join(dir, 'var.config.ts'), 'export default {}\n')
     writeFileSync(
       join(dir, 'a.steps.ts'),
-      `step('I greet {string} loudly', (ctx, name: string) => {})
+      `action('I greet {string} loudly', (ctx, name: string) => {})
 `,
     )
     writeFileSync(join(dir, 'a.var.md'), '# A\n\nGiven I greet "world" loudly\n')
@@ -353,7 +353,7 @@ test('planRename emits a handlerSync that swaps the TS type when a param type ch
     writeFileSync(
       join(dir, 'a.steps.ts'),
       `defineParameterType({ name: 'airport', regexp: /[A-Z]{3}/ })
-step('I fly to {string}', (ctx, name: string) => {})
+action('I fly to {string}', (ctx, name: string) => {})
 `,
     )
     writeFileSync(join(dir, 'a.var.md'), '# A\n\nGiven I fly to "world"\n')
@@ -405,7 +405,7 @@ test('renameStep refuses when a parameter is added (Phase 4 territory)', async (
     writeFileSync(join(dir, 'var.config.ts'), 'export default {}\n')
     writeFileSync(
       join(dir, 'a.steps.ts'),
-      `step('I greet {string}', () => {})
+      `action('I greet {string}', () => {})
 `,
     )
     writeFileSync(join(dir, 'a.var.md'), '# A\n\nGiven I greet "world"\n')
@@ -431,7 +431,7 @@ test('renameStep from a .var.md uses CucumberExpressionGenerator on the new sent
     writeFileSync(join(dir, 'var.config.ts'), 'export default {}\n')
     writeFileSync(
       join(dir, 'a.steps.ts'),
-      `step('I greet {string}', () => {})
+      `action('I greet {string}', () => {})
 `,
     )
     writeFileSync(join(dir, 'a.var.md'), '# A\n\nGiven I greet "world"\n')
@@ -459,8 +459,8 @@ test('completions: returns a snippet item per registered step, replacing from li
     writeFileSync(join(dir, 'var.config.ts'), 'export default {}\n')
     writeFileSync(
       join(dir, 'a.steps.ts'),
-      `step('I have {int} cukes', () => {})
-step('I greet {string}', () => {})
+      `action('I have {int} cukes', () => {})
+action('I greet {string}', () => {})
 `,
     )
   })
@@ -490,7 +490,7 @@ test('completions: replace range starts at the first non-whitespace of the line 
     writeFileSync(join(dir, 'var.config.ts'), 'export default {}\n')
     writeFileSync(
       join(dir, 'a.steps.ts'),
-      `step('I greet {string}', () => {})
+      `action('I greet {string}', () => {})
 `,
     )
   })
@@ -520,7 +520,7 @@ test('completions: a custom {airport} type uses its name as the placeholder', as
     writeFileSync(
       join(dir, 'a.steps.ts'),
       `defineParameterType({ name: 'airport', regexp: /[A-Z]{3}/ })
-step('I fly to {airport}', () => {})
+action('I fly to {airport}', () => {})
 `,
     )
   })
@@ -544,7 +544,7 @@ test('completions: returns nothing for non-.var.md files', async () => {
     writeFileSync(join(dir, 'var.config.ts'), 'export default {}\n')
     writeFileSync(
       join(dir, 'a.steps.ts'),
-      `step('I greet {string}', () => {})
+      `action('I greet {string}', () => {})
 `,
     )
   })
@@ -572,7 +572,7 @@ test('generateSnippet turns selected text into a step-definition stub (verbatim,
     const snippet = h.generateSnippet('Given I greet "world"')
     // No Given/When/Then heuristics — the selection IS the expression.
     expect(snippet.expression).toBe('Given I greet {string}')
-    expect(snippet.fullCode).toContain("step('Given I greet {string}'")
+    expect(snippet.fullCode).toContain("action('Given I greet {string}'")
   } finally {
     cleanup()
   }

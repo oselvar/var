@@ -52,7 +52,7 @@ test('defaults snippet.template to DEFAULT_SNIPPET_TEMPLATE when absent', async 
   const dir = mkdtempSync(join(tmpdir(), 'var-cfg-snippet-default-'))
   try {
     const cfg = await loadVarConfig(dir)
-    expect(cfg.snippet.template).toContain("step('{{expression}}'")
+    expect(cfg.snippet.template).toContain("{{role}}('{{expression}}'")
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }

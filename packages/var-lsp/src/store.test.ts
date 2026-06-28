@@ -31,7 +31,7 @@ const config = {
 describe('createStore over a FileSystem', () => {
   it('indexes matches from in-memory step + var files', async () => {
     const fs = fakeFs({
-      '/s.steps.ts': `import { defineContext } from '@oselvar/var-vitest'\nconst { step } = defineContext(() => ({}))\nstep('I greet {string}', (ctx, name: string) => {})\n`,
+      '/s.steps.ts': `action('I greet {string}', (ctx, name: string) => {})\n`,
       '/hello.var.md': `# Hi\n\nFirst I greet "world" okay?\n`,
     })
     const store = createStore({ fs, config })
@@ -45,7 +45,7 @@ describe('createStore over a FileSystem', () => {
     const store = createStore({ fs, config })
     await store.reindex()
     expect(store.index().matches.length).toBe(0)
-    await fs.write('/s.steps.ts', `step('I greet {string}', () => {})`)
+    await fs.write('/s.steps.ts', `action('I greet {string}', () => {})`)
     await fs.write('/a.var.md', `I greet "x"`)
     await store.reindex()
     expect(store.index().matches.length).toBeGreaterThan(0)

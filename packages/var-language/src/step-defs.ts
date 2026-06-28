@@ -1,3 +1,4 @@
+import type { StepKind } from '@oselvar/var'
 import * as ts from 'typescript'
 
 export type Position = { readonly line: number; readonly character: number }
@@ -22,6 +23,7 @@ export type HandlerParams = {
 export type StepDef = {
   readonly file: string
   readonly expression: string
+  readonly kind: StepKind
   readonly expressionRange: Range
   readonly callRange: Range
   // Optional because handlers in unusual forms (no parens, identifier-only
@@ -115,6 +117,7 @@ function visit(sf: ts.SourceFile, node: ts.Node, out: StepDef[], file: string): 
   if (ts.isCallExpression(node) && isStepCall(node) && node.arguments.length >= 1) {
     const arg0 = node.arguments[0]
     if (arg0 && ts.isStringLiteral(arg0)) {
+      const kind = (node.expression as ts.Identifier).text as StepKind
       const handler = node.arguments[1]
       const handlerParams =
         handler && (ts.isArrowFunction(handler) || ts.isFunctionExpression(handler))
@@ -123,6 +126,7 @@ function visit(sf: ts.SourceFile, node: ts.Node, out: StepDef[], file: string): 
       out.push({
         file,
         expression: arg0.text,
+        kind,
         expressionRange: rangeOf(sf, arg0),
         callRange: rangeOf(sf, node),
         handlerParams,
@@ -158,13 +162,14 @@ function extractHandlerParams(
   }
 }
 
+const ROLE_NAMES: ReadonlyArray<string> = ['context', 'action', 'sensor']
+
 function isStepCall(node: ts.CallExpression): boolean {
-  // Match `step(...)` regardless of whether `step` came from an import or a
-  // destructured `defineContext(...)` return. We accept any bare identifier
-  // named `step`. False positives from shadowed locals are filtered out by
-  // the test in Step 1 — function declarations, properties, and comments are
-  // not CallExpressions.
-  return ts.isIdentifier(node.expression) && node.expression.text === 'step'
+  // Match `context(...)`, `action(...)`, or `sensor(...)` — the three role
+  // call forms. False positives from shadowed locals are filtered out by the
+  // same logic that protects these identifiers — only CallExpressions with
+  // these identifiers qualify, regardless of import shape.
+  return ts.isIdentifier(node.expression) && ROLE_NAMES.includes(node.expression.text)
 }
 
 function rangeOf(sf: ts.SourceFile, node: ts.Node): Range {

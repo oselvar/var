@@ -2,41 +2,44 @@ import { expect, test } from 'vitest'
 import { discoverParameterTypes, discoverStepDefs } from '../src/step-defs.js'
 
 test('discovers a single step call with its source range', () => {
-  const source = `import { step } from '@oselvar/var-vitest'
-step('I have {int} cukes', (ctx, n) => {})
+  const source = `import { action } from '@oselvar/var-vitest'
+action('I have {int} cukes', (ctx, n) => {})
 `
   const defs = discoverStepDefs('steps.ts', source)
   expect(defs).toHaveLength(1)
   expect(defs[0]?.expression).toBe('I have {int} cukes')
-  // The expression literal starts at character 5 of line 2 (1-based).
+  expect(defs[0]?.kind).toBe('action')
+  // The expression literal starts at character 8 of line 2 (1-based).
   expect(defs[0]?.expressionRange.start.line).toBe(2)
   expect(defs[0]?.callRange.start.line).toBe(2)
 })
 
 test('discovers multiple step calls across the file', () => {
-  const source = `import { step } from '@oselvar/var-vitest'
-step('first', () => {})
-step('second', () => {})
-step('third', () => {})
+  const source = `import { context, action, sensor } from '@oselvar/var-vitest'
+context('first', () => {})
+action('second', () => {})
+sensor('third', () => {})
 `
   const defs = discoverStepDefs('steps.ts', source)
   expect(defs.map((d) => d.expression)).toEqual(['first', 'second', 'third'])
+  expect(defs.map((d) => d.kind)).toEqual(['context', 'action', 'sensor'])
 })
 
 test('handles the destructured-step pattern: const { step } = defineContext(...)', () => {
   const source = `import { defineContext } from '@oselvar/var-vitest'
-const { step } = defineContext(() => ({}))
-step('I greet {string}', (ctx, name: string) => {})
+const { action } = defineContext(() => ({}))
+action('I greet {string}', (ctx, name: string) => {})
 `
   const defs = discoverStepDefs('steps.ts', source)
   expect(defs).toHaveLength(1)
   expect(defs[0]?.expression).toBe('I greet {string}')
+  expect(defs[0]?.kind).toBe('action')
 })
 
 test('ignores `step` in unrelated positions (e.g. shadowed locals, comments)', () => {
-  const source = `// step('not a real step', () => {})
-function step() {}
-const obj = { step: 1 }
+  const source = `// action('not a real step', () => {})
+function action() {}
+const obj = { action: 1 }
 `
   const defs = discoverStepDefs('steps.ts', source)
   expect(defs).toHaveLength(0)
@@ -74,24 +77,26 @@ defineParameterType({ name: 'x', regexp: someRe })
 })
 
 test('captures the handler params range and structured (name, type) entries', () => {
-  const source = `step('I have {int} cukes', (ctx, count: number) => {})
+  const source = `action('I have {int} cukes', (ctx, count: number) => {})
 `
   const defs = discoverStepDefs('s.ts', source)
   expect(defs).toHaveLength(1)
+  expect(defs[0]?.kind).toBe('action')
   expect(defs[0]?.handlerParams).toBeDefined()
   expect(defs[0]?.handlerParams?.params).toEqual([
     { name: 'ctx', typeText: '' },
     { name: 'count', typeText: 'number' },
   ])
-  // The range starts at character 27 (the 'c' of 'ctx') and ends after 'number'.
+  // The range starts somewhere on line 1.
   expect(defs[0]?.handlerParams?.range.start.line).toBe(1)
   expect(defs[0]?.handlerParams?.range.end.line).toBe(1)
 })
 
 test('is undefined when the handler is not an arrow/function expression', () => {
   const source = `const fn = (ctx: unknown) => {}
-step('do thing', fn)
+sensor('do thing', fn)
 `
   const defs = discoverStepDefs('s.ts', source)
   expect(defs[0]?.handlerParams).toBeUndefined()
+  expect(defs[0]?.kind).toBe('sensor')
 })

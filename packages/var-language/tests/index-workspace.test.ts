@@ -6,7 +6,7 @@ test('cross-references matched substrings in .var.md to their step defs', () => 
     stepFiles: [
       {
         path: '/abs/steps/account.steps.ts',
-        source: `step('I have {int} cukes', (ctx, n) => {})
+        source: `action('I have {int} cukes', (ctx, n) => {})
 `,
       },
     ],
@@ -39,8 +39,8 @@ test('ambiguous matches surface as ambiguous-match diagnostics', () => {
     stepFiles: [
       {
         path: '/s.ts',
-        source: `step('I have {int} cukes', () => {})
-step('I have {int} {word}', () => {})
+        source: `action('I have {int} cukes', () => {})
+action('I have {int} {word}', () => {})
 `,
       },
     ],
@@ -63,7 +63,7 @@ test('a custom parameter type defined in *.steps.ts is registered before step co
       {
         path: '/airports.steps.ts',
         source: `defineParameterType({ name: 'airport', regexp: /[A-Z]{3}/ })
-step('I fly to {airport}', (ctx, code) => {})
+action('I fly to {airport}', (ctx, code) => {})
 `,
       },
     ],
@@ -84,7 +84,7 @@ test('a header-bound table highlights the binding paragraph with header words as
     stepFiles: [
       {
         path: '/yahtzee.steps.ts',
-        source: `step('each row lists the dice, the category and the score', (ctx, row) => {})\n`,
+        source: `action('each row lists the dice, the category and the score', (ctx, row) => {})\n`,
       },
     ],
     varFiles: [

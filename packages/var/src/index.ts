@@ -55,6 +55,7 @@ export { plan } from './plan.js'
 export { gherkinDocStrings, gherkinTables } from './plugins/gherkin/index.js'
 export type { Reporter, TestSink } from './ports.js'
 export type { StepKind } from './step-role.js'
+export { inferStepRole } from './step-role.js'
 export type {
   ParameterTypeInput,
   Registry,
