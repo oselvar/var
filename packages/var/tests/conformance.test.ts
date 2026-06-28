@@ -1,8 +1,17 @@
 import { expect, test } from 'vitest'
 import { CellMismatchError } from '../src/cell-diff.js'
-import { canonicalStringify, toFailureArtifact } from '../src/conformance.js'
+import {
+  canonicalStringify,
+  toFailureArtifact,
+  toPlanArtifact,
+  toRegistryArtifact,
+  toVarDocArtifact,
+} from '../src/conformance.js'
 import { DocStringMismatchError } from '../src/doc-string-diff.js'
 import { UnexpectedPassError } from '../src/execute.js'
+import { parse } from '../src/parse.js'
+import { plan } from '../src/plan.js'
+import { addStep, createRegistry } from '../src/registry.js'
 
 test('canonicalStringify sorts keys recursively and ends with a newline', () => {
   const out = canonicalStringify({ b: 1, a: { d: 2, c: 3 } })
@@ -46,4 +55,36 @@ test('toFailureArtifact recovers the line from a <specPath>:line:col stack frame
   err.stack = 'Error: boom\n    at handler (s.ts:1:1)\n    at step (e.var.md:42:7)'
   // fallbackLine is 4, but the frame says 42 → 42 wins.
   expect(toFailureArtifact(err, 'e.var.md', 4)).toEqual({ kind: 'thrown', line: 42 })
+})
+
+test('toRegistryArtifact lists expressions and parsed parameter-type names', () => {
+  const r = addStep(createRegistry(), {
+    expression: 'I have {int} cukes',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: () => {},
+  })
+  expect(toRegistryArtifact(r)).toEqual({
+    steps: [{ expression: 'I have {int} cukes', parameterTypeNames: ['int'] }],
+    parameterTypes: [],
+  })
+})
+
+test('toPlanArtifact projects examples, expectedOutcome and stringified args', () => {
+  const r = addStep(createRegistry(), {
+    expression: 'I have {int} cukes',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: () => {},
+  })
+  const art = toPlanArtifact(plan(parse('e.var.md', '# A\n\nI have 5 cukes.'), r))
+  expect(art.examples[0]?.expectedOutcome).toBe('pass')
+  expect(art.examples[0]?.steps[0]?.matchedExpression).toBe('I have {int} cukes')
+  expect(art.examples[0]?.steps[0]?.args).toEqual([{ value: '5', parameterType: 'int' }])
+})
+
+test('toVarDocArtifact keeps path, examples and orphanAttachments', () => {
+  const art = toVarDocArtifact(parse('e.var.md', '# A\n\nI have 5 cukes.'))
+  expect(art.path).toBe('e.var.md')
+  expect(Array.isArray(art.examples)).toBe(true)
 })

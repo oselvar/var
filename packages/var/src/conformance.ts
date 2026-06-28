@@ -3,6 +3,8 @@ import { isCellMismatchError, ReturnShapeError } from './cell-diff.js'
 import type { Diagnostic } from './diagnostics.js'
 import { isDocStringMismatchError } from './doc-string-diff.js'
 import { isUnexpectedPassError } from './execute.js'
+import type { ExecutionPlan } from './plan.js'
+import type { Registry } from './registry.js'
 import type { Span } from './span.js'
 
 // ---- Artifact types (the serialized contract) -----------------------------
@@ -134,6 +136,50 @@ function failingLine(error: unknown, specPath: string, fallbackLine: number): nu
   const escaped = specPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const m = new RegExp(`${escaped}:(\\d+):\\d+`).exec(stack)
   return m ? Number(m[1]) : fallbackLine
+}
+
+export function toVarDocArtifact(doc: VarDoc): VarDocArtifact {
+  return { path: doc.path, examples: doc.examples, orphanAttachments: doc.orphanAttachments }
+}
+
+export function toRegistryArtifact(
+  registry: Registry,
+  parameterTypes: ReadonlyArray<{ name: string; regexp: string }> = [],
+): RegistryArtifact {
+  return {
+    steps: registry.steps.map((s) => ({
+      expression: s.expression,
+      parameterTypeNames: parameterTypeNames(s.expression),
+    })),
+    parameterTypes: parameterTypes.map((p) => ({ name: p.name, regexp: p.regexp })),
+  }
+}
+
+export function toPlanArtifact(plan: ExecutionPlan): PlanArtifact {
+  return {
+    examples: plan.examples.map((ex) => ({
+      name: ex.name,
+      scopeStack: ex.scopeStack,
+      span: ex.span,
+      expectedOutcome: ex.expectedOutcome ?? 'pass',
+      steps: ex.steps.map((step) => {
+        const stepNames = parameterTypeNames(step.stepDef.expression)
+        return {
+          text: step.text,
+          matchSpan: step.matchSpan,
+          paramSpans: step.paramSpans,
+          matchedExpression: step.stepDef.expression,
+          args: step.args.map((a, i) => ({
+            value: String(a),
+            parameterType: stepNames[i] ?? null,
+          })),
+          ...(step.dataTable ? { dataTable: step.dataTable } : {}),
+          ...(step.docString ? { docString: step.docString } : {}),
+        }
+      }),
+    })),
+    diagnostics: plan.diagnostics,
+  }
 }
 
 export function toFailureArtifact(
