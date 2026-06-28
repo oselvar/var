@@ -107,14 +107,7 @@ export function executePlan(plan: ExecutionPlan, ports: ExecutePorts): void {
                 }
               }
             } else {
-              // Legacy step(): existing behaviour, unchanged.
-              if (step.dataTable) {
-                const bad = compareTable(returned, step.dataTable).filter((d) => !d.ok)
-                if (bad.length > 0) throw new CellMismatchError(bad)
-              } else if (step.docString) {
-                const diff = compareDocString(returned, step.docString.content, step.docString.span)
-                if (diff) throw new DocStringMismatchError(diff)
-              }
+              throw new ReturnShapeError(`unknown step kind: ${String(kind)}`)
             }
           } catch (err) {
             throw augmentStack(err, step, path)

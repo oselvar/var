@@ -12,7 +12,7 @@ type Entry = {
   readonly sourceFile: string
   readonly sourceLine: number
   readonly handler: StepHandler
-  readonly kind?: StepKind
+  readonly kind: StepKind
 }
 
 type CustomTypeDef = {
@@ -23,26 +23,14 @@ type CustomTypeDef = {
 
 let steps: Entry[] = []
 // One context factory per stepfile. Each .steps.ts that calls
-// defineContext() owns its own slice of state; steps from different
+// defineState() owns its own slice of state; steps from different
 // stepfiles never see each other's context.
 const contextFactoriesByFile = new Map<string, () => unknown | Promise<unknown>>()
 let customTypes: CustomTypeDef[] = []
 
-// A `step` function bound to a context type `C`. Typed step instances flow `C`
-// into the handler's first arg so users don't have to cast.
-export type Step<C = unknown> = <Args extends ReadonlyArray<unknown>>(
-  expression: string,
-  handler: (ctx: C, ...args: Args) => void | Promise<void>,
-) => void
-
-function registerStep(expression: string, handler: StepHandler, kind?: StepKind): void {
+function registerStep(expression: string, handler: StepHandler, kind: StepKind): void {
   const { sourceFile, sourceLine } = callerLocation()
-  steps.push({ expression, sourceFile, sourceLine, handler, ...(kind !== undefined && { kind }) })
-}
-
-// Generic `step` import: ctx is unknown. Use `defineContext(...).step` for typed ctx.
-export const step: Step<unknown> = (expression, handler) => {
-  registerStep(expression, handler as StepHandler)
+  steps.push({ expression, sourceFile, sourceLine, handler, kind })
 }
 
 export type RoleFn<C = unknown> = (
@@ -64,22 +52,6 @@ export const action: RoleFn = (expression, handler) =>
   registerStep(expression, handler as StepHandler, 'action')
 export const sensor: SensorFn = (expression, handler) =>
   registerStep(expression, handler as StepHandler, 'sensor')
-
-// Register the per-stepfile context factory AND return a `step` typed against
-// `C` so handler bodies can use `ctx.foo` without casts. The factory itself
-// is wired into the runtime by adapters — every example gets one fresh
-// context per stepfile that contributes a step to it.
-export function defineContext<C>(factory: () => C | Promise<C>): { readonly step: Step<C> } {
-  const { sourceFile } = callerLocation()
-  if (contextFactoriesByFile.has(sourceFile)) {
-    throw new Error(`defineContext() called more than once in ${sourceFile}`)
-  }
-  contextFactoriesByFile.set(sourceFile, factory as () => unknown)
-  const typedStep: Step<C> = (expression, handler) => {
-    registerStep(expression, handler as StepHandler)
-  }
-  return { step: typedStep }
-}
 
 export function defineState<C>(factory: () => C | Promise<C>): {
   readonly context: RoleFn<C>
@@ -131,7 +103,7 @@ export function buildRegistry(): Registry {
       expressionSourceFile: e.sourceFile,
       expressionSourceLine: e.sourceLine,
       handler: e.handler,
-      ...(e.kind !== undefined && { kind: e.kind }),
+      kind: e.kind,
     })
   }
   return r

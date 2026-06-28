@@ -13,7 +13,7 @@ test('scaffolds var.config.ts and an example .var.md + steps file', async () => 
     expect(existsSync(join(dir, 'var-examples/01-hello.var.md'))).toBe(true)
     expect(existsSync(join(dir, 'var-examples/steps/01-hello.steps.ts'))).toBe(true)
     const stepsTs = readFileSync(join(dir, 'var-examples/steps/01-hello.steps.ts'), 'utf8')
-    expect(stepsTs).toContain('defineContext')
+    expect(stepsTs).toContain('defineState')
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }

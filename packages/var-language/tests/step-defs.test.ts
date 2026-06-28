@@ -25,9 +25,9 @@ sensor('third', () => {})
   expect(defs.map((d) => d.kind)).toEqual(['context', 'action', 'sensor'])
 })
 
-test('handles the destructured-step pattern: const { step } = defineContext(...)', () => {
-  const source = `import { defineContext } from '@oselvar/var-vitest'
-const { action } = defineContext(() => ({}))
+test('handles the destructured-role pattern: const { action } = defineState(...)', () => {
+  const source = `import { defineState } from '@oselvar/var-vitest'
+const { action } = defineState(() => ({}))
 action('I greet {string}', (ctx, name: string) => {})
 `
   const defs = discoverStepDefs('steps.ts', source)

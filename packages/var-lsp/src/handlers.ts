@@ -177,6 +177,14 @@ export function buildHandlers(store: Store): Handlers {
     generateSnippet(text) {
       // Use the live index registry so custom parameter types declared in
       // *.steps.ts surface in the generated expression.
+      // TODO(role-inference): the var/generateSnippet request currently carries
+      // only `text`, not a uri or offset, so we cannot look up the surrounding
+      // matched steps from store.index().matches. Extend the request shape to
+      // include uri+offset, find the MatchRef entries in the same varPath whose
+      // ranges fall before/after the selection offset, collect their
+      // stepDef.kind, then call inferStepRole({ before, after }) and pass the
+      // result as `role` below. Until that protocol change lands, the default
+      // role ('action') applies automatically (no `role` key in options).
       const snippet = generateSnippet(text, store.index().registry, {
         template: store.snippetTemplate(),
       })

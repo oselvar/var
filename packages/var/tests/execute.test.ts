@@ -12,6 +12,7 @@ test('executePlan calls sink.example for each PlannedExample', () => {
     expression: 'I have {int} cukes',
     expressionSourceFile: 's.ts',
     expressionSourceLine: 1,
+    kind: 'action',
     handler: () => {},
   })
   // With the paragraph-as-test model, each paragraph is its own example and
@@ -34,12 +35,14 @@ test('executePlan reports all diagnostics through reporter.diagnostic', () => {
     expression: 'I have {int} cukes',
     expressionSourceFile: 's.ts',
     expressionSourceLine: 1,
+    kind: 'action',
     handler: () => {},
   })
   r = addStep(r, {
     expression: 'I have 5 cukes',
     expressionSourceFile: 's.ts',
     expressionSourceLine: 2,
+    kind: 'action',
     handler: () => {},
   })
   const p = plan(parse('m.var.md', '# A\n\nGiven I have 5 cukes'), r)
@@ -59,6 +62,7 @@ test('the sink.example run callback executes the step handlers in order', async 
       expression: 'I add {int}',
       expressionSourceFile: 's.ts',
       expressionSourceLine: 1,
+      kind: 'action',
       handler: (_ctx, n) => {
         calls.push(`add:${n as number}`)
       },
@@ -67,6 +71,7 @@ test('the sink.example run callback executes the step handlers in order', async 
       expression: 'I should have {int}',
       expressionSourceFile: 's.ts',
       expressionSourceLine: 2,
+      kind: 'sensor',
       handler: (_ctx, n) => {
         calls.push(`check:${n as number}`)
       },
@@ -91,6 +96,7 @@ test('executePlan augments a thrown error with a .var.md frame for the failing s
     expression: 'I throw',
     expressionSourceFile: 's.ts',
     expressionSourceLine: 1,
+    kind: 'action',
     handler: () => {
       throw new Error('boom')
     },
@@ -133,6 +139,7 @@ test('executePlan invokes createContext once per example and passes the result t
     expression: 'I record ctx',
     expressionSourceFile: 's.ts',
     expressionSourceLine: 1,
+    kind: 'action',
     handler: (ctx) => {
       ctxSeen.push(ctx)
     },
@@ -161,6 +168,7 @@ test('executePlan appends a data table as the last handler arg (after cucumber a
     expression: 'these books exist:',
     expressionSourceFile: 's.ts',
     expressionSourceLine: 1,
+    kind: 'context',
     handler: (_ctx, ...args) => {
       captured = args
     },
@@ -196,6 +204,7 @@ test('executePlan appends a docstring as the last handler arg', async () => {
     expression: 'the receipt is:',
     expressionSourceFile: 's.ts',
     expressionSourceLine: 1,
+    kind: 'context',
     handler: (_ctx, ...args) => {
       captured = args
     },
@@ -225,6 +234,7 @@ test('executePlan runs a header-bound table once per row, passing the row object
     expression: 'each row lists the dice, the category and the score',
     expressionSourceFile: 's.ts',
     expressionSourceLine: 1,
+    kind: 'sensor',
     handler: (_ctx, ...args) => {
       rows.push(args[args.length - 1])
     },
@@ -260,6 +270,7 @@ test('a failing header-bound row points the stack frame at that row line', async
     expression: 'each row lists the dice, the category and the score',
     expressionSourceFile: 's.ts',
     expressionSourceLine: 1,
+    kind: 'sensor',
     handler: (_ctx, row: { score: string }) => {
       if (row.score === '50') throw new Error('boom')
     },
@@ -295,6 +306,7 @@ test('a returning header-bound row that mismatches throws CellMismatchError with
     expression: 'each row lists the dice, the category and the score',
     expressionSourceFile: 's.ts',
     expressionSourceLine: 1,
+    kind: 'sensor',
     handler: (_ctx, row: { score: string }) => ({
       score: row.score === '50' ? 999 : Number(row.score),
     }),
@@ -335,6 +347,7 @@ test('a returning header-bound row that matches passes', async () => {
     expression: 'each row lists the dice, the category and the score',
     expressionSourceFile: 's.ts',
     expressionSourceLine: 1,
+    kind: 'sensor',
     handler: (_ctx, row: { score: string }) => ({ score: Number(row.score) }),
   })
   const source = `# Yahtzee
@@ -372,14 +385,17 @@ uppercase each one:
 | var    | VAR   |
 | bdd    | BDD   |`
 
-test('a whole-table step returning a mismatched table throws CellMismatchError at the cell span', async () => {
+test('a whole-table sensor returning a mismatched table throws CellMismatchError at the cell span', async () => {
+  // Sensor returning a tuple where [0] is the table (array-of-row-arrays).
+  // Row-array format: each row is an array of cell strings in column order.
   const r = addStep(createRegistry(), {
     expression: 'uppercase each one',
     expressionSourceFile: 's.ts',
     expressionSourceLine: 1,
+    kind: 'sensor',
     handler: () => [
-      ['var', 'WRONG'],
-      ['bdd', 'BDD'],
+      [['var', 'WRONG'],
+      ['bdd', 'BDD']],
     ],
   })
   const source = TABLE_DOC
@@ -398,25 +414,28 @@ test('a whole-table step returning a mismatched table throws CellMismatchError a
   expect(source.slice(cells[0]!.span.startOffset, cells[0]!.span.endOffset)).toBe('VAR')
 })
 
-test('a whole-table step returning a matching table passes', async () => {
+test('a whole-table sensor returning a matching table passes', async () => {
+  // Sensor returning a tuple where [0] is the table (array-of-row-objects).
   const r = addStep(createRegistry(), {
     expression: 'uppercase each one',
     expressionSourceFile: 's.ts',
     expressionSourceLine: 1,
+    kind: 'sensor',
     handler: () => [
-      { before: 'var', after: 'VAR' },
-      { before: 'bdd', after: 'BDD' },
+      [{ before: 'var', after: 'VAR' },
+      { before: 'bdd', after: 'BDD' }],
     ],
   })
   await expect(runsFor(TABLE_DOC, r)[0]?.()).resolves.toBeUndefined()
 })
 
-test('a whole-table step returning the wrong type throws ReturnShapeError', async () => {
+test('a whole-table sensor returning the wrong type throws ReturnShapeError', async () => {
   const r = addStep(createRegistry(), {
     expression: 'uppercase each one',
     expressionSourceFile: 's.ts',
     expressionSourceLine: 1,
-    handler: () => 'not a table',
+    kind: 'sensor',
+    handler: () => 'not a table' as unknown as [],
   })
   await expect(runsFor(TABLE_DOC, r)[0]?.()).rejects.toBeInstanceOf(ReturnShapeError)
 })
@@ -429,12 +448,14 @@ the greeting is:
 Hello, world!
 \`\`\``
 
-test('a doc-string step returning a different string throws DocStringMismatchError at the body span', async () => {
+test('a doc-string sensor returning a different string throws DocStringMismatchError at the body span', async () => {
+  // Sensor returning a tuple where [0] is the docstring.
   const r = addStep(createRegistry(), {
     expression: 'the greeting is',
     expressionSourceFile: 's.ts',
     expressionSourceLine: 1,
-    handler: () => 'Goodbye!\n',
+    kind: 'sensor',
+    handler: () => ['Goodbye!\n'],
   })
   const source = DOCSTRING_DOC
   let caught: unknown
@@ -450,40 +471,44 @@ test('a doc-string step returning a different string throws DocStringMismatchErr
   expect(source.slice(diff.span.startOffset, diff.span.endOffset)).toBe('Hello, world!\n')
 })
 
-test('a whole-table step returning undefined passes (asserted nothing)', async () => {
+test('a whole-table action returning undefined passes (asserted nothing)', async () => {
   const r = addStep(createRegistry(), {
     expression: 'uppercase each one',
     expressionSourceFile: 's.ts',
     expressionSourceLine: 1,
+    kind: 'action',
     handler: () => undefined,
   })
   await expect(runsFor(TABLE_DOC, r)[0]?.()).resolves.toBeUndefined()
 })
 
-test('a doc-string step returning undefined passes (asserted nothing)', async () => {
+test('a doc-string action returning undefined passes (asserted nothing)', async () => {
   const r = addStep(createRegistry(), {
     expression: 'the greeting is',
     expressionSourceFile: 's.ts',
     expressionSourceLine: 1,
+    kind: 'action',
     handler: () => undefined,
   })
   await expect(runsFor(DOCSTRING_DOC, r)[0]?.()).resolves.toBeUndefined()
 })
 
-test('a doc-string step returning the exact body passes', async () => {
+test('a doc-string sensor returning the exact body passes', async () => {
+  // Sensor returning a tuple where [0] is the docstring content.
   const r = addStep(createRegistry(), {
     expression: 'the greeting is',
     expressionSourceFile: 's.ts',
     expressionSourceLine: 1,
-    handler: (_ctx, body: string) => body, // echo the exact content
+    kind: 'sensor',
+    handler: (_ctx, body: string) => [body], // echo the exact content as a tuple
   })
   await expect(runsFor(DOCSTRING_DOC, r)[0]?.()).resolves.toBeUndefined()
 })
 
 test('executePlan passes each example its deduped 1-based step lines via info', async () => {
   let r = createRegistry()
-  r = addStep(r, { expression: 'I have {int} cukes', expressionSourceFile: 'inline', expressionSourceLine: 1, handler: () => {} })
-  r = addStep(r, { expression: 'I eat {int} cukes', expressionSourceFile: 'inline', expressionSourceLine: 2, handler: () => {} })
+  r = addStep(r, { expression: 'I have {int} cukes', expressionSourceFile: 'inline', expressionSourceLine: 1, kind: 'action', handler: () => {} })
+  r = addStep(r, { expression: 'I eat {int} cukes', expressionSourceFile: 'inline', expressionSourceLine: 2, kind: 'action', handler: () => {} })
   // Both steps are in one paragraph (no blank line between them) so the planner
   // creates a single example. "I have 5 cukes" is on line 3, "I eat 2 cukes" on line 4.
   const source = '# T\n\nI have 5 cukes.\nI eat 2 cukes.\n'

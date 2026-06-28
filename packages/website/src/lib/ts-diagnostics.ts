@@ -17,12 +17,6 @@ for (const [p, text] of Object.entries(libModules)) {
 // ctx/args typecheck without real module resolution.
 const AMBIENT_FILE = 'var-runtime.d.ts'
 const AMBIENT = `declare module '@oselvar/var-runtime' {
-  export type Step<C = unknown> = <A extends readonly unknown[]>(
-    expression: string,
-    handler: (ctx: C, ...args: A) => void | Promise<void>,
-  ) => void
-  export const step: Step<unknown>
-  export function defineContext<C>(factory: () => C | Promise<C>): { readonly step: Step<C> }
   export type RoleFn<C = unknown> = (
     expression: string,
     handler: (ctx: C, ...args: readonly unknown[]) => void | Promise<void>,
