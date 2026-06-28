@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Make the pure core (`@oselvar/var`) own header-bound table comparison: a row step returns its computed columns, the core diffs them against the table cells and emits structured `CellDiff`s via a typed `RowMismatchError`.
+**Goal:** Make the pure core (`@oselvar/var`) own header-bound table comparison: a row step returns its computed columns, the core diffs them against the table cells and emits structured `CellDiff`s via a typed `CellMismatchError`.
 
-**Architecture:** Add per-cell source spans to the table AST, a pure `compareRow` + `CellDiff` + `RowMismatchError` module, planner attachment of per-row checks, and execution-time comparison. No adapter changes — a mismatch still throws, so existing pass/fail behaviour (and the dogfood vitest test) is preserved. The live `~~9~~6` renderer (Phase 2) consumes `CellDiff` later.
+**Architecture:** Add per-cell source spans to the table AST, a pure `compareRow` + `CellDiff` + `CellMismatchError` module, planner attachment of per-row checks, and execution-time comparison. No adapter changes — a mismatch still throws, so existing pass/fail behaviour (and the dogfood vitest test) is preserved. The live `~~9~~6` renderer (Phase 2) consumes `CellDiff` later.
 
 **Tech Stack:** TypeScript (ESM, `node:`-style `.js` import specifiers), vitest, biome.
 
@@ -163,28 +163,28 @@ git commit -m "feat(var): per-cell source spans on table rows"
 
 ---
 
-### Task 2: `compareRow` + `CellDiff` + `RowMismatchError`
+### Task 2: `compareRow` + `CellDiff` + `CellMismatchError`
 
 **Files:**
-- Create: `packages/var/src/row-diff.ts`
+- Create: `packages/var/src/cell-diff.ts`
 - Modify: `packages/var/src/index.ts` (public exports)
-- Test: `packages/var/tests/row-diff.test.ts` (create)
+- Test: `packages/var/tests/cell-diff.test.ts` (create)
 
 **Interfaces:**
 - Produces:
   - `type CellDiff = { readonly column: string; readonly span: Span; readonly expected: string; readonly actual: string; readonly ok: boolean }`
   - `type RowCheck = { readonly column: string; readonly value: string; readonly span: Span }`
   - `function compareRow(returned: unknown, checks: ReadonlyArray<RowCheck>): ReadonlyArray<CellDiff>`
-  - `class RowMismatchError extends Error { readonly cells: ReadonlyArray<CellDiff> }`
-  - `function isRowMismatchError(e: unknown): e is RowMismatchError`
+  - `class CellMismatchError extends Error { readonly cells: ReadonlyArray<CellDiff> }`
+  - `function isCellMismatchError(e: unknown): e is CellMismatchError`
 
 - [ ] **Step 1: Write the failing test**
 
-Create `packages/var/tests/row-diff.test.ts`:
+Create `packages/var/tests/cell-diff.test.ts`:
 
 ```ts
 import { expect, test } from 'vitest'
-import { compareRow, isRowMismatchError, RowMismatchError, type RowCheck } from '../src/row-diff.js'
+import { compareRow, isCellMismatchError, CellMismatchError, type RowCheck } from '../src/cell-diff.js'
 
 const span = { startLine: 1, startCol: 1, endLine: 1, endCol: 2, startOffset: 0, endOffset: 1 }
 const checks: ReadonlyArray<RowCheck> = [
@@ -216,10 +216,10 @@ test('undefined / non-object return checks nothing', () => {
   expect(compareRow(42, checks)).toEqual([])
 })
 
-test('RowMismatchError carries the cells and is detectable', () => {
-  const err = new RowMismatchError([{ column: 'score', span, expected: '9', actual: '6', ok: false }])
-  expect(isRowMismatchError(err)).toBe(true)
-  expect(isRowMismatchError(new Error('x'))).toBe(false)
+test('CellMismatchError carries the cells and is detectable', () => {
+  const err = new CellMismatchError([{ column: 'score', span, expected: '9', actual: '6', ok: false }])
+  expect(isCellMismatchError(err)).toBe(true)
+  expect(isCellMismatchError(new Error('x'))).toBe(false)
   expect(err.cells[0]?.actual).toBe('6')
   expect(err.message).toContain('score')
 })
@@ -227,12 +227,12 @@ test('RowMismatchError carries the cells and is detectable', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd packages/var && npx vitest run tests/row-diff.test.ts`
-Expected: FAIL — cannot find module `../src/row-diff.js`.
+Run: `cd packages/var && npx vitest run tests/cell-diff.test.ts`
+Expected: FAIL — cannot find module `../src/cell-diff.js`.
 
 - [ ] **Step 3: Write the module**
 
-Create `packages/var/src/row-diff.ts`:
+Create `packages/var/src/cell-diff.ts`:
 
 ```ts
 import type { Span } from './span.js'
@@ -279,17 +279,17 @@ export function compareRow(
 
 // Thrown by the executor when a header-bound row's returned columns don't all
 // match. Carries the mismatched cells so adapters render/record them.
-export class RowMismatchError extends Error {
+export class CellMismatchError extends Error {
   readonly cells: ReadonlyArray<CellDiff>
   constructor(cells: ReadonlyArray<CellDiff>) {
     super(cells.map((c) => `${c.column}: expected ${c.expected} but was ${c.actual}`).join('; '))
-    this.name = 'RowMismatchError'
+    this.name = 'CellMismatchError'
     this.cells = cells
   }
 }
 
-export function isRowMismatchError(e: unknown): e is RowMismatchError {
-  return e instanceof RowMismatchError
+export function isCellMismatchError(e: unknown): e is CellMismatchError {
+  return e instanceof CellMismatchError
 }
 ```
 
@@ -298,21 +298,21 @@ export function isRowMismatchError(e: unknown): e is RowMismatchError {
 In `packages/var/src/index.ts`, add (next to the other re-exports, e.g. after the `./diagnostics.js` exports):
 
 ```ts
-export type { CellDiff, RowCheck } from './row-diff.js'
-export { compareRow, isRowMismatchError, RowMismatchError } from './row-diff.js'
+export type { CellDiff, RowCheck } from './cell-diff.js'
+export { compareRow, isCellMismatchError, CellMismatchError } from './cell-diff.js'
 ```
 
 - [ ] **Step 5: Run test to verify it passes**
 
-Run: `cd packages/var && npx vitest run tests/row-diff.test.ts`
+Run: `cd packages/var && npx vitest run tests/cell-diff.test.ts`
 Expected: PASS (all 6).
 
 - [ ] **Step 6: Commit**
 
 ```bash
-npx biome check --write packages/var/src/row-diff.ts packages/var/src/index.ts packages/var/tests/row-diff.test.ts
-git add packages/var/src/row-diff.ts packages/var/src/index.ts packages/var/tests/row-diff.test.ts
-git commit -m "feat(var): compareRow + CellDiff + RowMismatchError"
+npx biome check --write packages/var/src/cell-diff.ts packages/var/src/index.ts packages/var/tests/cell-diff.test.ts
+git add packages/var/src/cell-diff.ts packages/var/src/index.ts packages/var/tests/cell-diff.test.ts
+git commit -m "feat(var): compareRow + CellDiff + CellMismatchError"
 ```
 
 ---
@@ -368,7 +368,7 @@ Expected: FAIL — `result.examples[0].rowChecks` is `undefined`.
 In `packages/var/src/plan.ts`, add the import near the top (with the other imports):
 
 ```ts
-import type { RowCheck } from './row-diff.js'
+import type { RowCheck } from './cell-diff.js'
 ```
 
 Add to the `PlannedExample` type (after `headerBinding?: HeaderBinding`):
@@ -421,15 +421,15 @@ git commit -m "feat(var): planner attaches rowChecks to header-bound rows"
 - Test: `packages/var/tests/execute.test.ts` (append)
 
 **Interfaces:**
-- Consumes: `compareRow`, `RowMismatchError` (Task 2); `PlannedExample.rowChecks` (Task 3).
-- Behaviour: after running a header-bound row example's step, the executor compares the handler's return against `rowChecks` and throws `RowMismatchError` (with the mismatched `CellDiff`s) if any column differs. The synthetic stack frame points at the row line.
+- Consumes: `compareRow`, `CellMismatchError` (Task 2); `PlannedExample.rowChecks` (Task 3).
+- Behaviour: after running a header-bound row example's step, the executor compares the handler's return against `rowChecks` and throws `CellMismatchError` (with the mismatched `CellDiff`s) if any column differs. The synthetic stack frame points at the row line.
 
 - [ ] **Step 1: Write the failing test**
 
 Append to `packages/var/tests/execute.test.ts`:
 
 ```ts
-test('a returning header-bound row that mismatches throws RowMismatchError with the cell span', async () => {
+test('a returning header-bound row that mismatches throws CellMismatchError with the cell span', async () => {
   let r = createRegistry()
   r = addStep(r, {
     expression: 'each row lists the dice, the category and the score',
@@ -458,8 +458,8 @@ each row lists the dice, the category and the score:
   } catch (err) {
     caught = err
   }
-  expect(isRowMismatchError(caught)).toBe(true)
-  const cells = (caught as RowMismatchError).cells
+  expect(isCellMismatchError(caught)).toBe(true)
+  const cells = (caught as CellMismatchError).cells
   expect(cells).toHaveLength(1)
   expect(cells[0]?.column).toBe('score')
   expect(cells[0]?.expected).toBe('50')
@@ -495,20 +495,20 @@ each row lists the dice, the category and the score:
 Add the import at the top of `packages/var/tests/execute.test.ts` (with the existing imports):
 
 ```ts
-import { isRowMismatchError, type RowMismatchError } from '../src/row-diff.js'
+import { isCellMismatchError, type CellMismatchError } from '../src/cell-diff.js'
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd packages/var && npx vitest run tests/execute.test.ts -t "RowMismatchError"`
-Expected: FAIL — no error thrown (the executor ignores the return value), so `isRowMismatchError(caught)` is `false`.
+Run: `cd packages/var && npx vitest run tests/execute.test.ts -t "CellMismatchError"`
+Expected: FAIL — no error thrown (the executor ignores the return value), so `isCellMismatchError(caught)` is `false`.
 
 - [ ] **Step 3: Capture the return value and compare**
 
 In `packages/var/src/execute.ts`, add the import:
 
 ```ts
-import { compareRow, RowMismatchError } from './row-diff.js'
+import { compareRow, CellMismatchError } from './cell-diff.js'
 ```
 
 In the `ports.sink.example(ex.name, async () => { ... })` body, capture each handler's return and compare after the step loop. Change the handler call to capture its result:
@@ -531,7 +531,7 @@ Declare `let lastReturn: unknown` just before the `for (const step of ex.steps)`
         if (bad.length > 0) {
           const lastStep = ex.steps[ex.steps.length - 1]
           // biome-ignore lint/style/noNonNullAssertion: a header-bound row example always has its row step
-          throw augmentStack(new RowMismatchError(bad), lastStep!, path)
+          throw augmentStack(new CellMismatchError(bad), lastStep!, path)
         }
       }
 ```
@@ -546,7 +546,7 @@ Expected: both new tests PASS; existing execute tests still PASS.
 ```bash
 npx biome check --write packages/var/src/execute.ts packages/var/tests/execute.test.ts
 git add packages/var/src/execute.ts packages/var/tests/execute.test.ts
-git commit -m "feat(var): executor compares returned columns, throws RowMismatchError"
+git commit -m "feat(var): executor compares returned columns, throws CellMismatchError"
 ```
 
 ---
@@ -579,7 +579,7 @@ step(
 - [ ] **Step 2: Run the dogfood spec to verify it still passes**
 
 Run: `cd /Users/aslakhellesoy/git/oselvar/bdd && NODE_OPTIONS="--import tsx" npx vitest run 04-yahtzee`
-Expected: PASS — 12 row tests green (every returned score matches its cell, so no `RowMismatchError`).
+Expected: PASS — 12 row tests green (every returned score matches its cell, so no `CellMismatchError`).
 
 - [ ] **Step 3: Verify a deliberate break turns exactly one row red**
 
@@ -622,8 +622,8 @@ git commit -m "feat: Yahtzee step returns its computed column (framework-owned c
 
 ## Done when
 
-- `compareRow`, `CellDiff`, `RowCheck`, `RowMismatchError`, `isRowMismatchError` are exported from `@oselvar/var`.
-- A header-bound row whose returned column differs from its cell fails with a `RowMismatchError` carrying a `CellDiff` whose `span` points at the cell.
+- `compareRow`, `CellDiff`, `RowCheck`, `CellMismatchError`, `isCellMismatchError` are exported from `@oselvar/var`.
+- A header-bound row whose returned column differs from its cell fails with a `CellMismatchError` carrying a `CellDiff` whose `span` points at the cell.
 - The Yahtzee dogfood is green using `return { score }` (no `throw`, no `expect`).
 - Full repo suite green; website builds.
 - Phase 2 (live `~~9~~6` rendering in `cm-run`) is a separate plan that consumes `CellDiff`.
