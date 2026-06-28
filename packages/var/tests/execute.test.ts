@@ -1,4 +1,5 @@
 import { expect, test } from 'vitest'
+import { type CellMismatchError, isCellMismatchError } from '../src/cell-diff.js'
 import type { Diagnostic } from '../src/diagnostics.js'
 import { executePlan } from '../src/execute.js'
 import { parse } from '../src/parse.js'
@@ -285,4 +286,68 @@ each row lists the dice, the category and the score:
     stack = (err as Error).stack ?? ''
   }
   expect(stack).toContain('y.var.md:8:')
+})
+
+test('a returning header-bound row that mismatches throws CellMismatchError with the cell span', async () => {
+  let r = createRegistry()
+  r = addStep(r, {
+    expression: 'each row lists the dice, the category and the score',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: (_ctx, row: { score: string }) => ({
+      score: row.score === '50' ? 999 : Number(row.score),
+    }),
+  })
+  const source = `# Yahtzee
+
+each row lists the dice, the category and the score:
+
+| dice          | category   | score |
+| ------------- | ---------- | ----- |
+| 3, 3, 3, 4, 4 | full house | 17    |
+| 3, 3, 3, 3, 3 | Yahtzee    | 50    |`
+  const p = plan(parse('y.var.md', source), r)
+  const runs: Array<() => unknown | Promise<unknown>> = []
+  executePlan(p, {
+    sink: { example: (_n, run) => runs.push(run) },
+    reporter: { diagnostic: () => {} },
+  })
+  await runs[0]?.() // 17 matches -> passes
+  let caught: unknown
+  try {
+    await runs[1]?.() // returns 999, cell says 50 -> mismatch
+  } catch (err) {
+    caught = err
+  }
+  expect(isCellMismatchError(caught)).toBe(true)
+  const cells = (caught as CellMismatchError).cells
+  expect(cells).toHaveLength(1)
+  expect(cells[0]?.column).toBe('score')
+  expect(cells[0]?.expected).toBe('50')
+  expect(cells[0]?.actual).toBe('999')
+  expect(source.slice(cells[0]!.span.startOffset, cells[0]!.span.endOffset)).toBe('50')
+})
+
+test('a returning header-bound row that matches passes', async () => {
+  let r = createRegistry()
+  r = addStep(r, {
+    expression: 'each row lists the dice, the category and the score',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    handler: (_ctx, row: { score: string }) => ({ score: Number(row.score) }),
+  })
+  const source = `# Yahtzee
+
+each row lists the dice, the category and the score:
+
+| dice          | category   | score |
+| ------------- | ---------- | ----- |
+| 3, 3, 3, 4, 4 | full house | 17    |`
+  const p = plan(parse('y.var.md', source), r)
+  const runs: Array<() => unknown | Promise<unknown>> = []
+  executePlan(p, {
+    sink: { example: (_n, run) => runs.push(run) },
+    reporter: { diagnostic: () => {} },
+  })
+  await expect(runs[0]?.()).resolves.toBeUndefined()
 })

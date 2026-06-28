@@ -1,3 +1,4 @@
+import { CellMismatchError, compareRow } from './cell-diff.js'
 import type { ExecutionPlan, PlannedStep } from './plan.js'
 import type { Reporter, TestSink } from './ports.js'
 
@@ -20,6 +21,7 @@ export function executePlan(plan: ExecutionPlan, ports: ExecutePorts): void {
       // Cache one context per stepfile within this example. Lazy creation
       // keeps the cost zero for stepfiles whose steps don't run.
       const ctxByFile = new Map<string, unknown>()
+      let lastReturn: unknown
       for (const step of ex.steps) {
         const file = step.stepDef.expressionSourceFile
         let ctx = ctxByFile.get(file)
@@ -41,10 +43,20 @@ export function executePlan(plan: ExecutionPlan, ports: ExecutePorts): void {
         } else if (step.docString) {
           extra.push(step.docString.content)
         }
+        let returned: unknown
         try {
-          await step.stepDef.handler(ctx, ...step.args, ...extra)
+          returned = await step.stepDef.handler(ctx, ...step.args, ...extra)
         } catch (err) {
           throw augmentStack(err, step, path)
+        }
+        lastReturn = returned
+      }
+      if (ex.rowChecks && ex.rowChecks.length > 0) {
+        const bad = compareRow(lastReturn, ex.rowChecks).filter((d) => !d.ok)
+        if (bad.length > 0) {
+          const lastStep = ex.steps[ex.steps.length - 1]
+          // biome-ignore lint/style/noNonNullAssertion: a header-bound row example always has its row step
+          throw augmentStack(new CellMismatchError(bad), lastStep!, path)
         }
       }
     })
