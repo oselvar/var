@@ -106,6 +106,7 @@ test('defineState returns role functions typed against the state', () => {
   sense('the greeting should be {string}', (ctx) => [ctx.greeting])
   const r = buildRegistry()
   expect(r.steps).toHaveLength(2)
+  expect(r.steps.map((s) => s.kind)).toEqual(['context', 'sensor'])
 })
 
 test('a second defineState in the SAME file throws', () => {
