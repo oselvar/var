@@ -1,0 +1,36 @@
+---
+title: Doc strings
+description: How a fenced code block attaches to a step in a Vár spec — passed in as text, and checked against the step's returned string.
+area: reference
+order: 2
+---
+
+# Doc strings
+
+A fenced code block immediately **below** a step's paragraph attaches to that step. Its content (everything between the fences, including the trailing newline) is handed to your step as the **last argument**, after whatever the expression captured.
+
+````markdown
+The rendered greeting is:
+
+```text
+Hello, world!
+```
+````
+
+```ts
+step('The rendered greeting is:', (ctx, body) => {
+  // body === 'Hello, world!\n'
+})
+```
+
+## Returning a doc string
+
+If the step **returns a string**, Vár compares it against the doc-string content — **exactly**, byte for byte. This turns the fenced block into an assertion: the prose shows the expected output, and the step produces it.
+
+```ts
+step('Greet {word}:', (ctx, name, body) => {
+  return `Hello, ${name}!\n` // checked against the fence content, exactly
+})
+```
+
+Because the comparison is exact, the trailing newline matters: fence content ends with a newline, so the returned string must too. A step that returns nothing asserts nothing.
