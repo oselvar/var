@@ -31,6 +31,12 @@ export type {
   Severity,
 } from './diagnostics.js'
 export { ambiguousMatch } from './diagnostics.js'
+export type { DocStringDiff } from './doc-string-diff.js'
+export {
+  compareDocString,
+  DocStringMismatchError,
+  isDocStringMismatchError,
+} from './doc-string-diff.js'
 export type { ExecutePorts } from './execute.js'
 export { executePlan } from './execute.js'
 export type { ExpressionDiff, ExpressionSegment, ParamFate } from './expression-segments.js'
