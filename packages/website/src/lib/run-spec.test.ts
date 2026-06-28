@@ -1,4 +1,4 @@
-import { _resetBuilder, defineContext } from '@oselvar/var-runtime'
+import { _resetBuilder, defineState } from '@oselvar/var-runtime'
 import { afterEach, describe, expect, it } from 'vitest'
 import { runRegisteredSpec } from './run-spec.js'
 
@@ -9,11 +9,11 @@ const SPEC = `# Greeting\n\nFirst I greet "world" okay? I think the greeting sho
 describe('runRegisteredSpec', () => {
   it('passes when the handler does not throw', async () => {
     _resetBuilder()
-    const { step } = defineContext(() => ({ greeting: '' }))
-    step('I greet {string}', (ctx: { greeting: string }, name: string) => {
+    const { action } = defineState(() => ({ greeting: '' }))
+    action('I greet {string}', (ctx, name: string) => {
       ctx.greeting = `Hello, ${name}!`
     })
-    step('the greeting should be {string}', (ctx: { greeting: string }, expected: string) => {
+    action('the greeting should be {string}', (ctx, expected: string) => {
       if (ctx.greeting !== expected)
         throw new Error(`expected "${expected}" but was "${ctx.greeting}"`)
     })
@@ -25,11 +25,11 @@ describe('runRegisteredSpec', () => {
 
   it('fails with the message and the failing .var.md line on a throw', async () => {
     _resetBuilder()
-    const { step } = defineContext(() => ({ greeting: '' }))
-    step('I greet {string}', (ctx: { greeting: string }, name: string) => {
+    const { action } = defineState(() => ({ greeting: '' }))
+    action('I greet {string}', (ctx, name: string) => {
       ctx.greeting = `Hi ${name}`
     })
-    step('the greeting should be {string}', (ctx: { greeting: string }, expected: string) => {
+    action('the greeting should be {string}', (ctx, expected: string) => {
       if (ctx.greeting !== expected)
         throw new Error(`expected "${expected}" but was "${ctx.greeting}"`)
     })
@@ -41,8 +41,8 @@ describe('runRegisteredSpec', () => {
 
   it('attaches cells (source span + actual) for a header-bound row mismatch', async () => {
     _resetBuilder()
-    const { step } = defineContext(() => ({}))
-    step('Each row lists the n and the double', (_ctx, row: { n: string; double: string }) => ({
+    const { sensor } = defineState(() => ({}))
+    sensor('Each row lists the n and the double', (_ctx, row: { n: string; double: string }) => ({
       double: Number(row.n) * 2,
     }))
     const spec = `# Doubling
@@ -65,8 +65,8 @@ Each row lists the n and the double:
 
   it('attaches doc (body span + actual) for a doc-string mismatch', async () => {
     _resetBuilder()
-    const { step } = defineContext(() => ({}))
-    step('the greeting is', () => 'Goodbye!\n')
+    const { sensor } = defineState(() => ({}))
+    sensor('the greeting is', () => ['Goodbye!\n'] as [string])
     const spec = '# G\n\nthe greeting is:\n\n```text\nHello!\n```\n'
     const results = await runRegisteredSpec('/g.var.md', spec)
     const doc = results.examples[0]?.failure?.doc
@@ -77,11 +77,11 @@ Each row lists the n and the double:
 
   it('leaves cells/doc undefined for a plain thrown error', async () => {
     _resetBuilder()
-    const { step } = defineContext(() => ({ greeting: '' }))
-    step('I greet {string}', (ctx: { greeting: string }, name: string) => {
+    const { action } = defineState(() => ({ greeting: '' }))
+    action('I greet {string}', (ctx, name: string) => {
       ctx.greeting = `Hi ${name}`
     })
-    step('the greeting should be {string}', (ctx: { greeting: string }, expected: string) => {
+    action('the greeting should be {string}', (ctx, expected: string) => {
       if (ctx.greeting !== expected) throw new Error('nope')
     })
     const results = await runRegisteredSpec('/spec.var.md', SPEC)

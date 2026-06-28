@@ -23,6 +23,20 @@ const AMBIENT = `declare module '@oselvar/var-runtime' {
   ) => void
   export const step: Step<unknown>
   export function defineContext<C>(factory: () => C | Promise<C>): { readonly step: Step<C> }
+  export type RoleFn<C = unknown> = (
+    expression: string,
+    handler: (ctx: C, ...args: readonly unknown[]) => void | Promise<void>,
+  ) => void
+  export type SensorFn<C = unknown> = <A extends readonly unknown[]>(
+    expression: string,
+    handler: (ctx: C, ...args: A) => A | Promise<A> | void | Promise<void>,
+  ) => void
+  export const context: RoleFn
+  export const action: RoleFn
+  export const sensor: SensorFn
+  export function defineState<C>(factory: () => C | Promise<C>): {
+    readonly context: RoleFn<C>; readonly action: RoleFn<C>; readonly sensor: SensorFn<C>
+  }
   export function defineParameterType<T>(opts: {
     name: string
     regexp: RegExp | readonly RegExp[]
