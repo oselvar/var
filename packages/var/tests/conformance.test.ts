@@ -39,3 +39,11 @@ test('toFailureArtifact maps UnexpectedPassError and opaque throws', () => {
   expect(toFailureArtifact(new UnexpectedPassError(), 'e.var.md', 4).kind).toBe('unexpected-pass')
   expect(toFailureArtifact(new Error('boom'), 'e.var.md', 4)).toEqual({ kind: 'thrown', line: 4 })
 })
+
+test('toFailureArtifact recovers the line from a <specPath>:line:col stack frame', () => {
+  const err = new Error('boom')
+  // A synthetic frame like the one executePlan injects (augmentStack):
+  err.stack = 'Error: boom\n    at handler (s.ts:1:1)\n    at step (e.var.md:42:7)'
+  // fallbackLine is 4, but the frame says 42 → 42 wins.
+  expect(toFailureArtifact(err, 'e.var.md', 4)).toEqual({ kind: 'thrown', line: 42 })
+})
