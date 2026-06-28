@@ -1,5 +1,8 @@
 import type { Fence, Table, VarDoc } from './ast.js'
+import { isCellMismatchError, ReturnShapeError } from './cell-diff.js'
 import type { Diagnostic } from './diagnostics.js'
+import { isDocStringMismatchError } from './doc-string-diff.js'
+import { isUnexpectedPassError } from './execute.js'
 import type { Span } from './span.js'
 
 // ---- Artifact types (the serialized contract) -----------------------------
@@ -122,4 +125,40 @@ function fileStem(path: string): string {
 // `I have {int} cukes` -> ['int']. Internal — used only within this module.
 function parameterTypeNames(expression: string): ReadonlyArray<string> {
   return [...expression.matchAll(/\{([^}]*)\}/g)].map((m) => m[1] ?? '')
+}
+
+// Recover the 1-based failing line from the `<specPath>:line:col` frame that
+// executePlan injects (augmentStack). Falls back to the step's own line.
+function failingLine(error: unknown, specPath: string, fallbackLine: number): number {
+  const stack = error instanceof Error && typeof error.stack === 'string' ? error.stack : ''
+  const escaped = specPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const m = new RegExp(`${escaped}:(\\d+):\\d+`).exec(stack)
+  return m ? Number(m[1]) : fallbackLine
+}
+
+export function toFailureArtifact(
+  error: unknown,
+  specPath: string,
+  fallbackLine: number,
+): FailureArtifact {
+  const line = failingLine(error, specPath, fallbackLine)
+  if (isCellMismatchError(error)) {
+    return {
+      kind: 'cell-mismatch',
+      line,
+      cells: error.cells
+        .filter((c) => !c.ok)
+        .map((c) => ({ column: c.column, expected: c.expected, actual: c.actual, span: c.span })),
+    }
+  }
+  if (isDocStringMismatchError(error)) {
+    return {
+      kind: 'doc-string-mismatch',
+      line,
+      diff: { expected: error.diff.expected, actual: error.diff.actual, span: error.diff.span },
+    }
+  }
+  if (error instanceof ReturnShapeError) return { kind: 'return-shape', line }
+  if (isUnexpectedPassError(error)) return { kind: 'unexpected-pass', line }
+  return { kind: 'thrown', line }
 }
