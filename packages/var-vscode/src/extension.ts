@@ -48,6 +48,9 @@ export function activate(context: ExtensionContext): void {
       { scheme: 'file', pattern: '**/*.var.md' },
       { scheme: 'file', pattern: '**/*.steps.ts' },
     ],
+    synchronize: {
+      fileEvents: workspace.createFileSystemWatcher('**/.var/**/*.json'),
+    },
   }
   client = new LanguageClient('oselvar-var', 'Vár', serverOptions, clientOptions)
   const started = client.start()
