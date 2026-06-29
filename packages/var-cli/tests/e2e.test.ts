@@ -45,12 +45,12 @@ describe('var CLI (source via tsx)', () => {
     }
   })
 
-  test('lint --json exits 0 when a .var.md has only prose / unmatched keyword-led lines', () => {
+  test('lint --json exits 0 when a .md has only prose / unmatched keyword-led lines', () => {
     // No Given/When/Then heuristic: keyword-led but unmatched sentences are
     // not diagnostics, so lint must exit 0.
     const dir = mkdtempSync(join(tmpdir(), 'var-e2e-lint-'))
     try {
-      writeFileSync(join(dir, 'a.var.md'), '# A\n\nGiven I have 5 cukes')
+      writeFileSync(join(dir, 'a.md'), '# A\n\nGiven I have 5 cukes')
       const r = run(['lint', '--json'], dir)
       expect(r.status).toBe(0)
       const parsed = JSON.parse(r.stdout)

@@ -169,7 +169,7 @@ approach:
   matrix: extraction, matching, ambiguity diagnostics, completion, go-to-definition, document
   symbols, semantic tokens, and step-def generation round-trips. Gaps are recorded explicitly
   (logged, not silently skipped).
-- **Dogfooding stays per-runtime.** The existing `*.var.md` dogfood suites continue to run
+- **Dogfooding stays per-runtime.** The existing `*.md` dogfood suites continue to run
   under each runtime adapter (vitest/node/bun, and pytest for Python), proving the *runtime*
   integration end-to-end, while the conformance suite proves *cross-language equivalence* of
   the shared layers.

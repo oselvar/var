@@ -84,7 +84,7 @@ function nonLiteralSegment(node: Node, source: string): ExpressionSegment {
 
 // Plan describing how each parameter in the OLD expression maps onto the NEW
 // expression. Consumers (the rename refactor) use this to decide what to do
-// with each .var.md site's captured values.
+// with each .md site's captured values.
 export type ParamFate =
   | {
       readonly kind: 'kept'
@@ -113,13 +113,13 @@ export type ExpressionDiff = {
   readonly newSegments: ReadonlyArray<ExpressionSegment>
   readonly paramFates: ReadonlyArray<ParamFate>
   // Literal portions changed (e.g., `I greet` → `I welcome`). The cascade
-  // rewrites the .var.md sites' literal text from this signal.
+  // rewrites the .md sites' literal text from this signal.
   readonly literalChanged: boolean
 }
 
 // Render an expression by replacing each parameter slot with a concrete value
 // supplied by the caller. Used by the rename refactor to rebuild every
-// .var.md match site from the new expression while preserving captured
+// .md match site from the new expression while preserving captured
 // values. Opaque (optional/alternation) segments are emitted verbatim.
 //
 // Throws if `values.length` doesn't match the number of parameters in the

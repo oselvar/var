@@ -14,7 +14,7 @@ function runOne(
   let registry = createRegistry()
   registry = register(registry)
   // parse(path, source) — path first, source second
-  const doc = parse('x.var.md', source)
+  const doc = parse('x.md', source)
   const p = plan(doc, registry)
   let caught: unknown
   const ports: ExecutePorts = {

@@ -186,7 +186,7 @@ export function buildHandlers(store: Store): Handlers {
       // When both uri and position are supplied, infer the role from the
       // neighbouring matched steps in the same file. The lookup is file-scoped:
       // the workspace index does not expose example/heading boundaries, so steps
-      // from other examples in the same .var.md are included. That is an
+      // from other examples in the same .md are included. That is an
       // accepted approximation — inferStepRole inspects only presence/emptiness
       // and first action/sensor, and the snippet always offers the other roles
       // commented out, so a wrong guess is one keystroke to fix.
@@ -207,11 +207,11 @@ export function buildHandlers(store: Store): Handlers {
       const stepAt = resolveStepAt(store, uri, position)
       if (!stepAt) return { ok: false, error: 'No step under cursor.' }
 
-      // In a .var.md, `newName` is the user's edited sentence; we derive the
+      // In a .md, `newName` is the user's edited sentence; we derive the
       // new cucumber expression via the live workspace registry (so custom
       // param types like {airport} apply). In a .steps.ts, `newName` is the
       // expression text directly.
-      const isVarDoc = uriToPath(uri).endsWith('.var.md')
+      const isVarDoc = store.isVarDoc(uriToPath(uri))
       let newExpression: string
       if (isVarDoc) {
         try {
@@ -295,7 +295,7 @@ export function buildHandlers(store: Store): Handlers {
       const stepAt = resolveStepAt(store, uri, position)
       if (!stepAt) return { ok: false, error: 'No step under cursor.' }
 
-      const isVarDoc = uriToPath(uri).endsWith('.var.md')
+      const isVarDoc = store.isVarDoc(uriToPath(uri))
       let newExpression: string
       if (isVarDoc) {
         try {
@@ -393,9 +393,10 @@ export function buildHandlers(store: Store): Handlers {
       }
     },
     completions({ uri, position, linePrefix }) {
-      // Only offer completions in .var.md docs. .steps.ts gets its own TS
-      // completions from VSCode's TypeScript service.
-      if (!uriToPath(uri).endsWith('.var.md')) return []
+      // Only offer completions in var spec docs (those matched by the `vars`
+      // globs). .steps.ts gets its own TS completions from the TypeScript
+      // service, and ordinary markdown is left alone.
+      if (!store.isVarDoc(uriToPath(uri))) return []
 
       // Compute the replace range: from the first non-whitespace character of
       // the current line to the cursor. No Given/When/Then heuristics — if
@@ -443,7 +444,7 @@ function contains(range: { start: Position; end: Position }, position: Position)
 }
 
 // Returns the StepKind of matched steps strictly before and strictly after
-// `position` (0-based LSP) in the given .var.md file.
+// `position` (0-based LSP) in the given .md file.
 function neighbourRolesForSelection(
   store: Store,
   uri: string,

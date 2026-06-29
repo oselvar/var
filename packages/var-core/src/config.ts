@@ -8,7 +8,9 @@ import { DEFAULT_SNIPPET_TEMPLATE } from './snippet-template.js'
 export type { VarConfig } from './config-types.js'
 
 const DEFAULT_CONFIG: VarConfig = {
-  vars: ['**/*.var.md'],
+  // No default spec glob: specs are plain `.md` files, so a greedy default would
+  // parse every README in the repo. A repo must declare `vars` explicitly.
+  vars: [],
   steps: ['**/*.steps.ts'],
   snippet: { template: DEFAULT_SNIPPET_TEMPLATE },
   scannerPlugins: [],

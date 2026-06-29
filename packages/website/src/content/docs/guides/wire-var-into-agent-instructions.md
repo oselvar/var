@@ -2,7 +2,7 @@
 title: Wire Vár into your AI agent's instructions
 description: One-time setup so your coding agent defaults to writing a Vár spec before any production code.
 area: guides
-order: 1
+order: 3
 ---
 
 # Wire Vár into your AI agent's instructions
@@ -30,7 +30,7 @@ Paste this block in. Edit the language to match your house style; the substance 
 We use Vár for behaviour-driven development. When you implement a feature
 or fix a bug, you must:
 
-1. Write or update a `*.var.md` spec under the relevant package's `tests/`
+1. Write or update a `*.md` spec under the relevant package's `tests/`
    directory before touching production code. The spec describes the
    behaviour in plain English with concrete examples.
 2. Write or update the matching `*.steps.ts` step definitions.
@@ -68,13 +68,13 @@ git commit -m "docs: instruct agents to use Vár spec-first"
 Start a fresh session with your agent and ask for a small new feature *without* mentioning tests. A correctly configured agent should:
 
 - Acknowledge it will write the spec first.
-- Produce a `*.var.md` file with concrete examples before any production code.
+- Produce a `*.md` file with concrete examples before any production code.
 - Run the suite, see it fail, and iterate.
 
 If the agent skips straight to production code, your instruction file isn't being read — check the file name and location for the agent you're using.
 
 ## Anti-patterns
 
-- **Don't** also paste your full Vár syntax reference into the instruction file. The agent can read the package's own README and `*.var.md` files in the repo. Keep instructions to *how to work*, not *what Vár is*.
+- **Don't** also paste your full Vár syntax reference into the instruction file. The agent can read the package's own README and `*.md` files in the repo. Keep instructions to *how to work*, not *what Vár is*.
 - **Don't** tell the agent to "write tests where appropriate". Vague guidance gets ignored. Be specific: spec first, every time.
 - **Don't** let the agent edit the spec to make a failing test pass. That defeats the entire mechanism. The "spec is the contract" line above is load-bearing.

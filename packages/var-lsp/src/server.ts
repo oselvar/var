@@ -188,7 +188,7 @@ export function registerHandlers(
   })
 
   // Resolve everything the Rename refactor needs from a single position —
-  // the step def's expression + every matched .var.md site with its current
+  // the step def's expression + every matched .md site with its current
   // captured values. Returns null when the position isn't on a step.
   connection.onRequest(
     'var/stepAt',
@@ -221,7 +221,7 @@ export function registerHandlers(
   )
 
   // Render a (new) expression with a list of values into a literal string
-  // suitable for splicing into a .var.md document.
+  // suitable for splicing into a .md document.
   connection.onRequest<ReturnType<LspHandlers['renderExpressionText']> | null, void>(
     'var/renderExpressionText',
     (params: { expression: string; values: ReadonlyArray<string> }) => {

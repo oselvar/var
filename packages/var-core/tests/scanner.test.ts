@@ -151,7 +151,7 @@ these rows:
 | a | bb  |
 | - | --- |
 | 1 | 222 |`
-  const doc = parse('t.var.md', source)
+  const doc = parse('t.md', source)
   const table = doc.examples[0]?.body.find((b) => b.kind === 'table') as Table | undefined
   if (!table) throw new Error('no table parsed')
   const row = table.rows[0]
@@ -176,7 +176,7 @@ these:
 | - |
 | 7 |
 | 8 |`
-  const doc = parse('t.var.md', source)
+  const doc = parse('t.md', source)
   const table = doc.examples[0]?.body.find((b) => b.kind === 'table') as Table | undefined
   if (!table) throw new Error('single-column table did not parse as a table')
   expect(table.header.cells).toEqual(['n'])

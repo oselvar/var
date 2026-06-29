@@ -16,7 +16,7 @@ export type RunInput = {
 // Strips the scheme from a standard file:/// URI to recover the bare path.
 const stripFileScheme = (uri: string): string => uri.replace(/^file:\/\/\//, '')
 
-// Group editor descriptors and pair each group's spec (.var.md) with the step
+// Group editor descriptors and pair each group's spec (.md) with the step
 // files in that same group — visible .steps.ts editors first, then any hidden
 // carried steps. Pure: no DOM, no editor instances. Order follows first
 // appearance of each group.
@@ -39,7 +39,8 @@ export function groupRunInputs(
   const inputs: RunInput[] = []
   for (const group of order) {
     const bucket = byGroup.get(group) ?? []
-    const spec = bucket.find((e) => e.uri.endsWith('.var.md'))
+    // The spec is the markdown view; the others in the group are `.steps.ts`.
+    const spec = bucket.find((e) => e.uri.endsWith('.md'))
     if (!spec) continue
     const visibleSteps: StepFile[] = bucket
       .filter((e) => e.uri.endsWith('.steps.ts'))

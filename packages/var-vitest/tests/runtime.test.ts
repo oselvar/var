@@ -18,7 +18,7 @@ test('runVarSource emits one sink.example call per BDD example, executes its han
 
   const seen: string[] = []
   const runs: Array<() => void | Promise<void>> = []
-  runVarSource('# Eating\n\nI have 5 cukes. I eat 2.', 'belly.var.md', {
+  runVarSource('# Eating\n\nI have 5 cukes. I eat 2.', 'belly.md', {
     sink: {
       example: (name, run) => {
         seen.push(name)

@@ -21,7 +21,7 @@ That conceit is not decoration. Every design decision in Vár is an oath sworn a
 
 Cucumber asked you to learn a dialect. Gherkin is a DSL — its own grammar, its own files, its own tooling — and a dialect is something the business has to be taught before it can read, let alone write. Most never were.
 
-A Vár spec is a Markdown file ending in `.var.md`. Prose, with concrete examples written inline. There is no `Feature:`, no `Scenario:`, no indentation grammar to get wrong. If you can write a paragraph that names a context, an action, and an expected outcome, you've written a spec.
+A Vár spec is a Markdown file ending in `.md`. Prose, with concrete examples written inline. There is no `Feature:`, no `Scenario:`, no indentation grammar to get wrong. If you can write a paragraph that names a context, an action, and an expected outcome, you've written a spec.
 
 The point is that the document is *already* the document. It reads as reference documentation — a place people go to understand what the system does — because that's literally what it is. There's no separate business-readable artifact to keep in sync with the executable one. They're the same file.
 

@@ -9,22 +9,33 @@ test('loads var.config.ts when present', async () => {
   try {
     writeFileSync(
       join(dir, 'var.config.ts'),
-      `export default { vars: ['**/*.var.md'], steps: ['**/*.steps.ts'] }\n`,
+      `export default { vars: ['specs/**/*.md'], steps: ['**/*.steps.ts'] }\n`,
     )
     const cfg = await loadVarConfig(dir)
-    expect(cfg.vars).toEqual(['**/*.var.md'])
+    expect(cfg.vars).toEqual(['specs/**/*.md'])
     expect(cfg.steps).toEqual(['**/*.steps.ts'])
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }
 })
 
-test('returns defaults when var.config.ts is absent', async () => {
+test('defaults vars to [] (explicit vars required) when var.config.ts is absent', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'var-cfg-empty-'))
   try {
     const cfg = await loadVarConfig(dir)
-    expect(cfg.vars).toEqual(['**/*.var.md'])
+    expect(cfg.vars).toEqual([])
     expect(cfg.steps).toEqual(['**/*.steps.ts'])
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('defaults vars to [] when var.config.ts omits vars', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'var-cfg-novars-'))
+  try {
+    writeFileSync(join(dir, 'var.config.ts'), `export default { steps: ['**/*.steps.ts'] }\n`)
+    const cfg = await loadVarConfig(dir)
+    expect(cfg.vars).toEqual([])
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }
@@ -36,7 +47,7 @@ test('loads snippet.template from var.config.ts when provided', async () => {
     writeFileSync(
       join(dir, 'var.config.ts'),
       `export default {
-        vars: ['**/*.var.md'],
+        vars: ['specs/**/*.md'],
         steps: ['**/*.steps.ts'],
         snippet: { template: 'CUSTOM: {{expression}}' },
       }\n`,

@@ -33,7 +33,7 @@ const {
 } = Astro.props
 
 // Language is inferred from the uri extension: TypeScript for `.ts` (incl.
-// `.steps.ts`), Markdown otherwise (`.md`, `.var.md`).
+// `.steps.ts`), Markdown otherwise (`.md`, `.md`).
 const lang = uri.endsWith('.ts') ? 'typescript' : 'markdown'
 
 // The header filename is the uri's basename (strip the file:// scheme and any

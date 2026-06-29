@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { glob as nativeGlob } from 'node:fs/promises'
 import { resolve } from 'node:path'
+import { partitionGlobs } from '@oselvar/var-core'
 import { loadVarConfig } from '@oselvar/var-core/node'
 import type { Plugin } from 'vite'
 
@@ -13,9 +14,21 @@ export type VarVitestPluginOptions = {
   readonly cwd?: string
 }
 
+// A file is a var spec iff it was discovered by the configured `vars` globs.
+// Vite may append a query suffix (e.g. `?v=123`) to module ids, so strip it
+// before matching against the discovered absolute paths.
+export function isVarSpecId(id: string, specFiles: ReadonlySet<string>): boolean {
+  const path = id.split('?')[0] ?? id
+  return specFiles.has(path)
+}
+
 export function varVitestPlugin(options: VarVitestPluginOptions = {}): Plugin {
   const cwd = options.cwd ?? process.cwd()
   let stepFiles: ReadonlyArray<string> = []
+  // Absolute paths of the spec files discovered from `cfg.vars`. The `load`
+  // hook transforms only these into virtual test modules — there is no longer
+  // a `.md` extension to key off of.
+  let specFiles: ReadonlySet<string> = new Set()
   // Absolute path to var.config.ts when one exists; the generated virtual
   // module imports it directly so its scannerPlugins reach the runtime.
   let configPath: string | undefined
@@ -33,6 +46,7 @@ export function varVitestPlugin(options: VarVitestPluginOptions = {}): Plugin {
     async configResolved() {
       const cfg = await loadVarConfig(cwd)
       stepFiles = await findFiles(cwd, cfg.steps)
+      specFiles = new Set(await findFiles(cwd, cfg.vars))
       for (const name of ['var.config.ts', 'var.config.js', 'var.config.mjs']) {
         const abs = resolve(cwd, name)
         if (existsSync(abs)) {
@@ -42,7 +56,7 @@ export function varVitestPlugin(options: VarVitestPluginOptions = {}): Plugin {
       }
     },
     async load(id) {
-      if (!id.endsWith('.var.md')) return null
+      if (!isVarSpecId(id, specFiles)) return null
       const source = readFileSync(id, 'utf8')
       return generateVirtualModule({
         varPath: id,
@@ -104,18 +118,26 @@ runVarSource(SOURCE, PATH, {
 `
 }
 
-async function findFiles(cwd: string, patterns: ReadonlyArray<string>): Promise<string[]> {
+async function globAbs(cwd: string, patterns: ReadonlyArray<string>): Promise<string[]> {
   const out: string[] = []
-  const seen = new Set<string>()
   for (const pattern of patterns) {
     // node:fs/promises.glob is async iterable in Node 22+
     for await (const entry of glob(pattern, { cwd })) {
-      const abs = resolve(cwd, entry)
-      if (!seen.has(abs)) {
-        seen.add(abs)
-        out.push(abs)
-      }
+      out.push(resolve(cwd, entry))
     }
+  }
+  return out
+}
+
+async function findFiles(cwd: string, patterns: ReadonlyArray<string>): Promise<string[]> {
+  const { includes, excludes } = partitionGlobs(patterns)
+  const excluded = new Set(await globAbs(cwd, excludes))
+  const out: string[] = []
+  const seen = new Set<string>()
+  for (const abs of await globAbs(cwd, includes)) {
+    if (excluded.has(abs) || seen.has(abs)) continue
+    seen.add(abs)
+    out.push(abs)
   }
   return out
 }

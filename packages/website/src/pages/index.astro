@@ -1,5 +1,5 @@
 ---
-import yahtzeeSpec from '../../../../docs/tutorial/04-yahtzee.var.md?raw'
+import yahtzeeSpec from '../../../../docs/tutorial/04-yahtzee.md?raw'
 import yahtzeeSteps from '../../../../docs/tutorial/steps/04-yahtzee.steps.ts?raw'
 import Editor from '../components/Editor.astro'
 import Base from '../layouts/Base.astro'
@@ -69,7 +69,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '')
           Yahtzee scoresheet, yet every row is a precise, independent test. Change a
           die and watch a single row turn red.
         </p>
-        <Editor uri="file:///yahtzee.var.md">{yahtzeeSpec}</Editor>
+        <Editor uri="file:///yahtzee.md">{yahtzeeSpec}</Editor>
         <div class="demo__steps" aria-hidden="true">
           <Editor uri="file:///yahtzee.steps.ts" lineNumbers folding>{yahtzeeSteps}</Editor>
         </div>

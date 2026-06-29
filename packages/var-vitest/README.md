@@ -1,6 +1,6 @@
 # @oselvar/var-vitest
 
-The vitest adapter for Vár. Wire the plugin into your `vitest.config.ts` so `.var.md`
+The vitest adapter for Vár. Wire the plugin into your `vitest.config.ts` so `.md`
 files run as tests, and add the results reporter:
 
 ```ts

@@ -2,7 +2,7 @@ import { globSync, readFileSync } from 'node:fs'
 import { relative, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { buildRegistry, contextFactory } from '@oselvar/var/registry'
-import { executePlan, parse, plan } from '@oselvar/var-core'
+import { executePlan, parse, partitionGlobs, plan } from '@oselvar/var-core'
 import { loadVarConfig } from '@oselvar/var-core/node'
 
 export type RunOptions = {
@@ -96,17 +96,25 @@ function formatError(err: unknown): string {
 // recursion in Node 22.x. The synchronous globSync handles symlinks
 // correctly and the up-front file lists are small enough that the
 // blocking call is a non-issue.
-function findFiles(cwd: string, patterns: ReadonlyArray<string>): string[] {
+function globAbs(cwd: string, patterns: ReadonlyArray<string>): string[] {
   const out: string[] = []
-  const seen = new Set<string>()
   for (const pattern of patterns) {
     for (const entry of globSync(pattern, { cwd })) {
-      const abs = resolve(cwd, entry)
-      if (!seen.has(abs)) {
-        seen.add(abs)
-        out.push(abs)
-      }
+      out.push(resolve(cwd, entry))
     }
+  }
+  return out
+}
+
+function findFiles(cwd: string, patterns: ReadonlyArray<string>): string[] {
+  const { includes, excludes } = partitionGlobs(patterns)
+  const excluded = new Set(globAbs(cwd, excludes))
+  const out: string[] = []
+  const seen = new Set<string>()
+  for (const abs of globAbs(cwd, includes)) {
+    if (excluded.has(abs) || seen.has(abs)) continue
+    seen.add(abs)
+    out.push(abs)
   }
   return out
 }

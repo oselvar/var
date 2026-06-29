@@ -4,7 +4,7 @@ import type { SpecResults } from '../src/result.js'
 import { runResultDiagnostics } from '../src/run-diagnostics.js'
 
 function results(source: string, examples: SpecResults['examples']): SpecResults {
-  return { version: 1, specPath: 's.var.md', sourceHash: hashSource(source), examples }
+  return { version: 1, specPath: 's.md', sourceHash: hashSource(source), examples }
 }
 
 test('cell mismatch → one diagnostic per cell with expected/actual message', () => {
@@ -73,7 +73,7 @@ test('stale sourceHash → no diagnostics', () => {
   const source = 'x 6 y'
   const r: SpecResults = {
     version: 1,
-    specPath: 's.var.md',
+    specPath: 's.md',
     sourceHash: 'fnv1a:00000000',
     examples: [
       {

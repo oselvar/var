@@ -5,7 +5,7 @@ import {
   BrowserMessageWriter,
   createConnection,
 } from 'vscode-languageserver/browser'
-import yahtzeeSpec from '../../../../docs/tutorial/04-yahtzee.var.md?raw'
+import yahtzeeSpec from '../../../../docs/tutorial/04-yahtzee.md?raw'
 import helloSteps from '../../../../docs/tutorial/steps/01-hello.steps.ts?raw'
 import yahtzeeSteps from '../../../../docs/tutorial/steps/04-yahtzee.steps.ts?raw'
 import { createIdbFileSystem } from './idb-file-system.ts'
@@ -21,7 +21,7 @@ import { createTsDiagnostics } from './ts-diagnostics.ts'
 // reaches only the run-worker, so any step file a doc spec must HIGHLIGHT
 // against has to be seeded here too. The docs use hello + yahtzee steps.
 const SEED_FILES: Record<string, string> = {
-  '/yahtzee.var.md': yahtzeeSpec,
+  '/yahtzee.md': yahtzeeSpec,
   '/yahtzee.steps.ts': yahtzeeSteps,
   '/01-hello.steps.ts': helloSteps,
 }
@@ -31,7 +31,7 @@ const writer = new BrowserMessageWriter(self as DedicatedWorkerGlobalScope)
 const connection = createConnection(reader, writer)
 
 const config = {
-  vars: ['**/*.var.md'],
+  vars: ['**/*.md'],
   steps: ['**/*.steps.ts'],
   snippet: { template: DEFAULT_SNIPPET_TEMPLATE },
   scannerPlugins: [],

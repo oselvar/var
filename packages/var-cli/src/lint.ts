@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { glob as nativeGlob } from 'node:fs/promises'
 import { resolve } from 'node:path'
-import { createRegistry, parse, plan } from '@oselvar/var-core'
+import { createRegistry, parse, partitionGlobs, plan } from '@oselvar/var-core'
 import { loadVarConfig } from '@oselvar/var-core/node'
 
 export type LintOptions = {
@@ -65,17 +65,25 @@ function isError(code: string): boolean {
   return code === 'ambiguous-match'
 }
 
-async function findFiles(cwd: string, patterns: ReadonlyArray<string>): Promise<string[]> {
+async function globAbs(cwd: string, patterns: ReadonlyArray<string>): Promise<string[]> {
   const out: string[] = []
-  const seen = new Set<string>()
   for (const pattern of patterns) {
     for await (const entry of glob(pattern, { cwd })) {
-      const abs = resolve(cwd, entry)
-      if (!seen.has(abs)) {
-        seen.add(abs)
-        out.push(abs)
-      }
+      out.push(resolve(cwd, entry))
     }
+  }
+  return out
+}
+
+async function findFiles(cwd: string, patterns: ReadonlyArray<string>): Promise<string[]> {
+  const { includes, excludes } = partitionGlobs(patterns)
+  const excluded = new Set(await globAbs(cwd, excludes))
+  const out: string[] = []
+  const seen = new Set<string>()
+  for (const abs of await globAbs(cwd, includes)) {
+    if (excluded.has(abs) || seen.has(abs)) continue
+    seen.add(abs)
+    out.push(abs)
   }
   return out
 }

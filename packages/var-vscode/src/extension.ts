@@ -45,7 +45,7 @@ export function activate(context: ExtensionContext): void {
   }
   const clientOptions: LanguageClientOptions = {
     documentSelector: [
-      { scheme: 'file', pattern: '**/*.var.md' },
+      { scheme: 'file', pattern: '**/*.md' },
       { scheme: 'file', pattern: '**/*.steps.ts' },
     ],
     synchronize: {
@@ -90,7 +90,7 @@ function registerGenerateCodeAction(context: ExtensionContext): void {
     },
   }
   context.subscriptions.push(
-    languages.registerCodeActionsProvider({ scheme: 'file', pattern: '**/*.var.md' }, provider, {
+    languages.registerCodeActionsProvider({ scheme: 'file', pattern: '**/*.md' }, provider, {
       providedCodeActionKinds: [CodeActionKind.RefactorExtract],
     }),
   )
@@ -177,7 +177,7 @@ async function appendSnippet(uri: Uri, snippet: string): Promise<void> {
 }
 
 // -----------------------------------------------------------------------------
-// Rename: F2 on a matched step in .var.md OR on a step('...') expression
+// Rename: F2 on a matched step in .md OR on a step('...') expression
 // literal in .steps.ts triggers a cross-file refactor. v1 handles the
 // "literals only changed" case — same parameter count/order. Param add/remove
 // is rejected with a friendly message in this phase; phase 4 will prompt
@@ -253,9 +253,9 @@ function registerStepRename(
         )
       }
       // What VSCode pre-fills the inline editor with:
-      //   - in .var.md: the matched substring (a sentence)
+      //   - in .md: the matched substring (a sentence)
       //   - in .steps.ts: the cucumber expression literal WITHOUT its quotes
-      if (document.fileName.endsWith('.var.md')) {
+      if (document.fileName.endsWith('.md')) {
         const m = at.matches.find((m) => m.uri === document.uri.toString())
         if (!m) throw new Error('Internal: no match for the active document.')
         return {
@@ -338,7 +338,7 @@ function registerStepRename(
   }
 
   context.subscriptions.push(
-    languages.registerRenameProvider({ scheme: 'file', pattern: '**/*.var.md' }, provider),
+    languages.registerRenameProvider({ scheme: 'file', pattern: '**/*.md' }, provider),
     languages.registerRenameProvider({ scheme: 'file', pattern: '**/*.steps.ts' }, provider),
   )
 }

@@ -5,7 +5,7 @@ import { createRunResultsStore, runLspDiagnostics } from './run-results.js'
 const SOURCE = 'x 6 y'
 const SPEC: SpecResults = {
   version: 1,
-  specPath: 'docs/a.var.md',
+  specPath: 'docs/a.md',
   sourceHash: hashSource(SOURCE),
   examples: [
     {
@@ -37,10 +37,10 @@ describe('runLspDiagnostics', () => {
 describe('RunResultsStore', () => {
   it('ingests a valid .var json and keys it by the spec file URI', () => {
     const store = createRunResultsStore('file:///root')
-    const uri = store.ingest('/root/.var/docs/a.var.md.json', JSON.stringify(SPEC))
-    expect(uri).toBe('file:///root/docs/a.var.md')
-    expect(store.get('file:///root/docs/a.var.md')).toEqual(SPEC)
-    expect(store.specUris()).toEqual(['file:///root/docs/a.var.md'])
+    const uri = store.ingest('/root/.var/docs/a.md.json', JSON.stringify(SPEC))
+    expect(uri).toBe('file:///root/docs/a.md')
+    expect(store.get('file:///root/docs/a.md')).toEqual(SPEC)
+    expect(store.specUris()).toEqual(['file:///root/docs/a.md'])
   })
 
   it('rejects malformed JSON and a wrong version (stores nothing)', () => {
@@ -57,8 +57,8 @@ describe('RunResultsStore', () => {
 
   it('remove() drops the entry and returns its spec URI', () => {
     const store = createRunResultsStore('file:///root')
-    store.ingest('/root/.var/docs/a.var.md.json', JSON.stringify(SPEC))
-    expect(store.remove('/root/.var/docs/a.var.md.json')).toBe('file:///root/docs/a.var.md')
-    expect(store.get('file:///root/docs/a.var.md')).toBeUndefined()
+    store.ingest('/root/.var/docs/a.md.json', JSON.stringify(SPEC))
+    expect(store.remove('/root/.var/docs/a.md.json')).toBe('file:///root/docs/a.md')
+    expect(store.get('file:///root/docs/a.md')).toBeUndefined()
   })
 })

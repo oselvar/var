@@ -1,4 +1,4 @@
 export default {
-  vars: ['*.var.md'],
+  vars: ['*.md'],
   steps: ['*.steps.ts'],
 }

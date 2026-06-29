@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest'
 import { buildWorkspaceIndex } from '../src/index-workspace.js'
 
-test('cross-references matched substrings in .var.md to their step defs', () => {
+test('cross-references matched substrings in .md to their step defs', () => {
   const idx = buildWorkspaceIndex({
     stepFiles: [
       {
@@ -12,7 +12,7 @@ test('cross-references matched substrings in .var.md to their step defs', () => 
     ],
     varFiles: [
       {
-        path: '/abs/belly.var.md',
+        path: '/abs/belly.md',
         source: '# Belly\n\nGiven I have 5 cukes',
       },
     ],
@@ -20,7 +20,7 @@ test('cross-references matched substrings in .var.md to their step defs', () => 
   expect(idx.stepDefs).toHaveLength(1)
   expect(idx.matches).toHaveLength(1)
   const m = idx.matches[0]
-  expect(m?.varPath).toBe('/abs/belly.var.md')
+  expect(m?.varPath).toBe('/abs/belly.md')
   expect(m?.stepDef.expression).toBe('I have {int} cukes')
   // Match starts somewhere inside line 3 (the body).
   expect(m?.range.start.line).toBe(3)
@@ -29,7 +29,7 @@ test('cross-references matched substrings in .var.md to their step defs', () => 
 test('an unmatched keyword-led sentence produces NO diagnostic (no Given/When/Then heuristic)', () => {
   const idx = buildWorkspaceIndex({
     stepFiles: [],
-    varFiles: [{ path: '/m.var.md', source: '# M\n\nGiven I have 5 cukes' }],
+    varFiles: [{ path: '/m.md', source: '# M\n\nGiven I have 5 cukes' }],
   })
   expect(idx.diagnostics).toEqual([])
 })
@@ -44,7 +44,7 @@ action('I have {int} {word}', () => {})
 `,
       },
     ],
-    varFiles: [{ path: '/a.var.md', source: '# Ambig\n\nGiven I have 5 cukes' }],
+    varFiles: [{ path: '/a.md', source: '# Ambig\n\nGiven I have 5 cukes' }],
   })
   const codes = idx.diagnostics.map((d) => d.code)
   expect(codes).toContain('ambiguous-match')
@@ -67,7 +67,7 @@ action('I fly to {airport}', (ctx, code) => {})
 `,
       },
     ],
-    varFiles: [{ path: '/t.var.md', source: '# T\n\nGiven I fly to LHR\n' }],
+    varFiles: [{ path: '/t.md', source: '# T\n\nGiven I fly to LHR\n' }],
   })
   expect(idx.matches).toHaveLength(1)
   expect(idx.matches[0]?.stepDef.expression).toBe('I fly to {airport}')
@@ -89,7 +89,7 @@ test('a header-bound table highlights the binding paragraph with header words as
     ],
     varFiles: [
       {
-        path: '/yahtzee.var.md',
+        path: '/yahtzee.md',
         source: `# Yahtzee
 
 each row lists the dice, the category and the score:

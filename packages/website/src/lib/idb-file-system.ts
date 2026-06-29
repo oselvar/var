@@ -59,5 +59,11 @@ export async function createIdbFileSystem(seed: Record<string, string> = {}): Pr
     async write(path, content) {
       await tx(db, 'readwrite', (s) => s.put(content, path))
     },
+    matches(path, globs) {
+      // Mirror `list`'s crude extension matcher: in the browser, specs are
+      // distinguished from `.steps.ts` by extension, which is enough here.
+      const exts = globs.filter((g) => !g.startsWith('!')).map((g) => g.slice(g.lastIndexOf('.')))
+      return exts.some((e) => path.endsWith(e))
+    },
   }
 }

@@ -34,7 +34,7 @@ test('plan produces a PlannedExample with steps in document order', () => {
   // is also matched as a step. The heading becomes a `describe` scope.
   const source =
     '# Withdrawing\n\nGiven I have 100 in my account. When I withdraw 40. Then I should have 60 left.'
-  const varDoc = parse('w.var.md', source)
+  const varDoc = parse('w.md', source)
   const result = plan(varDoc, reg())
   expect(result.diagnostics).toHaveLength(0)
   expect(result.examples).toHaveLength(1)
@@ -66,7 +66,7 @@ test('plan emits an ambiguous-match diagnostic and does NOT include the example 
     kind: 'action',
     handler: () => {},
   })
-  const varDoc = parse('e.var.md', '# Ambig\n\nGiven I have 5 cukes')
+  const varDoc = parse('e.md', '# Ambig\n\nGiven I have 5 cukes')
   const result = plan(varDoc, r)
   expect(result.diagnostics).toHaveLength(1)
   expect(result.diagnostics[0]?.code).toBe('ambiguous-match')
@@ -75,7 +75,7 @@ test('plan emits an ambiguous-match diagnostic and does NOT include the example 
 
 test('plan skips an example heading whose body has no matches and no keyword-led sentences', () => {
   const source = '# Just docs\n\nSome prose with no matches and no keywords.'
-  const varDoc = parse('d.var.md', source)
+  const varDoc = parse('d.md', source)
   const result = plan(varDoc, reg())
   expect(result.examples).toHaveLength(0)
   expect(result.diagnostics).toHaveLength(0)
@@ -98,7 +98,7 @@ test('plan turns each list item into its own example (one matched step per item)
     handler: () => {},
   })
   const source = '# Bullets\n\n- Given I have 100 in my account\n- When I withdraw 40'
-  const result = plan(parse('b.var.md', source), r)
+  const result = plan(parse('b.md', source), r)
   expect(result.examples).toHaveLength(2)
   expect(result.examples.map((e) => e.steps.map((s) => s.text))).toEqual([
     ['I have 100 in my account'],
@@ -116,7 +116,7 @@ test('plan walks blockquote content as step-bearing', () => {
     handler: () => {},
   })
   const source = '# Quote\n\n> Given I have 100 in my account'
-  const result = plan(parse('q.var.md', source), r)
+  const result = plan(parse('q.md', source), r)
   expect(result.examples[0]?.steps).toHaveLength(1)
 })
 
@@ -136,7 +136,7 @@ Given these users exist:
 |------|-----|
 | Bob  | 30  |
 | Eve  | 25  |`
-  const result = plan(parse('u.var.md', source), r)
+  const result = plan(parse('u.md', source), r)
   const step = result.examples[0]?.steps[0]
   expect(step?.dataTable?.header.cells).toEqual(['name', 'age'])
   expect(step?.dataTable?.rows).toHaveLength(2)
@@ -160,7 +160,7 @@ Some interrupting prose.
 | name | age |
 |------|-----|
 | Bob  | 30  |`
-  const result = plan(parse('m.var.md', source), r)
+  const result = plan(parse('m.md', source), r)
   const step = result.examples[0]?.steps[0]
   expect(step?.dataTable).toBeUndefined()
 })
@@ -180,7 +180,7 @@ When I send the payload:
 \`\`\`json
 { "action": "import" }
 \`\`\``
-  const result = plan(parse('p.var.md', source), r)
+  const result = plan(parse('p.md', source), r)
   const step = result.examples[0]?.steps[0]
   expect(step?.docString?.contentType).toBe('json')
   expect(step?.docString?.content).toBe('{ "action": "import" }\n')
@@ -195,7 +195,7 @@ test('a step with NO following fence has no docString', () => {
     kind: 'action',
     handler: () => {},
   })
-  const result = plan(parse('p.var.md', '# P\nWhen I send the payload'), r)
+  const result = plan(parse('p.md', '# P\nWhen I send the payload'), r)
   expect(result.examples[0]?.steps[0]?.docString).toBeUndefined()
 })
 
@@ -203,14 +203,14 @@ test('a keyword-led sentence with no match does NOT produce a diagnostic (no Giv
   // Step-def generation is selection-driven only; we never infer that a
   // keyword-led sentence "should" have matched a step definition.
   const r = createRegistry()
-  const varDoc = parse('m.var.md', '# Empty\n\nGiven I have 5 cukes in my belly.')
+  const varDoc = parse('m.md', '# Empty\n\nGiven I have 5 cukes in my belly.')
   const result = plan(varDoc, r)
   expect(result.diagnostics).toHaveLength(0)
 })
 
 test('an unmatched sentence without a keyword is also silently treated as prose', () => {
   const r = createRegistry()
-  const varDoc = parse('p.var.md', '# Prose\n\nI have 5 cukes in my belly.')
+  const varDoc = parse('p.md', '# Prose\n\nI have 5 cukes in my belly.')
   const result = plan(varDoc, r)
   expect(result.diagnostics).toHaveLength(0)
 })
@@ -232,7 +232,7 @@ each row lists the dice, the category and the score:
 | ------------- | ---------- | ----- |
 | 3, 3, 3, 4, 4 | full house | 17    |
 | 3, 3, 3, 3, 3 | Yahtzee    | 50    |`
-  const result = plan(parse('y.var.md', source), r)
+  const result = plan(parse('y.md', source), r)
   expect(result.diagnostics).toHaveLength(0)
   // One example per data row (the header row is the binding, not an example).
   expect(result.examples).toHaveLength(2)
@@ -267,7 +267,7 @@ these users exist:
 | ---- | --- |
 | Bob  | 30  |
 | Eve  | 25  |`
-  const result = plan(parse('u.var.md', source), r)
+  const result = plan(parse('u.md', source), r)
   expect(result.examples).toHaveLength(1)
   const step = result.examples[0]?.steps[0]
   expect(step?.dataTable?.header.cells).toEqual(['name', 'age'])
@@ -290,7 +290,7 @@ each row lists the Dice and the Score:
 | dice      | score |
 | --------- | ----- |
 | 1,1,1,1,1 | 5     |`
-  const result = plan(parse('c.var.md', source), r)
+  const result = plan(parse('c.md', source), r)
   // No exact-case match → falls back to a single whole-table example.
   expect(result.examples).toHaveLength(1)
   expect(result.examples[0]?.steps[0]?.dataTable?.rows).toHaveLength(1)
@@ -313,7 +313,7 @@ each row lists the dice, the category and the score:
 | ------------- | ---------- | ----- |
 | 3, 3, 3, 4, 4 | full house | 17    |
 | 3, 3, 3, 3, 3 | Yahtzee    | 50    |`
-  const result = plan(parse('y.var.md', source), r)
+  const result = plan(parse('y.md', source), r)
   expect(result.examples.map((e) => e.name)).toEqual([
     '3, 3, 3, 4, 4 / full house / 17',
     '3, 3, 3, 3, 3 / Yahtzee / 50',
@@ -350,7 +350,7 @@ Some interrupting prose paragraph.
 | name | age |
 |------|-----|
 | Bob  | 30  |`
-  const result = plan(parse('o.var.md', source), r)
+  const result = plan(parse('o.md', source), r)
   expect(result.diagnostics).toHaveLength(0)
 })
 
@@ -370,7 +370,7 @@ each row lists the dice, the category and the score:
 | dice          | category   | score |
 | ------------- | ---------- | ----- |
 | 3, 3, 3, 4, 4 | full house | 17    |`
-  const result = plan(parse('y.var.md', source), r)
+  const result = plan(parse('y.md', source), r)
   const checks = result.examples[0]?.rowChecks
   if (!checks) throw new Error('no rowChecks')
   expect(checks.map((c) => c.column)).toEqual(['dice', 'category', 'score'])
@@ -389,7 +389,7 @@ test('an `error` fence marks the example expectedOutcome=fail with a message sub
     handler: () => {},
   })
   const src = '# Division\n\nI divide 1 by 0.\n\n```error\ndivision by zero\n```\n'
-  const ex = plan(parse('e.var.md', src), r).examples[0]
+  const ex = plan(parse('e.md', src), r).examples[0]
   expect(ex?.expectedOutcome).toBe('fail')
   expect(ex?.expectedErrorMessage).toBe('division by zero')
   // The error fence must NOT become a docString attachment on the step.
@@ -404,7 +404,7 @@ test('no `error` fence leaves expectedOutcome undefined', () => {
     kind: 'action',
     handler: () => {},
   })
-  const ex = plan(parse('e.var.md', '# Division\n\nI divide 1 by 1.'), r).examples[0]
+  const ex = plan(parse('e.md', '# Division\n\nI divide 1 by 1.'), r).examples[0]
   expect(ex?.expectedOutcome).toBeUndefined()
 })
 
@@ -418,7 +418,7 @@ test('an `error` fence with no matching step emits an error-fence-without-step d
     handler: () => {},
   })
   const src = '# Nope\n\nThis prose matches nothing.\n\n```error\nboom\n```\n'
-  const result = plan(parse('e.var.md', src), r)
+  const result = plan(parse('e.md', src), r)
   expect(result.examples).toHaveLength(0)
   expect(result.diagnostics).toHaveLength(1)
   expect(result.diagnostics[0]?.code).toBe('error-fence-without-step')
@@ -441,7 +441,7 @@ test('an `error` fence on an ambiguous example emits both diagnostics', () => {
     handler: () => {},
   })
   const src = '# Ambiguous\n\nI divide 1 by 0.\n\n```error\nboom\n```\n'
-  const result = plan(parse('e.var.md', src), r)
+  const result = plan(parse('e.md', src), r)
   const codes = result.diagnostics.map((d) => d.code).sort()
   expect(codes).toEqual(['ambiguous-match', 'error-fence-without-step'])
 })
@@ -461,7 +461,7 @@ the payload is:
 \`\`\`json
 { "ok": true }
 \`\`\``
-  const result = plan(parse('d.var.md', source), r)
+  const result = plan(parse('d.md', source), r)
   const ds = result.examples[0]?.steps[0]?.docString
   if (!ds) throw new Error('no docString')
   expect(ds.content).toBe('{ "ok": true }\n')

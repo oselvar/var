@@ -19,7 +19,7 @@ describe('var run', () => {
     const cwd = resolve(FIXTURES, 'run-basic')
     const r = run(['run'], cwd)
     expect(r.stderr).toBe('')
-    expect(r.stdout).toContain('hello.var.md')
+    expect(r.stdout).toContain('hello.md')
     expect(r.stdout).toMatch(/✓ When I greet "Aslak"/)
     expect(r.stdout).toMatch(/✗ When I greet "world"/)
     expect(r.stdout).toMatch(/expected "wrong" but was Hello, world!/)
@@ -36,7 +36,7 @@ describe('var run', () => {
     // var file. We don't have one — so this test confirms the failure mode
     // is the *only* one observed when failures exist. The run() variant
     // above already proves status===1 with mixed pass/fail.
-    const r = run(['run', 'no-such-pattern-*.var.md'], cwd)
+    const r = run(['run', 'no-such-pattern-*.md'], cwd)
     expect(r.stderr).toBe('')
     expect(r.stdout).toContain('0 examples, 0 passed, 0 failed')
     expect(r.status).toBe(0)

@@ -16,7 +16,7 @@ test('end-to-end: parse + plan with a simple expression', () => {
     expressionSourceLine: 1,
     handler: () => {},
   })
-  const result = varApi.plan(varApi.parse('hello.var.md', '# Belly\n\nGiven I have 5 cukes.'), r)
+  const result = varApi.plan(varApi.parse('hello.md', '# Belly\n\nGiven I have 5 cukes.'), r)
   expect(result.examples).toHaveLength(1)
   expect(result.examples[0]?.steps[0]?.text).toBe('I have 5 cukes')
   expect(result.examples[0]?.steps[0]?.args).toEqual([5])

@@ -199,13 +199,13 @@ export function executePlan(plan: ExecutionPlan, ports: ExecutePorts): void {
 }
 
 // Inject a synthetic V8 stack frame pointing at the matched step text's
-// location in the source .var.md. Terminals (vitest, iTerm, VSCode) recognize
+// location in the source .md. Terminals (vitest, iTerm, VSCode) recognize
 // the `file:line:col` pattern and make it cmd-clickable. The frame sits
 // directly BELOW the handler's `.ts` frame — conceptually the markdown calls
 // into the handler, so the handler is the callee (top) and the markdown is
 // the caller (one level out). Vitest's reporter auto-renders the code snippet
 // for the topmost frame, so the `.ts` source stays as the main error location
-// and the .var.md becomes a clickable link directly under it.
+// and the .md becomes a clickable link directly under it.
 function augmentStack(err: unknown, step: PlannedStep, varPath: string): unknown {
   if (!(err instanceof Error) || typeof err.stack !== 'string') return err
   const label = step.text.length > 60 ? `${step.text.slice(0, 60)}…` : step.text

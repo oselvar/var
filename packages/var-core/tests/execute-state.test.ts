@@ -12,7 +12,7 @@ function run(
   createContext: (stepFile: string) => unknown,
 ) {
   const registry = register(createRegistry())
-  const doc = parse('x.var.md', source)
+  const doc = parse('x.md', source)
   const p = plan(doc, registry)
   let caught: unknown
   const ports: ExecutePorts = {

@@ -53,7 +53,7 @@ When I send the payload:
 { "action": "import" }
 \`\`\``
 
-  const result = plan(parse('e.var.md', source), r)
+  const result = plan(parse('e.md', source), r)
   expect(result.diagnostics).toHaveLength(0)
   // 3 paragraphs across 2 headings → 3 examples:
   //   1. "Withdrawing cash" scope, one paragraph with all 3 banking steps

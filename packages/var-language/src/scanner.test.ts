@@ -18,7 +18,7 @@ describe('buildWorkspaceIndex scanner injection', () => {
     }
     const index = buildWorkspaceIndex({
       stepFiles: [{ path: 's.steps.ts', source: 'IGNORED BY FAKE' }],
-      varFiles: [{ path: 'a.var.md', source: 'First I greet "world"' }],
+      varFiles: [{ path: 'a.md', source: 'First I greet "world"' }],
       scanner,
     })
     expect(scanner.discoverStepDefs).toHaveBeenCalledOnce()

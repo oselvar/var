@@ -36,7 +36,7 @@ obtain the step-definition registry, and what they do with the result.
 
 ```mermaid
 graph LR
-  MD[".var.md<br/>examples"] --> PARSE["parse → VarDoc<br/><i>(shared core)</i>"]
+  MD[".md<br/>examples"] --> PARSE["parse → VarDoc<br/><i>(shared core)</i>"]
   STEPS["step source<br/>(.ts / .py / …)"] --> EXTRACT["tree-sitter extract<br/>→ StepDef[]<br/><i>(per-language query)</i>"]
 
   PARSE --> MATCH["match + plan<br/><i>(shared core)</i>"]
@@ -111,12 +111,12 @@ port a runner implements. The open question is *where the plan is produced* for 
 non-JS language:
 
 - **Model A — shared core, thin native runner (recommended).** The JS/wasm core
-  parses `.var.md`, matches, and emits a **serializable `ExecutionPlan`**
+  parses `.md`, matches, and emits a **serializable `ExecutionPlan`**
   (steps → `stepDefId` + args + locations). A thin Python runner maps
   `stepDefId → function` and executes. One parser, one matcher, one source of
   truth; the per-language code is tiny. Cost: a JS process in the loop at test
   time, and marshalling cucumber-expression arg values across the boundary.
-- **Model B — native re-implementation.** Python re-parses `.var.md` and
+- **Model B — native re-implementation.** Python re-parses `.md` and
   re-matches in-process (zero Node dependency, idiomatic `pytest`). Cost: a
   second markdown parser, matcher, and planner to keep byte-for-byte consistent,
   and the conformance suite (§5) becomes load-bearing rather than a safety net.
@@ -215,7 +215,7 @@ on TypeScript alone, before any Python exists:
 2. **Move extraction to the async shell edge**; add the `GrammarLoader` port.
 3. **Make `StepDef` neutral** — `typeText` becomes opaque.
 4. **Extract a `SnippetEmitter` port** from the TS-emitting snippet code.
-5. **De-hardcode file patterns** into per-language config (`.var.md` stays neutral).
+5. **De-hardcode file patterns** into per-language config (`.md` stays neutral).
 6. **Lock Model A vs B** (§3); if A, make `ExecutionPlan` serializable.
 7. **Stand up the conformance harness** with TS as the only column.
 

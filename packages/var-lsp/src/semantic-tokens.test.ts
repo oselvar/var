@@ -12,13 +12,13 @@ describe('semanticTokenData', () => {
     const source = 'I greet "x"'
     const matches = [
       {
-        varPath: '/a.var.md',
+        varPath: '/a.md',
         range: r(1, 1, 1, 12), // 0-based 0..11
         paramRanges: [r(1, 10, 1, 11)], // 0-based char 9
         paramValues: ['x'],
       } as unknown as MatchRef,
     ]
-    const data = semanticTokenData(matches, '/a.var.md', source)
+    const data = semanticTokenData(matches, '/a.md', source)
     expect(data).toEqual([
       0,
       0,
@@ -39,7 +39,7 @@ describe('semanticTokenData', () => {
   })
 
   it('returns [] when there are no matches for the file', () => {
-    expect(semanticTokenData([], '/a.var.md', 'hello')).toEqual([])
+    expect(semanticTokenData([], '/a.md', 'hello')).toEqual([])
   })
 
   it('legend lists function then parameter', () => {

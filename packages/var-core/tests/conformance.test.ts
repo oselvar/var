@@ -54,7 +54,7 @@ test('toFailureArtifact uses the line it is given verbatim (the step matchSpan l
   // No stack scraping: the failing line is the source position the caller
   // passes (matchSpan.startLine), so every language port reproduces it.
   const err = new Error('boom')
-  err.stack = 'Error: boom\n    at handler (s.ts:1:1)\n    at step (e.var.md:42:7)'
+  err.stack = 'Error: boom\n    at handler (s.ts:1:1)\n    at step (e.md:42:7)'
   expect(toFailureArtifact(err, 4)).toEqual({ kind: 'thrown', line: 4 })
 })
 
@@ -93,15 +93,15 @@ test('toPlanArtifact projects examples, expectedOutcome and stringified args', (
     kind: 'action',
     handler: () => {},
   })
-  const art = toPlanArtifact(plan(parse('e.var.md', '# A\n\nI have 5 cukes.'), r))
+  const art = toPlanArtifact(plan(parse('e.md', '# A\n\nI have 5 cukes.'), r))
   expect(art.examples[0]?.expectedOutcome).toBe('pass')
   expect(art.examples[0]?.steps[0]?.matchedExpression).toBe('I have {int} cukes')
   expect(art.examples[0]?.steps[0]?.args).toEqual([{ value: '5', parameterType: 'int' }])
 })
 
 test('toVarDocArtifact keeps path, examples and orphanAttachments', () => {
-  const art = toVarDocArtifact(parse('e.var.md', '# A\n\nI have 5 cukes.'))
-  expect(art.path).toBe('e.var.md')
+  const art = toVarDocArtifact(parse('e.md', '# A\n\nI have 5 cukes.'))
+  expect(art.path).toBe('e.md')
   expect(Array.isArray(art.examples)).toBe(true)
 })
 
@@ -121,7 +121,7 @@ test('toPlanArtifact projects diagnostics to portable fields (no message/path)',
     kind: 'action',
     handler: () => {},
   })
-  const art = toPlanArtifact(plan(parse('e.var.md', '# A\n\nI have 5 cukes.'), r))
+  const art = toPlanArtifact(plan(parse('e.md', '# A\n\nI have 5 cukes.'), r))
   expect(art.diagnostics).toHaveLength(1)
   expect(art.diagnostics[0]).not.toHaveProperty('message')
   expect(art.diagnostics[0]?.code).toBe('ambiguous-match')
@@ -136,7 +136,7 @@ test('runConformance: passing example yields pass steps with structural contextK
     kind: 'action',
     handler: () => {},
   })
-  const out = await runConformance(parse('e.var.md', '# A\n\nI have 5 cukes.'), r, () => ({}))
+  const out = await runConformance(parse('e.md', '# A\n\nI have 5 cukes.'), r, () => ({}))
   expect(out.trace.examples[0]).toEqual({
     name: 'I have 5 cukes',
     outcome: 'pass',
@@ -164,7 +164,7 @@ test('runConformance: expected-failure example reads pass but the step carries t
     },
   })
   const src = '# D\n\nI divide 1 by 0.\n\n```error\ndivision by zero\n```\n'
-  const out = await runConformance(parse('e.var.md', src), r, () => ({}))
+  const out = await runConformance(parse('e.md', src), r, () => ({}))
   const ex = out.trace.examples[0]
   expect(ex?.outcome).toBe('pass')
   expect(ex?.steps[0]?.outcome).toBe('fail')

@@ -18,22 +18,9 @@
   "activationEvents": [
     "onLanguage:markdown",
     "onLanguage:typescript",
-    "workspaceContains:**/var.config.ts",
-    "workspaceContains:**/*.var.md"
+    "workspaceContains:**/var.config.ts"
   ],
   "contributes": {
-    "languages": [
-      {
-        "id": "var-markdown",
-        "aliases": [
-          "Vár Markdown",
-          "var-md"
-        ],
-        "extensions": [
-          ".var.md"
-        ]
-      }
-    ],
     "commands": [
       {
         "command": "oselvar-var.generateStepDefinition",

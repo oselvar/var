@@ -59,7 +59,7 @@ function lspClient(): LSPClient {
 async function runSpecNow(groupId: string): Promise<void> {
   const group = groups.get(groupId)
   if (!group) return
-  const mdEntry = [...group.views.entries()].find(([u]) => u.endsWith('.var.md'))
+  const mdEntry = [...group.views.entries()].find(([u]) => u.endsWith('.md'))
   if (!mdEntry) return
   const mdView = mdEntry[1]
 
@@ -116,7 +116,7 @@ function autoRun(groupId: string) {
 
 function mountEditor(el: HTMLElement): EditorView {
   const doc = el.dataset.doc ?? ''
-  const uri = el.dataset.uri ?? 'file:///untitled.var.md'
+  const uri = el.dataset.uri ?? 'file:///untitled.md'
   const lang = el.dataset.lang ?? 'markdown'
   const groupId = el.dataset.group ?? DEFAULT_GROUP
   const group = getGroup(groupId)

@@ -12,6 +12,9 @@ export type Store = {
   index(): WorkspaceIndex
   snippetTemplate(): string
   stepGlobs(): ReadonlyArray<string>
+  // Whether a file is a var spec — i.e. it was discovered by the `vars` globs.
+  // There is no `.md` extension to key off of; the config defines specs.
+  isVarDoc(path: string): boolean
   fs(): FileSystem
 }
 
@@ -38,6 +41,9 @@ export function createStore(deps: StoreDeps): Store {
     index: () => current,
     snippetTemplate: () => config.snippet.template,
     stepGlobs: () => config.steps,
+    // Delegates to the filesystem port so unsaved editor buffers (which the
+    // disk-backed index can't see) are still recognised as spec docs.
+    isVarDoc: (path) => fs.matches(path, config.vars),
     fs: () => fs,
   }
 }

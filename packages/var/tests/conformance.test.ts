@@ -36,8 +36,8 @@ for (const name of readdirSync(BUNDLES, { withFileTypes: true })
       }
       const registry = buildRegistry()
       const createContext = contextFactory()
-      const source = readFileSync(resolve(dir, 'example.var.md'), 'utf8')
-      const varDoc = parse('example.var.md', source)
+      const source = readFileSync(resolve(dir, 'example.md'), 'utf8')
+      const varDoc = parse('example.md', source)
       const artifacts = await runConformance(varDoc, registry, createContext)
 
       const goldenDir = resolve(dir, 'golden')

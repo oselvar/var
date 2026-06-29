@@ -53,7 +53,7 @@ test('CellMismatchError carries the cells and is detectable', () => {
 
 // Build a real Table (with cellSpans) by parsing a markdown table.
 function tableOf(source: string): { table: Table; source: string } {
-  const doc = parse('t.var.md', source)
+  const doc = parse('t.md', source)
   const table = doc.examples[0]?.body.find((b) => b.kind === 'table') as Table | undefined
   if (!table) throw new Error('no table parsed')
   return { table, source }

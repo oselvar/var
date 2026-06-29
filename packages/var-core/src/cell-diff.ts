@@ -5,7 +5,7 @@ import type { Span } from './span.js'
 export type RowCheck = {
   readonly column: string
   readonly value: string // the cell text, e.g. "9"
-  readonly span: Span // the cell text's source range in the .var.md
+  readonly span: Span // the cell text's source range in the .md
 }
 
 // The verdict for one checked column after comparing against the table.

@@ -5,7 +5,7 @@ import type { Span } from './span.js'
 // Compare a sensor's returned inline actuals against the values captured from
 // the document. `expected` is the captured arguments, `sourceTexts` the matched
 // text at each parameter's span (used as the diff's `expected` display), and
-// `paramSpans` anchors each cell to the .var.md source. The three arrays align
+// `paramSpans` anchors each cell to the .md source. The three arrays align
 // 1:1 with `returned`; the caller validates length first.
 export function compareParams(
   returned: ReadonlyArray<unknown>,

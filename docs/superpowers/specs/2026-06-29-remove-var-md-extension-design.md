@@ -24,6 +24,12 @@ already is, via the `vars` glob array in `var.config.ts`.
 - **Require explicit `vars` (no greedy default).** `DEFAULT_CONFIG.vars` becomes `[]`.
   No config / no `vars` ⇒ nothing is discovered or parsed. (`steps` keeps its
   `['**/*.steps.ts']` default — `.steps.ts` stays a distinct, unambiguous extension.)
+- **`vars` supports `!`-prefixed exclusion globs** (gitignore/vitest-style). Needed
+  because a directory of `.md` specs may contain files that must not run — e.g.
+  `docs/tutorial/05-roman-numerals.md`, a deliberately not-implemented exercise the
+  old `.var.md` glob silently excluded. A pure `partitionGlobs(patterns)` splits a
+  list into includes and excludes; every discovery shell globs the includes and
+  subtracts anything matching the excludes.
 - **Hard cutover.** Rename every `.var.md` file to `.md`; remove every `.var.md`
   reference. No legacy path; `.var.md` stops being special anywhere.
 
@@ -44,10 +50,13 @@ already is, via the `vars` glob array in `var.config.ts`.
   (query-stripped) id is in the Set, instead of `endsWith('.var.md')`. The dogfood/
   cucumber `vitest.config.ts` `include` moves from `**/*.var.md` to the same spec globs
   so vitest does not try to run every `.md`.
-- **var-lsp** (`store.ts`, `handlers.ts`): the store already discovers via
-  `fs.list(config.vars)` — reuse that index for rename/completions decisions. For
-  unsaved/open documents not yet on disk, match the document path against `config.vars`
-  with a small glob matcher (in the shell, not the core).
+- **var-lsp** (`store.ts`, `handlers.ts`, `file-system.ts`): the `FileSystem` port
+  gains `matches(path, globs)`; `store.isVarDoc(path)` delegates to it. This recognises
+  both saved specs and unsaved editor buffers (which the disk-backed index can't see).
+  The node adapter implements `matches` with `node:path.matchesGlob` (relativised to the
+  workspace root, honouring `!`-excludes); the browser adapter uses its extension-based
+  matcher. `handlers.ts` rename/completions gate on `store.isVarDoc` instead of the
+  extension.
 - **website** (`run-grouping.ts`, `editor-mount.ts`, `var-worker.ts`): in-browser the
   only non-spec view is `.steps.ts`, so `endsWith('.var.md')` → `endsWith('.md')` is
   unambiguous. The worker config uses `vars: ['**/*.md']`.

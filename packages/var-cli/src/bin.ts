@@ -18,7 +18,7 @@ async function main(): Promise<void> {
           'var — markdown-native BDD',
           '',
           'Usage:',
-          '  var run [globs]        run .var.md examples (no test runner)',
+          '  var run [globs]        run markdown spec examples (no test runner)',
           '  var stepdef "<text>"   generate a step definition',
           '  var lint [globs]       check for missing/ambiguous/orphan steps',
           '  var init               scaffold a new project',

@@ -197,7 +197,7 @@ export function toPlanArtifact(plan: ExecutionPlan): PlanArtifact {
   }
 }
 
-// `line` is the failing step's own 1-based line in the `.var.md`
+// `line` is the failing step's own 1-based line in the `.md`
 // (`matchSpan.startLine`) — a deterministic, language-agnostic source position,
 // not a value scraped from a JS stack trace, so every port reproduces it.
 export function toFailureArtifact(error: unknown, line: number): FailureArtifact {

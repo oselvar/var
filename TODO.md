@@ -1,10 +1,18 @@
 # TODO
 
+## Website
+
+- [ ] Simpler frontpage
+- [ ] Use tailwindcss
+- [ ] Remove @navikt/ds-css
+- [ ] Tabs for examples on front page and tutorial
+- [ ] Prerender all editors
+
 ## Refactoring (LSP)
 
 - [ ] Rename a parameter type (e.g. `{airport}` → `{iata}`): cascade to the
       `defineParameterType({ name: ... })` call, every step expression that uses
-      `{name}`, and every matched .var.md site. Mirrors what F2 step rename
+      `{name}`, and every matched .md site. Mirrors what F2 step rename
       already does for cucumber expressions.
 - [ ] F2 polish: surface malformed-new-expression errors inline; offer a
       preview of sites that would become unmatched before applying.
@@ -12,8 +20,8 @@
 ## VSCode extension
 
 - [ ] Code Lens "➜ N references" above each `step('…')` with click-to-jump
-      back to every matched .var.md caller.
-- [ ] Find References (reverse): from a step def → all matched .var.md sites.
+      back to every matched .md caller.
+- [ ] Find References (reverse): from a step def → all matched .md sites.
 - [ ] Package .vsix and publish to the VSCode Marketplace + Open VSX.
 - [ ] Run button for each example.
 
@@ -40,11 +48,12 @@
 
 ## Code quality
 
-- [ ] Hoist the `findFiles` helper (duplicated across
+- [x] Hoist the `findFiles` helper (duplicated across
       `packages/var-vitest/src/plugin.ts`, `packages/var-cli/src/lint.ts`,
       `packages/var-cli/src/run.ts`, and `packages/var-lsp/src/store.ts`)
       into a shared utility — and standardise on `globSync`.
 - [ ] Move tests next to source
+- [ ] Move packages/var/tests/conformance.test.ts
 
 ## Markdown
 
@@ -54,9 +63,9 @@
 
 - [ ] Generate HTML from markdown and runner results (vitest JSON)
 
-## Performance
+## Runner
 
-- [ ] Vitest runner
+- [x] Vitest runner
 - [x] CLI runner (`var run`): ~0.74 s wall on the cucumber sample, ~2× faster
       than the vitest path (~1.5 s) and slightly faster than cucumber-js
       (~0.85 s). See `packages/cucumber/README.md`.

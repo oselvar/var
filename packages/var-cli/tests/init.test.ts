@@ -4,13 +4,13 @@ import { join } from 'node:path'
 import { expect, test } from 'vitest'
 import { runInit } from '../src/init.js'
 
-test('scaffolds var.config.ts and an example .var.md + steps file', async () => {
+test('scaffolds var.config.ts and an example .md + steps file', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'var-init-'))
   try {
     const result = await runInit({ cwd: dir, writeStdout: () => {} })
     expect(result.exitCode).toBe(0)
     expect(existsSync(join(dir, 'var.config.ts'))).toBe(true)
-    expect(existsSync(join(dir, 'var-examples/01-hello.var.md'))).toBe(true)
+    expect(existsSync(join(dir, 'var-examples/01-hello.md'))).toBe(true)
     expect(existsSync(join(dir, 'var-examples/steps/01-hello.steps.ts'))).toBe(true)
     const stepsTs = readFileSync(join(dir, 'var-examples/steps/01-hello.steps.ts'), 'utf8')
     expect(stepsTs).toContain('defineState')

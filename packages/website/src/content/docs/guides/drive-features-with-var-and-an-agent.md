@@ -27,7 +27,7 @@ Good. You've named the actor, the trigger, the precondition, and the observable 
 
 ### 2. Let the agent write the spec
 
-A correctly instructed agent will create or extend a `*.var.md` file with a concrete example matching your description. Read it before letting the agent continue. The spec is the one artefact you must understand fully — the production code can be regenerated; the spec cannot.
+A correctly instructed agent will create or extend a `*.md` file with a concrete example matching your description. Read it before letting the agent continue. The spec is the one artefact you must understand fully — the production code can be regenerated; the spec cannot.
 
 If the spec doesn't match what you meant, push back now, not later. "The spec doesn't say what happens when the name is whitespace-only" is a much cheaper conversation than "the code is wrong in production".
 

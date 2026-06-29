@@ -26,7 +26,7 @@ export type MatchRef = {
   readonly varPath: string
   readonly range: Range
   readonly paramRanges: ReadonlyArray<Range>
-  // The captured value for each parameter, sliced from the .var.md source at
+  // The captured value for each parameter, sliced from the .md source at
   // index time. Same order as `paramRanges` and the cucumber expression's
   // parameter list. Used by the rename refactor to preserve values across
   // expressions whose parameter list survives the edit.

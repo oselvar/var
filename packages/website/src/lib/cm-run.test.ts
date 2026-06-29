@@ -5,7 +5,7 @@ import { varDiagnostics } from './cm-run.js'
 const SOURCE = 'x 6 y'
 const results: SpecResults = {
   version: 1,
-  specPath: 's.var.md',
+  specPath: 's.md',
   sourceHash: hashSource(SOURCE),
   examples: [
     {

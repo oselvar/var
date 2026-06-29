@@ -13,13 +13,8 @@
       "project": ["src/**/*.ts", "tests/**/*.ts"]
     },
     "packages/var": {
-      "entry": [
-        "src/index.ts",
-        "tests/**/*.test.ts",
-        "bundles/**/*.steps.ts",
-        "bundles/**/*.var.md"
-      ],
-      "project": ["src/**/*.ts", "tests/**/*.ts", "bundles/**/*.{ts,var.md}"]
+      "entry": ["src/index.ts", "tests/**/*.test.ts", "bundles/**/*.steps.ts", "bundles/**/*.md"],
+      "project": ["src/**/*.ts", "tests/**/*.ts", "bundles/**/*.{ts,md}"]
     },
     "packages/var-language": {
       "project": ["src/**/*.ts", "tests/**/*.ts"]
@@ -32,8 +27,8 @@
       "ignoreDependencies": ["@oselvar/var-language", "@oselvar/var-lsp"]
     },
     "docs/tutorial": {
-      "entry": ["**/*.var.md", "**/*.steps.ts"],
-      "project": ["**/*.{ts,var.md}"]
+      "entry": ["**/*.md", "**/*.steps.ts"],
+      "project": ["**/*.{ts,md}"]
     }
   },
   "ignore": [

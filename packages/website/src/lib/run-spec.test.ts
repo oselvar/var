@@ -16,13 +16,13 @@ describe('runRegisteredSpec', () => {
       'the greeting should be {string}',
       (state, _expected: string) => [state.greeting] as [string],
     )
-    const results = await runRegisteredSpec('/spec.var.md', SPEC)
+    const results = await runRegisteredSpec('/spec.md', SPEC)
     expect(results.examples).toHaveLength(1)
     expect(results.examples[0]?.status).toBe('passed')
     expect(results.examples[0]?.lines).toContain(3)
   })
 
-  it('fails with the message and the failing .var.md line on a throw', async () => {
+  it('fails with the message and the failing .md line on a throw', async () => {
     _resetBuilder()
     const { action } = defineState(() => ({ greeting: '' }))
     action('I greet {string}', (_state, name: string) => ({ greeting: `Hi ${name}` }))
@@ -30,7 +30,7 @@ describe('runRegisteredSpec', () => {
       if (state.greeting !== expected)
         throw new Error(`expected "${expected}" but was "${state.greeting}"`)
     })
-    const results = await runRegisteredSpec('/spec.var.md', SPEC)
+    const results = await runRegisteredSpec('/spec.md', SPEC)
     expect(results.examples[0]?.status).toBe('failed')
     expect(results.examples[0]?.failure?.message).toContain('expected "Hello, world!"')
     expect(results.examples[0]?.failure?.line).toBe(3)
@@ -50,7 +50,7 @@ Each row lists the n and the double:
 | - | ------ |
 | 2 | 5 |
 `
-    const results = await runRegisteredSpec('/d.var.md', spec)
+    const results = await runRegisteredSpec('/d.md', spec)
     const failed = results.examples.find((e) => e.status === 'failed')
     const cells = failed?.failure?.cells
     if (!cells) throw new Error('no cells on the failure')
@@ -65,7 +65,7 @@ Each row lists the n and the double:
     const { sensor } = defineState(() => ({}))
     sensor('the greeting is', () => ['Goodbye!\n'] as [string])
     const spec = '# G\n\nthe greeting is:\n\n```text\nHello!\n```\n'
-    const results = await runRegisteredSpec('/g.var.md', spec)
+    const results = await runRegisteredSpec('/g.md', spec)
     const doc = results.examples[0]?.failure?.doc
     if (!doc) throw new Error('no doc on the failure')
     expect(spec.slice(doc.from, doc.to)).toBe('Hello!\n')
@@ -79,7 +79,7 @@ Each row lists the n and the double:
     action('the greeting should be {string}', (state, expected: string) => {
       if (state.greeting !== expected) throw new Error('nope')
     })
-    const results = await runRegisteredSpec('/spec.var.md', SPEC)
+    const results = await runRegisteredSpec('/spec.md', SPEC)
     expect(results.examples[0]?.failure?.cells).toBeUndefined()
     expect(results.examples[0]?.failure?.doc).toBeUndefined()
   })
