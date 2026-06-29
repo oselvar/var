@@ -1,0 +1,32 @@
+name: Python
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'python/**'
+      - '.github/workflows/python.yml'
+  pull_request:
+    paths:
+      - 'python/**'
+      - '.github/workflows/python.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: python
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - run: uv sync --locked
+
+      - run: uv run pytest
+
+      - run: uv run ruff check
