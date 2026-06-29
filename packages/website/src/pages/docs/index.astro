@@ -21,42 +21,21 @@ const groups = buildNav(entries, base, null)
     you get an error. Organised with <a href="https://diataxis.fr/">Diátaxis</a>.
   </p>
 
-  <div class="docs-cards">
+  <div class="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-5 my-10">
     {groups.map((group) => (
-      <section class="docs-card">
-        <p class="docs-card__kind">{group.area.diataxis}</p>
-        <h2>{group.area.label}</h2>
+      <section class="border border-line-subtle rounded-none p-6">
+        <p class="uppercase text-sm tracking-[0.04em] text-subtle m-0">{group.area.diataxis}</p>
+        <h2 class="font-sans font-semibold text-xl mt-1 mb-3">{group.area.label}</h2>
         {group.links.length > 0 ? (
-          <ul>
+          <ul class="list-none p-0 m-0">
             {group.links.map((link) => (
-              <li><a href={link.href}>{link.title}</a></li>
+              <li class="my-1.5"><a href={link.href}>{link.title}</a></li>
             ))}
           </ul>
         ) : (
-          <p class="docs-card__empty">Coming soon — spec syntax, step matching, CLI flags.</p>
+          <p class="text-[14px] opacity-60 m-0">Coming soon — spec syntax, step matching, CLI flags.</p>
         )}
       </section>
     ))}
   </div>
 </DocsLayout>
-
-<style>
-  .docs-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
-    margin: 40px 0;
-  }
-  .docs-card {
-    border: 1px solid var(--ax-border-subtle);
-    border-radius: var(--ax-radius-12);
-    padding: var(--ax-space-24);
-  }
-  .docs-card__kind {
-    text-transform: uppercase; font-size: var(--ax-font-size-small); letter-spacing: 0.04em; color: var(--ax-text-subtle); margin: 0;
-  }
-  .docs-card h2 { font-family: var(--ax-font-family); font-weight: var(--ax-font-weight-bold); font-size: var(--ax-font-size-heading-small); margin: 4px 0 12px; }
-  .docs-card ul { list-style: none; padding: 0; margin: 0; }
-  .docs-card li { margin: 6px 0; }
-  .docs-card__empty { font-size: 14px; opacity: 0.6; margin: 0; }
-</style>

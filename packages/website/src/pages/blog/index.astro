@@ -23,29 +23,14 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10)
       <a href={`${base}/rss.xml`}>RSS</a>.
     </p>
 
-    <ul class="post-list">
+    <ul class="list-none p-0 my-8">
       {posts.map((p) => (
-        <li>
-          <a class="post-title" href={`${base}/blog/${p.id}/`}>{p.data.title}</a>
-          <time datetime={fmt(p.data.pubDate)}>{fmt(p.data.pubDate)}</time>
-          <p>{p.data.description}</p>
+        <li class="py-4 border-b border-line-subtle">
+          <a class="font-sans font-semibold text-2xl text-ink no-underline hover:text-accent" href={`${base}/blog/${p.id}/`}>{p.data.title}</a>
+          <time class="block text-[13px] text-muted my-1" datetime={fmt(p.data.pubDate)}>{fmt(p.data.pubDate)}</time>
+          <p class="mt-1.5 mb-0">{p.data.description}</p>
         </li>
       ))}
     </ul>
   </main>
 </Base>
-
-<style>
-  .post-list { list-style: none; padding: 0; margin: var(--ax-space-32) 0; }
-  .post-list li { padding: var(--ax-space-16) 0; border-bottom: 1px solid var(--ax-border-neutral-subtle); }
-  .post-title {
-    font-family: var(--ax-font-family);
-    font-weight: var(--ax-font-weight-bold);
-    font-size: var(--ax-font-size-heading-medium);
-    color: var(--ax-text-default);
-    text-decoration: none;
-  }
-  .post-title:hover { color: var(--ax-text-accent, var(--var-accent)); }
-  .post-list time { display: block; font-size: 13px; color: var(--ax-text-neutral-subtle); margin: 4px 0; }
-  .post-list p { margin: 6px 0 0; }
-</style>

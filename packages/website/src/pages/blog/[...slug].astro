@@ -23,12 +23,8 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10)
 
     <article class="doc-body prose max-w-none prose-headings:font-semibold prose-h2:text-2xl prose-h3:text-xl prose-a:decoration-accent prose-a:decoration-2 prose-a:underline-offset-2">
       <h1>{post.data.title}</h1>
-      <p class="post-meta"><time datetime={fmt(post.data.pubDate)}>{fmt(post.data.pubDate)}</time></p>
+      <p class="text-[13px] text-muted mb-6"><time datetime={fmt(post.data.pubDate)}>{fmt(post.data.pubDate)}</time></p>
       <Content />
     </article>
   </main>
 </Base>
-
-<style>
-  .post-meta { font-size: 13px; color: var(--ax-text-neutral-subtle); margin: 0 0 24px; }
-</style>

@@ -5,7 +5,7 @@ import Editor from '../components/Editor.astro'
 import Base from '../layouts/Base.astro'
 ---
 <Base title="Vár playground" description="Run Vár in the browser.">
-  <main class="doc playground">
+  <main class="playground max-w-[62rem] mx-auto px-4 pt-20 pb-20">
     <h1>playground</h1>
     <p>
       Edit the spec or the step definitions — both share one in-browser Vár language
@@ -34,14 +34,3 @@ import Base from '../layouts/Base.astro'
     </p>
   </main>
 </Base>
-
-<style>
-  /* The playground needs a wider column than the prose measure: code editors
-     are cramped at 46rem and overflow horizontally. Widen the container and
-     trim the side padding so the editors get room. */
-  main.playground {
-    max-width: 62rem;
-    padding-left: var(--ax-space-16);
-    padding-right: var(--ax-space-16);
-  }
-</style>
