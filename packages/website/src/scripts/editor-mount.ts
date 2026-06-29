@@ -2,7 +2,7 @@ import { javascript } from '@codemirror/lang-javascript'
 import { markdown } from '@codemirror/lang-markdown'
 import { foldGutter } from '@codemirror/language'
 import { LSPClient, languageServerExtensions } from '@codemirror/lsp-client'
-import type { Extension } from '@codemirror/state'
+import { Annotation, type Extension } from '@codemirror/state'
 import { lineNumbers } from '@codemirror/view'
 import { hashSource } from '@oselvar/var-core'
 import { basicSetup, EditorView, minimalSetup } from 'codemirror'
@@ -10,6 +10,7 @@ import { flashExtension, type GenerateSnippet, stepGenAffordance } from '../lib/
 import { setRunResults, varRunExtension } from '../lib/cm-run.ts'
 import { semanticTokens } from '../lib/cm-semantic-tokens.ts'
 import { varEditorThemeExt } from '../lib/cm-var-theme.ts'
+import { planReplay, type ReplayOp } from '../lib/replay-plan.ts'
 import { runSpec } from '../lib/run-client.ts'
 import type { StepFile } from '../lib/run-grouping.ts'
 import { groupRunInputs } from '../lib/run-grouping.ts'
@@ -107,10 +108,92 @@ function scheduleRun(groupId: string): void {
   )
 }
 
+// Transactions produced by replay are tagged so the auto-run listener can tell
+// them apart from genuine user edits (a real user edit cancels an active replay
+// — the user always wins).
+const replayTxn = Annotation.define<boolean>()
+
+const REPLAY_MS = 35 // constant per-keystroke delay
+
+type ReplayState = { token: number; timer?: ReturnType<typeof setTimeout> }
+const replays = new WeakMap<EditorView, ReplayState>()
+
+// Per-view UI for the active-state highlight: the ordered states and their
+// buttons, so we can mark the button whose text equals the current document.
+type StateUI = {
+  readonly states: ReadonlyArray<{ name: string; text: string }>
+  readonly buttons: ReadonlyArray<HTMLButtonElement>
+}
+const stateUIs = new WeakMap<EditorView, StateUI>()
+
+function cancelReplay(view: EditorView): void {
+  const r = replays.get(view)
+  if (r) {
+    r.token += 1
+    if (r.timer) clearTimeout(r.timer)
+    r.timer = undefined
+  }
+}
+
+// Mark the button whose state text equals the current document; clear the rest.
+function refreshActiveState(view: EditorView): void {
+  const ui = stateUIs.get(view)
+  if (!ui) return
+  const current = view.state.doc.toString()
+  ui.buttons.forEach((btn, i) => {
+    btn.setAttribute('aria-pressed', String(ui.states[i]?.text === current))
+  })
+}
+
+// Animate the live document into `target`, one keystroke per REPLAY_MS tick.
+// Always diffs from the *current* doc, so manual edits (before or mid-replay)
+// are respected.
+function replayTo(view: EditorView, target: string): void {
+  cancelReplay(view)
+  const r = replays.get(view) ?? { token: 0 }
+  replays.set(view, r)
+  const token = r.token
+  const ops = planReplay(view.state.doc.toString(), target)
+  let i = 0
+  const step = (): void => {
+    const cur = replays.get(view)
+    if (!cur || cur.token !== token) return // superseded or cancelled
+    if (i >= ops.length) {
+      refreshActiveState(view)
+      return
+    }
+    const op: ReplayOp = ops[i++] as ReplayOp
+    if (op.kind === 'insert') {
+      const caret = op.at + op.text.length
+      view.dispatch({
+        changes: { from: op.at, insert: op.text },
+        selection: { anchor: caret },
+        scrollIntoView: true,
+        annotations: replayTxn.of(true),
+      })
+    } else {
+      view.dispatch({
+        changes: { from: op.at, to: op.at + 1 },
+        selection: { anchor: op.at },
+        scrollIntoView: true,
+        annotations: replayTxn.of(true),
+      })
+    }
+    cur.timer = setTimeout(step, REPLAY_MS)
+  }
+  step()
+}
+
 // Re-run (debounced) only the group whose editor changed — no run buttons.
+// A genuine user edit (not one of our replay transactions) cancels any active
+// replay and refreshes the active-state highlight.
 function autoRun(groupId: string) {
   return EditorView.updateListener.of((u) => {
-    if (u.docChanged) scheduleRun(groupId)
+    if (!u.docChanged) return
+    const isReplay = u.transactions.some((tr) => tr.annotation(replayTxn))
+    if (!isReplay) cancelReplay(u.view)
+    refreshActiveState(u.view)
+    scheduleRun(groupId)
   })
 }
 
@@ -168,6 +251,27 @@ function mountEditor(el: HTMLElement): EditorView {
   }
   const view = new EditorView({ doc, extensions: ext, parent: el })
   group.views.set(uri, view)
+
+  // Wire multi-state replay buttons, if this editor carries states. The buttons
+  // were rendered server-side in the enclosing chrome figcaption; bind each to a
+  // replay toward its state's text. Wiring is local to mount — no global view map.
+  if (el.dataset.states) {
+    try {
+      const states = JSON.parse(el.dataset.states) as Array<{ name: string; text: string }>
+      const figure = el.closest('figure.file-editor')
+      const buttons = figure ? [...figure.querySelectorAll<HTMLButtonElement>('.fe-state-btn')] : []
+      if (buttons.length === states.length && buttons.length > 0) {
+        buttons.forEach((btn, i) => {
+          btn.addEventListener('click', () => replayTo(view, states[i].text))
+        })
+        stateUIs.set(view, { states, buttons })
+        refreshActiveState(view)
+      }
+    } catch {
+      // Malformed states — the editor simply renders without replay buttons.
+    }
+  }
+
   return view
 }
 
