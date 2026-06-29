@@ -1,47 +1,83 @@
 @import 'tailwindcss';
+@plugin '@tailwindcss/typography';
 
-:root {
-  /* Layout + mode-agnostic aliases. The actual color VALUES live in the
-     :root,.light and .dark blocks below (earthy theme overrides Aksel). */
-  --page-gutter: var(--ax-space-16);
-  --content-max: 760px;
+/* Dark mode follows the .dark class on <html> (set by the inline script in
+   Base.astro). */
+@custom-variant dark (&:where(.dark, .dark *));
 
-  /* Square corners (shipped) — our CSS is the only consumer of these tokens. */
-  --ax-radius-4: 0;
-  --ax-radius-8: 0;
-  --ax-radius-12: 0;
-  --radius-5: 0;
+/* Static scales. */
+@theme {
+  --font-sans: 'Source Sans 3 Variable', 'Source Sans 3', system-ui, sans-serif;
 
-  /* Legacy brand names still used by the Editor window chrome + the CodeMirror
-     theme files. They resolve to the mode-aware tokens defined below. */
-  --cream: var(--ax-bg-default);
-  --ink: var(--ax-text-default);
-  --orange: var(--var-accent);
-  --yellow: var(--var-accent-strong);
-  --accent: var(--ax-text-accent);
+  /* Square corners — zero the whole radius scale. */
+  --radius-xs: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+}
+
+/* Semantic colors → Tailwind utilities. `inline` means the utilities emit
+   var(--…) references, so they resolve per-mode at runtime. */
+@theme inline {
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-sunken: var(--sunken);
+  --color-ink: var(--ink);
+  --color-subtle: var(--subtle);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-contrast: var(--accent-contrast);
+  --color-strong: var(--strong);
+  --color-strong-hover: var(--strong-hover);
+  --color-highlight: var(--highlight);
+  --color-line: var(--line);
+  --color-line-subtle: var(--line-subtle);
 }
 
 /* ── Earthy theme · LIGHT (Umber & Linen) ─────────────────────────────── */
 :root,
 .light {
-  --ax-bg-default: #f4f0e6; /* linen */
-  --ax-bg-raised: #fbf8f0; /* cards, editor, code */
-  --ax-bg-sunken: #ece5d5; /* fenced code blocks */
-  --ax-text-default: #2a2017; /* umber */
-  --ax-text-subtle: #6b5d4c;
-  --ax-text-neutral-subtle: #8a7b66;
-  --ax-text-accent: #b0552f; /* burnt sienna — links */
-  --ax-text-accent-contrast: #fbf8f0;
-  --ax-bg-accent-strong: #3b2e20; /* brown buttons */
-  --ax-bg-accent-strong-hover: #2a2017;
-  --ax-border-subtle: #dcd3c0;
-  --ax-border-neutral-subtle: #dcd3c0;
-  --ax-border-default: #c8bba3;
+  --surface: #f4f0e6; /* linen */
+  --raised: #fbf8f0; /* cards, editor, code */
+  --sunken: #ece5d5; /* fenced code blocks */
+  --ink: #2a2017; /* umber — also the legacy --ink alias for CodeMirror */
+  --subtle: #6b5d4c;
+  --muted: #8a7b66;
+  --accent: #b0552f; /* burnt sienna — links + identity accent */
+  --accent-contrast: #fbf8f0;
+  --strong: #3b2e20; /* brown buttons */
+  --strong-hover: #2a2017;
+  --highlight: #c8924a; /* warm tan */
+  --line: #c8bba3;
+  --line-subtle: #dcd3c0;
 
-  --var-accent: #b0552f; /* identity accent (sienna) */
-  --var-accent-strong: #c8924a; /* warm tan (replaces yellow) */
+  /* Legacy aliases still read by CodeMirror code (out of scope). --radius-5
+     feeds the generated-step widget in cm-generate-step.ts (square corners). */
+  --yellow: var(--highlight);
+  --radius-5: 0;
 
-  /* Editor */
+  /* Bridge: keep the old Aksel color tokens resolving to the new ones so
+     not-yet-converted components stay identical. Removed in the final task. */
+  --ax-bg-default: var(--surface);
+  --ax-bg-raised: var(--raised);
+  --ax-bg-sunken: var(--sunken);
+  --ax-text-default: var(--ink);
+  --ax-text-subtle: var(--subtle);
+  --ax-text-neutral-subtle: var(--muted);
+  --ax-text-accent: var(--accent);
+  --ax-text-accent-contrast: var(--accent-contrast);
+  --ax-bg-accent-strong: var(--strong);
+  --ax-bg-accent-strong-hover: var(--strong-hover);
+  --ax-border-subtle: var(--line-subtle);
+  --ax-border-neutral-subtle: var(--line-subtle);
+  --ax-border-default: var(--line);
+  --var-accent: var(--accent);
+  --var-accent-strong: var(--highlight);
+
+  /* Editor (CodeMirror — out of scope, unchanged) */
   --ed-bg: #fbf8f0;
   --ed-text: #2a2017;
   --ed-gutter: #8a7b66;
@@ -56,7 +92,7 @@
   --ed-chip-text: #f4f0e6;
   --ed-flash: rgba(94, 148, 136, 0.4);
 
-  /* Syntax */
+  /* Syntax (CodeMirror — out of scope, unchanged) */
   --syn-keyword: #9a3e1b;
   --syn-string: #5e7a4e;
   --syn-comment: #a08c72;
@@ -68,24 +104,40 @@
 
 /* ── Earthy theme · WARM DARK ─────────────────────────────────────────── */
 .dark {
-  --ax-bg-default: #17120d;
-  --ax-bg-raised: #221a12;
-  --ax-bg-sunken: #110d09;
-  --ax-text-default: #efe7d7;
-  --ax-text-subtle: #b7a892;
-  --ax-text-neutral-subtle: #94866f;
-  --ax-text-accent: #cc6b3c; /* terracotta */
-  --ax-text-accent-contrast: #17120d;
-  --ax-bg-accent-strong: #cc6b3c; /* terracotta buttons in dark */
-  --ax-bg-accent-strong-hover: #d9743f;
-  --ax-border-subtle: #3a2e22;
-  --ax-border-neutral-subtle: #3a2e22;
-  --ax-border-default: #6a523b;
+  --surface: #17120d;
+  --raised: #221a12;
+  --sunken: #110d09;
+  --ink: #efe7d7;
+  --subtle: #b7a892;
+  --muted: #94866f;
+  --accent: #cc6b3c; /* terracotta */
+  --accent-contrast: #17120d;
+  --strong: #cc6b3c;
+  --strong-hover: #d9743f;
+  --highlight: #d9a441;
+  --line: #6a523b;
+  --line-subtle: #3a2e22;
 
-  --var-accent: #cc6b3c;
-  --var-accent-strong: #d9a441;
+  --yellow: var(--highlight);
 
-  /* Editor */
+  /* Bridge (removed in final task) */
+  --ax-bg-default: var(--surface);
+  --ax-bg-raised: var(--raised);
+  --ax-bg-sunken: var(--sunken);
+  --ax-text-default: var(--ink);
+  --ax-text-subtle: var(--subtle);
+  --ax-text-neutral-subtle: var(--muted);
+  --ax-text-accent: var(--accent);
+  --ax-text-accent-contrast: var(--accent-contrast);
+  --ax-bg-accent-strong: var(--strong);
+  --ax-bg-accent-strong-hover: var(--strong-hover);
+  --ax-border-subtle: var(--line-subtle);
+  --ax-border-neutral-subtle: var(--line-subtle);
+  --ax-border-default: var(--line);
+  --var-accent: var(--accent);
+  --var-accent-strong: var(--highlight);
+
+  /* Editor (CodeMirror — out of scope, unchanged) */
   --ed-bg: #221a12;
   --ed-text: #efe7d7;
   --ed-gutter: #7c6e58;
@@ -100,7 +152,7 @@
   --ed-chip-text: #17120d;
   --ed-flash: rgba(111, 168, 155, 0.45);
 
-  /* Syntax */
+  /* Syntax (CodeMirror — out of scope, unchanged) */
   --syn-keyword: #e08a57;
   --syn-string: #9cbe82;
   --syn-comment: #7c6e58;
