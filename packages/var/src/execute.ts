@@ -89,21 +89,18 @@ export function executePlan(plan: ExecutionPlan, ports: ExecutePorts): void {
                   sourceTexts,
                 ).filter((d) => !d.ok)
                 if (paramDiffs.length > 0) throw new CellMismatchError(paramDiffs)
-                // Trailing table / doc string: the extras, in order, are the
-                // remaining tuple elements.
-                let extraIdx = step.args.length
+                // Trailing table / doc string: the extra, if any, is at
+                // index step.args.length in the returned tuple.
                 if (step.dataTable) {
-                  const bad = compareTable(returned[extraIdx], step.dataTable).filter((d) => !d.ok)
+                  const bad = compareTable(returned[step.args.length], step.dataTable).filter((d) => !d.ok)
                   if (bad.length > 0) throw new CellMismatchError(bad)
-                  extraIdx++
                 } else if (step.docString) {
                   const diff = compareDocString(
-                    returned[extraIdx],
+                    returned[step.args.length],
                     step.docString.content,
                     step.docString.span,
                   )
                   if (diff) throw new DocStringMismatchError(diff)
-                  extraIdx++
                 }
               }
             } else {

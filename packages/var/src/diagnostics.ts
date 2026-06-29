@@ -25,7 +25,7 @@ export type AmbiguousInput = {
 
 export function ambiguousMatch(input: AmbiguousInput): Diagnostic {
   const lines = input.candidates
-    .map((c) => `  step('${c.expression}', ...)    at ${c.sourceFile}:${c.sourceLine}`)
+    .map((c) => `  '${c.expression}'    at ${c.sourceFile}:${c.sourceLine}`)
     .join('\n')
   return {
     severity: 'error',

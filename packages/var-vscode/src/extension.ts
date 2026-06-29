@@ -238,7 +238,7 @@ function registerStepRename(
         position: { line: position.line, character: position.character },
       })
       if (!at) {
-        throw new Error('Place the cursor on a matched step or a step() expression first.')
+        throw new Error('Place the cursor on a matched step or a context()/action()/sensor() expression first.')
       }
       // What VSCode pre-fills the inline editor with:
       //   - in .var.md: the matched substring (a sentence)
