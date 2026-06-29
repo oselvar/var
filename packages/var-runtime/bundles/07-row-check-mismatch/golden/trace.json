@@ -1,0 +1,40 @@
+{
+  "examples": [
+    {
+      "name": "10 / A",
+      "outcome": "fail",
+      "steps": [
+        {
+          "contextKey": {
+            "exampleName": "10 / A",
+            "stepFile": "report.steps"
+          },
+          "exampleName": "10 / A",
+          "failure": {
+            "cells": [
+              {
+                "actual": "99",
+                "column": "score",
+                "expected": "10",
+                "span": {
+                  "endCol": 5,
+                  "endLine": 9,
+                  "endOffset": 110,
+                  "startCol": 3,
+                  "startLine": 9,
+                  "startOffset": 108
+                }
+              }
+            ],
+            "kind": "cell-mismatch",
+            "line": 9
+          },
+          "matchedExpression": "I report the score and grade",
+          "ordinal": 1,
+          "outcome": "fail",
+          "stepText": "I report the score and grade"
+        }
+      ]
+    }
+  ]
+}

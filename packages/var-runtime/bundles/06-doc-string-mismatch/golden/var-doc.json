@@ -1,0 +1,141 @@
+{
+  "examples": [
+    {
+      "body": [
+        {
+          "inlineMap": [
+            {
+              "sourceOffset": 44,
+              "textOffset": 0
+            },
+            {
+              "sourceOffset": 45,
+              "textOffset": 1
+            },
+            {
+              "sourceOffset": 46,
+              "textOffset": 2
+            },
+            {
+              "sourceOffset": 47,
+              "textOffset": 3
+            },
+            {
+              "sourceOffset": 48,
+              "textOffset": 4
+            },
+            {
+              "sourceOffset": 49,
+              "textOffset": 5
+            },
+            {
+              "sourceOffset": 50,
+              "textOffset": 6
+            },
+            {
+              "sourceOffset": 51,
+              "textOffset": 7
+            },
+            {
+              "sourceOffset": 52,
+              "textOffset": 8
+            },
+            {
+              "sourceOffset": 53,
+              "textOffset": 9
+            },
+            {
+              "sourceOffset": 54,
+              "textOffset": 10
+            },
+            {
+              "sourceOffset": 55,
+              "textOffset": 11
+            },
+            {
+              "sourceOffset": 56,
+              "textOffset": 12
+            },
+            {
+              "sourceOffset": 57,
+              "textOffset": 13
+            },
+            {
+              "sourceOffset": 58,
+              "textOffset": 14
+            },
+            {
+              "sourceOffset": 59,
+              "textOffset": 15
+            },
+            {
+              "sourceOffset": 60,
+              "textOffset": 16
+            },
+            {
+              "sourceOffset": 61,
+              "textOffset": 17
+            },
+            {
+              "sourceOffset": 62,
+              "textOffset": 18
+            },
+            {
+              "sourceOffset": 63,
+              "textOffset": 19
+            },
+            {
+              "sourceOffset": 64,
+              "textOffset": 20
+            }
+          ],
+          "kind": "paragraph",
+          "span": {
+            "endCol": 22,
+            "endLine": 5,
+            "endOffset": 65,
+            "startCol": 1,
+            "startLine": 5,
+            "startOffset": 44
+          },
+          "text": "I echo the following:"
+        },
+        {
+          "body": "hello\n",
+          "bodySpan": {
+            "endCol": 1,
+            "endLine": 9,
+            "endOffset": 77,
+            "startCol": 1,
+            "startLine": 8,
+            "startOffset": 71
+          },
+          "info": "",
+          "kind": "fence",
+          "span": {
+            "endCol": 4,
+            "endLine": 9,
+            "endOffset": 80,
+            "startCol": 1,
+            "startLine": 7,
+            "startOffset": 67
+          }
+        }
+      ],
+      "scopeStack": [
+        "Echo mismatch",
+        "A wrong echo is caught"
+      ],
+      "span": {
+        "endCol": 4,
+        "endLine": 9,
+        "endOffset": 80,
+        "startCol": 1,
+        "startLine": 5,
+        "startOffset": 44
+      }
+    }
+  ],
+  "orphanAttachments": [],
+  "path": "example.var.md"
+}

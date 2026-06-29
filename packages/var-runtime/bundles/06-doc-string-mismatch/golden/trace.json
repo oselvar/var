@@ -1,0 +1,37 @@
+{
+  "examples": [
+    {
+      "name": "I echo the following:",
+      "outcome": "fail",
+      "steps": [
+        {
+          "contextKey": {
+            "exampleName": "I echo the following:",
+            "stepFile": "echo.steps"
+          },
+          "exampleName": "I echo the following:",
+          "failure": {
+            "diff": {
+              "actual": "goodbye",
+              "expected": "hello\n",
+              "span": {
+                "endCol": 1,
+                "endLine": 9,
+                "endOffset": 77,
+                "startCol": 1,
+                "startLine": 8,
+                "startOffset": 71
+              }
+            },
+            "kind": "doc-string-mismatch",
+            "line": 5
+          },
+          "matchedExpression": "I echo the following:",
+          "ordinal": 1,
+          "outcome": "fail",
+          "stepText": "I echo the following:"
+        }
+      ]
+    }
+  ]
+}

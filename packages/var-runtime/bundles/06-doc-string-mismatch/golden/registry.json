@@ -1,0 +1,9 @@
+{
+  "parameterTypes": [],
+  "steps": [
+    {
+      "expression": "I echo the following:",
+      "parameterTypeNames": []
+    }
+  ]
+}

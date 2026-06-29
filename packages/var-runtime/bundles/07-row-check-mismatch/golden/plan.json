@@ -1,0 +1,38 @@
+{
+  "diagnostics": [],
+  "examples": [
+    {
+      "expectedOutcome": "pass",
+      "name": "10 / A",
+      "scopeStack": [
+        "Scoring",
+        "A wrong score is caught",
+        "I report the score and grade"
+      ],
+      "span": {
+        "endCol": 18,
+        "endLine": 9,
+        "endOffset": 123,
+        "startCol": 1,
+        "startLine": 9,
+        "startOffset": 106
+      },
+      "steps": [
+        {
+          "args": [],
+          "matchSpan": {
+            "endCol": 18,
+            "endLine": 9,
+            "endOffset": 123,
+            "startCol": 1,
+            "startLine": 9,
+            "startOffset": 106
+          },
+          "matchedExpression": "I report the score and grade",
+          "paramSpans": [],
+          "text": "I report the score and grade"
+        }
+      ]
+    }
+  ]
+}

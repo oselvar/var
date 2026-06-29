@@ -1,0 +1,9 @@
+{
+  "parameterTypes": [],
+  "steps": [
+    {
+      "expression": "I report the score and grade",
+      "parameterTypeNames": []
+    }
+  ]
+}

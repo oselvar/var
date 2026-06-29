@@ -1,0 +1,113 @@
+{
+  "examples": [
+    {
+      "body": [
+        {
+          "inlineMap": [
+            {
+              "sourceOffset": 68,
+              "textOffset": 0
+            },
+            {
+              "sourceOffset": 69,
+              "textOffset": 1
+            },
+            {
+              "sourceOffset": 70,
+              "textOffset": 2
+            },
+            {
+              "sourceOffset": 71,
+              "textOffset": 3
+            },
+            {
+              "sourceOffset": 72,
+              "textOffset": 4
+            },
+            {
+              "sourceOffset": 73,
+              "textOffset": 5
+            },
+            {
+              "sourceOffset": 74,
+              "textOffset": 6
+            },
+            {
+              "sourceOffset": 75,
+              "textOffset": 7
+            },
+            {
+              "sourceOffset": 76,
+              "textOffset": 8
+            },
+            {
+              "sourceOffset": 77,
+              "textOffset": 9
+            },
+            {
+              "sourceOffset": 78,
+              "textOffset": 10
+            },
+            {
+              "sourceOffset": 79,
+              "textOffset": 11
+            },
+            {
+              "sourceOffset": 80,
+              "textOffset": 12
+            },
+            {
+              "sourceOffset": 81,
+              "textOffset": 13
+            }
+          ],
+          "kind": "paragraph",
+          "span": {
+            "endCol": 15,
+            "endLine": 5,
+            "endOffset": 82,
+            "startCol": 1,
+            "startLine": 5,
+            "startOffset": 68
+          },
+          "text": "I always boom."
+        },
+        {
+          "body": "expected message\n",
+          "bodySpan": {
+            "endCol": 1,
+            "endLine": 9,
+            "endOffset": 110,
+            "startCol": 1,
+            "startLine": 8,
+            "startOffset": 93
+          },
+          "info": "error",
+          "kind": "fence",
+          "span": {
+            "endCol": 4,
+            "endLine": 9,
+            "endOffset": 113,
+            "startCol": 1,
+            "startLine": 7,
+            "startOffset": 84
+          }
+        }
+      ],
+      "scopeStack": [
+        "Message mismatch",
+        "A non-matching expected message still fails"
+      ],
+      "span": {
+        "endCol": 4,
+        "endLine": 9,
+        "endOffset": 113,
+        "startCol": 1,
+        "startLine": 5,
+        "startOffset": 68
+      }
+    }
+  ],
+  "orphanAttachments": [],
+  "path": "example.var.md"
+}

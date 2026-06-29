@@ -1,0 +1,100 @@
+{
+  "examples": [
+    {
+      "body": [
+        {
+          "inlineMap": [
+            {
+              "sourceOffset": 44,
+              "textOffset": 0
+            },
+            {
+              "sourceOffset": 45,
+              "textOffset": 1
+            },
+            {
+              "sourceOffset": 46,
+              "textOffset": 2
+            },
+            {
+              "sourceOffset": 47,
+              "textOffset": 3
+            },
+            {
+              "sourceOffset": 48,
+              "textOffset": 4
+            },
+            {
+              "sourceOffset": 49,
+              "textOffset": 5
+            },
+            {
+              "sourceOffset": 50,
+              "textOffset": 6
+            },
+            {
+              "sourceOffset": 51,
+              "textOffset": 7
+            },
+            {
+              "sourceOffset": 52,
+              "textOffset": 8
+            },
+            {
+              "sourceOffset": 53,
+              "textOffset": 9
+            },
+            {
+              "sourceOffset": 54,
+              "textOffset": 10
+            },
+            {
+              "sourceOffset": 55,
+              "textOffset": 11
+            },
+            {
+              "sourceOffset": 56,
+              "textOffset": 12
+            },
+            {
+              "sourceOffset": 57,
+              "textOffset": 13
+            },
+            {
+              "sourceOffset": 58,
+              "textOffset": 14
+            },
+            {
+              "sourceOffset": 59,
+              "textOffset": 15
+            }
+          ],
+          "kind": "paragraph",
+          "span": {
+            "endCol": 17,
+            "endLine": 5,
+            "endOffset": 60,
+            "startCol": 1,
+            "startLine": 5,
+            "startOffset": 44
+          },
+          "text": "I greet \"world\"."
+        }
+      ],
+      "scopeStack": [
+        "Greeting",
+        "It captures a quoted string"
+      ],
+      "span": {
+        "endCol": 17,
+        "endLine": 5,
+        "endOffset": 60,
+        "startCol": 1,
+        "startLine": 5,
+        "startOffset": 44
+      }
+    }
+  ],
+  "orphanAttachments": [],
+  "path": "example.var.md"
+}

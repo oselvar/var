@@ -1,0 +1,11 @@
+{
+  "parameterTypes": [],
+  "steps": [
+    {
+      "expression": "I greet {string}",
+      "parameterTypeNames": [
+        "string"
+      ]
+    }
+  ]
+}

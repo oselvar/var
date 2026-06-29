@@ -1,0 +1,51 @@
+{
+  "diagnostics": [],
+  "examples": [
+    {
+      "expectedOutcome": "pass",
+      "name": "I greet \"world\"",
+      "scopeStack": [
+        "Greeting",
+        "It captures a quoted string"
+      ],
+      "span": {
+        "endCol": 17,
+        "endLine": 5,
+        "endOffset": 60,
+        "startCol": 1,
+        "startLine": 5,
+        "startOffset": 44
+      },
+      "steps": [
+        {
+          "args": [
+            {
+              "parameterType": "string",
+              "value": "\"world\""
+            }
+          ],
+          "matchSpan": {
+            "endCol": 16,
+            "endLine": 5,
+            "endOffset": 59,
+            "startCol": 1,
+            "startLine": 5,
+            "startOffset": 44
+          },
+          "matchedExpression": "I greet {string}",
+          "paramSpans": [
+            {
+              "endCol": 16,
+              "endLine": 5,
+              "endOffset": 59,
+              "startCol": 9,
+              "startLine": 5,
+              "startOffset": 52
+            }
+          ],
+          "text": "I greet \"world\""
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "examples": [
+    {
+      "name": "I always boom",
+      "outcome": "fail",
+      "steps": [
+        {
+          "contextKey": {
+            "exampleName": "I always boom",
+            "stepFile": "boom.steps"
+          },
+          "exampleName": "I always boom",
+          "failure": {
+            "kind": "thrown",
+            "line": 5
+          },
+          "matchedExpression": "I always boom",
+          "ordinal": 1,
+          "outcome": "fail",
+          "stepText": "I always boom"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "diagnostics": [],
+  "examples": [
+    {
+      "expectedErrorMessage": "expected message",
+      "expectedOutcome": "fail",
+      "name": "I always boom",
+      "scopeStack": [
+        "Message mismatch",
+        "A non-matching expected message still fails"
+      ],
+      "span": {
+        "endCol": 4,
+        "endLine": 9,
+        "endOffset": 113,
+        "startCol": 1,
+        "startLine": 5,
+        "startOffset": 68
+      },
+      "steps": [
+        {
+          "args": [],
+          "matchSpan": {
+            "endCol": 14,
+            "endLine": 5,
+            "endOffset": 81,
+            "startCol": 1,
+            "startLine": 5,
+            "startOffset": 68
+          },
+          "matchedExpression": "I always boom",
+          "paramSpans": [],
+          "text": "I always boom"
+        }
+      ]
+    }
+  ]
+}
