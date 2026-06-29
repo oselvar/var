@@ -15,13 +15,13 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10)
 
 <Base title={`${post.data.title} — Vár blog`} description={post.data.description}>
   <main class="page">
-    <nav class="doc-nav" aria-label="Breadcrumb">
-      <a href={`${base}/`}>Vár</a>
-      <span aria-hidden="true">›</span>
-      <a href={`${base}/blog/`}>blog</a>
+    <nav class="font-mono text-[14px] uppercase tracking-[0.04em] text-muted mb-8" aria-label="Breadcrumb">
+      <a class="text-ink no-underline border-b border-transparent hover:border-accent hover:text-accent" href={`${base}/`}>Vár</a>
+      <span class="mx-2 text-accent" aria-hidden="true">›</span>
+      <a class="text-ink no-underline border-b border-transparent hover:border-accent hover:text-accent" href={`${base}/blog/`}>blog</a>
     </nav>
 
-    <article class="doc-body prose max-w-none prose-headings:font-semibold prose-h2:text-2xl prose-h3:text-xl prose-a:decoration-accent prose-a:decoration-2 prose-a:underline-offset-2">
+    <article class="doc-body prose max-w-none prose-headings:font-semibold prose-h2:text-2xl prose-h3:text-xl prose-a:decoration-accent prose-a:decoration-2 prose-a:underline-offset-2 prose-pre:rounded-none prose-strong:font-bold">
       <h1>{post.data.title}</h1>
       <p class="text-[13px] text-muted mb-6"><time datetime={fmt(post.data.pubDate)}>{fmt(post.data.pubDate)}</time></p>
       <Content />

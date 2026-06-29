@@ -6,20 +6,20 @@ import Base from '../layouts/Base.astro'
 ---
 <Base title="Vár playground" description="Run Vár in the browser.">
   <main class="playground max-w-[62rem] mx-auto px-4 pt-20 pb-20">
-    <h1>playground</h1>
-    <p>
+    <h1 class="font-sans font-semibold text-[1.75rem] leading-[1.05] mb-8">playground</h1>
+    <p class="mb-4">
       Edit the spec or the step definitions — both share one in-browser Vár language
       server, so the highlighting in the spec updates live as you change either file.
     </p>
 
-    <p>
+    <p class="mb-4">
       TIP: Install the VSCode extension or the LSP server to get Vár in your own editor.
     </p>
 
-    <h2>the spec</h2>
+    <h2 class="font-sans font-semibold text-2xl mt-12 mb-3">the spec</h2>
     <Editor uri="file:///yahtzee.md" lineNumbers folding define>{yahtzeeSpec}</Editor>
 
-    <h2>the step definitions</h2>
+    <h2 class="font-sans font-semibold text-2xl mt-12 mb-3">the step definitions</h2>
     <Editor uri="file:///yahtzee.steps.ts" lineNumbers folding>{yahtzeeSteps}</Editor>
 
     <p>
