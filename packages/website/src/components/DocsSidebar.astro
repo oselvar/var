@@ -7,64 +7,28 @@ interface Props {
 const { groups } = Astro.props
 ---
 
-<nav class="docs-sidebar" aria-label="Docs sections">
+<nav aria-label="Docs sections">
   {groups.map((group) => (
-    <section class="docs-sidebar__group">
-      <p class="docs-sidebar__label">
+    <section class="mb-6">
+      <p class="text-sm font-semibold text-subtle uppercase tracking-[0.04em] mb-2">
         {group.area.label}
-        <span class="docs-sidebar__caption">{group.area.diataxis}</span>
+        <span class="block normal-case tracking-normal text-sm opacity-70">{group.area.diataxis}</span>
       </p>
       {group.links.length > 0 ? (
-        <ul>
+        <ul class="list-none p-0 m-0">
           {group.links.map((link) => (
-            <li>
+            <li class="my-0.5">
               <a
                 href={link.href}
-                class={link.current ? 'is-current' : undefined}
+                class={`block px-2 py-1 text-ink no-underline rounded-none hover:bg-raised${link.current ? ' is-current bg-raised text-accent font-semibold shadow-[inset_2px_0_0_var(--accent)]' : ''}`}
                 aria-current={link.current ? 'page' : undefined}
               >{link.title}</a>
             </li>
           ))}
         </ul>
       ) : (
-        <p class="docs-sidebar__empty">Coming soon</p>
+        <p class="m-0 px-2 py-1 text-subtle">Coming soon</p>
       )}
     </section>
   ))}
 </nav>
-
-<style>
-  .docs-sidebar__group { margin: 0 0 var(--ax-space-24); }
-  .docs-sidebar__label {
-    font-size: var(--ax-font-size-small);
-    font-weight: var(--ax-font-weight-bold);
-    color: var(--ax-text-subtle);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin: 0 0 var(--ax-space-8);
-  }
-  .docs-sidebar__caption {
-    display: block;
-    text-transform: none;
-    letter-spacing: 0;
-    font-size: var(--ax-font-size-small);
-    opacity: 0.7;
-  }
-  .docs-sidebar ul { list-style: none; padding: 0; margin: 0; }
-  .docs-sidebar li { margin: 2px 0; }
-  .docs-sidebar a {
-    display: block;
-    padding: var(--ax-space-4) var(--ax-space-8);
-    color: var(--ax-text-default);
-    text-decoration: none;
-    border-radius: var(--ax-radius-4);
-  }
-  .docs-sidebar a:hover { background: var(--ax-bg-raised); }
-  .docs-sidebar a.is-current {
-    background: var(--ax-bg-raised);
-    color: var(--ax-text-accent, var(--var-accent));
-    font-weight: var(--ax-font-weight-bold);
-    box-shadow: inset 2px 0 0 var(--ax-border-accent, var(--var-accent));
-  }
-  .docs-sidebar__empty { margin: 0; padding: var(--ax-space-4) var(--ax-space-8); color: var(--ax-text-subtle); }
-</style>

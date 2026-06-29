@@ -21,12 +21,12 @@ const desc = description ?? 'Vár — Behaviour-Driven Development specs an AI a
 ---
 
 <Base title={fullTitle} description={desc} hasSidebar={true}>
-  <div class="docs-shell" data-docs-shell>
+  <div class="docs-shell grid grid-cols-[280px_minmax(0,1fr)] gap-12 max-w-[1200px] mx-auto px-6 pt-8 pb-16 max-[820px]:grid-cols-[minmax(0,1fr)]" data-docs-shell>
     <div class="docs-shell__backdrop" data-docs-backdrop aria-hidden="true"></div>
-    <aside class="docs-shell__sidebar" data-docs-sidebar>
+    <aside class="docs-shell__sidebar sticky top-16 self-start max-h-[calc(100vh-5rem)] overflow-y-auto max-[820px]:fixed max-[820px]:top-0 max-[820px]:left-0 max-[820px]:bottom-0 max-[820px]:z-[60] max-[820px]:w-[280px] max-[820px]:max-h-none max-[820px]:p-6 max-[820px]:bg-surface max-[820px]:border-r max-[820px]:border-line-subtle max-[820px]:-translate-x-full max-[820px]:transition-transform max-[820px]:duration-200" data-docs-sidebar>
       <DocsSidebar groups={groups} />
     </aside>
-    <main class="docs-shell__main">
+    <main class="docs-shell__main min-w-0 max-w-[46rem]">
       <Breadcrumb base={base} area={breadcrumb?.area.label} title={breadcrumb?.title} />
       <article class="doc-body prose max-w-none prose-headings:font-semibold prose-h1:text-[1.75rem] prose-h1:leading-[1.05] prose-h2:text-2xl prose-h3:text-xl prose-a:decoration-accent prose-a:decoration-2 prose-a:underline-offset-2" data-pagefind-body>
         <slot />
@@ -37,29 +37,12 @@ const desc = description ?? 'Vár — Behaviour-Driven Development specs an AI a
   <CopyButton />
 
   <style>
-    .docs-shell {
-      display: grid;
-      grid-template-columns: 280px minmax(0, 1fr);
-      gap: var(--ax-space-48);
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: var(--ax-space-32) var(--ax-space-24) var(--ax-space-64);
-    }
     .docs-shell__backdrop { display: none; }
-    .docs-shell__sidebar { position: sticky; top: var(--ax-space-64); align-self: start; max-height: calc(100vh - 5rem); overflow-y: auto; }
-    .docs-shell__main { min-width: 0; max-width: 46rem; }
-
     @media (max-width: 820px) {
-      .docs-shell { grid-template-columns: minmax(0, 1fr); }
-      .docs-shell__sidebar {
-        position: fixed; top: 0; left: 0; bottom: 0; z-index: 60;
-        width: 280px; max-height: none; padding: 24px;
-        background: var(--ax-bg-default); border-right: 1px solid var(--ax-border-subtle);
-        transform: translateX(-100%); transition: transform 0.2s ease;
-      }
       .docs-shell.is-open .docs-shell__sidebar { transform: translateX(0); }
       .docs-shell.is-open .docs-shell__backdrop {
-        display: block; position: fixed; inset: 0; z-index: 55; background: color-mix(in srgb, var(--ax-text-default) 40%, transparent);
+        display: block; position: fixed; inset: 0; z-index: 55;
+        background: color-mix(in srgb, var(--ink) 40%, transparent);
       }
     }
   </style>
