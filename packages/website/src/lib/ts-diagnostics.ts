@@ -31,13 +31,23 @@ const AMBIENT = `declare module '@oselvar/var-runtime' {
   type ResolveArg<Name extends string, Custom> = Name extends keyof Custom ? Custom[Name] : Name extends keyof BuiltInParameterTypes ? BuiltInParameterTypes[Name] : AnyArg
   type MapArgs<Names extends readonly string[], Custom> = { [Index in keyof Names]: ResolveArg<Names[Index] & string, Custom> }
   type HandlerArgs<E extends string, Custom> = [...MapArgs<ParameterNames<E>, Custom>, ...AnyArg[]]
+  type DeepReadonly<T> = T extends (...args: never[]) => unknown
+    ? T
+    : T extends ReadonlyArray<infer U>
+      ? ReadonlyArray<DeepReadonly<U>>
+      : T extends object
+        ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
+        : T
   export type RoleFn<C = unknown, Custom = Record<never, never>> = <E extends string>(
     expression: E,
-    handler: (ctx: C, ...args: HandlerArgs<E, Custom>) => void | Promise<void>,
+    handler: (
+      state: DeepReadonly<C>,
+      ...args: HandlerArgs<E, Custom>
+    ) => Partial<C> | void | Promise<Partial<C> | void>,
   ) => void
   export type SensorFn<C = unknown, Custom = Record<never, never>> = <E extends string, R>(
     expression: E,
-    handler: (ctx: C, ...args: HandlerArgs<E, Custom>) => R | Promise<R>,
+    handler: (state: DeepReadonly<C>, ...args: HandlerArgs<E, Custom>) => R | Promise<R>,
   ) => void
   export const context: RoleFn
   export const action: RoleFn

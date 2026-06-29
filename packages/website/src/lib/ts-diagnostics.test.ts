@@ -14,7 +14,7 @@ describe('ts-diagnostics', () => {
     const ts = createTsDiagnostics()
     ts.updateDoc(
       'b.steps.ts',
-      `import { defineState } from '@oselvar/var-runtime'\nconst { action } = defineState(() => ({ greeting: '' }))\naction('I greet {string}', (ctx, name) => { ctx.greeting = name })\n`,
+      `import { defineState } from '@oselvar/var-runtime'\nconst { action } = defineState(() => ({ greeting: '' }))\naction('I greet {string}', (_state, name) => ({ greeting: name }))\n`,
     )
     const d = ts.diagnostics('b.steps.ts')
     expect(d.find((x) => /Cannot find module/.test(x.message))).toBeUndefined()
@@ -48,6 +48,19 @@ describe('ts-diagnostics', () => {
     )
     const d = ts.diagnostics('e.steps.ts')
     expect(d.some((x) => /toUpperCase/.test(x.message))).toBe(true)
+  })
+
+  it('flags mutation of the readonly state', () => {
+    const ts = createTsDiagnostics()
+    ts.updateDoc(
+      'f.steps.ts',
+      `import { defineState } from '@oselvar/var-runtime'\n` +
+        `const { action } = defineState(() => ({ greeting: '' }))\n` +
+        // assigning to the deeply-readonly state must produce a diagnostic.
+        `action('I greet {string}', (state, name) => { state.greeting = name })\n`,
+    )
+    const d = ts.diagnostics('f.steps.ts')
+    expect(d.some((x) => /read-only|readonly|Cannot assign/.test(x.message))).toBe(true)
   })
 
   it('has the standard lib bundled (Error resolves)', () => {
