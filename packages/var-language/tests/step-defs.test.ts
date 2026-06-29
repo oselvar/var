@@ -50,9 +50,11 @@ test('returns empty array for a file with no step calls', () => {
   expect(discoverStepDefs('empty.ts', 'const x = 1\n')).toEqual([])
 })
 
-test('discovers defineParameterType with a regexp literal', () => {
-  const source = `import { defineParameterType } from '@oselvar/var-vitest'
-defineParameterType({ name: 'airport', regexp: /[A-Z]{3}/, transformer: (r) => r })
+test('discovers a paramType from defineState with a regexp literal', () => {
+  const source = `import { defineState } from '@oselvar/var'
+const { action } = defineState(() => ({}), {
+  airport: { regexp: /[A-Z]{3}/, transformer: (r) => r },
+})
 `
   const defs = discoverParameterTypes('p.ts', source)
   expect(defs).toHaveLength(1)
@@ -60,20 +62,39 @@ defineParameterType({ name: 'airport', regexp: /[A-Z]{3}/, transformer: (r) => r
   expect(defs[0]?.regexp).toBe('[A-Z]{3}')
 })
 
-test('discovers defineParameterType with a string literal regexp', () => {
-  const source = `defineParameterType({ name: 'airport', regexp: '[A-Z]{3}' })
+test('discovers a paramType from defineState with a string-literal regexp', () => {
+  const source = `const { action } = defineState(() => ({}), {
+  airport: { regexp: '[A-Z]{3}' },
+})
 `
   const defs = discoverParameterTypes('p.ts', source)
   expect(defs).toHaveLength(1)
+  expect(defs[0]?.name).toBe('airport')
   expect(defs[0]?.regexp).toBe('[A-Z]{3}')
 })
 
-test('skips defineParameterType calls with non-literal name or regexp', () => {
-  const source = `const n = 'airport'
-defineParameterType({ name: n, regexp: /[A-Z]{3}/ })
-defineParameterType({ name: 'x', regexp: someRe })
+test('discovers multiple paramTypes from one defineState call', () => {
+  const source = `const x = defineState(() => ({}), {
+  airport: { regexp: /[A-Z]{3}/ },
+  digit: { regexp: '[0-9]' },
+})
+`
+  const names = discoverParameterTypes('p.ts', source).map((d) => d.name)
+  expect(names).toEqual(['airport', 'digit'])
+})
+
+test('skips paramType entries with a non-literal regexp', () => {
+  const source = `const x = defineState(() => ({}), {
+  airport: { regexp: someRe },
+})
 `
   expect(discoverParameterTypes('p.ts', source)).toHaveLength(0)
+})
+
+test('returns empty when defineState has no paramTypes argument', () => {
+  const source = `const { action } = defineState(() => ({ n: 0 }))
+`
+  expect(discoverParameterTypes('p.ts', source)).toEqual([])
 })
 
 test('captures the handler params range and structured (name, type) entries', () => {

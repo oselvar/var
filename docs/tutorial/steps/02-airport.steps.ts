@@ -1,8 +1,8 @@
 import { defineState } from '@oselvar/var-vitest'
 
-// Declaring the custom `{airport}` parameter type here (rather than via a
-// separate defineParameterType call) lets Vár infer the captured args: the
-// transformer returns string, so `from`/`to` are typed string with no annotation.
+// The custom `{airport}` parameter type is declared in defineState's second
+// argument, so Vár can infer the captured args: the transformer returns string,
+// so `from`/`to` are typed string with no annotation.
 const { action, sensor } = defineState(() => ({ from: '', to: '' }), {
   airport: { regexp: /[A-Z]{3}/, transformer: (code: string) => code },
 })

@@ -61,39 +61,33 @@ function visitForParameterTypes(
   out: ParameterTypeDef[],
   file: string,
 ): void {
-  if (ts.isCallExpression(node) && isDefineParameterTypeCall(node) && node.arguments.length >= 1) {
-    const arg0 = node.arguments[0]
-    if (arg0 && ts.isObjectLiteralExpression(arg0)) {
-      const name = readStringProperty(arg0, 'name')
-      const regexp = readRegexpProperty(arg0, 'regexp')
-      if (name !== undefined && regexp !== undefined) {
-        out.push({
-          file,
-          name,
-          regexp,
-          callRange: rangeOf(sf, node),
-        })
+  if (ts.isCallExpression(node) && isDefineStateCall(node) && node.arguments.length >= 2) {
+    const arg1 = node.arguments[1]
+    if (arg1 && ts.isObjectLiteralExpression(arg1)) {
+      for (const prop of arg1.properties) {
+        if (!ts.isPropertyAssignment(prop)) continue
+        const name = ts.isIdentifier(prop.name)
+          ? prop.name.text
+          : ts.isStringLiteral(prop.name)
+            ? prop.name.text
+            : undefined
+        if (name === undefined) continue
+        const def = prop.initializer
+        if (!ts.isObjectLiteralExpression(def)) continue
+        const regexp = readRegexpProperty(def, 'regexp')
+        if (regexp !== undefined) {
+          out.push({ file, name, regexp, callRange: rangeOf(sf, node) })
+        }
       }
     }
   }
   ts.forEachChild(node, (child) => visitForParameterTypes(sf, child, out, file))
 }
 
-function isDefineParameterTypeCall(node: ts.CallExpression): boolean {
-  // Match a bare `defineParameterType(...)` call. False positives on shadowed
-  // locals are filtered out by the same logic that protects `step()` — only
-  // CallExpressions with this identifier qualify, regardless of import shape.
-  return ts.isIdentifier(node.expression) && node.expression.text === 'defineParameterType'
-}
-
-function readStringProperty(obj: ts.ObjectLiteralExpression, name: string): string | undefined {
-  for (const prop of obj.properties) {
-    if (!ts.isPropertyAssignment(prop)) continue
-    if (!ts.isIdentifier(prop.name) || prop.name.text !== name) continue
-    const init = prop.initializer
-    if (ts.isStringLiteral(init) || ts.isNoSubstitutionTemplateLiteral(init)) return init.text
-  }
-  return undefined
+function isDefineStateCall(node: ts.CallExpression): boolean {
+  // Match a bare `defineState(...)` call, regardless of import shape. Shadowed
+  // locals are an accepted false-positive risk, same as the role-call matcher.
+  return ts.isIdentifier(node.expression) && node.expression.text === 'defineState'
 }
 
 function readRegexpProperty(obj: ts.ObjectLiteralExpression, name: string): string | undefined {
