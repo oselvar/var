@@ -8,22 +8,15 @@ import Search from 'astro-pagefind/components/Search.astro'
 />
 
 <style is:global>
-  .docs-search {
-    display: contents;
-  }
-  .docs-search pagefind-searchbox {
-    width: 100%;
-    max-width: 28rem;
-  }
+  .docs-search { display: contents; }
+  .docs-search pagefind-searchbox { width: 100%; max-width: 28rem; }
   .docs-search .pagefind-ui__search-input,
   pagefind-searchbox::part(input) {
-    background: var(--ax-bg-default);
-    color: var(--ax-text-default);
-    border: 1px solid var(--ax-border-default);
-    border-radius: var(--ax-radius-8);
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 0;
     font-size: 14px;
   }
-  pagefind-searchbox::part(results) {
-    z-index: 70;
-  }
+  pagefind-searchbox::part(results) { z-index: 70; }
 </style>

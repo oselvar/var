@@ -8,26 +8,11 @@ interface Props {
 const { next, areaLabel } = Astro.props
 ---
 
-<footer class="more-in-area">
+<footer class="mt-12 pt-6 border-t border-line-subtle">
   {next && (
-    <a class="more-in-area__next" href={next.href}>
-      <span class="more-in-area__kicker">Next in {areaLabel}</span>
-      <span class="more-in-area__title">{next.title} →</span>
+    <a class="inline-block px-4 py-3 border border-line rounded-none no-underline text-ink hover:bg-raised" href={next.href}>
+      <span class="block text-sm uppercase tracking-[0.04em] text-subtle">Next in {areaLabel}</span>
+      <span class="font-semibold">{next.title} →</span>
     </a>
   )}
 </footer>
-
-<style>
-  .more-in-area { margin-top: var(--ax-space-48); padding-top: var(--ax-space-24); border-top: 1px solid var(--ax-border-subtle); }
-  .more-in-area__next {
-    display: inline-block;
-    padding: var(--ax-space-12) var(--ax-space-16);
-    border: 1px solid var(--ax-border-default);
-    border-radius: var(--ax-radius-8);
-    text-decoration: none;
-    color: var(--ax-text-default);
-  }
-  .more-in-area__next:hover { background: var(--ax-bg-raised); }
-  .more-in-area__kicker { display: block; font-size: var(--ax-font-size-small); text-transform: uppercase; letter-spacing: 0.04em; color: var(--ax-text-subtle); }
-  .more-in-area__title { font-weight: var(--ax-font-weight-bold); }
-</style>

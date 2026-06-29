@@ -21,61 +21,26 @@
 </template>
 
 <style is:global>
-  .doc-body .code-block {
-    position: relative;
-  }
+  .doc-body .code-block { position: relative; }
   .copybtn {
-    position: absolute;
-    top: var(--ax-space-8, 8px);
-    right: var(--ax-space-8, 8px);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    padding: 0;
-    border: 1px solid var(--ax-border-subtle);
-    border-radius: var(--ax-radius-8, 8px);
-    background: var(--ax-bg-default);
-    color: var(--ax-text-subtle);
-    cursor: pointer;
-    opacity: 0;
-    transition:
-      opacity 0.12s ease,
-      color 0.12s ease,
-      background 0.12s ease;
+    position: absolute; top: 8px; right: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 2rem; height: 2rem; padding: 0;
+    border: 1px solid var(--line-subtle); border-radius: 0;
+    background: var(--surface); color: var(--subtle);
+    cursor: pointer; opacity: 0;
+    transition: opacity 0.12s ease, color 0.12s ease, background 0.12s ease;
   }
   .doc-body .code-block:hover .copybtn,
   .copybtn:focus-visible,
-  .copybtn.copybtn--active {
-    opacity: 1;
-  }
-  .copybtn:hover {
-    color: var(--ax-text-default);
-    background: var(--ax-bg-raised);
-  }
-  .copybtn__icon {
-    width: 1.15rem;
-    height: 1.15rem;
-  }
-  .copybtn__icon--check {
-    display: none;
-  }
-  .copybtn--active {
-    color: var(--ax-text-default);
-  }
-  .copybtn--active .copybtn__icon--copy {
-    display: none;
-  }
-  .copybtn--active .copybtn__icon--check {
-    display: inline;
-  }
-  /* No hover on touch devices — keep the button visible. */
-  @media (hover: none) {
-    .copybtn {
-      opacity: 1;
-    }
-  }
+  .copybtn.copybtn--active { opacity: 1; }
+  .copybtn:hover { color: var(--ink); background: var(--raised); }
+  .copybtn__icon { width: 1.15rem; height: 1.15rem; }
+  .copybtn__icon--check { display: none; }
+  .copybtn--active { color: var(--ink); }
+  .copybtn--active .copybtn__icon--copy { display: none; }
+  .copybtn--active .copybtn__icon--check { display: inline; }
+  @media (hover: none) { .copybtn { opacity: 1; } }
 </style>
 
 <script>
