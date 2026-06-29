@@ -69,6 +69,15 @@ custom registry) is unaffected — that governs the *args after* `state`.
 ## Runtime (`packages/var/src/execute.ts`)
 
 - Add a pure `deepFreeze<T>(value: T): T` helper in the core (no dependencies).
+  **It freezes plain objects and arrays only — it does NOT freeze or recurse
+  into class instances** (any value whose prototype is not `Object.prototype`,
+  `null`, or `Array`). Rationale: real step suites keep a stateful collaborator
+  in state — a `Library`, a page object, a DB client, the system under test —
+  and those rely on internal mutation through their methods. Freezing them would
+  break every such suite. The immutability guarantee covers the test's *plain
+  data* state; the *reference* to an embedded instance is still immutable (you
+  cannot reassign `state.library`), but the instance's own internals stay live.
+  (`Date`, `Map`, `Set`, etc. are likewise left live.)
 - Initial state from `createContext(file)` is deep-frozen before first use.
 - In the per-step loop, replace the current "context/action must not return"
   branch with:
