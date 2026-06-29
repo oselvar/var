@@ -66,8 +66,12 @@ TS-language-specific. The layout makes that explicit rather than burying it.
 Decisions:
 
 - **Conformance corpus is root-level**, owned by neither language. Both harnesses read
-  `../conformance/`. (The `conformance-infra` branch already authors the corpus at root
-  `conformance/`, so this is consistent — see Sequencing.)
+  `../conformance/`. The corpus + harness are **already on main** — corpus at
+  `packages/var/bundles/` (bundles use `example.md` + `*.steps.ts`, per the
+  `.var.md`-extension removal), projections in `packages/var-core/src/conformance.ts`,
+  harness in `packages/var/tests/conformance.test.ts`. The restructure **promotes**
+  `packages/var/bundles/` to root `conformance/bundles/` (so it is neutral, not nested in
+  the TS `var` package) and repoints the harness.
 - **Docs stay at root** (`doc/`, `docs/`). They describe the whole project, not one impl.
 - **Each language tree is self-contained**: its package manager, lint/format, type-check,
   and test config live inside its own directory. Nothing language-specific remains at the
@@ -94,14 +98,16 @@ Decisions:
 
 ## Sequencing
 
-The restructure is a mechanical, repo-wide `git mv` + path edit. Running it against a
-quiet trunk avoids brutal rebase conflicts with open branches.
+The restructure is a mostly-mechanical, repo-wide `git mv` + path edit. Running it
+against a quiet trunk avoids brutal rebase conflicts with open branches.
 
-1. **Land in-flight branches to main first** — `conformance-infra` (adds `conformance/`
-   at root + the TS harness) and the `ARCHITECTURE.md` rewrite worktree. Trunk-based dev
-   with short branches makes this cheap.
-2. **Restructure** (this spec): `git mv` the workspace into `typescript/`, fix paths,
-   repoint the harness at `../conformance/`, update CI.
+1. **Quiesce in-flight branches first.** The conformance core is already on main; verify
+   the open `conformance-infra` origin branch and the `ARCHITECTURE.md` rewrite worktree
+   are merged or abandoned before moving files, so no open branch carries large
+   path-conflicting diffs.
+2. **Promote the corpus + restructure** (this spec): `git mv packages/var/bundles` to root
+   `conformance/bundles`, `git mv` the rest of the workspace into `typescript/`, fix every
+   broken relative path, repoint the conformance harness at the new root corpus, update CI.
 3. **uv bootstrap** (this spec): create `python/` uv workspace + empty skeletons + CI
    lane proving `uv run pytest` is green.
 4. **Python runtime port** — issue #2, a separate spec/plan, later.
