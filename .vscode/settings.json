@@ -1,5 +1,5 @@
 {
-  "vitest.workspaceConfig": "./vitest.config.ts",
+  "vitest.workspaceConfig": "./typescript/vitest.config.ts",
   "vitest.maximumConfigs": 10,
   "vitest.nodeEnv": {
     "NODE_OPTIONS": "--import tsx"
