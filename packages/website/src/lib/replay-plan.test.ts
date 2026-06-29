@@ -46,12 +46,13 @@ describe('planReplay', () => {
     ])
   })
 
-  it('emits one delete per removed character at a stable index', () => {
-    // Deleting "cd" from "abcd": both deletions target index 2, because each
-    // delete shifts the remaining tail left under the caret.
+  it('emits deletes right-to-left within a segment, like Backspace', () => {
+    // Deleting "cd" from "abcd": the caret starts at the right end of the
+    // doomed run and walks left (delete index 3 then 2), as if pressing
+    // Backspace, rather than forward-Delete at a stationary caret.
     const ops = planReplay('abcd', 'ab')
     expect(ops).toEqual([
-      { kind: 'delete', at: 2 },
+      { kind: 'delete', at: 3 },
       { kind: 'delete', at: 2 },
     ])
   })

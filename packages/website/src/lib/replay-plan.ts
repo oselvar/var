@@ -11,8 +11,10 @@ export type ReplayOp = { kind: 'insert'; at: number; text: string } | { kind: 'd
 // Pure and deterministic: no DOM, no timers. Uses jsdiff's minimal char diff,
 // then walks the segments maintaining an evolving caret:
 //   - equal   -> advance the caret past it
-//   - removed -> delete one char at the caret per char (the caret stays; the
-//                document shrinks left under it)
+//   - removed -> delete the segment right-to-left, one char per op, so it reads
+//                like pressing Backspace (the caret walks left from the right
+//                end of the run) rather than forward Delete at a stationary
+//                caret. The caret ends back at the segment start.
 //   - added   -> insert one char at the caret per char, advancing the caret
 export function planReplay(from: string, to: string): ReplayOp[] {
   const ops: ReplayOp[] = []
@@ -24,8 +26,8 @@ export function planReplay(from: string, to: string): ReplayOp[] {
         caret += 1
       }
     } else if (part.removed) {
-      for (const _ of part.value) {
-        ops.push({ kind: 'delete', at: caret })
+      for (let j = part.value.length - 1; j >= 0; j--) {
+        ops.push({ kind: 'delete', at: caret + j })
       }
     } else {
       caret += part.value.length
