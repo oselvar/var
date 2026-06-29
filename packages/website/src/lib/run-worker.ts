@@ -1,6 +1,7 @@
 import * as varCore from '@oselvar/var-core'
 import { hashSource, type SpecResults } from '@oselvar/var-core'
 import * as varRuntime from '@oselvar/var-runtime'
+import { _resetBuilder } from '@oselvar/var-runtime/registry'
 import * as ts from 'typescript'
 import { runRegisteredSpec } from './run-spec.ts'
 
@@ -36,7 +37,7 @@ self.onmessage = async (e: MessageEvent<RunInput>) => {
   const input = e.data
   let results: SpecResults
   try {
-    varRuntime._resetBuilder()
+    _resetBuilder()
     for (const f of input.stepFiles) evalStepFile(f.path, f.source)
     results = await runRegisteredSpec(input.varPath, input.varSource, input.exampleIndex)
   } catch (err) {

@@ -6,6 +6,10 @@
     ".": {
       "types": "./src/index.ts",
       "import": "./src/index.ts"
+    },
+    "./registry": {
+      "types": "./src/registry.ts",
+      "import": "./src/registry.ts"
     }
   },
   "main": "./src/index.ts",
@@ -29,6 +33,10 @@
       ".": {
         "types": "./dist/index.d.ts",
         "import": "./dist/index.js"
+      },
+      "./registry": {
+        "types": "./dist/registry.d.ts",
+        "import": "./dist/registry.js"
       }
     },
     "main": "./dist/index.js",

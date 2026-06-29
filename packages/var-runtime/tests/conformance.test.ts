@@ -3,7 +3,7 @@ import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { canonicalStringify, parse, runConformance } from '@oselvar/var-core'
 import { describe, expect, test } from 'vitest'
-import { _resetBuilder, buildRegistry, contextFactory } from '../src/index.js'
+import { _resetBuilder, buildRegistry, contextFactory } from '../src/registry.js'
 
 const BUNDLES = resolve(import.meta.dirname, '../bundles')
 const UPDATE = process.env.VAR_UPDATE_GOLDENS === '1'

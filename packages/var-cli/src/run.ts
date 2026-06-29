@@ -3,7 +3,7 @@ import { relative, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { executePlan, parse, plan } from '@oselvar/var-core'
 import { loadVarConfig } from '@oselvar/var-core/node'
-import { buildRegistry, contextFactory } from '@oselvar/var-runtime'
+import { buildRegistry, contextFactory } from '@oselvar/var-runtime/registry'
 
 export type RunOptions = {
   readonly cwd: string
