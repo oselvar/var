@@ -7,7 +7,7 @@ const { sensor } = defineState(() => ({}))
 // object of raw strings. Returning { score } compares only that column.
 sensor(
   'Examples of dice, category and score',
-  (_ctx, row: { dice: string; category: string; score: string }) => {
+  (_state, row: { dice: string; category: string; score: string }) => {
     const dice = row.dice.split(',').map((d) => Number(d.trim()))
     return { score: score(dice, row.category) }
   },

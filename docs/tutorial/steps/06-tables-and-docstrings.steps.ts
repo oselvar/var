@@ -4,7 +4,7 @@ const { sensor } = defineState(() => ({}))
 
 // Whole-table mode: the table arrives as string[][] (header row first). Return
 // the tuple [reproducedTable] — Vár compares every cell against the spec.
-sensor('Uppercase each one:', (_ctx, rows: ReadonlyArray<ReadonlyArray<string>>) => {
+sensor('Uppercase each one:', (_state, rows: ReadonlyArray<ReadonlyArray<string>>) => {
   const reproduced = rows
     .slice(1)
     .map(([before]) => ({ before, after: (before ?? '').toUpperCase() }))
@@ -14,6 +14,6 @@ sensor('Uppercase each one:', (_ctx, rows: ReadonlyArray<ReadonlyArray<string>>)
 // Doc-string mode: the post-ctx args are (name, body); return [name, text].
 // `name` is inferred from {word}; `_body` is the trailing doc-string arg (no
 // placeholder in the expression), so it keeps its annotation.
-sensor('Greet {word}:', (_ctx, name, _body: string) => {
+sensor('Greet {word}:', (_state, name, _body: string) => {
   return [name, `Hello, ${name}!\n`]
 })

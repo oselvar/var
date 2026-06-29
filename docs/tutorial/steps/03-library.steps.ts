@@ -46,26 +46,26 @@ const { context, action, sensor } = defineState(
   },
 )
 
-context('Maya has borrowed {string}, due back on {date}', (_ctx, _title, _due) => {
+context('Maya has borrowed {string}, due back on {date}', (_state, _title, _due) => {
   // ctx.library.checkOut(ctx.member, title, due)
 })
 
-action('she returns it on {date}', (_ctx, _returned) => {
+action('she returns it on {date}', (_state, _returned) => {
   // ctx.library.checkIn(ctx.member, returned)
 })
 
-sensor('charges her a {money} late fee', (_ctx, _fee) => {
+sensor('charges her a {money} late fee', (_state, _fee) => {
   // expect(ctx.library.feesOwedBy(ctx.member)).toBe(fee)
 })
 
-sensor('{money} for each day overdue', (_ctx, _dailyRate) => {
+sensor('{money} for each day overdue', (_state, _dailyRate) => {
   // ...
 })
 
-sensor('Her account shows the fee', (_ctx) => {
+sensor('Her account shows the fee', (_state) => {
   // expect(ctx.library.accountOf(ctx.member).fees).toBeGreaterThan(0)
 })
 
-sensor("she can't borrow anything else", (_ctx) => {
+sensor("she can't borrow anything else", (_state) => {
   // expect(() => ctx.library.checkOut(...)).toThrow(/unpaid/i)
 })

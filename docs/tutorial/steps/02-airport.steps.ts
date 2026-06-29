@@ -7,9 +7,9 @@ const { action, sensor } = defineState(() => ({ from: '', to: '' }), {
   airport: { regexp: /[A-Z]{3}/, transformer: (code: string) => code },
 })
 
-action('I fly from {airport} to {airport}', (ctx, from, to) => {
-  ctx.from = from
-  ctx.to = to
-})
+action('I fly from {airport} to {airport}', (_state, from, to) => ({ from, to }))
 
-sensor('the route should be from {airport} to {airport}', (ctx, _from, _to) => [ctx.from, ctx.to])
+sensor('the route should be from {airport} to {airport}', (state, _from, _to) => [
+  state.from,
+  state.to,
+])
