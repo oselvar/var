@@ -31,6 +31,7 @@ export type PlanArtifact = {
     readonly scopeStack: ReadonlyArray<string>
     readonly span: Span
     readonly expectedOutcome: 'pass' | 'fail'
+    readonly expectedErrorMessage?: string
     readonly steps: ReadonlyArray<{
       readonly text: string
       readonly matchSpan: Span
@@ -166,6 +167,7 @@ export function toPlanArtifact(plan: ExecutionPlan): PlanArtifact {
       scopeStack: ex.scopeStack,
       span: ex.span,
       expectedOutcome: ex.expectedOutcome ?? 'pass',
+      ...(ex.expectedErrorMessage ? { expectedErrorMessage: ex.expectedErrorMessage } : {}),
       steps: ex.steps.map((step) => {
         const stepNames = parameterTypeNames(step.stepDef.expression)
         return {
@@ -173,8 +175,8 @@ export function toPlanArtifact(plan: ExecutionPlan): PlanArtifact {
           matchSpan: step.matchSpan,
           paramSpans: step.paramSpans,
           matchedExpression: step.stepDef.expression,
-          args: step.args.map((a, i) => ({
-            value: String(a),
+          args: step.paramSpans.map((span, i) => ({
+            value: plan.varDoc.source.slice(span.startOffset, span.endOffset),
             parameterType: stepNames[i] ?? null,
           })),
           ...(step.dataTable ? { dataTable: step.dataTable } : {}),
@@ -225,7 +227,7 @@ export async function runConformance(
 ): Promise<BundleArtifacts> {
   const execution = buildPlan(varDoc, registry)
 
-  const observed = new Map<string, StepObservation[]>()
+  const observed = new Map<number, StepObservation[]>()
   const queue: { name: string; run: () => void | Promise<void> }[] = []
   executePlan(execution, {
     sink: { example: (name, run) => queue.push({ name, run }) },
@@ -233,25 +235,27 @@ export async function runConformance(
     createContext,
     observer: {
       step: (o) => {
-        const list = observed.get(o.exampleName) ?? []
+        const list = observed.get(o.exampleIndex) ?? []
         list.push(o)
-        observed.set(o.exampleName, list)
+        observed.set(o.exampleIndex, list)
       },
     },
   })
 
   const traceExamples = []
-  for (const { name, run } of queue) {
+  for (let k = 0; k < queue.length; k++) {
+    const { name, run } = queue[k] as { name: string; run: () => void | Promise<void> }
     let outcome: 'pass' | 'fail' = 'pass'
     try {
       await run()
     } catch {
       outcome = 'fail'
     }
-    const planned = execution.examples.find((e) => e.name === name)
-    const obs = observed.get(name) ?? []
+    const planned = execution.examples[k]
+    const obs = observed.get(k) ?? []
     const steps: StepTrace[] = (planned?.steps ?? []).map((step, i) => {
-      const o = obs.find((x) => x.ordinal === i + 1)
+      const matches = obs.filter((x) => x.ordinal === i + 1)
+      const o = matches.find((m) => m.outcome === 'fail') ?? matches[matches.length - 1]
       const stepOutcome = o ? o.outcome : 'skipped'
       return {
         exampleName: name,

@@ -15,6 +15,7 @@ export function isUnexpectedPassError(e: unknown): e is UnexpectedPassError {
 
 export type StepObservation = {
   readonly exampleName: string
+  readonly exampleIndex: number // 0-based index within plan.examples
   readonly ordinal: number // 1-based index within the example
   readonly stepFile: string // step.stepDef.expressionSourceFile (raw)
   readonly outcome: 'pass' | 'fail'
@@ -41,7 +42,7 @@ export function executePlan(plan: ExecutionPlan, ports: ExecutePorts): void {
   for (const d of plan.diagnostics) ports.reporter.diagnostic(d)
   const createContext = ports.createContext ?? (() => ({}))
   const path = plan.varDoc.path
-  for (const ex of plan.examples) {
+  plan.examples.forEach((ex, exampleIndex) => {
     ports.sink.example(
       ex.name,
       async () => {
@@ -85,6 +86,7 @@ export function executePlan(plan: ExecutionPlan, ports: ExecutePorts): void {
             const augmented = augmentStack(err, step, path)
             ports.observer?.step({
               exampleName: ex.name,
+              exampleIndex,
               ordinal: i + 1,
               stepFile: file,
               outcome: 'fail',
@@ -95,6 +97,7 @@ export function executePlan(plan: ExecutionPlan, ports: ExecutePorts): void {
           }
           ports.observer?.step({
             exampleName: ex.name,
+            exampleIndex,
             ordinal: i + 1,
             stepFile: file,
             outcome: 'pass',
@@ -107,6 +110,7 @@ export function executePlan(plan: ExecutionPlan, ports: ExecutePorts): void {
             const augmented = augmentStack(new CellMismatchError(bad), lastStep, path)
             ports.observer?.step({
               exampleName: ex.name,
+              exampleIndex,
               ordinal: ex.steps.length,
               stepFile: lastStep.stepDef.expressionSourceFile,
               outcome: 'fail',
@@ -131,7 +135,7 @@ export function executePlan(plan: ExecutionPlan, ports: ExecutePorts): void {
       },
       { lines: [...new Set(ex.steps.map((s) => s.matchSpan.startLine))] },
     )
-  }
+  })
 }
 
 // Inject a synthetic V8 stack frame pointing at the matched step text's

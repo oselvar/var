@@ -581,7 +581,9 @@ test('observer receives a pass observation per executed step', async () => {
     step: (o) => obs.push(o),
   })
   await run?.()
-  expect(obs).toEqual([{ exampleName: 'I add 5', ordinal: 1, stepFile: 's.ts', outcome: 'pass' }])
+  expect(obs).toEqual([
+    { exampleName: 'I add 5', exampleIndex: 0, ordinal: 1, stepFile: 's.ts', outcome: 'pass' },
+  ])
 })
 
 test('observer receives a fail observation when a step throws', async () => {

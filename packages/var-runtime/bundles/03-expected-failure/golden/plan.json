@@ -2,6 +2,7 @@
   "diagnostics": [],
   "examples": [
     {
+      "expectedErrorMessage": "division by zero",
       "expectedOutcome": "fail",
       "name": "I divide 1 by 0",
       "scopeStack": [
