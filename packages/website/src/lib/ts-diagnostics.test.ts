@@ -20,6 +20,20 @@ describe('ts-diagnostics', () => {
     expect(d.find((x) => /Cannot find module/.test(x.message))).toBeUndefined()
   })
 
+  it('infers built-in parameter types from the cucumber expression', () => {
+    const ts = createTsDiagnostics()
+    ts.updateDoc(
+      'd.steps.ts',
+      `import { defineState } from '@oselvar/var-runtime'\n` +
+        `const { action } = defineState(() => ({ n: 0 }))\n` +
+        // `count` carries NO annotation; {int} infers it as number, so assigning
+        // it to a string must produce a diagnostic.
+        `action('I have {int} cukes', (_ctx, count) => { const s: string = count; void s })\n`,
+    )
+    const d = ts.diagnostics('d.steps.ts')
+    expect(d.some((x) => /not assignable/.test(x.message))).toBe(true)
+  })
+
   it('has the standard lib bundled (Error resolves)', () => {
     const ts = createTsDiagnostics()
     ts.updateDoc('c.steps.ts', 'throw new Error("boom")\n')

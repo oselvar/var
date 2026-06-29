@@ -1,4 +1,4 @@
-import { beforeEach, expect, test } from 'vitest'
+import { beforeEach, expect, expectTypeOf, test } from 'vitest'
 import {
   _resetBuilder,
   action,
@@ -87,6 +87,32 @@ test('typed handlers reject mismatched ctx and arg usage', () => {
   act('I have {int} cukes', (ctx) => ctx.count++)
   const r = buildRegistry()
   expect(r.steps).toHaveLength(2)
+})
+
+test('built-in parameter types are inferred from the expression (no annotations)', () => {
+  // TYPE-LEVEL assertions (fire via tsconfig.tests.json under `pnpm typecheck`).
+  // The handler params carry NO annotations — their types come from the
+  // cucumber expression. This is the Tier 1 inference contract.
+  const { action: act, sensor: sense } = defineState(() => ({ n: 0 }))
+  act('I greet {string}', (_ctx, name) => {
+    expectTypeOf(name).toEqualTypeOf<string>()
+  })
+  act('add {int} and {float}', (_ctx, a, b) => {
+    expectTypeOf(a).toEqualTypeOf<number>()
+    expectTypeOf(b).toEqualTypeOf<number>()
+  })
+  sense('have {biginteger} cukes', (_ctx, big) => {
+    expectTypeOf(big).toEqualTypeOf<bigint>()
+    return [big]
+  })
+  // A trailing doc-string/table arg has no placeholder, so it stays flexible:
+  // the author annotates it and it lands in the `...AnyArg[]` tail.
+  sense('greet {word}:', (_ctx, who, body: string) => {
+    expectTypeOf(who).toEqualTypeOf<string>()
+    return [who, body]
+  })
+  const r = buildRegistry()
+  expect(r.steps).toHaveLength(4)
 })
 
 test('context/action/sensor register with their kind', () => {

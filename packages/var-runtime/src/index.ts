@@ -33,22 +33,68 @@ function registerStep(expression: string, handler: StepHandler, kind: StepKind):
   steps.push({ expression, sourceFile, sourceLine, handler, kind })
 }
 
-// A context/action handler runs for its side effects only. `Args` is inferred
-// from the handler's own parameter list, so authors annotate the captured
-// arguments (`(ctx, name: string) => …`) without a cast and without TS2345.
-export type RoleFn<C = unknown> = <Args extends readonly unknown[]>(
-  expression: string,
-  handler: (ctx: C, ...args: Args) => void | Promise<void>,
+// ─── Argument-type inference from the cucumber expression (Tier 1) ───
+// The handler's positional args are derived from the expression literal:
+// `{int}`/`{float}`/… → number, `{biginteger}` → bigint, `{string}`/`{word}`/
+// `{}` → string. Authors no longer annotate them. Custom parameter types
+// (`{airport}`) and the trailing data-table / doc-string arg the runtime
+// appends are not visible in the expression, so they fall back to `AnyArg` and
+// can be annotated to taste (Tier 2 will resolve customs via a typed registry).
+
+// `any`, not `unknown`: an annotated fallback param (`code: string`) must stay
+// assignable to its slot, which `unknown` would reject under parameter
+// contravariance — the exact TS2345 that typed handlers used to hit.
+// biome-ignore lint/suspicious/noExplicitAny: intentional flexible fallback slot
+type AnyArg = any
+
+// Built-in cucumber parameter-type name → TypeScript type.
+type BuiltInArg<N extends string> = N extends
+  | 'int'
+  | 'float'
+  | 'double'
+  | 'long'
+  | 'short'
+  | 'byte'
+  | 'bigdecimal'
+  ? number
+  : N extends 'biginteger'
+    ? bigint
+    : N extends 'string' | 'word' | ''
+      ? string
+      : AnyArg
+
+// Pull `{name}` placeholders out of the expression literal, in source order.
+// A `{` preceded by a backslash is an escaped literal brace, not a parameter.
+type ParseArgs<
+  S extends string,
+  Acc extends unknown[] = [],
+> = S extends `${infer Pre}{${infer Rest}`
+  ? Pre extends `${string}\\`
+    ? ParseArgs<Rest, Acc>
+    : Rest extends `${infer Name}}${infer After}`
+      ? ParseArgs<After, [...Acc, BuiltInArg<Name>]>
+      : Acc
+  : Acc
+
+// Parsed placeholders, followed by any trailing arg (table/doc string) the
+// runtime appends — that tail is `AnyArg` because the expression can't describe it.
+type HandlerArgs<E extends string> = [...ParseArgs<E>, ...AnyArg[]]
+
+// A context/action handler runs for its side effects only; its args are inferred
+// from the expression `E` (see HandlerArgs), so `(ctx, name) => …` types `name`
+// without an annotation and without TS2345.
+export type RoleFn<C = unknown> = <E extends string>(
+  expression: E,
+  handler: (ctx: C, ...args: HandlerArgs<E>) => void | Promise<void>,
 ) => void
 
 // A sensor may RETURN a value for the pure core to compare against the Markdown.
 // That return shape is independent of the captured args — it can be a by-index
 // column tuple, a header-bound row object, a whole reproduced table, or a
-// doc-string tuple — so `R` is inferred freely from the handler body and is
-// deliberately NOT constrained to `Args`.
-export type SensorFn<C = unknown> = <Args extends readonly unknown[], R>(
-  expression: string,
-  handler: (ctx: C, ...args: Args) => R | Promise<R>,
+// doc-string tuple — so `R` is inferred freely from the handler body.
+export type SensorFn<C = unknown> = <E extends string, R>(
+  expression: E,
+  handler: (ctx: C, ...args: HandlerArgs<E>) => R | Promise<R>,
 ) => void
 
 export const context: RoleFn = (expression, handler) =>

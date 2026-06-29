@@ -17,13 +17,28 @@ for (const [p, text] of Object.entries(libModules)) {
 // ctx/args typecheck without real module resolution.
 const AMBIENT_FILE = 'var-runtime.d.ts'
 const AMBIENT = `declare module '@oselvar/var-runtime' {
-  export type RoleFn<C = unknown> = <Args extends readonly unknown[]>(
-    expression: string,
-    handler: (ctx: C, ...args: Args) => void | Promise<void>,
+  type AnyArg = any
+  type BuiltInArg<N extends string> =
+    N extends 'int' | 'float' | 'double' | 'long' | 'short' | 'byte' | 'bigdecimal' ? number
+    : N extends 'biginteger' ? bigint
+    : N extends 'string' | 'word' | '' ? string
+    : AnyArg
+  type ParseArgs<S extends string, Acc extends unknown[] = []> =
+    S extends \`\${infer Pre}{\${infer Rest}\`
+      ? Pre extends \`\${string}\\\\\`
+        ? ParseArgs<Rest, Acc>
+        : Rest extends \`\${infer Name}}\${infer After}\`
+          ? ParseArgs<After, [...Acc, BuiltInArg<Name>]>
+          : Acc
+      : Acc
+  type HandlerArgs<E extends string> = [...ParseArgs<E>, ...AnyArg[]]
+  export type RoleFn<C = unknown> = <E extends string>(
+    expression: E,
+    handler: (ctx: C, ...args: HandlerArgs<E>) => void | Promise<void>,
   ) => void
-  export type SensorFn<C = unknown> = <Args extends readonly unknown[], R>(
-    expression: string,
-    handler: (ctx: C, ...args: Args) => R | Promise<R>,
+  export type SensorFn<C = unknown> = <E extends string, R>(
+    expression: E,
+    handler: (ctx: C, ...args: HandlerArgs<E>) => R | Promise<R>,
   ) => void
   export const context: RoleFn
   export const action: RoleFn
