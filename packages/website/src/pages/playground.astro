@@ -22,6 +22,27 @@ import Base from '../layouts/Base.astro'
     <h2 class="font-sans font-semibold text-2xl mt-12 mb-3">the step definitions</h2>
     <Editor uri="file:///yahtzee.steps.ts" lineNumbers folding>{yahtzeeSteps}</Editor>
 
+    <h2 class="font-sans font-semibold text-2xl mt-12 mb-3">replay between states</h2>
+    <p class="mb-4">
+      Click a button in the editor's header to watch it type its way from the
+      current text to that state. Edit the text first — the replay always starts
+      from whatever is there now.
+    </p>
+    <Editor uri="file:///oars.md" chrome lineNumbers group="oars-demo">
+      <Fragment slot="empty">{`Feature: Oars
+
+Scenario: counting
+  Given a var`}</Fragment>
+      <Fragment slot="one oar">{`Feature: Oars
+
+Scenario: counting
+  Given a var with 1 oar`}</Fragment>
+      <Fragment slot="three oars">{`Feature: Oars
+
+Scenario: counting
+  Given a var with 3 oars`}</Fragment>
+    </Editor>
+
     <p>
       If you have ever written a unit test, this will be familiar. The main difference between
       examples and unit tests are:
