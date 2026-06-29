@@ -28,7 +28,7 @@ import Base from '../layouts/Base.astro'
       current text to that state. Edit the text first — the replay always starts
       from whatever is there now.
     </p>
-    <Editor uri="file:///oars.md" chrome lineNumbers group="oars-demo">
+    <Editor uri="file:///oars.md" chrome lineNumbers group="oars-demo" replayMs={20}>
       <Fragment slot="empty">{`Feature: Oars
 
 Scenario: counting

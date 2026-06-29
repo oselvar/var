@@ -21,6 +21,9 @@ interface Props {
   // Hidden companion step sources fed to this editor's run group without
   // rendering a visible editor. Use when a doc shows only the spec.
   steps?: ReadonlyArray<{ path: string; source: string }>
+  // Milliseconds between keystrokes when replaying between named states
+  // (default 35). Lower is faster. Only relevant with ≥2 named-slot states.
+  replayMs?: number
 }
 const {
   uri,
@@ -30,6 +33,7 @@ const {
   chrome = false,
   group,
   steps,
+  replayMs,
 } = Astro.props
 
 // Language is inferred from the uri extension: TypeScript for `.ts` (incl.
@@ -70,6 +74,7 @@ const mountAttrs = {
   'data-group': group,
   'data-steps': steps ? JSON.stringify(steps) : undefined,
   'data-states': hasStates ? JSON.stringify(states) : undefined,
+  'data-replay-ms': replayMs != null ? String(replayMs) : undefined,
 }
 ---
 {chrome ? (

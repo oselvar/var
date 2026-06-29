@@ -113,7 +113,7 @@ function scheduleRun(groupId: string): void {
 // — the user always wins).
 const replayTxn = Annotation.define<boolean>()
 
-const REPLAY_MS = 35 // constant per-keystroke delay
+const REPLAY_MS = 35 // default per-keystroke delay (overridable via `replayMs` prop)
 
 type ReplayState = { token: number; timer?: ReturnType<typeof setTimeout> }
 const replays = new WeakMap<EditorView, ReplayState>()
@@ -145,10 +145,10 @@ function refreshActiveState(view: EditorView): void {
   })
 }
 
-// Animate the live document into `target`, one keystroke per REPLAY_MS tick.
+// Animate the live document into `target`, one keystroke per `delayMs` tick.
 // Always diffs from the *current* doc, so manual edits (before or mid-replay)
 // are respected.
-function replayTo(view: EditorView, target: string): void {
+function replayTo(view: EditorView, target: string, delayMs: number = REPLAY_MS): void {
   cancelReplay(view)
   const r = replays.get(view) ?? { token: 0 }
   replays.set(view, r)
@@ -179,7 +179,7 @@ function replayTo(view: EditorView, target: string): void {
         annotations: replayTxn.of(true),
       })
     }
-    cur.timer = setTimeout(step, REPLAY_MS)
+    cur.timer = setTimeout(step, delayMs)
   }
   step()
 }
@@ -258,11 +258,15 @@ function mountEditor(el: HTMLElement): EditorView {
   if (el.dataset.states) {
     try {
       const states = JSON.parse(el.dataset.states) as Array<{ name: string; text: string }>
+      // Optional per-editor keystroke delay; fall back to the default for a
+      // missing or non-positive value.
+      const parsedMs = Number(el.dataset.replayMs)
+      const delayMs = Number.isFinite(parsedMs) && parsedMs > 0 ? parsedMs : REPLAY_MS
       const figure = el.closest('figure.file-editor')
       const buttons = figure ? [...figure.querySelectorAll<HTMLButtonElement>('.fe-state-btn')] : []
       if (buttons.length === states.length && buttons.length > 0) {
         buttons.forEach((btn, i) => {
-          btn.addEventListener('click', () => replayTo(view, states[i].text))
+          btn.addEventListener('click', () => replayTo(view, states[i].text, delayMs))
         })
         stateUIs.set(view, { states, buttons })
         refreshActiveState(view)
