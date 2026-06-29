@@ -29,7 +29,7 @@ test('toFailureArtifact projects a CellMismatchError to cell-mismatch', () => {
   const err = new CellMismatchError([
     { column: 'score', span, expected: '9', actual: '6', ok: false },
   ])
-  expect(toFailureArtifact(err, 'e.var.md', 7)).toEqual({
+  expect(toFailureArtifact(err, 7)).toEqual({
     kind: 'cell-mismatch',
     line: 7,
     cells: [{ column: 'score', expected: '9', actual: '6', span }],
@@ -38,7 +38,7 @@ test('toFailureArtifact projects a CellMismatchError to cell-mismatch', () => {
 
 test('toFailureArtifact projects a DocStringMismatchError to doc-string-mismatch', () => {
   const err = new DocStringMismatchError({ span, expected: 'a', actual: 'b' })
-  expect(toFailureArtifact(err, 'e.var.md', 7)).toEqual({
+  expect(toFailureArtifact(err, 7)).toEqual({
     kind: 'doc-string-mismatch',
     line: 7,
     diff: { expected: 'a', actual: 'b', span },
@@ -46,16 +46,16 @@ test('toFailureArtifact projects a DocStringMismatchError to doc-string-mismatch
 })
 
 test('toFailureArtifact maps UnexpectedPassError and opaque throws', () => {
-  expect(toFailureArtifact(new UnexpectedPassError(), 'e.var.md', 4).kind).toBe('unexpected-pass')
-  expect(toFailureArtifact(new Error('boom'), 'e.var.md', 4)).toEqual({ kind: 'thrown', line: 4 })
+  expect(toFailureArtifact(new UnexpectedPassError(), 4).kind).toBe('unexpected-pass')
+  expect(toFailureArtifact(new Error('boom'), 4)).toEqual({ kind: 'thrown', line: 4 })
 })
 
-test('toFailureArtifact recovers the line from a <specPath>:line:col stack frame', () => {
+test('toFailureArtifact uses the line it is given verbatim (the step matchSpan line)', () => {
+  // No stack scraping: the failing line is the source position the caller
+  // passes (matchSpan.startLine), so every language port reproduces it.
   const err = new Error('boom')
-  // A synthetic frame like the one executePlan injects (augmentStack):
   err.stack = 'Error: boom\n    at handler (s.ts:1:1)\n    at step (e.var.md:42:7)'
-  // fallbackLine is 4, but the frame says 42 → 42 wins.
-  expect(toFailureArtifact(err, 'e.var.md', 4)).toEqual({ kind: 'thrown', line: 42 })
+  expect(toFailureArtifact(err, 4)).toEqual({ kind: 'thrown', line: 4 })
 })
 
 test('toRegistryArtifact lists expressions and parsed parameter-type names', () => {

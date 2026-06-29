@@ -148,15 +148,6 @@ function parameterTypeNames(compiled: CucumberExpression): ReadonlyArray<string>
   return names
 }
 
-// Recover the 1-based failing line from the `<specPath>:line:col` frame that
-// executePlan injects (augmentStack). Falls back to the step's own line.
-function failingLine(error: unknown, specPath: string, fallbackLine: number): number {
-  const stack = error instanceof Error && typeof error.stack === 'string' ? error.stack : ''
-  const escaped = specPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const m = new RegExp(`${escaped}:(\\d+):\\d+`).exec(stack)
-  return m ? Number(m[1]) : fallbackLine
-}
-
 export function toVarDocArtifact(doc: VarDoc): VarDocArtifact {
   return { path: doc.path, examples: doc.examples, orphanAttachments: doc.orphanAttachments }
 }
@@ -206,12 +197,10 @@ export function toPlanArtifact(plan: ExecutionPlan): PlanArtifact {
   }
 }
 
-export function toFailureArtifact(
-  error: unknown,
-  specPath: string,
-  fallbackLine: number,
-): FailureArtifact {
-  const line = failingLine(error, specPath, fallbackLine)
+// `line` is the failing step's own 1-based line in the `.var.md`
+// (`matchSpan.startLine`) — a deterministic, language-agnostic source position,
+// not a value scraped from a JS stack trace, so every port reproduces it.
+export function toFailureArtifact(error: unknown, line: number): FailureArtifact {
   if (isCellMismatchError(error)) {
     return {
       kind: 'cell-mismatch',
@@ -279,7 +268,7 @@ export async function runConformance(
         contextKey: { exampleName: name, stepFile: fileStem(step.stepDef.expressionSourceFile) },
         outcome: stepOutcome,
         ...(stepOutcome === 'fail'
-          ? { failure: toFailureArtifact(o?.error, varDoc.path, step.matchSpan.startLine) }
+          ? { failure: toFailureArtifact(o?.error, step.matchSpan.startLine) }
           : {}),
       }
     })
