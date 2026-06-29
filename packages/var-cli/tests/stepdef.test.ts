@@ -18,7 +18,7 @@ test('writes the snippet to the file specified by --file', async () => {
     })
     expect(result.exitCode).toBe(0)
     const written = readFileSync(target, 'utf8')
-    expect(written).toContain("step('I have {int} cukes', (ctx, count: number) => {")
+    expect(written).toContain("action('I have {int} cukes', (ctx, count: number) => {")
     expect(written).toContain("throw new Error('not implemented')")
   } finally {
     rmSync(dir, { recursive: true, force: true })
@@ -37,7 +37,7 @@ test('--print writes to stdout, not the file', async () => {
       writeStdout: (s) => captured.push(s),
     })
     expect(result.exitCode).toBe(0)
-    expect(captured.join('')).toContain("step('I have {int} cukes',")
+    expect(captured.join('')).toContain("action('I have {int} cukes',")
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }
@@ -57,7 +57,7 @@ test('appends to an existing step file (does not overwrite)', async () => {
     })
     const written = readFileSync(target, 'utf8')
     expect(written).toContain("import { step } from '@oselvar/var-vitest'")
-    expect(written).toContain("step('I have {int} cukes',")
+    expect(written).toContain("action('I have {int} cukes',")
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }

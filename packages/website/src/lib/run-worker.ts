@@ -20,7 +20,7 @@ function evalStepFile(path: string, source: string): void {
     if (spec === '@oselvar/var-runtime' || spec === '@oselvar/var-vitest') return varRuntime
     if (spec === '@oselvar/var') return varCore
     throw new Error(
-      `Cannot import "${spec}" in the browser runner — import step()/defineContext from "@oselvar/var-runtime".`,
+      `Cannot import "${spec}" in the browser runner — import action()/context()/sensor()/defineState() from "@oselvar/var-runtime".`,
     )
   }
   const mod = { exports: {} as Record<string, unknown> }

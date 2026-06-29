@@ -27,7 +27,7 @@ describe('var CLI (source via tsx)', () => {
     try {
       const r = run(['stepdef', 'I have 5 cukes', '--print'], dir)
       expect(r.status).toBe(0)
-      expect(r.stdout).toContain("step('I have {int} cukes', (ctx, count: number) => {")
+      expect(r.stdout).toContain("action('I have {int} cukes', (ctx, count: number) => {")
       expect(r.stdout).toContain("throw new Error('not implemented')")
     } finally {
       rmSync(dir, { recursive: true, force: true })

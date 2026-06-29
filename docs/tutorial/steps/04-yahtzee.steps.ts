@@ -1,11 +1,11 @@
-import { defineContext } from '@oselvar/var-vitest'
+import { defineState } from '@oselvar/var-vitest'
 
-const { step } = defineContext(() => ({}))
+const { sensor } = defineState(() => ({}))
 
-// A header-bound table: because the paragraph above the table names every
-// header cell (dice, category, score), the runner calls this step once per row,
-// handing it the row as an object of raw strings.
-step(
+// Header-bound table: the paragraph names every header cell (dice, category,
+// score), so the runner calls this sensor once per row with the row as an
+// object of raw strings. Returning { score } compares only that column.
+sensor(
   'Examples of dice, category and score',
   (_ctx, row: { dice: string; category: string; score: string }) => {
     const dice = row.dice.split(',').map((d) => Number(d.trim()))

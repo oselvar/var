@@ -165,10 +165,17 @@ export function registerHandlers(
   // client is responsible for source (the user's selection) and target
   // (the steps file to append to); the server only knows how to translate
   // text → snippet.
-  connection.onRequest('var/generateSnippet', (params: { text: string }) => {
-    if (!handlers) return null
-    return handlers.generateSnippet(params.text)
-  })
+  connection.onRequest(
+    'var/generateSnippet',
+    (params: { text: string; uri?: string; position?: { line: number; character: number } }) => {
+      if (!handlers) return null
+      return handlers.generateSnippet({
+        text: params.text,
+        ...(params.uri !== undefined ? { uri: params.uri } : {}),
+        ...(params.position !== undefined ? { position: params.position } : {}),
+      })
+    },
+  )
 
   connection.onRequest('var/stepGlobs', () => {
     if (!handlers) return []

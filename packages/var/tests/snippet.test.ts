@@ -53,9 +53,21 @@ test('accepts a custom template via options.template', () => {
 
 test('default template renders the "Write code here" comment and an Error throw', () => {
   const s = generateSnippet('I have 5 cukes', createRegistry())
-  expect(s.fullCode).toContain("step('I have {int} cukes', (ctx, count: number) => {")
+  expect(s.fullCode).toContain("action('I have {int} cukes', (ctx, count: number) => {")
   expect(s.fullCode).toContain('Write code here that turns the phrase above into concrete actions')
   expect(s.fullCode).toContain("throw new Error('not implemented')")
+})
+
+test('snippet defaults to action and offers context/sensor as commented alternatives', () => {
+  const s = generateSnippet('I have 5 cukes', createRegistry())
+  expect(s.fullCode).toMatch(/^action\(/m)
+  expect(s.fullCode).toMatch(/^\/\/ context\(/m)
+  expect(s.fullCode).toMatch(/^\/\/ sensor\(/m)
+})
+
+test('snippet honours an explicit role', () => {
+  const s = generateSnippet('the total is 5', createRegistry(), { role: 'sensor' })
+  expect(s.fullCode).toMatch(/^sensor\(/m)
 })
 
 test('a custom {airport} parameter type drives both the expression and the arg name', () => {

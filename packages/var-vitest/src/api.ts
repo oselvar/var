@@ -4,12 +4,14 @@
 // a re-export so step files that import from @oselvar/var-vitest don't
 // have to change.
 
-export type { Step } from '@oselvar/var-runtime'
+export type { RoleFn, SensorFn } from '@oselvar/var-runtime'
 export {
   _resetBuilder,
+  action,
   buildRegistry,
+  context,
   contextFactory,
-  defineContext,
   defineParameterType,
-  step,
+  defineState,
+  sensor,
 } from '@oselvar/var-runtime'

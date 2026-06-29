@@ -1,13 +1,15 @@
-import { defineContext } from '@oselvar/var-vitest'
+import { defineState } from '@oselvar/var-vitest'
 
-const { step } = defineContext(() => ({}))
+const { sensor } = defineState(() => ({}))
 
 // Whole-table mode: the table arrives as string[][] (header row first). Return
-// the full computed table — Vár compares every cell against the spec.
-step('Uppercase each one:', (_ctx, rows: ReadonlyArray<ReadonlyArray<string>>) => {
-  return rows.slice(1).map(([before]) => ({ before, after: (before ?? '').toUpperCase() }))
+// the tuple [reproducedTable] — Vár compares every cell against the spec.
+sensor('Uppercase each one:', (_ctx, rows: ReadonlyArray<ReadonlyArray<string>>) => {
+  const reproduced = rows.slice(1).map(([before]) => ({ before, after: (before ?? '').toUpperCase() }))
+  return [reproduced] as const
 })
 
-// Doc-string mode: return the exact text the fence should contain. Fence bodies
-// include their trailing newline, so the returned string ends in "\n" too.
-step('Greet {word}:', (_ctx, name: string, _body: string) => `Hello, ${name}!\n`)
+// Doc-string mode: the post-ctx args are (name, body); return [name, text].
+sensor('Greet {word}:', (_ctx, name: string, _body: string) => {
+  return [name, `Hello, ${name}!\n`] as [string, string]
+})

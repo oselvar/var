@@ -1,5 +1,5 @@
-import { step } from '@oselvar/var-runtime'
+import { action } from '@oselvar/var-runtime'
 
 // Both expressions match "I have 5 cukes" → ambiguous-match diagnostic.
-step('I have {int} cukes', () => {})
-step('I have 5 cukes', () => {})
+action('I have {int} cukes', () => {})
+action('I have 5 cukes', () => {})

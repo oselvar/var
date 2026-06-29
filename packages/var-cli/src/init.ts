@@ -13,19 +13,15 @@ Given I greet "world"
 Then the greeting is "Hello, world!"
 `
 
-const EXAMPLE_STEPS = `import { defineContext } from '@oselvar/var-vitest'
+const EXAMPLE_STEPS = `import { defineState } from '@oselvar/var-vitest'
 
-const { step } = defineContext(() => ({ greeting: '' }))
+const { action, sensor } = defineState(() => ({ greeting: '' }))
 
-step('I greet {string}', (ctx, name: string) => {
+action('I greet {string}', (ctx, name: string) => {
   ctx.greeting = \`Hello, \${name}!\`
 })
 
-step('the greeting is {string}', (ctx, expected: string) => {
-  if (ctx.greeting !== expected) {
-    throw new Error(\`Expected \${expected}, got \${ctx.greeting}\`)
-  }
-})
+sensor('the greeting is {string}', (ctx, _expected: string) => [ctx.greeting] as [string])
 `
 
 export type InitOptions = {

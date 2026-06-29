@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { decodeEntities, highlightSteps } from './step-highlight.js'
 
-const STEP_SOURCE = `import { defineContext } from '@oselvar/var-vitest'
-const { step } = defineContext(() => ({ greeting: '' }))
-step('I greet {string}', (ctx, name: string) => {})
-step('the greeting should be {string}', (ctx, expected: string) => {})
+const STEP_SOURCE = `import { action, sensor } from '@oselvar/var-vitest'
+action('I greet {string}', (ctx, name: string) => {})
+sensor('the greeting should be {string}', (ctx, expected: string) => {})
 `
 
 const steps = [{ path: '01-hello.steps.ts', source: STEP_SOURCE }]

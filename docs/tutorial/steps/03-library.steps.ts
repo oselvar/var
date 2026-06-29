@@ -1,4 +1,4 @@
-import { defineContext, defineParameterType } from '@oselvar/var-vitest'
+import { defineParameterType, defineState } from '@oselvar/var-vitest'
 
 // import { Library } from '../src/library'
 
@@ -38,33 +38,31 @@ defineParameterType({
   transformer: (title) => title,
 })
 
-const { step } = defineContext(() => ({
+const { context, action, sensor } = defineState(() => ({
   // library: new Library(),
   member: 'maya',
 }))
 
-step('Maya has borrowed {string}, due back on {date}', (_ctx, _title: string, _due: Date) => {
+context('Maya has borrowed {string}, due back on {date}', (_ctx, _title: string, _due: Date) => {
   // ctx.library.checkOut(ctx.member, title, due)
 })
 
-step('she returns it on {date}', (_ctx, _returned: Date) => {
+action('she returns it on {date}', (_ctx, _returned: Date) => {
   // ctx.library.checkIn(ctx.member, returned)
 })
 
-step('charges her a {money} late fee', (_ctx, _fee: number) => {
+sensor('charges her a {money} late fee', (_ctx, _fee: number) => {
   // expect(ctx.library.feesOwedBy(ctx.member)).toBe(fee)
 })
 
-step('{money} for each day overdue', (_ctx, _dailyRate: number) => {
-  // const { dueDate, returnedDate } = ctx.library.lastLoanOf(ctx.member)
-  // const daysOverdue = (returnedDate.getTime() - dueDate.getTime()) / 86_400_000
-  // expect(ctx.library.feesOwedBy(ctx.member)).toBe(dailyRate * daysOverdue)
+sensor('{money} for each day overdue', (_ctx, _dailyRate: number) => {
+  // ...
 })
 
-step('Her account shows the fee', (_ctx) => {
+sensor('Her account shows the fee', (_ctx) => {
   // expect(ctx.library.accountOf(ctx.member).fees).toBeGreaterThan(0)
 })
 
-step("she can't borrow anything else", (_ctx) => {
-  // expect(() => ctx.library.checkOut(ctx.member, 'Anything', new Date())).toThrow(/unpaid/i)
+sensor("she can't borrow anything else", (_ctx) => {
+  // expect(() => ctx.library.checkOut(...)).toThrow(/unpaid/i)
 })

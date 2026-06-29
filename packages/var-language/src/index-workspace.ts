@@ -84,6 +84,7 @@ export function buildWorkspaceIndex(input: WorkspaceInput): WorkspaceIndex {
           expression: def.expression,
           expressionSourceFile: def.file,
           expressionSourceLine: def.expressionRange.start.line,
+          kind: def.kind,
           handler: EMPTY_HANDLER,
         })
       } catch {

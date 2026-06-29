@@ -1,5 +1,4 @@
-import { defineContext, defineParameterType } from '@oselvar/var-vitest'
-import { expect } from 'vitest'
+import { defineParameterType, defineState } from '@oselvar/var-vitest'
 
 defineParameterType({
   name: 'airport',
@@ -7,14 +6,14 @@ defineParameterType({
   transformer: (code: string) => code,
 })
 
-const { step } = defineContext(() => ({ from: '', to: '' }))
+const { action, sensor } = defineState(() => ({ from: '', to: '' }))
 
-step('I fly from {airport} to {airport}', (ctx, from: string, to: string) => {
+action('I fly from {airport} to {airport}', (ctx, from: string, to: string) => {
   ctx.from = from
   ctx.to = to
 })
 
-step('the route should be from {airport} to {airport}', (ctx, from: string, to: string) => {
-  expect(ctx.from).toBe(from)
-  expect(ctx.to).toBe(to)
-})
+sensor(
+  'the route should be from {airport} to {airport}',
+  (ctx, _from: string, _to: string) => [ctx.from, ctx.to] as [string, string],
+)

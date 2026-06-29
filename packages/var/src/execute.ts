@@ -1,5 +1,6 @@
-import { CellMismatchError, compareRow, compareTable } from './cell-diff.js'
+import { CellMismatchError, compareRow, compareTable, ReturnShapeError } from './cell-diff.js'
 import { compareDocString, DocStringMismatchError } from './doc-string-diff.js'
+import { compareParams } from './param-diff.js'
 import type { ExecutionPlan, PlannedStep } from './plan.js'
 import type { Reporter, TestSink } from './ports.js'
 
@@ -75,12 +76,61 @@ export function executePlan(plan: ExecutionPlan, ports: ExecutePorts): void {
           try {
             const returned = await step.stepDef.handler(ctx, ...step.args, ...extra)
             lastReturn = returned
-            if (step.dataTable) {
-              const bad = compareTable(returned, step.dataTable).filter((d) => !d.ok)
-              if (bad.length > 0) throw new CellMismatchError(bad)
-            } else if (step.docString) {
-              const diff = compareDocString(returned, step.docString.content, step.docString.span)
-              if (diff) throw new DocStringMismatchError(diff)
+            // Dispatch on the step's role. Only `sensor` compares a return
+            // value; `context`/`action` must not return; an unknown kind is a
+            // wiring bug.
+            const kind = step.stepDef.kind
+            if (kind === 'context' || kind === 'action') {
+              if (returned !== undefined) {
+                throw new ReturnShapeError(
+                  'a context/action step must not return a value; only sensor() returns for comparison',
+                )
+              }
+            } else if (kind === 'sensor') {
+              // Header-bound rows are compared after the loop via ex.rowChecks;
+              // skip the tuple contract for them (they return a row object).
+              if (!ex.rowChecks && returned !== undefined) {
+                if (!Array.isArray(returned)) {
+                  throw new ReturnShapeError(
+                    `a sensor must return a tuple of its arguments after ctx, got ${typeof returned}`,
+                  )
+                }
+                const expectedLen = step.args.length + extra.length
+                if (returned.length !== expectedLen) {
+                  throw new ReturnShapeError(
+                    `sensor return must have ${expectedLen} element(s), got ${returned.length}`,
+                  )
+                }
+                // Inline parameters: returned[0..args.length) vs captured args.
+                const inlineReturned = returned.slice(0, step.args.length)
+                const sourceTexts = step.paramSpans.map((s) =>
+                  plan.varDoc.source.slice(s.startOffset, s.endOffset),
+                )
+                const paramDiffs = compareParams(
+                  inlineReturned,
+                  step.args,
+                  step.paramSpans,
+                  sourceTexts,
+                ).filter((d) => !d.ok)
+                if (paramDiffs.length > 0) throw new CellMismatchError(paramDiffs)
+                // Trailing table / doc string: the extra, if any, is at
+                // index step.args.length in the returned tuple.
+                if (step.dataTable) {
+                  const bad = compareTable(returned[step.args.length], step.dataTable).filter(
+                    (d) => !d.ok,
+                  )
+                  if (bad.length > 0) throw new CellMismatchError(bad)
+                } else if (step.docString) {
+                  const diff = compareDocString(
+                    returned[step.args.length],
+                    step.docString.content,
+                    step.docString.span,
+                  )
+                  if (diff) throw new DocStringMismatchError(diff)
+                }
+              }
+            } else {
+              throw new ReturnShapeError(`unknown step kind: ${String(kind)}`)
             }
           } catch (err) {
             const augmented = augmentStack(err, step, path)

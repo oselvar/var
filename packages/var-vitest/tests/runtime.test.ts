@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, test } from 'vitest'
-import { _resetBuilder, step } from '../src/api.js'
+import { _resetBuilder, action } from '../src/api.js'
 import { runVarSource } from '../src/runtime.js'
 
 beforeEach(() => _resetBuilder())
@@ -7,10 +7,10 @@ afterEach(() => _resetBuilder())
 
 test('runVarSource emits one sink.example call per BDD example, executes its handlers', async () => {
   const calls: string[] = []
-  step('I have {int} cukes', (_ctx, n) => {
+  action('I have {int} cukes', (_ctx, n) => {
     calls.push(`have:${n as number}`)
   })
-  step('I eat {int}', (_ctx, n) => {
+  action('I eat {int}', (_ctx, n) => {
     calls.push(`eat:${n as number}`)
   })
 

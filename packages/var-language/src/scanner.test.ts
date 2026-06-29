@@ -9,6 +9,7 @@ describe('buildWorkspaceIndex scanner injection', () => {
         {
           file: 's.steps.ts',
           expression: 'I greet {string}',
+          kind: 'action' as const,
           expressionRange: { start: { line: 1, character: 1 }, end: { line: 1, character: 10 } },
           callRange: { start: { line: 1, character: 1 }, end: { line: 1, character: 10 } },
         },

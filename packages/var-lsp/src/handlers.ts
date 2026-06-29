@@ -2,7 +2,9 @@ import {
   diffExpressions,
   expressionSegments,
   generateSnippet,
+  inferStepRole,
   renderExpression,
+  type StepKind,
 } from '@oselvar/var'
 import type { MatchRef } from '@oselvar/var-language'
 import type { Store } from './store.js'
@@ -127,7 +129,11 @@ type Handlers = {
   hover(params: HoverParams): HoverResult
   definition(params: DefinitionParams): DefinitionResult
   diagnosticsFor(uri: string): ReadonlyArray<Diagnostic>
-  generateSnippet(text: string): SnippetResult
+  generateSnippet(params: {
+    readonly text: string
+    readonly uri?: string
+    readonly position?: Position
+  }): SnippetResult
   stepGlobs(): ReadonlyArray<string>
   stepAt(params: HoverParams): StepAtResult
   renameStep(params: RenameStepParams): RenameStepResult
@@ -174,11 +180,23 @@ export function buildHandlers(store: Store): Handlers {
           range: d.range,
         }))
     },
-    generateSnippet(text) {
+    generateSnippet({ text, uri, position }) {
       // Use the live index registry so custom parameter types declared in
       // *.steps.ts surface in the generated expression.
+      // When both uri and position are supplied, infer the role from the
+      // neighbouring matched steps in the same file. The lookup is file-scoped:
+      // the workspace index does not expose example/heading boundaries, so steps
+      // from other examples in the same .var.md are included. That is an
+      // accepted approximation — inferStepRole inspects only presence/emptiness
+      // and first action/sensor, and the snippet always offers the other roles
+      // commented out, so a wrong guess is one keystroke to fix.
+      const role =
+        uri !== undefined && position !== undefined
+          ? inferStepRole(neighbourRolesForSelection(store, uri, position))
+          : undefined
       const snippet = generateSnippet(text, store.index().registry, {
         template: store.snippetTemplate(),
+        ...(role !== undefined ? { role } : {}),
       })
       return { fullCode: snippet.fullCode, expression: snippet.expression }
     },
@@ -422,6 +440,44 @@ function contains(range: { start: Position; end: Position }, position: Position)
   if (position.line === range.start.line && position.character < range.start.character) return false
   if (position.line === range.end.line && position.character > range.end.character) return false
   return true
+}
+
+// Returns the StepKind of matched steps strictly before and strictly after
+// `position` (0-based LSP) in the given .var.md file.
+function neighbourRolesForSelection(
+  store: Store,
+  uri: string,
+  position: Position,
+): { readonly before: ReadonlyArray<StepKind>; readonly after: ReadonlyArray<StepKind> } {
+  const path = uriToPath(uri)
+  // Convert 0-based LSP position to 1-based workspace-index position.
+  const pos: Position = { line: position.line + 1, character: position.character + 1 }
+  const fileMatches = store
+    .index()
+    .matches.filter((m) => m.varPath === path)
+    .slice()
+    .sort((a, b) =>
+      a.range.start.line !== b.range.start.line
+        ? a.range.start.line - b.range.start.line
+        : a.range.start.character - b.range.start.character,
+    )
+  const before: StepKind[] = []
+  const after: StepKind[] = []
+  for (const m of fileMatches) {
+    if (posLt(m.range.end, pos)) {
+      before.push(m.stepDef.kind)
+    } else if (posLt(pos, m.range.start)) {
+      after.push(m.stepDef.kind)
+    }
+    // A match that contains pos is neither (shouldn't happen for an unmatched selection).
+  }
+  return { before, after }
+}
+
+// Returns true if position `a` is strictly before position `b`.
+function posLt(a: Position, b: Position): boolean {
+  if (a.line !== b.line) return a.line < b.line
+  return a.character < b.character
 }
 
 function resolveStepAt(store: Store, uri: string, position: Position): StepAtResult {

@@ -1,3 +1,3 @@
-import { step } from '@oselvar/var-runtime'
+import { action } from '@oselvar/var-runtime'
 
-step('I greet {string}', () => {})
+action('I greet {string}', () => {})

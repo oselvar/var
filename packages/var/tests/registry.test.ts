@@ -72,3 +72,24 @@ test('addStep throws on duplicate expressions, listing both source positions', (
     }),
   ).toThrow(/duplicate step definition.+a\.ts:3.+b\.ts:9/)
 })
+
+test('addStep carries the step kind through to the registration', () => {
+  const r = addStep(createRegistry(), {
+    expression: 'I greet {string}',
+    expressionSourceFile: 'a.steps.ts',
+    expressionSourceLine: 1,
+    handler: () => {},
+    kind: 'sensor',
+  })
+  expect(r.steps[0]?.kind).toBe('sensor')
+})
+
+test('kind is optional (legacy step path)', () => {
+  const r = addStep(createRegistry(), {
+    expression: 'I greet {string}',
+    expressionSourceFile: 'a.steps.ts',
+    expressionSourceLine: 1,
+    handler: () => {},
+  })
+  expect(r.steps[0]?.kind).toBeUndefined()
+})

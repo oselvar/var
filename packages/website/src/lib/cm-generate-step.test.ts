@@ -15,29 +15,29 @@ function apply(doc: string, change: { from: number; to: number; insert: string }
   return doc.slice(0, change.from) + change.insert + doc.slice(change.to)
 }
 
-const BLOCK = "step('I greet {string}', (ctx, user: string) => {\n})\n"
+const BLOCK = "action('I greet {string}', (ctx, user: string) => {\n})\n"
 
 describe('appendStepDef', () => {
   it('appends to an empty document with no leading separator', () => {
     const { changes, from, to } = appendStepDef('', BLOCK)
     const result = apply('', changes as { from: number; to: number; insert: string })
-    expect(result).toBe("step('I greet {string}', (ctx, user: string) => {\n})\n")
+    expect(result).toBe("action('I greet {string}', (ctx, user: string) => {\n})\n")
     expect(result.slice(from, to)).toBe(BLOCK.trim())
   })
 
   it('separates from existing content with exactly one blank line', () => {
-    const existing = "step('a', (ctx) => {\n})\n"
+    const existing = "action('a', (ctx) => {\n})\n"
     const { changes, from, to } = appendStepDef(existing, BLOCK)
     const result = apply(existing, changes as { from: number; to: number; insert: string })
-    expect(result).toBe(`step('a', (ctx) => {\n})\n\n${BLOCK.trim()}\n`)
+    expect(result).toBe(`action('a', (ctx) => {\n})\n\n${BLOCK.trim()}\n`)
     expect(result.slice(from, to)).toBe(BLOCK.trim())
   })
 
   it('normalises an existing trailing blank-line run to a single separator', () => {
-    const existing = "step('a', (ctx) => {\n})\n\n\n"
+    const existing = "action('a', (ctx) => {\n})\n\n\n"
     const { changes, from, to } = appendStepDef(existing, BLOCK)
     const result = apply(existing, changes as { from: number; to: number; insert: string })
-    expect(result).toBe(`step('a', (ctx) => {\n})\n\n${BLOCK.trim()}\n`)
+    expect(result).toBe(`action('a', (ctx) => {\n})\n\n${BLOCK.trim()}\n`)
     expect(result.slice(from, to)).toBe(BLOCK.trim())
   })
 
@@ -66,12 +66,12 @@ function editor(doc: string, selection?: { anchor: number; head: number }) {
 }
 
 describe('runGenerateStepDef', () => {
-  const generate = (text: string) =>
-    Promise.resolve({ fullCode: `step('${text}', (ctx) => {\n})\n`, expression: text })
+  const generate = (text: string, _position?: { line: number; character: number }) =>
+    Promise.resolve({ fullCode: `action('${text}', (ctx) => {\n})\n`, expression: text })
 
   it('returns null and does not touch the steps view when the selection is empty', async () => {
     const spec = editor('I greet world', { anchor: 3, head: 3 })
-    const steps = editor("step('a', (ctx) => {\n})\n")
+    const steps = editor("action('a', (ctx) => {\n})\n")
     const before = steps.state.doc.toString()
     const result = await runGenerateStepDef({ specView: spec, stepsView: steps, generate })
     expect(result).toBeNull()
@@ -80,12 +80,12 @@ describe('runGenerateStepDef', () => {
 
   it('appends the generated snippet and selects the inserted block', async () => {
     const spec = editor('I greet world', { anchor: 2, head: 7 }) // selects "greet"
-    const steps = editor("step('a', (ctx) => {\n})\n")
+    const steps = editor("action('a', (ctx) => {\n})\n")
     const result = await runGenerateStepDef({ specView: spec, stepsView: steps, generate })
     expect(result).not.toBeNull()
     const doc = steps.state.doc.toString()
-    expect(doc).toContain("step('greet', (ctx) => {")
-    expect(doc.slice(result!.from, result!.to)).toBe("step('greet', (ctx) => {\n})")
+    expect(doc).toContain("action('greet', (ctx) => {")
+    expect(doc.slice(result!.from, result!.to)).toBe("action('greet', (ctx) => {\n})")
     const sel = steps.state.selection.main
     expect([sel.from, sel.to]).toEqual([result!.from, result!.to])
     expect(result!.expression).toBe('greet')

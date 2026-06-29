@@ -116,7 +116,14 @@ function registerGenerateStepDefinition(
     const [snippet, stepGlobs] = await Promise.all([
       lspClient.sendRequest<{ readonly fullCode: string; readonly expression: string }>(
         'var/generateSnippet',
-        { text },
+        {
+          text,
+          uri: editor.document.uri.toString(),
+          position: {
+            line: editor.selection.start.line,
+            character: editor.selection.start.character,
+          },
+        },
       ),
       lspClient.sendRequest<ReadonlyArray<string>>('var/stepGlobs'),
     ])
@@ -241,7 +248,7 @@ function registerStepRename(
         position: { line: position.line, character: position.character },
       })
       if (!at) {
-        throw new Error('Place the cursor on a matched step or a step() expression first.')
+        throw new Error('Place the cursor on a matched step or a context()/action()/sensor() expression first.')
       }
       // What VSCode pre-fills the inline editor with:
       //   - in .var.md: the matched substring (a sentence)

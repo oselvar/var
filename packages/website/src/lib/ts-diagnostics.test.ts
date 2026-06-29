@@ -14,7 +14,7 @@ describe('ts-diagnostics', () => {
     const ts = createTsDiagnostics()
     ts.updateDoc(
       'b.steps.ts',
-      `import { defineContext } from '@oselvar/var-runtime'\nconst { step } = defineContext(() => ({ greeting: '' }))\nstep('I greet {string}', (ctx, name) => { ctx.greeting = name })\n`,
+      `import { defineState } from '@oselvar/var-runtime'\nconst { action } = defineState(() => ({ greeting: '' }))\naction('I greet {string}', (ctx, name) => { ctx.greeting = name })\n`,
     )
     const d = ts.diagnostics('b.steps.ts')
     expect(d.find((x) => /Cannot find module/.test(x.message))).toBeUndefined()

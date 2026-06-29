@@ -22,6 +22,8 @@ export {
   isCellMismatchError,
   ReturnShapeError,
 } from './cell-diff.js'
+export { compareParams } from './param-diff.js'
+export { deepEqual } from './deep-equal.js'
 export type { VarConfig } from './config-types.js'
 export type {
   BundleArtifacts,
@@ -69,6 +71,8 @@ export type { ExecutionPlan, PlannedExample, PlannedStep } from './plan.js'
 export { plan } from './plan.js'
 export { gherkinDocStrings, gherkinTables } from './plugins/gherkin/index.js'
 export type { Reporter, TestSink } from './ports.js'
+export type { StepKind } from './step-role.js'
+export { inferStepRole } from './step-role.js'
 export type {
   ParameterTypeInput,
   Registry,

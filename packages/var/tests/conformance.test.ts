@@ -63,6 +63,7 @@ test('toRegistryArtifact lists expressions and parsed parameter-type names', () 
     expression: 'I have {int} cukes',
     expressionSourceFile: 's.ts',
     expressionSourceLine: 1,
+    kind: 'action',
     handler: () => {},
   })
   expect(toRegistryArtifact(r)).toEqual({
@@ -76,6 +77,7 @@ test('toPlanArtifact projects examples, expectedOutcome and stringified args', (
     expression: 'I have {int} cukes',
     expressionSourceFile: 's.ts',
     expressionSourceLine: 1,
+    kind: 'action',
     handler: () => {},
   })
   const art = toPlanArtifact(plan(parse('e.var.md', '# A\n\nI have 5 cukes.'), r))
@@ -96,12 +98,14 @@ test('toPlanArtifact projects diagnostics to portable fields (no message/path)',
     expression: 'I have {int} cukes',
     expressionSourceFile: '/abs/s.ts',
     expressionSourceLine: 1,
+    kind: 'action',
     handler: () => {},
   })
   r = addStep(r, {
     expression: 'I have 5 cukes',
     expressionSourceFile: '/abs/s.ts',
     expressionSourceLine: 2,
+    kind: 'action',
     handler: () => {},
   })
   const art = toPlanArtifact(plan(parse('e.var.md', '# A\n\nI have 5 cukes.'), r))
@@ -116,6 +120,7 @@ test('runConformance: passing example yields pass steps with structural contextK
     expression: 'I have {int} cukes',
     expressionSourceFile: '/abs/s.ts',
     expressionSourceLine: 1,
+    kind: 'action',
     handler: () => {},
   })
   const out = await runConformance(parse('e.var.md', '# A\n\nI have 5 cukes.'), r, () => ({}))
@@ -140,6 +145,7 @@ test('runConformance: expected-failure example reads pass but the step carries t
     expression: 'I divide {int} by {int}',
     expressionSourceFile: '/abs/s.ts',
     expressionSourceLine: 1,
+    kind: 'action',
     handler: (_c, _a, b) => {
       if (b === 0) throw new Error('division by zero')
     },

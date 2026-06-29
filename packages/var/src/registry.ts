@@ -3,8 +3,9 @@ import {
   ParameterType,
   ParameterTypeRegistry,
 } from '@cucumber/cucumber-expressions'
+import type { StepKind } from './step-role.js'
 
-export type StepHandler = (ctx: unknown, ...args: ReadonlyArray<unknown>) => void | Promise<void>
+export type StepHandler = (ctx: unknown, ...args: ReadonlyArray<unknown>) => unknown | Promise<unknown>
 
 export type StepRegistration = {
   readonly expression: string
@@ -12,6 +13,7 @@ export type StepRegistration = {
   readonly expressionSourceLine: number
   readonly handler: StepHandler
   readonly compiled: CucumberExpression
+  readonly kind?: StepKind
 }
 
 export type Registry = {

@@ -22,7 +22,7 @@ describe('var run', () => {
     expect(r.stdout).toContain('hello.var.md')
     expect(r.stdout).toMatch(/✓ When I greet "Aslak"/)
     expect(r.stdout).toMatch(/✗ When I greet "world"/)
-    expect(r.stdout).toContain('expected wrong, got Hello, world!')
+    expect(r.stdout).toMatch(/expected "wrong" but was Hello, world!/)
     expect(r.stdout).toMatch(/2 examples, 1 passed, 1 failed/)
     expect(r.status).toBe(1)
   })

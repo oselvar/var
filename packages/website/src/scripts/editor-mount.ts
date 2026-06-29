@@ -108,8 +108,8 @@ function mountEditor(el: HTMLElement): EditorView {
   if (lang === 'markdown') {
     ext.push(varRunExtension())
     if (el.dataset.define !== 'false') {
-      const generate: GenerateSnippet = (text) =>
-        client.request('var/generateSnippet', { text }) as Promise<{
+      const generate: GenerateSnippet = (text, position) =>
+        client.request('var/generateSnippet', { text, uri, position }) as Promise<{
           fullCode: string
           expression: string
         }>

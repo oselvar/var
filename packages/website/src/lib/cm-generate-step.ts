@@ -53,7 +53,10 @@ export type EditorLike = {
   focus?: () => void
 }
 
-export type GenerateSnippet = (text: string) => Promise<{ fullCode: string; expression: string }>
+export type GenerateSnippet = (
+  text: string,
+  position?: { line: number; character: number },
+) => Promise<{ fullCode: string; expression: string }>
 
 // Carries the range to flash after an insert (null clears it).
 export const flashRange = StateEffect.define<{ from: number; to: number } | null>()
@@ -66,7 +69,11 @@ export async function runGenerateStepDef(opts: {
   const sel = opts.specView.state.selection.main
   if (sel.empty) return null
   const text = opts.specView.state.sliceDoc(sel.from, sel.to)
-  const { fullCode, expression } = await opts.generate(text)
+  // Derive the 0-based LSP position of the selection start so the server can
+  // infer the step role from the surrounding matched steps.
+  const line = opts.specView.state.doc.lineAt(sel.from)
+  const position = { line: line.number - 1, character: sel.from - line.from }
+  const { fullCode, expression } = await opts.generate(text, position)
   const { changes, from, to } = appendStepDef(opts.stepsView.state.doc.toString(), fullCode)
   opts.stepsView.dispatch({
     changes,
