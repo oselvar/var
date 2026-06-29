@@ -1,0 +1,11 @@
+{
+  "parameterTypes": [],
+  "steps": [
+    {
+      "expression": "I have {int} cukes",
+      "parameterTypeNames": [
+        "int"
+      ]
+    }
+  ]
+}

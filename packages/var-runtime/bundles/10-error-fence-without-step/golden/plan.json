@@ -1,0 +1,17 @@
+{
+  "diagnostics": [
+    {
+      "code": "error-fence-without-step",
+      "severity": "error",
+      "span": {
+        "endCol": 4,
+        "endLine": 7,
+        "endOffset": 54,
+        "startCol": 1,
+        "startLine": 5,
+        "startOffset": 37
+      }
+    }
+  ],
+  "examples": []
+}

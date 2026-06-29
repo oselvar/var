@@ -1,6 +1,6 @@
 import type { Block, Fence, InlineOffset, Table, VarDoc } from './ast.js'
 import type { RowCheck } from './cell-diff.js'
-import { ambiguousMatch, type Diagnostic } from './diagnostics.js'
+import { ambiguousMatch, type Diagnostic, errorFenceWithoutStep } from './diagnostics.js'
 import { findHits, type Hit, resolveHits } from './matcher.js'
 import type { Registry, StepRegistration } from './registry.js'
 import { splitSentences } from './sentences.js'
@@ -177,15 +177,25 @@ export function plan(varDoc: VarDoc, registry: Registry): ExecutionPlan {
       }
     })
 
+    const runnableSteps = hadAmbiguous ? [] : finalSteps
+
+    // An `error` fence declares the example expected-to-fail, but here there's
+    // no runnable step to produce that failure (nothing matched, or the match
+    // was ambiguous). That's an author mistake, not silent Markdown — flag it.
+    if (errorFence && runnableSteps.length === 0) {
+      diagnostics.push(errorFenceWithoutStep({ span: errorFence.span }))
+    }
+
     if (finalSteps.length === 0 && !hadAmbiguous) {
-      // Example has no matches and no diagnostics — drop it (docs).
+      // Example has no matches — drop it (docs). Any `error`-fence mistake was
+      // already reported just above.
       continue
     }
     examples.push({
       name: deriveExampleName(ex.body),
       scopeStack: ex.scopeStack,
       span: ex.span,
-      steps: hadAmbiguous ? [] : finalSteps,
+      steps: runnableSteps,
       ...(errorFence
         ? {
             expectedOutcome: 'fail' as const,

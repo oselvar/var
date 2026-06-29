@@ -1,0 +1,164 @@
+{
+  "examples": [
+    {
+      "body": [
+        {
+          "inlineMap": [
+            {
+              "sourceOffset": 8,
+              "textOffset": 0
+            },
+            {
+              "sourceOffset": 9,
+              "textOffset": 1
+            },
+            {
+              "sourceOffset": 10,
+              "textOffset": 2
+            },
+            {
+              "sourceOffset": 11,
+              "textOffset": 3
+            },
+            {
+              "sourceOffset": 12,
+              "textOffset": 4
+            },
+            {
+              "sourceOffset": 13,
+              "textOffset": 5
+            },
+            {
+              "sourceOffset": 14,
+              "textOffset": 6
+            },
+            {
+              "sourceOffset": 15,
+              "textOffset": 7
+            },
+            {
+              "sourceOffset": 16,
+              "textOffset": 8
+            },
+            {
+              "sourceOffset": 17,
+              "textOffset": 9
+            },
+            {
+              "sourceOffset": 18,
+              "textOffset": 10
+            },
+            {
+              "sourceOffset": 19,
+              "textOffset": 11
+            },
+            {
+              "sourceOffset": 20,
+              "textOffset": 12
+            },
+            {
+              "sourceOffset": 21,
+              "textOffset": 13
+            },
+            {
+              "sourceOffset": 22,
+              "textOffset": 14
+            },
+            {
+              "sourceOffset": 23,
+              "textOffset": 15
+            },
+            {
+              "sourceOffset": 24,
+              "textOffset": 16
+            },
+            {
+              "sourceOffset": 25,
+              "textOffset": 17
+            },
+            {
+              "sourceOffset": 26,
+              "textOffset": 18
+            },
+            {
+              "sourceOffset": 27,
+              "textOffset": 19
+            },
+            {
+              "sourceOffset": 28,
+              "textOffset": 20
+            },
+            {
+              "sourceOffset": 29,
+              "textOffset": 21
+            },
+            {
+              "sourceOffset": 30,
+              "textOffset": 22
+            },
+            {
+              "sourceOffset": 31,
+              "textOffset": 23
+            },
+            {
+              "sourceOffset": 32,
+              "textOffset": 24
+            },
+            {
+              "sourceOffset": 33,
+              "textOffset": 25
+            },
+            {
+              "sourceOffset": 34,
+              "textOffset": 26
+            }
+          ],
+          "kind": "paragraph",
+          "span": {
+            "endCol": 28,
+            "endLine": 3,
+            "endOffset": 35,
+            "startCol": 1,
+            "startLine": 3,
+            "startOffset": 8
+          },
+          "text": "This prose matches nothing."
+        },
+        {
+          "body": "boom\n",
+          "bodySpan": {
+            "endCol": 1,
+            "endLine": 7,
+            "endOffset": 51,
+            "startCol": 1,
+            "startLine": 6,
+            "startOffset": 46
+          },
+          "info": "error",
+          "kind": "fence",
+          "span": {
+            "endCol": 4,
+            "endLine": 7,
+            "endOffset": 54,
+            "startCol": 1,
+            "startLine": 5,
+            "startOffset": 37
+          }
+        }
+      ],
+      "scopeStack": [
+        "Nope"
+      ],
+      "span": {
+        "endCol": 4,
+        "endLine": 7,
+        "endOffset": 54,
+        "startCol": 1,
+        "startLine": 3,
+        "startOffset": 8
+      }
+    }
+  ],
+  "orphanAttachments": [],
+  "path": "example.var.md"
+}

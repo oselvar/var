@@ -408,6 +408,44 @@ test('no `error` fence leaves expectedOutcome undefined', () => {
   expect(ex?.expectedOutcome).toBeUndefined()
 })
 
+test('an `error` fence with no matching step emits an error-fence-without-step diagnostic', () => {
+  // The prose matches no step, so the expected-failure can never run.
+  const r = addStep(createRegistry(), {
+    expression: 'I divide {int} by {int}',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    kind: 'action',
+    handler: () => {},
+  })
+  const src = '# Nope\n\nThis prose matches nothing.\n\n```error\nboom\n```\n'
+  const result = plan(parse('e.var.md', src), r)
+  expect(result.examples).toHaveLength(0)
+  expect(result.diagnostics).toHaveLength(1)
+  expect(result.diagnostics[0]?.code).toBe('error-fence-without-step')
+})
+
+test('an `error` fence on an ambiguous example emits both diagnostics', () => {
+  let r = createRegistry()
+  r = addStep(r, {
+    expression: 'I divide {int} by {int}',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    kind: 'action',
+    handler: () => {},
+  })
+  r = addStep(r, {
+    expression: 'I divide 1 by 0',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 2,
+    kind: 'action',
+    handler: () => {},
+  })
+  const src = '# Ambiguous\n\nI divide 1 by 0.\n\n```error\nboom\n```\n'
+  const result = plan(parse('e.var.md', src), r)
+  const codes = result.diagnostics.map((d) => d.code).sort()
+  expect(codes).toEqual(['ambiguous-match', 'error-fence-without-step'])
+})
+
 test('a doc-string step carries the fence body span on its plan', () => {
   const r = addStep(createRegistry(), {
     expression: 'the payload is',
