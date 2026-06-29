@@ -10,8 +10,8 @@
   --ax-radius-12: 0;
   --radius-5: 0;
 
-  /* Legacy brand names still used by FileEditor + the CodeMirror theme files.
-     They resolve to the mode-aware tokens defined below. */
+  /* Legacy brand names still used by the Editor window chrome + the CodeMirror
+     theme files. They resolve to the mode-aware tokens defined below. */
   --cream: var(--ax-bg-default);
   --ink: var(--ax-text-default);
   --orange: var(--var-accent);

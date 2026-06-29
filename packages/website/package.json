@@ -26,7 +26,6 @@
     "@lezer/highlight": "^1.2.3",
     "@navikt/ds-css": "^8.14.0",
     "@oselvar/var": "workspace:*",
-    "@oselvar/var-language": "workspace:*",
     "@oselvar/var-lsp": "workspace:*",
     "@oselvar/var-runtime": "workspace:*",
     "astro-pagefind": "^2.0.0",

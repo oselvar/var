@@ -3,9 +3,10 @@
 // https://aksel.nav.no/komponenter/core/copybutton
 //
 // Rendered once per docs page. The script enhances every <pre> inside
-// `.doc-body` (skipping the FileEditor code windows) with a copy button that
-// follows the Aksel CopyButton behaviour: a Files icon that swaps to a
-// Checkmark + "Copied!" label for 2s after a successful copy.
+// `.doc-body` with a copy button that follows the Aksel CopyButton behaviour:
+// a Files icon that swaps to a Checkmark + "Copied!" label for 2s after a
+// successful copy. (Live CodeMirror editors render a contenteditable div, not a
+// <pre>, so they are never matched.)
 ---
 
 <template id="copybtn-template">
@@ -84,9 +85,6 @@
     const blocks = document.querySelectorAll<HTMLPreElement>('.doc-body pre:not([data-copy])')
     for (const pre of blocks) {
       pre.setAttribute('data-copy', '')
-      // Skip the FileEditor code windows — only real fenced code blocks.
-      if (pre.closest('.file-editor')) continue
-
       const wrap = document.createElement('div')
       wrap.className = 'code-block'
       pre.parentNode?.insertBefore(wrap, pre)
