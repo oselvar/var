@@ -4,15 +4,6 @@ import yahtzeeSteps from '../../../../docs/tutorial/steps/04-yahtzee.steps.ts?ra
 import Editor from '../components/Editor.astro'
 import Base from '../layouts/Base.astro'
 
-const quotes = [
-  'Move over vibeslop, here comes Vár',
-  'BDD without the BS',
-  'Like therapy for your test suite',
-  'Specs you’d actually read',
-  'Plain English in, working tests out',
-  'Your team’s shared brain, in markdown',
-]
-
 const base = import.meta.env.BASE_URL.replace(/\/$/, '')
 ---
 
@@ -20,7 +11,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '')
   title="Vár — Behaviour-Driven Development that doesn’t make you cry"
   description="Vár turns plain-English examples into runnable specs. Discover misunderstandings, clear your head."
 >
-  <main class="landing max-w-[70rem] mx-auto px-12 pt-20 pb-20">
+  <main class="landing max-w-280 mx-auto px-12 pt-20 pb-20">
     <section class="text-center pt-12 pb-6">
       <div class="flex items-center justify-center gap-[clamp(12px,3vw,40px)]">
         <img class="h-[clamp(72px,16vw,200px)] w-auto" src={`${base}/logo2-transparent.png`} alt="Vár logo" />
@@ -31,48 +22,22 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '')
     </section>
 
     <section class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-10 items-start pt-6 pb-12 max-[880px]:grid-cols-1 max-[880px]:gap-6" aria-label="What Vár is, and a live example">
-      <div class="text-center">
-        <p class="max-w-[42rem] mt-4 mx-auto text-center text-[17px] text-subtle">
-          Vár hard-wires your documentation to your software.
-          When they go out of sync, you'll know.
+      <div>
+        <p class="max-w-2xl mt-4 mx-auto text-[17px]">
+          The documentation is both <a href="#">guide and sensor</a> for humans and agents.
         </p>
 
-        <p class="max-w-[42rem] mt-4 mx-auto text-center text-[17px] text-subtle">
-          The documentation is both <a href="#">signal</a> and <a href="#">sensor</a> for programmers and coding agents.
+        <p class="max-w-2xl mt-4 mx-auto text-[17px]">
+          Vár senses when your softare and documentation go out of sync.
         </p>
 
-        <p class="max-w-[42rem] mt-4 mx-auto text-center text-[17px] text-subtle">
-          <pre class="mt-4 text-[clamp(11px,1.6vw,14px)] overflow-x-auto">
-      ----signal---&gt;
-[documentation]      [software]
-      &lt;---sensor---
-          </pre>
-        </p>
-
-        <p class="max-w-[42rem] mt-4 mx-auto text-center text-[17px] text-subtle">
-          This is different from how it's usually done.
-        </p>
-
-        <p class="max-w-[42rem] mt-4 mx-auto text-center text-[17px] text-subtle">
-          <pre class="mt-4 text-[clamp(11px,1.6vw,14px)] overflow-x-auto">DRIFT
-        [specifications] ----signal---&gt;
-        [documentation] --describes--&gt; [software]
-        [tests]     &lt;-------sensor-----
-          </pre>
+        <p class="max-w-2xl mt-4 mx-auto text-center text-[17px] text-subtle">
+          <img class="h-[clamp(72px,16vw,200px)] w-auto" src={`${base}/guide-sensor.svg`} alt="Vár logo" />
         </p>
       </div>
 
       <section class="p-0" aria-label="See it live">
-        <h2 class="font-sans font-semibold text-2xl tracking-[0.02em] mb-3 text-center">the same five dice, five different scores</h2>
-        <p class="max-w-[42rem] mx-auto mb-6 text-center text-[17px] text-subtle">
-          This isn't a screenshot — it's a runnable spec. The table reads like a
-          Yahtzee scoresheet, yet every row is a precise, independent test. Change a
-          die and watch a single row turn red.
-        </p>
-        <Editor uri="file:///yahtzee.md">{yahtzeeSpec}</Editor>
-        <div class="absolute left-[-99999px] top-0 w-[700px]" aria-hidden="true">
-          <Editor uri="file:///yahtzee.steps.ts" lineNumbers folding>{yahtzeeSteps}</Editor>
-        </div>
+        <Editor uri="file:///yahtzee.md" steps={[{path: "file:///yahtzee.steps.ts", source: yahtzeeSteps}]}>{yahtzeeSpec}</Editor>
         <p class="text-center mt-4"><a class="text-ink underline decoration-accent" href={`${base}/playground`}>Open it in the playground →</a></p>
       </section>
     </section>
@@ -80,34 +45,6 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '')
     <section class="flex flex-wrap gap-4 items-center justify-center mt-2 mb-6" aria-label="Get started">
       <a class="bg-strong text-accent-contrast rounded-none px-6 py-3 font-semibold no-underline hover:bg-strong-hover" href={`${base}/docs/start-here/hello-var-your-first-spec`}>Get started →</a>
       <a class="text-ink underline decoration-accent hover:text-ink" href={`${base}/docs/`}>Browse docs</a>
-    </section>
-
-    <section class="grid grid-cols-2 gap-6 py-12 max-[720px]:grid-cols-1" aria-label="What Vár gives you">
-      <article class="bg-raised border border-line-subtle rounded-none text-ink p-6">
-        <h2 class="font-sans font-semibold text-2xl tracking-[0.02em] mb-3">discover misunderstandings</h2>
-        <p class="m-0 text-[17px]">
-          Pin down what "done" means before anyone writes code. Vár turns plain-English
-          examples into runnable specs — the conversation becomes the test.
-        </p>
-      </article>
-      <article class="bg-raised border border-line-subtle rounded-none text-ink p-6">
-        <h2 class="font-sans font-semibold text-2xl tracking-[0.02em] mb-3">clear your head</h2>
-        <p class="m-0 text-[17px]">
-          Stop juggling intent in your head. Write the example, run it, and let the tests hold
-          the shape of the feature for you.
-        </p>
-      </article>
-    </section>
-
-    <section class="py-12 text-center" aria-label="Install">
-      <pre class="bg-raised border border-line-subtle rounded-none text-ink inline-block m-0 px-6 py-4 font-mono text-[17px] before:content-['$_'] before:text-accent"><code>pnpm add -D @oselvar/var-vitest</code></pre>
-    </section>
-
-    <section class="py-12" aria-label="Quotes">
-      <h2 class="font-sans font-semibold text-2xl tracking-[0.02em] text-center mb-8">word on the street</h2>
-      <ul class="list-none p-0 m-0 grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-4">
-        {quotes.map((q) => <li class="bg-raised border border-line-subtle rounded-none text-ink p-5 italic text-[18px] before:content-['“'] before:text-[36px] before:leading-[0] before:align-[-10px] before:mr-1 before:text-accent">{q}</li>)}
-      </ul>
     </section>
   </main>
 </Base>
