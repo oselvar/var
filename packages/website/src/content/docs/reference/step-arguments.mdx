@@ -6,7 +6,7 @@ order: 1
 ---
 
 import Editor from '../../../components/Editor.astro'
-import helloSteps from '../../../../../../docs/tutorial/steps/01-hello.steps.ts?raw'
+import helloSteps from '../../../../../var-examples/hello-var/hello-var.steps.ts?raw'
 
 # Step argument types
 
@@ -41,7 +41,7 @@ handler `(state, a, b)` where both `a` and `b` are `number`. Here is the whole
 `01-hello` step file — note that **no parameter is annotated** — running against
 its spec:
 
-<Editor uri="file:///hello.md" chrome lineNumbers folding group="step-arguments" steps={[{ path: '01-hello.steps.ts', source: helloSteps }]}>{`
+<Editor uri="file:///hello.md" chrome lineNumbers folding group="step-arguments" steps={[{ path: 'hello-var.steps.ts', source: helloSteps }]}>{`
 # Hello, Vár
 
 First I greet "world" okay? I think the greeting should be "Hello, world!"

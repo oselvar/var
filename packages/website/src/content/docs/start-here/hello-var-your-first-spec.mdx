@@ -6,7 +6,7 @@ order: 1
 ---
 
 import Editor from '../../../components/Editor.astro'
-import helloSteps from '../../../../../../docs/tutorial/steps/01-hello.steps.ts?raw'
+import helloSteps from '../../../../../var-examples/hello-var/hello-var.steps.ts?raw'
 
 # Hello Vár: your first punishment
 
@@ -37,7 +37,7 @@ content, and you have a spec.
 
 Add this to a new file:
 
-<Editor uri="file:///hello.md" chrome lineNumbers folding group="hello-var-tutorial" steps={[{ path: '01-hello.steps.ts', source: helloSteps }]}>{`
+<Editor uri="file:///hello.md" chrome lineNumbers folding group="hello-var-tutorial" steps={[{ path: 'hello-var.steps.ts', source: helloSteps }]}>{`
 # Hello, Vár
 Run \`pnpm test\` and watch this file run as tests.
 

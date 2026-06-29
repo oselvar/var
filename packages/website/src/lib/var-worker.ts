@@ -5,9 +5,9 @@ import {
   BrowserMessageWriter,
   createConnection,
 } from 'vscode-languageserver/browser'
-import yahtzeeSpec from '../../../../docs/tutorial/04-yahtzee.md?raw'
-import helloSteps from '../../../../docs/tutorial/steps/01-hello.steps.ts?raw'
-import yahtzeeSteps from '../../../../docs/tutorial/steps/04-yahtzee.steps.ts?raw'
+import helloSteps from '../../../var-examples/hello-var/hello-var.steps.ts?raw'
+import yahtzeeSpec from '../../../var-examples/yahtzee/yahtzee.md?raw'
+import yahtzeeSteps from '../../../var-examples/yahtzee/yahtzee.steps.ts?raw'
 import { createIdbFileSystem } from './idb-file-system.ts'
 import { createTsDiagnostics } from './ts-diagnostics.ts'
 

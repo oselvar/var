@@ -1,9 +1,12 @@
 export default {
   vars: {
-    include: ['docs/tutorial/**/*.md'],
-    // 04-yahtzee.broken.md is a deliberately broken example; 05-roman-numerals
-    // is a not-implemented "your turn" exercise. Neither must run as a spec.
-    exclude: ['docs/tutorial/04-yahtzee.broken.md', 'docs/tutorial/05-roman-numerals.md'],
+    include: ['packages/var-examples/**/*.md'],
+    // yahtzee.broken.md is a deliberately broken example; roman-numerals is a
+    // not-implemented "your turn" exercise. Neither must run as a spec.
+    exclude: [
+      'packages/var-examples/yahtzee/yahtzee.broken.md',
+      'packages/var-examples/roman-numerals/roman-numerals.md',
+    ],
   },
-  steps: ['docs/tutorial/**/*.steps.ts'],
+  steps: ['packages/var-examples/**/*.steps.ts'],
 }

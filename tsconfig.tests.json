@@ -23,7 +23,6 @@
     "var.config.ts",
     "vitest.config.ts",
     "vitest.plugins.ts",
-    "docs/tutorial/vitest.config.ts",
     "packages/*/vitest.config.ts",
     "packages/*/var.config.ts"
   ]

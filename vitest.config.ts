@@ -7,7 +7,7 @@ const root = new URL('.', import.meta.url).pathname
 // Reporters are root-level in vitest 4 workspace mode — project reporters are ignored.
 export default defineConfig({
   test: {
-    projects: ['packages/*/vitest.config.ts', 'docs/tutorial/vitest.config.ts'],
+    projects: ['packages/*/vitest.config.ts'],
     reporters: ['default', new VarResultsReporter({ cwd: root })],
   },
 })

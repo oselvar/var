@@ -6,7 +6,7 @@ order: 2
 ---
 
 import Editor from '../../../components/Editor.astro'
-import yahtzeeSteps from '../../../../../../docs/tutorial/steps/04-yahtzee.steps.ts?raw'
+import yahtzeeSteps from '../../../../../var-examples/yahtzee/yahtzee.steps.ts?raw'
 
 # Tables
 
@@ -58,7 +58,7 @@ There is no new syntax — the opt-in *is* the prose naming its columns. Here th
 sentence mentions `dice`, `category`, and `score`, which are exactly the table's
 headers:
 
-<Editor uri="file:///yahtzee.md" chrome lineNumbers folding group="tables" steps={[{ path: '04-yahtzee.steps.ts', source: yahtzeeSteps }]}>{`
+<Editor uri="file:///yahtzee.md" chrome lineNumbers folding group="tables" steps={[{ path: 'yahtzee.steps.ts', source: yahtzeeSteps }]}>{`
 # Yahtzee
 
 Examples of dice, category and score:

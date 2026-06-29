@@ -33,18 +33,6 @@ importers:
         specifier: ^4.1.9
         version: 4.1.9(@types/node@26.0.1)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(yaml@2.9.0))
 
-  docs/tutorial:
-    devDependencies:
-      '@oselvar/var':
-        specifier: workspace:*
-        version: link:../../packages/var
-      '@oselvar/var-vitest':
-        specifier: workspace:*
-        version: link:../../packages/var-vitest
-      vitest:
-        specifier: ^4.1.9
-        version: 4.1.9(@types/node@26.0.1)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(yaml@2.9.0))
-
   packages/cucumber:
     devDependencies:
       '@cucumber/cucumber':
@@ -96,6 +84,18 @@ importers:
       '@cucumber/cucumber-expressions':
         specifier: ^20.0.0
         version: 20.0.0
+
+  packages/var-examples:
+    devDependencies:
+      '@oselvar/var':
+        specifier: workspace:*
+        version: link:../var
+      '@oselvar/var-vitest':
+        specifier: workspace:*
+        version: link:../var-vitest
+      vitest:
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@26.0.1)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(yaml@2.9.0))
 
   packages/var-language:
     dependencies:

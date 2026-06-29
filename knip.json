@@ -26,7 +26,7 @@
       "project": ["src/**/*.ts"],
       "ignoreDependencies": ["@oselvar/var-language", "@oselvar/var-lsp"]
     },
-    "docs/tutorial": {
+    "packages/var-examples": {
       "entry": ["**/*.md", "**/*.steps.ts"],
       "project": ["**/*.{ts,md}"]
     }
