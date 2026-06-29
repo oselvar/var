@@ -1,5 +1,5 @@
-import { defineState } from '@oselvar/var-runtime'
-import { _resetBuilder } from '@oselvar/var-runtime/registry'
+import { defineState } from '@oselvar/var'
+import { _resetBuilder } from '@oselvar/var/registry'
 import { afterEach, describe, expect, it } from 'vitest'
 import { runRegisteredSpec } from './run-spec.js'
 

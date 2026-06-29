@@ -12,7 +12,7 @@
     "packages/var-vitest": {
       "project": ["src/**/*.ts", "tests/**/*.ts"]
     },
-    "packages/var-runtime": {
+    "packages/var": {
       "entry": [
         "src/index.ts",
         "tests/**/*.test.ts",

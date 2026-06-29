@@ -1,4 +1,6 @@
-import { sensor } from '@oselvar/var-runtime'
+import { defineState } from '@oselvar/var'
+
+const { sensor } = defineState(() => ({}))
 
 // Header-bound row step: returns its computed columns; the core diffs them
 // against the row cells (rowChecks path). score 99 ≠ 10 → CellMismatchError → "cell-mismatch".

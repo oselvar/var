@@ -4,15 +4,6 @@ import yahtzeeSteps from '../../../../docs/tutorial/steps/04-yahtzee.steps.ts?ra
 import Editor from '../components/Editor.astro'
 import Base from '../layouts/Base.astro'
 
-const quotes = [
-  'Move over vibeslop, here comes Vár',
-  'BDD without the BS',
-  'Like therapy for your test suite',
-  'Specs you’d actually read',
-  'Plain English in, working tests out',
-  'Your team’s shared brain, in markdown',
-]
-
 const base = import.meta.env.BASE_URL.replace(/\/$/, '')
 ---
 
@@ -82,32 +73,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '')
       <a class="cta__secondary" href={`${base}/docs/`}>Browse docs</a>
     </section>
 
-    <section class="pitch" aria-label="What Vár gives you">
-      <article>
-        <h2>discover misunderstandings</h2>
-        <p>
-          Pin down what “done” means before anyone writes code. Vár turns plain-English
-          examples into runnable specs — the conversation becomes the test.
-        </p>
-      </article>
-      <article>
-        <h2>clear your head</h2>
-        <p>
-          Stop juggling intent in your head. Write the example, run it, and let the tests hold
-          the shape of the feature for you.
-        </p>
-      </article>
-    </section>
-
     <section class="install" aria-label="Install">
       <pre><code>pnpm add -D @oselvar/var-vitest</code></pre>
-    </section>
-
-    <section class="quotes" aria-label="Quotes">
-      <h2>word on the street</h2>
-      <ul>
-        {quotes.map((q) => <li>{q}</li>)}
-      </ul>
     </section>
   </main>
 </Base>

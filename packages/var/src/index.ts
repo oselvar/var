@@ -120,7 +120,7 @@ type DeepReadonly<T> = T extends (...args: never[]) => unknown
 // `name` without an annotation and without TS2345. It EVOLVES state by RETURNING
 // a partial state object (shallow-merged by the runtime) — or nothing, for no
 // change. It never mutates `state`.
-export type RoleFn<C = unknown, Custom = Record<never, never>> = <E extends string>(
+type RoleFn<C = unknown, Custom = Record<never, never>> = <E extends string>(
   expression: E,
   handler: (
     state: DeepReadonly<C>,
@@ -134,17 +134,10 @@ export type RoleFn<C = unknown, Custom = Record<never, never>> = <E extends stri
 // return shape is independent of the captured args — a by-index column tuple, a
 // header-bound row object, a whole reproduced table, or a doc-string tuple — so
 // `R` is inferred freely from the handler body. A sensor never changes state.
-export type SensorFn<C = unknown, Custom = Record<never, never>> = <E extends string, R>(
+type SensorFn<C = unknown, Custom = Record<never, never>> = <E extends string, R>(
   expression: E,
   handler: (state: DeepReadonly<C>, ...args: HandlerArgs<E, Custom>) => R | Promise<R>,
 ) => void
-
-export const context: RoleFn = (expression, handler) =>
-  registerStep(expression, handler as StepHandler, 'context')
-export const action: RoleFn = (expression, handler) =>
-  registerStep(expression, handler as StepHandler, 'action')
-export const sensor: SensorFn = (expression, handler) =>
-  registerStep(expression, handler as StepHandler, 'sensor')
 
 // A custom parameter type, declared inline in `defineState` so its transformer's
 // return type can be captured for inference (and registered for matching).
@@ -226,12 +219,7 @@ function callerLocation(): { sourceFile: string; sourceLine: number } {
   let callerIdx = -1
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i] ?? ''
-    if (
-      line.includes('/var-runtime/src/index') ||
-      line.includes('/var-runtime/dist/index') ||
-      line.includes('/api.ts') ||
-      line.includes('/api.js')
-    ) {
+    if (line.includes('/var/src/index') || line.includes('/var/dist/index')) {
       continue
     }
     callerIdx = i

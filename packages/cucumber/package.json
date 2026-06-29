@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "@cucumber/cucumber": "^13.0.0",
+    "@oselvar/var": "workspace:*",
     "@oselvar/var-core": "workspace:*",
     "@oselvar/var-cli": "workspace:*",
     "@oselvar/var-vitest": "workspace:*",

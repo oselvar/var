@@ -16,7 +16,7 @@ const ARTIFACTS = [
   ['trace', 'trace'],
 ] as const
 
-// NOTE: these tests share @oselvar/var-runtime module-scope state, so they must
+// NOTE: these tests share @oselvar/var module-scope state, so they must
 // run sequentially within this file. Do NOT mark them `test.concurrent`.
 // Run with `vitest run` (one-shot), NOT watch mode: bundles are loaded via
 // dynamic import(), which is cached, so a watch re-run would re-clear the

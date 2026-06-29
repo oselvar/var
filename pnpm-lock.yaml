@@ -32,6 +32,9 @@ importers:
 
   docs/tutorial:
     devDependencies:
+      '@oselvar/var':
+        specifier: workspace:*
+        version: link:../../packages/var
       '@oselvar/var-vitest':
         specifier: workspace:*
         version: link:../../packages/var-vitest
@@ -44,6 +47,9 @@ importers:
       '@cucumber/cucumber':
         specifier: ^13.0.0
         version: 13.0.0
+      '@oselvar/var':
+        specifier: workspace:*
+        version: link:../var
       '@oselvar/var-cli':
         specifier: workspace:*
         version: link:../var-cli
@@ -63,14 +69,24 @@ importers:
         specifier: ^4.1.9
         version: 4.1.9(@types/node@26.0.1)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(yaml@2.9.0))
 
-  packages/var-cli:
+  packages/var:
     dependencies:
       '@oselvar/var-core':
         specifier: workspace:*
         version: link:../var-core
-      '@oselvar/var-runtime':
+    devDependencies:
+      vitest:
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@26.0.1)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(yaml@2.9.0))
+
+  packages/var-cli:
+    dependencies:
+      '@oselvar/var':
         specifier: workspace:*
-        version: link:../var-runtime
+        version: link:../var
+      '@oselvar/var-core':
+        specifier: workspace:*
+        version: link:../var-core
 
   packages/var-core:
     dependencies:
@@ -102,24 +118,14 @@ importers:
         specifier: ^1.0.12
         version: 1.0.12
 
-  packages/var-runtime:
-    dependencies:
-      '@oselvar/var-core':
-        specifier: workspace:*
-        version: link:../var-core
-    devDependencies:
-      vitest:
-        specifier: ^4.1.9
-        version: 4.1.9(@types/node@26.0.1)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(yaml@2.9.0))
-
   packages/var-vitest:
     dependencies:
+      '@oselvar/var':
+        specifier: workspace:*
+        version: link:../var
       '@oselvar/var-core':
         specifier: workspace:*
         version: link:../var-core
-      '@oselvar/var-runtime':
-        specifier: workspace:*
-        version: link:../var-runtime
       vite:
         specifier: ^5.0.0 || ^6.0.0
         version: 6.4.3(@types/node@26.0.1)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0)
@@ -178,15 +184,15 @@ importers:
       '@navikt/ds-css':
         specifier: ^8.14.0
         version: 8.14.0
+      '@oselvar/var':
+        specifier: workspace:*
+        version: link:../var
       '@oselvar/var-core':
         specifier: workspace:*
         version: link:../var-core
       '@oselvar/var-lsp':
         specifier: workspace:*
         version: link:../var-lsp
-      '@oselvar/var-runtime':
-        specifier: workspace:*
-        version: link:../var-runtime
       astro-pagefind:
         specifier: ^2.0.0
         version: 2.0.0(astro@7.0.3(@astrojs/markdown-remark@7.2.0)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@26.0.1)(jiti@2.7.0)(rollup@4.62.2)(tsx@4.22.4)(yaml@2.9.0))

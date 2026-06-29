@@ -47,7 +47,7 @@ test('appends to an existing step file (does not overwrite)', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'var-stepdef-append-'))
   try {
     const target = join(dir, 'steps.ts')
-    writeFileSync(target, "import { step } from '@oselvar/var-vitest'\n\n")
+    writeFileSync(target, "import { step } from '@oselvar/var'\n\n")
     await runStepdef({
       text: 'I have 5 cukes',
       file: target,
@@ -56,7 +56,7 @@ test('appends to an existing step file (does not overwrite)', async () => {
       writeStdout: () => {},
     })
     const written = readFileSync(target, 'utf8')
-    expect(written).toContain("import { step } from '@oselvar/var-vitest'")
+    expect(written).toContain("import { step } from '@oselvar/var'")
     expect(written).toContain("action('I have {int} cukes',")
   } finally {
     rmSync(dir, { recursive: true, force: true })

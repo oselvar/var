@@ -27,7 +27,7 @@
     "@navikt/ds-css": "^8.14.0",
     "@oselvar/var-core": "workspace:*",
     "@oselvar/var-lsp": "workspace:*",
-    "@oselvar/var-runtime": "workspace:*",
+    "@oselvar/var": "workspace:*",
     "astro-pagefind": "^2.0.0",
     "codemirror": "^6.0.2",
     "typescript": "^6.0.3",

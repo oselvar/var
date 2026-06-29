@@ -7,6 +7,7 @@
     "build": "tsc -p tsconfig.json"
   },
   "devDependencies": {
+    "@oselvar/var": "workspace:*",
     "@oselvar/var-vitest": "workspace:*",
     "vitest": "^4.1.9"
   }

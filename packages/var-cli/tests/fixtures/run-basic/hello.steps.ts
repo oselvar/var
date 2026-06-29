@@ -1,4 +1,4 @@
-import { defineState } from '@oselvar/var-runtime'
+import { defineState } from '@oselvar/var'
 
 const { action, sensor } = defineState(() => ({ greeting: '' }))
 

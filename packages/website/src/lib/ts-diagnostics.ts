@@ -15,8 +15,8 @@ for (const [p, text] of Object.entries(libModules)) {
 
 // Ambient types for the browser step-definition runtime, so imports resolve and
 // ctx/args typecheck without real module resolution.
-const AMBIENT_FILE = 'var-runtime.d.ts'
-const AMBIENT = `declare module '@oselvar/var-runtime' {
+const AMBIENT_FILE = 'var.d.ts'
+const AMBIENT = `declare module '@oselvar/var' {
   type AnyArg = any
   interface BuiltInParameterTypes {
     int: number; float: number; double: number; byte: number; short: number; long: number
@@ -49,9 +49,6 @@ const AMBIENT = `declare module '@oselvar/var-runtime' {
     expression: E,
     handler: (state: DeepReadonly<C>, ...args: HandlerArgs<E, Custom>) => R | Promise<R>,
   ) => void
-  export const context: RoleFn
-  export const action: RoleFn
-  export const sensor: SensorFn
   type ParamTypeDef<T> = { regexp: RegExp | readonly RegExp[]; transformer: (...captures: string[]) => T }
   type CustomRegistry<P> = { [K in keyof P]: P[K] extends ParamTypeDef<infer T> ? T : never }
   export function defineState<C, P extends Record<string, ParamTypeDef<unknown>> = Record<never, never>>(

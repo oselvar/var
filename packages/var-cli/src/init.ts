@@ -13,7 +13,7 @@ Given I greet "world"
 Then the greeting is "Hello, world!"
 `
 
-const EXAMPLE_STEPS = `import { defineState } from '@oselvar/var-vitest'
+const EXAMPLE_STEPS = `import { defineState } from '@oselvar/var'
 
 const { action, sensor } = defineState(() => ({ greeting: '' }))
 

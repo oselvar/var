@@ -1,4 +1,4 @@
-import { defineState } from '@oselvar/var-vitest'
+import { defineState } from '@oselvar/var'
 
 // import { Library } from '../src/library'
 

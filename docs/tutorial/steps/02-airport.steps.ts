@@ -1,4 +1,4 @@
-import { defineState } from '@oselvar/var-vitest'
+import { defineState } from '@oselvar/var'
 
 // The custom `{airport}` parameter type is declared in defineState's second
 // argument, so Vár can infer the captured args: the transformer returns string,

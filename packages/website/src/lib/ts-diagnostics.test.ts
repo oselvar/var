@@ -10,11 +10,11 @@ describe('ts-diagnostics', () => {
     expect(d.some((x) => /not assignable/.test(x.message))).toBe(true)
   })
 
-  it('resolves @oselvar/var-runtime via the ambient decl (no cannot-find-module)', () => {
+  it('resolves @oselvar/var via the ambient decl (no cannot-find-module)', () => {
     const ts = createTsDiagnostics()
     ts.updateDoc(
       'b.steps.ts',
-      `import { defineState } from '@oselvar/var-runtime'\nconst { action } = defineState(() => ({ greeting: '' }))\naction('I greet {string}', (_state, name) => ({ greeting: name }))\n`,
+      `import { defineState } from '@oselvar/var'\nconst { action } = defineState(() => ({ greeting: '' }))\naction('I greet {string}', (_state, name) => ({ greeting: name }))\n`,
     )
     const d = ts.diagnostics('b.steps.ts')
     expect(d.find((x) => /Cannot find module/.test(x.message))).toBeUndefined()
@@ -24,7 +24,7 @@ describe('ts-diagnostics', () => {
     const ts = createTsDiagnostics()
     ts.updateDoc(
       'd.steps.ts',
-      `import { defineState } from '@oselvar/var-runtime'\n` +
+      `import { defineState } from '@oselvar/var'\n` +
         `const { action } = defineState(() => ({ n: 0 }))\n` +
         // `count` carries NO annotation; {int} infers it as number, so assigning
         // it to a string must produce a diagnostic.
@@ -38,7 +38,7 @@ describe('ts-diagnostics', () => {
     const ts = createTsDiagnostics()
     ts.updateDoc(
       'e.steps.ts',
-      `import { defineState } from '@oselvar/var-runtime'\n` +
+      `import { defineState } from '@oselvar/var'\n` +
         `const { action } = defineState(() => ({}), {\n` +
         `  date: { regexp: /.+/, transformer: (s: string) => new Date(s) },\n` +
         `})\n` +
@@ -54,7 +54,7 @@ describe('ts-diagnostics', () => {
     const ts = createTsDiagnostics()
     ts.updateDoc(
       'f.steps.ts',
-      `import { defineState } from '@oselvar/var-runtime'\n` +
+      `import { defineState } from '@oselvar/var'\n` +
         `const { action } = defineState(() => ({ greeting: '' }))\n` +
         // assigning to the deeply-readonly state must produce a diagnostic.
         `action('I greet {string}', (state, name) => { state.greeting = name })\n`,

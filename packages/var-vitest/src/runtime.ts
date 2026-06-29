@@ -1,3 +1,4 @@
+import { buildRegistry, contextFactory } from '@oselvar/var/registry'
 import {
   executePlan,
   parse,
@@ -7,7 +8,6 @@ import {
   type TestSink,
   toFailure,
 } from '@oselvar/var-core'
-import { buildRegistry, contextFactory } from '@oselvar/var-runtime/registry'
 
 export { toFailure }
 

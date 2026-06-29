@@ -1,4 +1,6 @@
-import { sensor } from '@oselvar/var-runtime'
+import { defineState } from '@oselvar/var'
+
+const { sensor } = defineState(() => ({}))
 
 // Returns the WRONG string (as the post-ctx tuple); the core compares it to the
 // doc string and throws DocStringMismatchError → trace failure.kind "doc-string-mismatch".

@@ -1,10 +1,11 @@
 import { beforeEach, expect, expectTypeOf, test } from 'vitest'
-import { action, context, defineState, sensor } from '../src/index.js'
+import { defineState } from '../src/index.js'
 import { _resetBuilder, buildRegistry, contextFactory } from '../src/registry.js'
 
 beforeEach(() => _resetBuilder())
 
 test('action() adds a registration; buildRegistry() returns an immutable Registry', () => {
+  const { action } = defineState(() => ({}))
   action('I have {int} cukes', () => {})
   const r = buildRegistry()
   expect(r.steps).toHaveLength(1)
@@ -29,6 +30,7 @@ test('contextFactory() returns a default `{}` for a stepfile that did not call d
 })
 
 test('duplicate action() calls throw at buildRegistry()', () => {
+  const { action } = defineState(() => ({}))
   action('I have {int} cukes', () => {})
   action('I have {int} cukes', () => {})
   expect(() => buildRegistry()).toThrow(/duplicate step definition/)
@@ -37,6 +39,7 @@ test('duplicate action() calls throw at buildRegistry()', () => {
 test('action() type-checks typed handler arguments matching the cucumber expression', () => {
   // This is a TYPE-LEVEL assertion via a compile check. If `action()` lost its generic,
   // the typed `name: string` parameter below would error with TS2345.
+  const { action } = defineState(() => ({}))
   action('I greet {string}', (_ctx, name: string) => {
     expect(typeof name).toBe('string')
   })
@@ -120,6 +123,7 @@ test('custom parameter types declared in defineState are inferred (Tier 2)', () 
 })
 
 test('context/action/sensor register with their kind', () => {
+  const { context, action, sensor } = defineState(() => ({}))
   context('a logged-in user', () => {})
   action('I click submit', () => {})
   sensor('the total is {int}', (_ctx, total: number) => [total])

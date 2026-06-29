@@ -1,4 +1,4 @@
-import { defineState } from '@oselvar/var-vitest'
+import { defineState } from '@oselvar/var'
 
 const { sensor } = defineState(() => ({}))
 

@@ -2,7 +2,7 @@ import { expect, test } from 'vitest'
 import { discoverParameterTypes, discoverStepDefs } from '../src/step-defs.js'
 
 test('discovers a single step call with its source range', () => {
-  const source = `import { action } from '@oselvar/var-vitest'
+  const source = `import { action } from '@oselvar/var'
 action('I have {int} cukes', (ctx, n) => {})
 `
   const defs = discoverStepDefs('steps.ts', source)
@@ -15,7 +15,7 @@ action('I have {int} cukes', (ctx, n) => {})
 })
 
 test('discovers multiple step calls across the file', () => {
-  const source = `import { context, action, sensor } from '@oselvar/var-vitest'
+  const source = `import { context, action, sensor } from '@oselvar/var'
 context('first', () => {})
 action('second', () => {})
 sensor('third', () => {})
@@ -26,7 +26,7 @@ sensor('third', () => {})
 })
 
 test('handles the destructured-role pattern: const { action } = defineState(...)', () => {
-  const source = `import { defineState } from '@oselvar/var-vitest'
+  const source = `import { defineState } from '@oselvar/var'
 const { action } = defineState(() => ({}))
 action('I greet {string}', (ctx, name: string) => {})
 `

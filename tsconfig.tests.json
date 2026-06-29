@@ -16,7 +16,7 @@
     "packages/var-cli/tests",
     "packages/var-language/tests",
     "packages/var-lsp/tests",
-    "packages/var-runtime/tests",
+    "packages/var/tests",
     "packages/var-vitest/tests"
   ]
 }

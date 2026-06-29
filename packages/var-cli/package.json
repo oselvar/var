@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@oselvar/var-core": "workspace:*",
-    "@oselvar/var-runtime": "workspace:*"
+    "@oselvar/var": "workspace:*"
   },
   "publishConfig": {
     "exports": {

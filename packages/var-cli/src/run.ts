@@ -1,9 +1,9 @@
 import { globSync, readFileSync } from 'node:fs'
 import { relative, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { buildRegistry, contextFactory } from '@oselvar/var/registry'
 import { executePlan, parse, plan } from '@oselvar/var-core'
 import { loadVarConfig } from '@oselvar/var-core/node'
-import { buildRegistry, contextFactory } from '@oselvar/var-runtime/registry'
 
 export type RunOptions = {
   readonly cwd: string
@@ -20,9 +20,8 @@ export async function runRun(opts: RunOptions): Promise<RunResult> {
   const varPatterns = opts.globs && opts.globs.length > 0 ? opts.globs : cfg.vars
   const varFiles = findFiles(opts.cwd, varPatterns)
 
-  // Importing each stepfile runs its `step()` / `defineContext()` /
-  // `defineParameterType()` calls, populating the @oselvar/var-runtime
-  // module-scope registry. Order does not matter.
+  // Importing each stepfile runs its `defineState(...)` calls, populating the
+  // @oselvar/var module-scope registry. Order does not matter.
   for (const path of stepFiles) {
     await import(pathToFileURL(path).href)
   }

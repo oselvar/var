@@ -1,4 +1,4 @@
-import { defineState } from '@oselvar/var-vitest'
+import { defineState } from '@oselvar/var'
 import { expect } from 'vitest'
 import { type Book, type BorrowError, Library, type Receipt } from '../src/library.js'
 
