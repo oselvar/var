@@ -1,8 +1,6 @@
 import { readFileSync } from 'node:fs'
-import { glob as nativeGlob } from 'node:fs/promises'
-import { resolve } from 'node:path'
 import { createRegistry, parse, plan } from '@oselvar/var-core'
-import { loadVarConfig } from '@oselvar/var-core/node'
+import { findFiles, loadVarConfig } from '@oselvar/var-core/node'
 
 export type LintOptions = {
   readonly cwd: string
@@ -22,17 +20,12 @@ type Item = {
   readonly message: string
 }
 
-const glob = nativeGlob as unknown as (
-  pattern: string,
-  opts: { cwd: string },
-) => AsyncIterable<string>
-
 export async function runLint(opts: LintOptions): Promise<LintResult> {
   const cfg = await loadVarConfig(opts.cwd)
   // A CLI `--globs` override is include-only; excludes live in var.config.ts.
   const varGlobs =
     opts.globs && opts.globs.length > 0 ? { include: opts.globs, exclude: [] } : cfg.vars
-  const files = await findFiles(opts.cwd, varGlobs.include, varGlobs.exclude)
+  const files = findFiles(opts.cwd, varGlobs.include, varGlobs.exclude)
   const registry = createRegistry()
   const items: Item[] = []
   for (const path of files) {
@@ -65,30 +58,4 @@ function firstLine(s: string): string {
 
 function isError(code: string): boolean {
   return code === 'ambiguous-match'
-}
-
-async function globAbs(cwd: string, patterns: ReadonlyArray<string>): Promise<string[]> {
-  const out: string[] = []
-  for (const pattern of patterns) {
-    for await (const entry of glob(pattern, { cwd })) {
-      out.push(resolve(cwd, entry))
-    }
-  }
-  return out
-}
-
-async function findFiles(
-  cwd: string,
-  include: ReadonlyArray<string>,
-  exclude: ReadonlyArray<string> = [],
-): Promise<string[]> {
-  const excluded = new Set(await globAbs(cwd, exclude))
-  const out: string[] = []
-  const seen = new Set<string>()
-  for (const abs of await globAbs(cwd, include)) {
-    if (excluded.has(abs) || seen.has(abs)) continue
-    seen.add(abs)
-    out.push(abs)
-  }
-  return out
 }

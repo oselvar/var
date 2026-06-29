@@ -1,9 +1,9 @@
-import { globSync, readFileSync } from 'node:fs'
-import { relative, resolve } from 'node:path'
+import { readFileSync } from 'node:fs'
+import { relative } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { buildRegistry, contextFactory } from '@oselvar/var/registry'
-import { executePlan, parse, plan } from '@oselvar/var-core'
-import { loadVarConfig } from '@oselvar/var-core/node'
+import { collectExamples, parse, plan } from '@oselvar/var-core'
+import { findFiles, loadVarConfig } from '@oselvar/var-core/node'
 
 export type RunOptions = {
   readonly cwd: string
@@ -40,9 +40,7 @@ export async function runRun(opts: RunOptions): Promise<RunResult> {
     const varDoc = parse(path, source, cfg.scannerPlugins)
     const execution = plan(varDoc, registry)
 
-    const queue: { name: string; run: () => void | Promise<void> }[] = []
-    executePlan(execution, {
-      sink: { example: (name, run) => queue.push({ name, run }) },
+    const queue = collectExamples(execution, {
       reporter: {
         diagnostic: (d) => {
           if (d.severity === 'error') errorDiagnostics++
@@ -92,34 +90,4 @@ function formatError(err: unknown): string {
   if (err instanceof Error && typeof err.stack === 'string') return err.stack
   if (err instanceof Error) return err.message
   return String(err)
-}
-
-// node:fs/promises.glob (async) crashes on symlinked entries during
-// recursion in Node 22.x. The synchronous globSync handles symlinks
-// correctly and the up-front file lists are small enough that the
-// blocking call is a non-issue.
-function globAbs(cwd: string, patterns: ReadonlyArray<string>): string[] {
-  const out: string[] = []
-  for (const pattern of patterns) {
-    for (const entry of globSync(pattern, { cwd })) {
-      out.push(resolve(cwd, entry))
-    }
-  }
-  return out
-}
-
-function findFiles(
-  cwd: string,
-  include: ReadonlyArray<string>,
-  exclude: ReadonlyArray<string> = [],
-): string[] {
-  const excluded = new Set(globAbs(cwd, exclude))
-  const out: string[] = []
-  const seen = new Set<string>()
-  for (const abs of globAbs(cwd, include)) {
-    if (excluded.has(abs) || seen.has(abs)) continue
-    seen.add(abs)
-    out.push(abs)
-  }
-  return out
 }

@@ -55,8 +55,13 @@ export {
   DocStringMismatchError,
   isDocStringMismatchError,
 } from './doc-string-diff.js'
-export type { ExecutePorts, ExecutionObserver, StepObservation } from './execute.js'
-export { executePlan, isUnexpectedPassError, UnexpectedPassError } from './execute.js'
+export type { ExecutePorts, ExecutionObserver, QueuedExample, StepObservation } from './execute.js'
+export {
+  collectExamples,
+  executePlan,
+  isUnexpectedPassError,
+  UnexpectedPassError,
+} from './execute.js'
 export type { ExpressionDiff, ExpressionSegment, ParamFate } from './expression-segments.js'
 export { diffExpressions, expressionSegments, renderExpression } from './expression-segments.js'
 export { toFailure } from './failure.js'

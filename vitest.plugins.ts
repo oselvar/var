@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs'
 import type { Plugin } from 'vite'
+import { defineConfig } from 'vitest/config'
 
 // typescript's published `typescript.js` ends with a
 // `//# sourceMappingURL=typescript.js.map` comment, but the `.map` is not
@@ -20,4 +21,17 @@ export function stripTypescriptSourcemap(): Plugin {
       return code.replace(/\n\/\/# sourceMappingURL=typescript\.js\.map\s*$/, '\n')
     },
   }
+}
+
+// Shared vitest config for packages that run their tests from both `src` and
+// `tests` and import `typescript` transitively (var-language, var-lsp): strip
+// the dangling sourcemap comment and inline workspace packages from source.
+export function defineSourceTestConfig() {
+  return defineConfig({
+    plugins: [stripTypescriptSourcemap()],
+    test: {
+      include: ['{src,tests}/**/*.test.ts'],
+      server: { deps: { inline: [/^@oselvar\//] } },
+    },
+  })
 }

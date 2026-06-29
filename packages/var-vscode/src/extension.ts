@@ -1,6 +1,13 @@
 import { realpathSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
+import type {
+  Range as LspRange,
+  PlanParamFate,
+  PlanRenameResult,
+  RenderTextResult,
+  StepAtResult,
+} from '@oselvar/var-lsp/protocol'
 import {
   CodeAction,
   type CodeActionContext,
@@ -57,11 +64,6 @@ export function activate(context: ExtensionContext): void {
   registerGenerateStepDefinition(context, client, started)
   registerGenerateCodeAction(context)
   registerStepRename(context, client, started)
-}
-
-type LspRange = {
-  readonly start: { readonly line: number; readonly character: number }
-  readonly end: { readonly line: number; readonly character: number }
 }
 
 function toVscodeRange(r: LspRange): Range {
@@ -183,57 +185,6 @@ async function appendSnippet(uri: Uri, snippet: string): Promise<void> {
 // is rejected with a friendly message in this phase; phase 4 will prompt
 // per-occurrence for adds and strip for removes.
 // -----------------------------------------------------------------------------
-
-type StepAtMatch = {
-  readonly uri: string
-  readonly range: LspRange
-  readonly paramRanges: ReadonlyArray<LspRange>
-  readonly paramValues: ReadonlyArray<string>
-}
-
-type StepAtResult = {
-  readonly expression: string
-  readonly stepDefUri: string
-  readonly expressionRange: LspRange
-  readonly matches: ReadonlyArray<StepAtMatch>
-} | null
-
-type PlanParamFate =
-  | {
-      readonly kind: 'kept'
-      readonly oldIndex: number
-      readonly newIndex: number
-      readonly oldName: string
-      readonly newName: string
-      readonly nameUnchanged: boolean
-    }
-  | { readonly kind: 'added'; readonly newIndex: number; readonly name: string }
-  | { readonly kind: 'removed'; readonly oldIndex: number; readonly name: string }
-
-type HandlerSyncEdit = {
-  readonly uri: string
-  readonly range: LspRange
-  readonly newText: string
-}
-
-type PlanRenameResult =
-  | {
-      readonly ok: true
-      readonly newExpression: string
-      readonly paramFates: ReadonlyArray<PlanParamFate>
-      readonly stepDef: { readonly uri: string; readonly expressionInnerRange: LspRange }
-      readonly matches: ReadonlyArray<{
-        readonly uri: string
-        readonly range: LspRange
-        readonly paramValues: ReadonlyArray<string>
-      }>
-      readonly handlerSync?: HandlerSyncEdit | undefined
-    }
-  | { readonly ok: false; readonly error: string }
-
-type RenderTextResult =
-  | { readonly ok: true; readonly text: string }
-  | { readonly ok: false; readonly error: string }
 
 function registerStepRename(
   context: ExtensionContext,

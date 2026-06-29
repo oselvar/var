@@ -6,6 +6,10 @@
     ".": {
       "types": "./src/server.ts",
       "import": "./src/server.ts"
+    },
+    "./protocol": {
+      "types": "./src/protocol.ts",
+      "import": "./src/protocol.ts"
     }
   },
   "main": "./src/server.ts",
@@ -32,6 +36,10 @@
       ".": {
         "types": "./dist/server.d.ts",
         "import": "./dist/server.js"
+      },
+      "./protocol": {
+        "types": "./dist/protocol.d.ts",
+        "import": "./dist/protocol.js"
       }
     },
     "main": "./dist/server.js",

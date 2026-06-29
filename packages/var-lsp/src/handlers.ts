@@ -7,16 +7,23 @@ import {
   type StepKind,
 } from '@oselvar/var-core'
 import type { MatchRef } from '@oselvar/var-language'
+import type {
+  HandlerSync,
+  PlanParamFate,
+  PlanRenameResult,
+  Position,
+  Range,
+  RenderTextResult,
+  StepAtMatch,
+  StepAtResult,
+} from './protocol.js'
 import type { Store } from './store.js'
 import { uriToPath } from './uri.js'
-
-type Position = { readonly line: number; readonly character: number }
 
 type HoverParams = { readonly uri: string; readonly position: Position }
 type HoverResult = { readonly contents: string } | null
 
 type DefinitionParams = HoverParams
-type Range = { readonly start: Position; readonly end: Position }
 type LocationLink = {
   readonly originSelectionRange: Range
   readonly targetUri: string
@@ -34,31 +41,9 @@ type Diagnostic = {
 
 type SnippetResult = { readonly fullCode: string; readonly expression: string }
 
-// Output of `var/stepAt`: everything the Rename refactor needs to compute a
-// cross-file WorkspaceEdit from a single F2 position. Ranges are 0-based LSP.
-type StepAtMatch = {
-  readonly uri: string
-  readonly range: Range
-  readonly paramRanges: ReadonlyArray<Range>
-  readonly paramValues: ReadonlyArray<string>
-}
-
-type StepAtResult = {
-  readonly expression: string
-  readonly stepDefUri: string
-  readonly expressionRange: Range
-  readonly matches: ReadonlyArray<StepAtMatch>
-} | null
-
 // Ready-to-apply edit for the Rename refactor. The client just turns these
 // into a WorkspaceEdit and calls applyEdit.
 type RenameEdit = { readonly uri: string; readonly range: Range; readonly newText: string }
-
-type HandlerSync = {
-  readonly uri: string
-  readonly range: Range
-  readonly newText: string
-}
 
 type RenameStepResult =
   | {
@@ -76,45 +61,6 @@ type RenameStepResult =
   | { readonly ok: false; readonly error: string }
 
 type RenameStepParams = HoverParams & { readonly newName: string }
-
-// Plan-only output: the analysis the client needs to drive per-site prompts
-// for added / type-changed parameters before any edit is applied.
-type PlanParamFate =
-  | {
-      readonly kind: 'kept'
-      readonly oldIndex: number
-      readonly newIndex: number
-      readonly oldName: string
-      readonly newName: string
-      readonly nameUnchanged: boolean
-    }
-  | { readonly kind: 'added'; readonly newIndex: number; readonly name: string }
-  | { readonly kind: 'removed'; readonly oldIndex: number; readonly name: string }
-
-type PlanRenameResult =
-  | {
-      readonly ok: true
-      readonly newExpression: string
-      readonly paramFates: ReadonlyArray<PlanParamFate>
-      readonly stepDef: {
-        readonly uri: string
-        readonly expressionInnerRange: Range
-      }
-      readonly matches: ReadonlyArray<{
-        readonly uri: string
-        readonly range: Range
-        readonly paramValues: ReadonlyArray<string>
-      }>
-      // Optional — present when the handler was an arrow/function expression
-      // we could analyze. The client just applies this edit alongside the
-      // expression-literal edit and the per-site cascades.
-      readonly handlerSync?: HandlerSync | undefined
-    }
-  | { readonly ok: false; readonly error: string }
-
-type RenderTextResult =
-  | { readonly ok: true; readonly text: string }
-  | { readonly ok: false; readonly error: string }
 
 type CompletionItem = {
   readonly label: string
@@ -204,45 +150,12 @@ export function buildHandlers(store: Store): Handlers {
       return store.stepGlobs()
     },
     renameStep({ uri, position, newName }) {
-      const stepAt = resolveStepAt(store, uri, position)
-      if (!stepAt) return { ok: false, error: 'No step under cursor.' }
+      const prepared = prepareRename(store, uri, position, newName)
+      if (!prepared.ok) return prepared
+      const { stepAt, newExpression, diff } = prepared
 
-      // In a .md, `newName` is the user's edited sentence; we derive the
-      // new cucumber expression via the live workspace registry (so custom
-      // param types like {airport} apply). In a .steps.ts, `newName` is the
-      // expression text directly.
-      const isVarDoc = store.isVarDoc(uriToPath(uri))
-      let newExpression: string
-      if (isVarDoc) {
-        try {
-          newExpression = generateSnippet(newName, store.index().registry, {
-            template: store.snippetTemplate(),
-          }).expression
-        } catch (e) {
-          return {
-            ok: false,
-            error: `Cannot derive a cucumber expression from "${newName}": ${(e as Error).message}`,
-          }
-        }
-      } else {
-        newExpression = newName
-      }
-
-      if (newExpression === stepAt.expression) {
-        return { ok: false, error: 'Nothing to rename — the expression is unchanged.' }
-      }
-
-      // Validate via the diff. Phase 3 supports only the literal-only path;
-      // adding/removing/typed-changing a parameter is the Phase 4 territory.
-      let diff: ReturnType<typeof diffExpressions>
-      try {
-        diff = diffExpressions(stepAt.expression, newExpression, store.index().registry)
-      } catch (e) {
-        return {
-          ok: false,
-          error: `Invalid cucumber expression: ${(e as Error).message}`,
-        }
-      }
+      // Phase 3 supports only the literal-only path; adding/removing/typed-
+      // changing a parameter is the Phase 4 territory.
       const offending = diff.paramFates.find((f) => f.kind !== 'kept')
       if (offending) {
         const verb = offending.kind === 'added' ? 'adding a parameter' : 'removing a parameter'
@@ -269,20 +182,11 @@ export function buildHandlers(store: Store): Handlers {
         sites.push({ uri: m.uri, range: m.range, newText: rebuilt })
       }
 
-      // Shrink the expression range to exclude the surrounding quotes. The
-      // walker emits the literal node's full extent including quotes; the
-      // inner range is just (outer.start + 1) .. (outer.end - 1) on the same
-      // line — string literals don't span lines in our discovery.
-      const outer = stepAt.expressionRange
-      const inner: Range = {
-        start: { line: outer.start.line, character: outer.start.character + 1 },
-        end: { line: outer.end.line, character: outer.end.character - 1 },
-      }
       return {
         ok: true,
         stepDef: {
           uri: stepAt.stepDefUri,
-          expressionInnerRange: inner,
+          expressionInnerRange: innerRange(stepAt.expressionRange),
           newExpression,
         },
         sites,
@@ -292,35 +196,9 @@ export function buildHandlers(store: Store): Handlers {
       return resolveStepAt(store, uri, position)
     },
     planRename({ uri, position, newName }) {
-      const stepAt = resolveStepAt(store, uri, position)
-      if (!stepAt) return { ok: false, error: 'No step under cursor.' }
-
-      const isVarDoc = store.isVarDoc(uriToPath(uri))
-      let newExpression: string
-      if (isVarDoc) {
-        try {
-          newExpression = generateSnippet(newName, store.index().registry, {
-            template: store.snippetTemplate(),
-          }).expression
-        } catch (e) {
-          return {
-            ok: false,
-            error: `Cannot derive a cucumber expression from "${newName}": ${(e as Error).message}`,
-          }
-        }
-      } else {
-        newExpression = newName
-      }
-      if (newExpression === stepAt.expression) {
-        return { ok: false, error: 'Nothing to rename — the expression is unchanged.' }
-      }
-
-      let diff: ReturnType<typeof diffExpressions>
-      try {
-        diff = diffExpressions(stepAt.expression, newExpression, store.index().registry)
-      } catch (e) {
-        return { ok: false, error: `Invalid cucumber expression: ${(e as Error).message}` }
-      }
+      const prepared = prepareRename(store, uri, position, newName)
+      if (!prepared.ok) return prepared
+      const { stepAt, newExpression, diff } = prepared
 
       // Enrich each fate with the OLD and NEW parameter names so the client
       // can produce a clearer prompt (e.g. "{string} → {airport}").
@@ -347,12 +225,6 @@ export function buildHandlers(store: Store): Handlers {
         }
       })
 
-      const outer = stepAt.expressionRange
-      const inner: Range = {
-        start: { line: outer.start.line, character: outer.start.character + 1 },
-        end: { line: outer.end.line, character: outer.end.character - 1 },
-      }
-
       // Phase 5: also sync the TS handler signature when we have its source.
       const stepDefRecord = store
         .index()
@@ -375,7 +247,10 @@ export function buildHandlers(store: Store): Handlers {
         ok: true,
         newExpression,
         paramFates,
-        stepDef: { uri: stepAt.stepDefUri, expressionInnerRange: inner },
+        stepDef: {
+          uri: stepAt.stepDefUri,
+          expressionInnerRange: innerRange(stepAt.expressionRange),
+        },
         matches: stepAt.matches.map((m) => ({
           uri: m.uri,
           range: m.range,
@@ -506,6 +381,69 @@ function resolveStepAt(store: Store, uri: string, position: Position): StepAtRes
     stepDefUri: `file://${stepDef.file}`,
     expressionRange: toLspRange(stepDef.expressionRange),
     matches,
+  }
+}
+
+type PreparedRename =
+  | {
+      readonly ok: true
+      readonly stepAt: NonNullable<StepAtResult>
+      readonly newExpression: string
+      readonly diff: ReturnType<typeof diffExpressions>
+    }
+  | { readonly ok: false; readonly error: string }
+
+// Shared front-half of renameStep/planRename: locate the step under the cursor,
+// derive the new cucumber expression (from the edited sentence in a .md, or
+// verbatim in a .steps.ts where custom param types like {airport} apply),
+// reject a no-op rename, then diff old vs new.
+function prepareRename(
+  store: Store,
+  uri: string,
+  position: Position,
+  newName: string,
+): PreparedRename {
+  const stepAt = resolveStepAt(store, uri, position)
+  if (!stepAt) return { ok: false, error: 'No step under cursor.' }
+
+  const isVarDoc = store.isVarDoc(uriToPath(uri))
+  let newExpression: string
+  if (isVarDoc) {
+    try {
+      newExpression = generateSnippet(newName, store.index().registry, {
+        template: store.snippetTemplate(),
+      }).expression
+    } catch (e) {
+      return {
+        ok: false,
+        error: `Cannot derive a cucumber expression from "${newName}": ${(e as Error).message}`,
+      }
+    }
+  } else {
+    newExpression = newName
+  }
+
+  if (newExpression === stepAt.expression) {
+    return { ok: false, error: 'Nothing to rename — the expression is unchanged.' }
+  }
+
+  let diff: ReturnType<typeof diffExpressions>
+  try {
+    diff = diffExpressions(stepAt.expression, newExpression, store.index().registry)
+  } catch (e) {
+    return { ok: false, error: `Invalid cucumber expression: ${(e as Error).message}` }
+  }
+  return { ok: true, stepAt, newExpression, diff }
+}
+
+// Shrink an expression-literal range to exclude the surrounding quotes. The
+// walker emits the literal's full extent including quotes; the inner range is
+// (outer.start + 1) .. (outer.end - 1) — string literals don't span lines in
+// our discovery, so this is a single-line trim.
+function innerRange(outer: Range): Range {
+  return {
+    start: { line: outer.start.line, character: outer.start.character + 1 },
+    end: { line: outer.end.line, character: outer.end.character - 1 },
   }
 }
 

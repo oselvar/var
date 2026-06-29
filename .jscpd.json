@@ -1,7 +1,7 @@
 {
-  "threshold": 3,
+  "threshold": 0,
   "reporters": ["consoleFull"],
-  "ignore": ["**/node_modules/**", "**/dist/**", "**/tests/**", "**/*.test.ts"],
+  "ignore": ["**/node_modules/**", "**/dist/**", "**/tests/**", "**/*.test.ts", "**/*.json"],
   "absolute": true,
   "gitignore": true
 }

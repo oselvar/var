@@ -1,14 +1,8 @@
 import { existsSync, readFileSync } from 'node:fs'
-import { glob as nativeGlob } from 'node:fs/promises'
 import { resolve } from 'node:path'
-import { loadVarConfig } from '@oselvar/var-core/node'
+import { findFiles, loadVarConfig } from '@oselvar/var-core/node'
 import type { Plugin } from 'vite'
 import { configDefaults } from 'vitest/config'
-
-const glob = nativeGlob as unknown as (
-  pattern: string,
-  opts: { cwd: string },
-) => AsyncIterable<string>
 
 export type VarVitestPluginOptions = {
   readonly cwd?: string
@@ -59,8 +53,8 @@ export function varVitestPlugin(options: VarVitestPluginOptions = {}): Plugin {
     },
     async configResolved() {
       const cfg = await loadVarConfig(cwd)
-      stepFiles = await findFiles(cwd, cfg.steps)
-      specFiles = new Set(await findFiles(cwd, cfg.vars.include, cfg.vars.exclude))
+      stepFiles = findFiles(cwd, cfg.steps)
+      specFiles = new Set(findFiles(cwd, cfg.vars.include, cfg.vars.exclude))
       for (const name of ['var.config.ts', 'var.config.js', 'var.config.mjs']) {
         const abs = resolve(cwd, name)
         if (existsSync(abs)) {
@@ -130,31 +124,4 @@ runVarSource(SOURCE, PATH, {
   scannerPlugins: varConfig?.scannerPlugins ?? [],
 })
 `
-}
-
-async function globAbs(cwd: string, patterns: ReadonlyArray<string>): Promise<string[]> {
-  const out: string[] = []
-  for (const pattern of patterns) {
-    // node:fs/promises.glob is async iterable in Node 22+
-    for await (const entry of glob(pattern, { cwd })) {
-      out.push(resolve(cwd, entry))
-    }
-  }
-  return out
-}
-
-async function findFiles(
-  cwd: string,
-  include: ReadonlyArray<string>,
-  exclude: ReadonlyArray<string> = [],
-): Promise<string[]> {
-  const excluded = new Set(await globAbs(cwd, exclude))
-  const out: string[] = []
-  const seen = new Set<string>()
-  for (const abs of await globAbs(cwd, include)) {
-    if (excluded.has(abs) || seen.has(abs)) continue
-    seen.add(abs)
-    out.push(abs)
-  }
-  return out
 }

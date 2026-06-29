@@ -40,6 +40,23 @@ export type ExecutePorts = {
   readonly observer?: ExecutionObserver
 }
 
+export type QueuedExample = { readonly name: string; readonly run: () => void | Promise<void> }
+
+// Run a plan only to collect its examples into an ordered queue, leaving the
+// caller to invoke (and time/observe) each `run()` itself. Wires the `sink` for
+// you; forward `reporter` (and optionally `createContext`/`observer`) as needed.
+export function collectExamples(
+  plan: ExecutionPlan,
+  ports: Omit<ExecutePorts, 'sink'>,
+): QueuedExample[] {
+  const queue: QueuedExample[] = []
+  executePlan(plan, {
+    ...ports,
+    sink: { example: (name, run) => queue.push({ name, run }) },
+  })
+  return queue
+}
+
 export function executePlan(plan: ExecutionPlan, ports: ExecutePorts): void {
   for (const d of plan.diagnostics) ports.reporter.diagnostic(d)
   const createContext = ports.createContext ?? (() => ({}))

@@ -3,7 +3,7 @@ import type { Fence, Table, VarDoc } from './ast.js'
 import { isCellMismatchError, ReturnShapeError } from './cell-diff.js'
 import type { DiagnosticCode, Severity } from './diagnostics.js'
 import { isDocStringMismatchError } from './doc-string-diff.js'
-import { executePlan, isUnexpectedPassError, type StepObservation } from './execute.js'
+import { collectExamples, isUnexpectedPassError, type StepObservation } from './execute.js'
 import { plan as buildPlan, type ExecutionPlan } from './plan.js'
 import type { Registry } from './registry.js'
 import type { Span } from './span.js'
@@ -231,9 +231,7 @@ export async function runConformance(
   const execution = buildPlan(varDoc, registry)
 
   const observed = new Map<number, StepObservation[]>()
-  const queue: { name: string; run: () => void | Promise<void> }[] = []
-  executePlan(execution, {
-    sink: { example: (name, run) => queue.push({ name, run }) },
+  const queue = collectExamples(execution, {
     reporter: { diagnostic: () => {} }, // diagnostics are captured in the plan artifact
     createContext,
     observer: {

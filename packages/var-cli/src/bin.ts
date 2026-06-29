@@ -8,6 +8,12 @@ import { runStepdef } from './stepdef.js'
 const parsed = parseArgv(process.argv.slice(2))
 
 async function main(): Promise<void> {
+  const io = {
+    cwd: process.cwd(),
+    writeStdout: (s: string) => process.stdout.write(s),
+    writeStderr: (s: string) => process.stderr.write(s),
+  }
+  const globs = parsed.positionals.length > 0 ? parsed.positionals : undefined
   switch (parsed.command) {
     case '':
     case 'help':
@@ -39,38 +45,24 @@ async function main(): Promise<void> {
         text,
         file,
         print,
-        cwd: process.cwd(),
-        writeStdout: (s) => process.stdout.write(s),
+        cwd: io.cwd,
+        writeStdout: io.writeStdout,
       })
       process.exitCode = result.exitCode
       break
     }
     case 'lint': {
-      const result = await runLint({
-        cwd: process.cwd(),
-        json: parsed.flags.json === true,
-        globs: parsed.positionals.length > 0 ? parsed.positionals : undefined,
-        writeStdout: (s) => process.stdout.write(s),
-        writeStderr: (s) => process.stderr.write(s),
-      })
+      const result = await runLint({ ...io, json: parsed.flags.json === true, globs })
       process.exitCode = result.exitCode
       break
     }
     case 'init': {
-      const result = await runInit({
-        cwd: process.cwd(),
-        writeStdout: (s) => process.stdout.write(s),
-      })
+      const result = await runInit({ cwd: io.cwd, writeStdout: io.writeStdout })
       process.exitCode = result.exitCode
       break
     }
     case 'run': {
-      const result = await runRun({
-        cwd: process.cwd(),
-        globs: parsed.positionals.length > 0 ? parsed.positionals : undefined,
-        writeStdout: (s) => process.stdout.write(s),
-        writeStderr: (s) => process.stderr.write(s),
-      })
+      const result = await runRun({ ...io, globs })
       process.exitCode = result.exitCode
       break
     }
