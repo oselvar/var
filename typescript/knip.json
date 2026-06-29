@@ -16,10 +16,10 @@
       "entry": [
         "src/index.ts",
         "tests/**/*.test.ts",
-        "../../conformance/bundles/**/*.steps.ts",
-        "../../conformance/bundles/**/*.md"
+        "../../../conformance/bundles/**/*.steps.ts",
+        "../../../conformance/bundles/**/*.md"
       ],
-      "project": ["src/**/*.ts", "tests/**/*.ts", "../../conformance/bundles/**/*.{ts,md}"]
+      "project": ["src/**/*.ts", "tests/**/*.ts", "../../../conformance/bundles/**/*.{ts,md}"]
     },
     "packages/var-language": {
       "project": ["src/**/*.ts", "tests/**/*.ts"]

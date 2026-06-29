@@ -5,7 +5,7 @@ import { canonicalStringify, parse, runConformance } from '@oselvar/var-core'
 import { describe, expect, test } from 'vitest'
 import { _resetBuilder, buildRegistry, contextFactory } from '../src/registry.js'
 
-const BUNDLES = resolve(import.meta.dirname, '../../../conformance/bundles')
+const BUNDLES = resolve(import.meta.dirname, '../../../../conformance/bundles')
 const UPDATE = process.env.VAR_UPDATE_GOLDENS === '1'
 
 // 'var-doc' <-> BundleArtifacts['varDoc']; others map name->key directly.
