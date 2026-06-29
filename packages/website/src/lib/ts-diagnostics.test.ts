@@ -34,6 +34,22 @@ describe('ts-diagnostics', () => {
     expect(d.some((x) => /not assignable/.test(x.message))).toBe(true)
   })
 
+  it('infers custom parameter types declared in defineState', () => {
+    const ts = createTsDiagnostics()
+    ts.updateDoc(
+      'e.steps.ts',
+      `import { defineState } from '@oselvar/var-runtime'\n` +
+        `const { action } = defineState(() => ({}), {\n` +
+        `  date: { regexp: /.+/, transformer: (s: string) => new Date(s) },\n` +
+        `})\n` +
+        // `when` has NO annotation; {date}'s transformer returns Date, so calling
+        // a string method on it must produce a diagnostic.
+        `action('due on {date}', (_ctx, when) => { when.toUpperCase() })\n`,
+    )
+    const d = ts.diagnostics('e.steps.ts')
+    expect(d.some((x) => /toUpperCase/.test(x.message))).toBe(true)
+  })
+
   it('has the standard lib bundled (Error resolves)', () => {
     const ts = createTsDiagnostics()
     ts.updateDoc('c.steps.ts', 'throw new Error("boom")\n')

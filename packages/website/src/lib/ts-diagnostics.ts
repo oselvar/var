@@ -18,33 +18,37 @@ for (const [p, text] of Object.entries(libModules)) {
 const AMBIENT_FILE = 'var-runtime.d.ts'
 const AMBIENT = `declare module '@oselvar/var-runtime' {
   type AnyArg = any
-  type BuiltInArg<N extends string> =
-    N extends 'int' | 'float' | 'double' | 'long' | 'short' | 'byte' | 'bigdecimal' ? number
-    : N extends 'biginteger' ? bigint
-    : N extends 'string' | 'word' | '' ? string
-    : AnyArg
-  type ParseArgs<S extends string, Acc extends unknown[] = []> =
-    S extends \`\${infer Pre}{\${infer Rest}\`
-      ? Pre extends \`\${string}\\\\\`
-        ? ParseArgs<Rest, Acc>
-        : Rest extends \`\${infer Name}}\${infer After}\`
-          ? ParseArgs<After, [...Acc, BuiltInArg<Name>]>
-          : Acc
-      : Acc
-  type HandlerArgs<E extends string> = [...ParseArgs<E>, ...AnyArg[]]
-  export type RoleFn<C = unknown> = <E extends string>(
+  interface BuiltInParameterTypes {
+    int: number; float: number; double: number; byte: number; short: number; long: number
+    biginteger: bigint; bigdecimal: string; word: string; string: string; '': string
+  }
+  type ParameterNames<S extends string, InParameter extends boolean = false, Current extends string = '', Names extends string[] = []> =
+    S extends \`\\\\\${infer _Escaped}\${infer Rest}\` ? ParameterNames<Rest, InParameter, Current, Names>
+    : S extends \`{\${infer Rest}\` ? ParameterNames<Rest, true, '', Names>
+    : S extends \`}\${infer Rest}\` ? (InParameter extends true ? ParameterNames<Rest, false, '', [...Names, Current]> : ParameterNames<Rest, false, '', Names>)
+    : S extends \`\${infer Char}\${infer Rest}\` ? (InParameter extends true ? ParameterNames<Rest, true, \`\${Current}\${Char}\`, Names> : ParameterNames<Rest, false, Current, Names>)
+    : Names
+  type ResolveArg<Name extends string, Custom> = Name extends keyof Custom ? Custom[Name] : Name extends keyof BuiltInParameterTypes ? BuiltInParameterTypes[Name] : AnyArg
+  type MapArgs<Names extends readonly string[], Custom> = { [Index in keyof Names]: ResolveArg<Names[Index] & string, Custom> }
+  type HandlerArgs<E extends string, Custom> = [...MapArgs<ParameterNames<E>, Custom>, ...AnyArg[]]
+  export type RoleFn<C = unknown, Custom = Record<never, never>> = <E extends string>(
     expression: E,
-    handler: (ctx: C, ...args: HandlerArgs<E>) => void | Promise<void>,
+    handler: (ctx: C, ...args: HandlerArgs<E, Custom>) => void | Promise<void>,
   ) => void
-  export type SensorFn<C = unknown> = <E extends string, R>(
+  export type SensorFn<C = unknown, Custom = Record<never, never>> = <E extends string, R>(
     expression: E,
-    handler: (ctx: C, ...args: HandlerArgs<E>) => R | Promise<R>,
+    handler: (ctx: C, ...args: HandlerArgs<E, Custom>) => R | Promise<R>,
   ) => void
   export const context: RoleFn
   export const action: RoleFn
   export const sensor: SensorFn
-  export function defineState<C>(factory: () => C | Promise<C>): {
-    readonly context: RoleFn<C>; readonly action: RoleFn<C>; readonly sensor: SensorFn<C>
+  type ParamTypeDef<T> = { regexp: RegExp | readonly RegExp[]; transformer: (...captures: string[]) => T }
+  type CustomRegistry<P> = { [K in keyof P]: P[K] extends ParamTypeDef<infer T> ? T : never }
+  export function defineState<C, P extends Record<string, ParamTypeDef<unknown>> = Record<never, never>>(
+    factory: () => C | Promise<C>,
+    paramTypes?: P,
+  ): {
+    readonly context: RoleFn<C, CustomRegistry<P>>; readonly action: RoleFn<C, CustomRegistry<P>>; readonly sensor: SensorFn<C, CustomRegistry<P>>
   }
   export function defineParameterType<T>(opts: {
     name: string

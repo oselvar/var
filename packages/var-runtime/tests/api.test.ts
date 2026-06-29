@@ -115,6 +115,29 @@ test('built-in parameter types are inferred from the expression (no annotations)
   expect(r.steps).toHaveLength(4)
 })
 
+test('custom parameter types declared in defineState are inferred (Tier 2)', () => {
+  // TYPE-LEVEL assertions (fire via tsconfig.tests.json under `pnpm typecheck`).
+  // The transformer return types form the registry: {airport} → string,
+  // {date} → Date. Built-ins still resolve alongside them.
+  const { action: act, sensor: sense } = defineState(() => ({ from: '' }), {
+    airport: { regexp: /[A-Z]{3}/, transformer: (code: string) => code },
+    date: { regexp: /.+/, transformer: (s: string) => new Date(s) },
+  })
+  act('fly from {airport} to {airport} on {date}', (_ctx, from, to, when) => {
+    expectTypeOf(from).toEqualTypeOf<string>()
+    expectTypeOf(to).toEqualTypeOf<string>()
+    expectTypeOf(when).toEqualTypeOf<Date>()
+  })
+  sense('at {airport} after {int} hours', (_ctx, code, hours) => {
+    expectTypeOf(code).toEqualTypeOf<string>()
+    expectTypeOf(hours).toEqualTypeOf<number>()
+    return [code, hours]
+  })
+  const r = buildRegistry()
+  expect(r.steps).toHaveLength(2)
+  expect([...r.parameterTypes.parameterTypes].some((p) => p.name === 'airport')).toBe(true)
+})
+
 test('context/action/sensor register with their kind', () => {
   context('a logged-in user', () => {})
   action('I click submit', () => {})

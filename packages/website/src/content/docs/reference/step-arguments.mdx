@@ -54,36 +54,39 @@ A wrong annotation is still an error: `{int}` infers `number`, so writing
 **narrow** a slot the inference can't reach (below) — never to restate what the
 expression already says.
 
-## Two cases inference can't reach
+## Custom parameter types
 
-These fall back to `any`, so you annotate them to recover a precise type.
-
-### Custom parameter types
-
-A type you register with `defineParameterType` is inferred as `any` today,
-because the expression string carries only its name, not its transformer's
-return type. Annotate the parameter to type it:
+Declare custom parameter types in the second argument to `defineState`, and
+their transformer's **return type** is inferred for every matching placeholder —
+just like the built-ins. No annotations:
 
 ```ts
-defineParameterType({ name: 'date', regexp: /…/, transformer: (m, d) => new Date(/* … */) })
+const { context } = defineState(() => ({ member: 'maya' }), {
+  date: { regexp: /…/, transformer: (m: string, d: string) => new Date(/* … */) },
+})
 
-// {date} is custom → inferred as `any`; annotate `_due` to get Date.
-context('borrowed {string}, due back on {date}', (_ctx, title, _due: Date) => {
-  // `title` is inferred as string from {string}; `_due` is annotated Date.
+// {date} → Date, {string} → string, both inferred.
+context('borrowed {string}, due back on {date}', (_ctx, title, due) => {
+  // `title` is string, `due` is Date.
 })
 ```
 
-> Inferring custom types from the transformer's return type is planned — it
-> needs the parameter types declared where TypeScript can see their return
-> types, rather than via a side-effecting `defineParameterType` call. Until then,
-> annotate them.
+The transformer is the source of truth: `(…) => Date` makes `{date}` a `Date`,
+`(…) => number` makes it a `number`. Because the declaration also registers the
+type for matching, you no longer need a separate `defineParameterType` call.
 
-### The trailing table or doc-string argument
+> The standalone `defineParameterType(…)` function still works for registering a
+> type globally, but a placeholder backed by it falls back to `any` (the
+> registration isn't connected to the step at the type level). Declare types in
+> `defineState` to get inference.
 
-A data table or doc string attached to a step arrives as the **last** argument,
-*after* the captured parameters. It has no `{…}` placeholder in the expression,
-so it is inferred as `any` — annotate it. See [Tables](/docs/reference/tables)
-and [Doc strings](/docs/reference/doc-strings) for the shapes.
+## The trailing table or doc-string argument
+
+This is the one slot inference can't reach. A data table or doc string attached
+to a step arrives as the **last** argument, *after* the captured parameters. It
+has no `{…}` placeholder in the expression, so it is inferred as `any` — annotate
+it. See [Tables](/docs/reference/tables) and
+[Doc strings](/docs/reference/doc-strings) for the shapes.
 
 ```ts
 // `name` inferred from {word}; `body` is the trailing doc string — annotate it.

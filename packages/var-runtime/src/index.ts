@@ -33,13 +33,15 @@ function registerStep(expression: string, handler: StepHandler, kind: StepKind):
   steps.push({ expression, sourceFile, sourceLine, handler, kind })
 }
 
-// ─── Argument-type inference from the cucumber expression (Tier 1) ───
-// The handler's positional args are derived from the expression literal:
-// `{int}`/`{float}`/… → number, `{biginteger}` → bigint, `{string}`/`{word}`/
-// `{}` → string. Authors no longer annotate them. Custom parameter types
-// (`{airport}`) and the trailing data-table / doc-string arg the runtime
-// appends are not visible in the expression, so they fall back to `AnyArg` and
-// can be annotated to taste (Tier 2 will resolve customs via a typed registry).
+// ─── Argument-type inference from the cucumber expression ───
+// var's own port of cucumber-expressions' parameter grammar: map an expression
+// literal's `{name}` placeholders to the types their transformers produce.
+// (Deliberately kept here rather than upstreamed — the parameter-extraction
+// grammar is small and stable, and var's needs are narrow.) The one
+// var-specific choice is the `AnyArg` fallback for a name with no known type:
+// `any`, not `unknown`, so authors can still annotate a slot the inference can't
+// reach — a custom type not declared via `defineState`, or the trailing
+// data-table / doc-string arg the runtime appends.
 
 // `any`, not `unknown`: an annotated fallback param (`code: string`) must stay
 // assignable to its slot, which `unknown` would reject under parameter
@@ -47,54 +49,75 @@ function registerStep(expression: string, handler: StepHandler, kind: StepKind):
 // biome-ignore lint/suspicious/noExplicitAny: intentional flexible fallback slot
 type AnyArg = any
 
-// Built-in cucumber parameter-type name → TypeScript type.
-type BuiltInArg<N extends string> = N extends
-  | 'int'
-  | 'float'
-  | 'double'
-  | 'long'
-  | 'short'
-  | 'byte'
-  | 'bigdecimal'
-  ? number
-  : N extends 'biginteger'
-    ? bigint
-    : N extends 'string' | 'word' | ''
-      ? string
-      : AnyArg
+// Built-in cucumber parameter-type name → the type its transformer produces.
+interface BuiltInParameterTypes {
+  int: number
+  float: number
+  double: number
+  byte: number
+  short: number
+  long: number
+  biginteger: bigint
+  bigdecimal: string
+  word: string
+  string: string
+  '': string
+}
 
-// Pull `{name}` placeholders out of the expression literal, in source order.
-// A `{` preceded by a backslash is an escaped literal brace, not a parameter.
-type ParseArgs<
+// Parameter-type names in the expression, in source order. Escape-aware:
+// a brace escaped with a backslash (`\{`) is literal text, not a parameter.
+type ParameterNames<
   S extends string,
-  Acc extends unknown[] = [],
-> = S extends `${infer Pre}{${infer Rest}`
-  ? Pre extends `${string}\\`
-    ? ParseArgs<Rest, Acc>
-    : Rest extends `${infer Name}}${infer After}`
-      ? ParseArgs<After, [...Acc, BuiltInArg<Name>]>
-      : Acc
-  : Acc
+  InParameter extends boolean = false,
+  Current extends string = '',
+  Names extends string[] = [],
+> = S extends `\\${infer _Escaped}${infer Rest}`
+  ? ParameterNames<Rest, InParameter, Current, Names>
+  : S extends `{${infer Rest}`
+    ? ParameterNames<Rest, true, '', Names>
+    : S extends `}${infer Rest}`
+      ? InParameter extends true
+        ? ParameterNames<Rest, false, '', [...Names, Current]>
+        : ParameterNames<Rest, false, '', Names>
+      : S extends `${infer Char}${infer Rest}`
+        ? InParameter extends true
+          ? ParameterNames<Rest, true, `${Current}${Char}`, Names>
+          : ParameterNames<Rest, false, Current, Names>
+        : Names
 
-// Parsed placeholders, followed by any trailing arg (table/doc string) the
-// runtime appends — that tail is `AnyArg` because the expression can't describe it.
-type HandlerArgs<E extends string> = [...ParseArgs<E>, ...AnyArg[]]
+// Resolve one parameter name to a type: a custom registry entry wins, then a
+// built-in, then the `any` fallback.
+type ResolveArg<Name extends string, Custom> = Name extends keyof Custom
+  ? Custom[Name]
+  : Name extends keyof BuiltInParameterTypes
+    ? BuiltInParameterTypes[Name]
+    : AnyArg
+
+type MapArgs<Names extends readonly string[], Custom> = {
+  [Index in keyof Names]: ResolveArg<Names[Index] & string, Custom>
+}
+
+// Parsed placeholders mapped to types, then any trailing arg (table/doc string)
+// the runtime appends — that tail is `AnyArg` because the expression can't
+// describe it.
+type HandlerArgs<E extends string, Custom> = [...MapArgs<ParameterNames<E>, Custom>, ...AnyArg[]]
 
 // A context/action handler runs for its side effects only; its args are inferred
-// from the expression `E` (see HandlerArgs), so `(ctx, name) => …` types `name`
-// without an annotation and without TS2345.
-export type RoleFn<C = unknown> = <E extends string>(
+// from the expression `E` (built-in parameter types, plus any `Custom` types
+// declared via `defineState`), so `(ctx, name) => …` types `name` without an
+// annotation and without TS2345.
+export type RoleFn<C = unknown, Custom = Record<never, never>> = <E extends string>(
   expression: E,
-  handler: (ctx: C, ...args: HandlerArgs<E>) => void | Promise<void>,
+  handler: (ctx: C, ...args: HandlerArgs<E, Custom>) => void | Promise<void>,
 ) => void
 
 // A sensor may RETURN a value for the pure core to compare against the Markdown.
 // That return shape is independent of the captured args — it can be a by-index
 // column tuple, a header-bound row object, a whole reproduced table, or a
 // doc-string tuple — so `R` is inferred freely from the handler body.
-export type SensorFn<C = unknown> = <E extends string, R>(
+export type SensorFn<C = unknown, Custom = Record<never, never>> = <E extends string, R>(
   expression: E,
-  handler: (ctx: C, ...args: HandlerArgs<E>) => R | Promise<R>,
+  handler: (ctx: C, ...args: HandlerArgs<E, Custom>) => R | Promise<R>,
 ) => void
 
 export const context: RoleFn = (expression, handler) =>
@@ -104,16 +127,38 @@ export const action: RoleFn = (expression, handler) =>
 export const sensor: SensorFn = (expression, handler) =>
   registerStep(expression, handler as StepHandler, 'sensor')
 
-export function defineState<C>(factory: () => C | Promise<C>): {
-  readonly context: RoleFn<C>
-  readonly action: RoleFn<C>
-  readonly sensor: SensorFn<C>
+// A custom parameter type, declared inline in `defineState` so its transformer's
+// return type can be captured for inference (and registered for matching).
+type ParamTypeDef<T> = {
+  readonly regexp: RegExp | ReadonlyArray<RegExp>
+  readonly transformer: (...captures: string[]) => T
+}
+
+// Record of parameter-type definitions → `{ name: producedType }`, the custom
+// registry that drives `{name}` → type inference for this stepfile's steps.
+type CustomRegistry<P> = { [K in keyof P]: P[K] extends ParamTypeDef<infer T> ? T : never }
+
+export function defineState<
+  C,
+  P extends Record<string, ParamTypeDef<unknown>> = Record<never, never>,
+>(
+  factory: () => C | Promise<C>,
+  paramTypes?: P,
+): {
+  readonly context: RoleFn<C, CustomRegistry<P>>
+  readonly action: RoleFn<C, CustomRegistry<P>>
+  readonly sensor: SensorFn<C, CustomRegistry<P>>
 } {
   const { sourceFile } = callerLocation()
   if (contextFactoriesByFile.has(sourceFile)) {
     throw new Error(`defineState() called more than once in ${sourceFile}`)
   }
   contextFactoriesByFile.set(sourceFile, factory as () => unknown)
+  if (paramTypes) {
+    for (const [name, def] of Object.entries(paramTypes)) {
+      customTypes.push({ name, regexp: def.regexp, transformer: def.transformer })
+    }
+  }
   return {
     context: (expression, handler) => registerStep(expression, handler as StepHandler, 'context'),
     action: (expression, handler) => registerStep(expression, handler as StepHandler, 'action'),
