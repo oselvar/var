@@ -49,7 +49,7 @@ const doc = decodeEntities(
 )
 
 const mountAttrs = {
-  class: 'cm-mount',
+  class: 'cm-mount border border-line-subtle rounded-none overflow-hidden my-6',
   'data-uri': uri,
   'data-lang': lang,
   'data-doc': doc,
@@ -61,37 +61,17 @@ const mountAttrs = {
 }
 ---
 {chrome ? (
-  <figure class="file-editor">
-    <figcaption class="fe-bar">{filename}</figcaption>
+  <figure class="file-editor my-6">
+    <figcaption class="fe-bar px-[14px] py-2 bg-line-subtle text-ink font-mono text-[14px] font-semibold tracking-[0.01em]">{filename}</figcaption>
     <div {...mountAttrs}></div>
   </figure>
 ) : (
   <div {...mountAttrs}></div>
 )}
 <style>
-  .cm-mount { border: 1px solid var(--ax-border-subtle); border-radius: var(--radius-5); overflow: hidden; margin: 24px 0; }
   .cm-mount :global(.cm-editor) { font-size: 14px; }
   .cm-mount :global(.cm-editor.cm-focused) { outline: none; }
-
-  /* Filename variant — shown only when `filename` is set. A borderless header
-     bar (background = the editor's border colour, text = the heading ink) sits
-     directly above the otherwise-unchanged bare editor. No window chrome,
-     shadow, or hover; the nested mount only drops its own vertical margin. */
-  .file-editor {
-    margin: 24px 0;
-  }
-  .file-editor .cm-mount {
-    margin: 0;
-  }
-  .fe-bar {
-    padding: 8px 14px;
-    background: var(--ax-border-subtle);
-    color: var(--ink);
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-  }
+  .file-editor .cm-mount { margin: 0; }
 </style>
 <script>
   import '../scripts/editor-mount.ts'
