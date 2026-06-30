@@ -25,8 +25,9 @@ from var.ast import (
     ThematicBreak,
     VarDoc,
 )
+from var.plan import ExecutionPlan
 from var.registry import Registry
-from var.span import Span
+from var.span import Span, utf16_slice
 
 
 # ---------------------------------------------------------------------------
@@ -164,4 +165,70 @@ def to_var_doc_artifact(doc: VarDoc) -> dict[str, Any]:
         "path": doc.path,
         "examples": [_example(ex) for ex in doc.examples],
         "orphanAttachments": [_block(b) for b in doc.orphan_attachments],
+    }
+
+
+# ---------------------------------------------------------------------------
+# Plan artifact projection
+# ---------------------------------------------------------------------------
+
+
+def _doc_string(ds: Any) -> dict[str, Any]:
+    return {
+        "content": ds.content,
+        "contentType": ds.content_type,
+        "span": _span(ds.span),
+    }
+
+
+def to_plan_artifact(execution_plan: ExecutionPlan) -> dict[str, Any]:
+    """Project an ExecutionPlan to the camelCase wire dict for the plan artifact.
+
+    Port of ``toPlanArtifact`` from conformance.ts.
+    """
+    source = execution_plan.var_doc.source
+
+    def _step(step: Any) -> dict[str, Any]:
+        step_names = parameter_type_names(step.step_def.compiled)
+        result: dict[str, Any] = {
+            "text": step.text,
+            "matchSpan": _span(step.match_span),
+            "paramSpans": [_span(s) for s in step.param_spans],
+            "matchedExpression": step.step_def.expression,
+            "args": [
+                {
+                    "value": utf16_slice(source, s.start_offset, s.end_offset),
+                    "parameterType": step_names[i] if i < len(step_names) else None,
+                }
+                for i, s in enumerate(step.param_spans)
+            ],
+        }
+        if step.data_table is not None:
+            result["dataTable"] = _block(step.data_table)
+        if step.doc_string is not None:
+            result["docString"] = _doc_string(step.doc_string)
+        return result
+
+    def _planned_example(ex: Any) -> dict[str, Any]:
+        result: dict[str, Any] = {
+            "name": ex.name,
+            "scopeStack": list(ex.scope_stack),
+            "span": _span(ex.span),
+            "expectedOutcome": ex.expected_outcome if ex.expected_outcome is not None else "pass",
+        }
+        if ex.expected_error_message is not None:
+            result["expectedErrorMessage"] = ex.expected_error_message
+        result["steps"] = [_step(s) for s in ex.steps]
+        return result
+
+    return {
+        "examples": [_planned_example(ex) for ex in execution_plan.examples],
+        "diagnostics": [
+            {
+                "code": d.code,
+                "severity": d.severity,
+                "span": _span(d.span),
+            }
+            for d in execution_plan.diagnostics
+        ],
     }

@@ -17,9 +17,10 @@ from pathlib import Path
 import pytest
 
 from var.canonical_json import canonical_stringify
-from var.conformance import to_registry_artifact, to_var_doc_artifact
+from var.conformance import to_plan_artifact, to_registry_artifact, to_var_doc_artifact
 from var.define_state import _reset_builder, build_registry
 from var.parse import parse
+from var.plan import plan as build_plan
 
 # python/packages/var/tests/ -> parents[4] = repo root
 BUNDLES_DIR = Path(__file__).resolve().parents[4] / "conformance" / "bundles"
@@ -64,3 +65,17 @@ def test_registry_matches_golden(bundle: Path) -> None:
     actual = canonical_stringify(artifact)
     expected = (bundle / "golden" / "registry.json").read_text(encoding="utf-8")
     assert actual == expected, f"registry.json mismatch for {bundle.name}"
+
+
+@pytest.mark.parametrize("bundle", BUNDLES_WITH_STEPS, ids=lambda b: b.name)
+def test_plan_matches_golden(bundle: Path) -> None:
+    _reset_builder()
+    _import_steps(bundle)
+    registry = build_registry()
+    source = (bundle / "example.md").read_text(encoding="utf-8")
+    doc = parse("example.md", source)
+    execution = build_plan(doc, registry)
+    artifact = to_plan_artifact(execution)
+    actual = canonical_stringify(artifact)
+    expected = (bundle / "golden" / "plan.json").read_text(encoding="utf-8")
+    assert actual == expected, f"plan.json mismatch for {bundle.name}"
