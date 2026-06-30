@@ -178,6 +178,32 @@ order: Python core split first** (smaller blast radius, a fast win that locks th
 seam), then the TS `var-runner` extraction. After both, a quick cross-check confirms the
 inventories match.
 
+## Known residual divergences (tracked for future convergence)
+
+Both sub-projects landed (Python core split + TS var-runner extraction); the two
+implementations now present one structure (`var-core` / `var` / `var-runner` /
+adapters) with matching public names. These smaller seam divergences remain — none
+blocks consistency, but record them so the reference fully converges later and the
+next implementor (Java/C#) knows which side to follow:
+
+- **Config/discovery physical ownership.** Python's `var-runner` *owns*
+  `config`/`discovery`; TS's `var-runner` *re-exports* them — they physically stay
+  in `var-core/node` because `var-lsp` imports them there. Accepted per decision
+  (keep `var-lsp` off `var-runner`). Public API matches; physical home differs.
+- **`matchSpec` / `match_spec`.** Python's `var-runner` exposes `match_spec`
+  (per-file glob predicate, used by pytest's per-file collection hook); TS has no
+  `matchSpec` (vitest does set-membership on discovered paths via an inline
+  `isVarSpecId`). Add `matchSpec` to TS `var-runner` if/when a TS runner needs
+  per-file matching.
+- **`planSpec` arity.** TS `planSpec(path, source, registry, scannerPlugins?)`
+  carries an optional `scannerPlugins`; Python `plan_spec(path, source, registry)`
+  does not thread plugins here. Reconcile when Python grows scanner-plugin support.
+- **`findSpecs` / `find_specs` parameter order.** TS `(cwd, include, exclude)` vs
+  Python `(include, exclude, root)`. Pick one canonical order when next touched.
+- **`renderFailure` wording.** Human-readable terminal text differs (and `var-cli`
+  still uses its own `formatError` for output parity). Acceptable — it's not a
+  name and not conformance-checked.
+
 ## References
 
 - TS inventory & Python inventory (this session's analysis).
