@@ -11,6 +11,7 @@ dev = ["pytest>=8", "ruff>=0.6"]
 
 [tool.pytest.ini_options]
 testpaths = ["packages"]
+addopts = "--import-mode=importlib"
 
 [tool.ruff]
 line-length = 100
