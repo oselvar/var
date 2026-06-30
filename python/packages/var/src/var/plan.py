@@ -1,0 +1,511 @@
+"""plan.py — port of var-core/src/plan.ts.
+
+Produces an ExecutionPlan from a VarDoc + Registry by matching step
+expressions against every text-bearing block in each example, attaching
+trailing tables / fenced code blocks, detecting header-bound tables, and
+collecting diagnostics.
+"""
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass
+from typing import Literal
+
+from var.ast import Block, Example, Fence, InlineOffset, Table, VarDoc
+from var.diagnostics import (
+    AmbiguousInput,
+    Candidate,
+    Diagnostic,
+    ambiguous_match,
+    error_fence_without_step,
+)
+from var.matcher import Hit, find_hits, resolve_hits
+from var.registry import Registry, StepRegistration
+from var.sentences import split_sentences
+from var.span import Span, span_from_offsets
+
+
+# ---------------------------------------------------------------------------
+# Public types
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True, slots=True)
+class DocString:
+    content: str
+    content_type: str
+    span: Span
+
+
+@dataclass(frozen=True, slots=True)
+class PlannedStep:
+    text: str
+    match_span: Span
+    param_spans: tuple[Span, ...]
+    step_def: StepRegistration
+    args: tuple
+    data_table: Table | None = None
+    doc_string: DocString | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class HeaderBinding:
+    """Describes the binding paragraph shared by all rows of a header-bound table."""
+
+    match_span: Span
+    param_spans: tuple[Span, ...]
+    step_def: StepRegistration
+
+
+@dataclass(frozen=True, slots=True)
+class RowCheck:
+    """One expected column value for a header-bound table row."""
+
+    column: str
+    value: str
+    span: Span
+
+
+@dataclass(frozen=True, slots=True)
+class PlannedExample:
+    name: str
+    scope_stack: tuple[str, ...]
+    span: Span
+    steps: tuple[PlannedStep, ...]
+    header_binding: HeaderBinding | None = None
+    row_checks: tuple[RowCheck, ...] | None = None
+    expected_outcome: Literal["fail"] | None = None
+    expected_error_message: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ExecutionPlan:
+    var_doc: VarDoc
+    examples: tuple[PlannedExample, ...]
+    diagnostics: tuple[Diagnostic, ...]
+
+
+# ---------------------------------------------------------------------------
+# Internal helpers
+# ---------------------------------------------------------------------------
+
+
+def _lift_inline_offset(
+    inline_map: tuple[InlineOffset, ...],
+    text_offset: int,
+) -> int:
+    """Mirror liftInlineOffset from plan.ts.
+
+    Walk inline_map to find the best entry whose text_offset <= the given
+    text_offset, then map source_offset + delta back to a source offset.
+    """
+    best: InlineOffset | None = inline_map[0] if inline_map else None
+    for entry in inline_map:
+        if entry.text_offset <= text_offset:
+            best = entry
+    if best is None:
+        raise ValueError("empty inline_map")
+    return best.source_offset + (text_offset - best.text_offset)
+
+
+def _lift_span(source: str, block: Block, block_start: int, block_end: int) -> Span:
+    """Mirror liftSpan from plan.ts.
+
+    Maps a UTF-16 [block_start, block_end) offset range within the block's
+    plain text back to a source-document Span.  Only paragraph / list_item /
+    blockquote blocks carry an inline_map; for other block kinds the block's
+    own span is returned unchanged.
+    """
+    if block.kind not in ("paragraph", "list_item", "blockquote"):
+        return block.span  # type: ignore[return-value]
+    inline_map: tuple[InlineOffset, ...] = block.inline_map  # type: ignore[union-attr]
+    start_src = _lift_inline_offset(inline_map, block_start)
+    end_src = _lift_inline_offset(inline_map, block_end)
+    return span_from_offsets(source, start_src, end_src)
+
+
+# ---------------------------------------------------------------------------
+# Block-level planning
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True, slots=True)
+class _Ambiguity:
+    match_start: int
+    match_end: int
+    candidates: tuple[Hit, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class _BlockPlan:
+    steps: tuple[Hit, ...]
+    ambiguities: tuple[_Ambiguity, ...]
+
+
+def _plan_block(text: str, registry: Registry) -> _BlockPlan:
+    """Mirror planBlock from plan.ts.
+
+    Splits *text* into sentences, runs find_hits + resolve_hits on each, and
+    adjusts the offsets back to block-text positions.
+    """
+    all_steps: list[Hit] = []
+    all_ambiguities: list[_Ambiguity] = []
+
+    for sentence in split_sentences(text):
+        hits = find_hits(sentence.text, registry)
+        # Adjust hit offsets from sentence-relative to block-text-relative.
+        adjusted: list[Hit] = []
+        for h in hits:
+            adjusted.append(
+                Hit(
+                    expression=h.expression,
+                    step_def=h.step_def,
+                    match_start=h.match_start + sentence.start_offset,
+                    match_end=h.match_end + sentence.start_offset,
+                    args=h.args,
+                    param_spans=tuple(
+                        type(p)(
+                            start=p.start + sentence.start_offset,
+                            end=p.end + sentence.start_offset,
+                        )
+                        for p in h.param_spans
+                    ),
+                )
+            )
+        resolved = resolve_hits(tuple(adjusted))
+        if resolved.kind == "ambiguous":
+            for c in resolved.collisions:
+                all_ambiguities.append(
+                    _Ambiguity(
+                        match_start=c.match_start,
+                        match_end=c.match_end,
+                        candidates=c.candidates,
+                    )
+                )
+        elif resolved.steps:
+            all_steps.extend(resolved.steps)
+
+    return _BlockPlan(steps=tuple(all_steps), ambiguities=tuple(all_ambiguities))
+
+
+# ---------------------------------------------------------------------------
+# Header-bound table detection
+# ---------------------------------------------------------------------------
+
+
+def _word_offset(haystack: str, word: str) -> int:
+    """Return the start index of *word* as a whole word in *haystack*, or -1.
+
+    Mirror wordOffset from plan.ts — case-sensitive, whole-word match using
+    Unicode letter/number/underscore boundaries.
+    """
+    escaped = re.escape(word)
+    m = re.search(
+        r"(?<![^\W_])" + escaped + r"(?![^\W_])",
+        haystack,
+        re.UNICODE,
+    )
+    return m.start() if m else -1
+
+
+def _detect_header_bound(
+    ex: Example,
+    steps_by_block: dict[int, list[PlannedStep]],
+    source: str,
+) -> (
+    tuple[Table, PlannedStep, tuple[Span, ...]]
+    | None
+):
+    """Mirror detectHeaderBound from plan.ts.
+
+    Scans the example body for a table whose every header cell name appears
+    (case-sensitive, whole word) in the block immediately above it, and that
+    block has planned steps.  Returns (table, last_step, header_spans) or None.
+    """
+    body = ex.body
+    for idx in range(1, len(body)):
+        here = body[idx]
+        if here.kind != "table":
+            continue
+        above = body[idx - 1]
+        if above.kind not in ("paragraph", "list_item", "blockquote"):
+            continue
+        steps = steps_by_block.get(idx - 1)
+        if not steps:
+            continue
+        table: Table = here  # type: ignore[assignment]
+        assert table.header is not None
+        header_cells = table.header.cells
+        offsets = [_word_offset(above.text, cell) for cell in header_cells]  # type: ignore[union-attr]
+        if any(o < 0 for o in offsets):
+            continue
+        header_spans = tuple(
+            _lift_span(source, above, offsets[i], offsets[i] + len(header_cells[i]))  # type: ignore[arg-type]
+            for i in range(len(header_cells))
+        )
+        return table, steps[-1], header_spans
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Derive example name
+# ---------------------------------------------------------------------------
+
+
+def _derive_example_name(body: tuple[Block, ...]) -> str:
+    """Mirror deriveExampleName from plan.ts."""
+    primary = next(
+        (b for b in body if b.kind in ("paragraph", "list_item", "blockquote")),
+        None,
+    )
+    if primary is None:
+        return ""
+    sentences = split_sentences(primary.text)  # type: ignore[union-attr]
+    if not sentences:
+        return ""
+    first = sentences[0]
+    # Strip a single trailing . ! ? (embedded terminators are left alone).
+    return re.sub(r"[.!?]$", "", first.text)
+
+
+# ---------------------------------------------------------------------------
+# Main entry point
+# ---------------------------------------------------------------------------
+
+
+def plan(var_doc: VarDoc, registry: Registry) -> ExecutionPlan:
+    """Mirror plan() from plan.ts.
+
+    Produces an ExecutionPlan by walking each Example's body blocks.
+    """
+    examples: list[PlannedExample] = []
+    diagnostics: list[Diagnostic] = []
+
+    for ex in var_doc.examples:
+        had_ambiguous = False
+
+        # ------------------------------------------------------------------
+        # Pass 1: plan each text-bearing block, collect steps by block index.
+        # ------------------------------------------------------------------
+        steps_by_block: dict[int, list[PlannedStep]] = {}
+
+        for idx, block in enumerate(ex.body):
+            if block.kind not in ("paragraph", "list_item", "blockquote"):
+                continue
+            result = _plan_block(block.text, registry)  # type: ignore[union-attr]
+
+            for collision in result.ambiguities:
+                span = _lift_span(
+                    var_doc.source,
+                    block,
+                    collision.match_start,
+                    collision.match_end,
+                )
+                diagnostics.append(
+                    ambiguous_match(
+                        AmbiguousInput(
+                            text=block.text[  # type: ignore[index]
+                                # slice using cp indices — for span reporting
+                                # we need the UTF-16 text; here we slice the
+                                # Python str for the diagnostic message only.
+                                _u16_to_cp(block.text, collision.match_start)  # type: ignore[union-attr]
+                                : _u16_to_cp(block.text, collision.match_end)  # type: ignore[union-attr]
+                            ],
+                            span=span,
+                            candidates=tuple(
+                                Candidate(
+                                    expression=c.expression,
+                                    source_file=c.step_def.expression_source_file,
+                                    source_line=c.step_def.expression_source_line,
+                                )
+                                for c in collision.candidates
+                            ),
+                        )
+                    )
+                )
+                had_ambiguous = True
+
+            if not had_ambiguous and result.steps:
+                block_steps: list[PlannedStep] = [
+                    PlannedStep(
+                        text=_utf16_slice(block.text, hit.match_start, hit.match_end),  # type: ignore[union-attr]
+                        match_span=_lift_span(
+                            var_doc.source, block, hit.match_start, hit.match_end
+                        ),
+                        param_spans=tuple(
+                            _lift_span(var_doc.source, block, p.start, p.end)
+                            for p in hit.param_spans
+                        ),
+                        step_def=hit.step_def,
+                        args=hit.args,
+                    )
+                    for hit in result.steps
+                ]
+                steps_by_block[idx] = block_steps
+
+        # ------------------------------------------------------------------
+        # Header-bound table detection
+        # ------------------------------------------------------------------
+        bound = _detect_header_bound(ex, steps_by_block, var_doc.source) if not had_ambiguous else None
+
+        if bound is not None:
+            table, binding_step, header_spans = bound
+            header_binding = HeaderBinding(
+                match_span=binding_step.match_span,
+                param_spans=binding_step.param_spans,
+                step_def=binding_step.step_def,
+            )
+            assert table.header is not None
+            for row in table.rows:
+                row_object: dict[str, str] = {}
+                for i, cell_name in enumerate(table.header.cells):
+                    row_object[cell_name] = row.cells[i] if i < len(row.cells) else ""
+                row_step = PlannedStep(
+                    text=binding_step.text,
+                    match_span=row.span,  # type: ignore[arg-type]
+                    param_spans=binding_step.param_spans,
+                    step_def=binding_step.step_def,
+                    args=(*binding_step.args, row_object),
+                )
+                row_checks = tuple(
+                    RowCheck(
+                        column=cell_name,
+                        value=row.cells[i] if i < len(row.cells) else "",
+                        span=(
+                            row.cell_spans[i]
+                            if i < len(row.cell_spans)
+                            else row.span  # type: ignore[arg-type]
+                        ),
+                    )
+                    for i, cell_name in enumerate(table.header.cells)
+                )
+                examples.append(
+                    PlannedExample(
+                        name=" / ".join(row.cells),
+                        scope_stack=(*ex.scope_stack, binding_step.text),
+                        span=row.span,  # type: ignore[arg-type]
+                        steps=(row_step,),
+                        header_binding=header_binding,
+                        row_checks=row_checks,
+                    )
+                )
+            continue
+
+        # ------------------------------------------------------------------
+        # Error fence detection
+        # ------------------------------------------------------------------
+        error_fence: Fence | None = next(
+            (b for b in ex.body if b.kind == "fence" and b.info == "error"),  # type: ignore[union-attr]
+            None,
+        )
+
+        # ------------------------------------------------------------------
+        # Pass 2: attach trailing table / fence to the last step in a block.
+        # ------------------------------------------------------------------
+        attachments: dict[
+            int,
+            tuple[Table | None, DocString | None],
+        ] = {}
+
+        for idx in range(1, len(ex.body)):
+            here = ex.body[idx]
+            if here.kind == "table" and (idx - 1) in steps_by_block:
+                prev_data, prev_doc = attachments.get(idx - 1, (None, None))
+                attachments[idx - 1] = (here, prev_doc)  # type: ignore[assignment]
+            elif (
+                here.kind == "fence"
+                and here.info != "error"  # type: ignore[union-attr]
+                and (idx - 1) in steps_by_block
+            ):
+                fence: Fence = here  # type: ignore[assignment]
+                prev_data, prev_doc = attachments.get(idx - 1, (None, None))
+                attachments[idx - 1] = (
+                    prev_data,
+                    DocString(
+                        content=fence.body,
+                        content_type=fence.info,
+                        span=fence.body_span,  # type: ignore[arg-type]
+                    ),
+                )
+
+        # ------------------------------------------------------------------
+        # Pass 3: rebuild the final step list, applying attachments.
+        # ------------------------------------------------------------------
+        final_steps: list[PlannedStep] = []
+        for idx in range(len(ex.body)):
+            block_steps = steps_by_block.get(idx, [])
+            attach = attachments.get(idx)
+            for s_idx, step in enumerate(block_steps):
+                if s_idx == len(block_steps) - 1 and attach is not None:
+                    data_table, doc_string = attach
+                    final_steps.append(
+                        PlannedStep(
+                            text=step.text,
+                            match_span=step.match_span,
+                            param_spans=step.param_spans,
+                            step_def=step.step_def,
+                            args=step.args,
+                            data_table=data_table,
+                            doc_string=doc_string,
+                        )
+                    )
+                else:
+                    final_steps.append(step)
+
+        runnable_steps = () if had_ambiguous else tuple(final_steps)
+
+        # An `error` fence without a runnable step is an author mistake.
+        if error_fence is not None and not runnable_steps:
+            diagnostics.append(error_fence_without_step(error_fence.span))  # type: ignore[arg-type]
+
+        if not final_steps and not had_ambiguous:
+            # No matches — drop this example (plain docs).
+            continue
+
+        # Build expected-outcome fields.
+        expected_outcome: Literal["fail"] | None = None
+        expected_error_message: str | None = None
+        if error_fence is not None:
+            expected_outcome = "fail"
+            msg = error_fence.body.strip()
+            if msg:
+                expected_error_message = msg
+
+        examples.append(
+            PlannedExample(
+                name=_derive_example_name(ex.body),
+                scope_stack=ex.scope_stack,
+                span=ex.span,  # type: ignore[arg-type]
+                steps=runnable_steps,
+                expected_outcome=expected_outcome,
+                expected_error_message=expected_error_message,
+            )
+        )
+
+    return ExecutionPlan(
+        var_doc=var_doc,
+        examples=tuple(examples),
+        diagnostics=tuple(diagnostics),
+    )
+
+
+# ---------------------------------------------------------------------------
+# UTF-16 utilities (local — avoid polluting span.py)
+# ---------------------------------------------------------------------------
+
+
+def _u16_to_cp(text: str, u16_offset: int) -> int:
+    """Code-point index in *text* for the given UTF-16 offset."""
+    count = 0
+    for i, ch in enumerate(text):
+        if count >= u16_offset:
+            return i
+        count += 2 if ord(ch) > 0xFFFF else 1
+    return len(text)
+
+
+def _utf16_slice(text: str, start_u16: int, end_u16: int) -> str:
+    """Slice *text* using UTF-16 offsets."""
+    a = _u16_to_cp(text, start_u16)
+    b = _u16_to_cp(text, end_u16)
+    return text[a:b]
