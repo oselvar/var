@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 from pathlib import Path
 
 import pytest
@@ -8,6 +9,7 @@ from var_runner.config import read_var_config
 from var_runner.discovery import match_spec
 from var_runner.run import RecordingReporter, examples_with_runs, plan_spec
 from var_runner.steps import load_steps
+from var_pytest.fixtures import _active_request, get_active_request, wrap_registry_for_fixtures
 
 _STASH: dict = {}  # keyed by config id → (VarConfig, LoadedSteps, root)
 
@@ -16,6 +18,8 @@ def pytest_configure(config: pytest.Config) -> None:
     root = Path(config.rootpath)
     cfg = read_var_config(root / "pyproject.toml")
     loaded = load_steps(cfg.steps, root)
+    wrapped_registry = wrap_registry_for_fixtures(loaded.registry, get_active_request)
+    loaded = dataclasses.replace(loaded, registry=wrapped_registry)
     _STASH[id(config)] = (cfg, loaded, root)
 
 
@@ -56,9 +60,25 @@ class VarItem(pytest.Item):
         self._example = example
         self._run = run
         self._source = source
+        self._token = None
+
+    def setup(self) -> None:
+        from _pytest.fixtures import TopRequest
+
+        fm = self.session._fixturemanager
+        self._fixtureinfo = fm.getfixtureinfo(node=self, func=None, cls=None)
+        self.fixturenames = self._fixtureinfo.names_closure
+        self.funcargs: dict = {}
+        self._request = TopRequest(self, _ispytest=True)  # type: ignore[arg-type]
+        self._token = _active_request.set(self._request)
 
     def runtest(self) -> None:
         self._run()
+
+    def teardown(self) -> None:
+        if self._token is not None:
+            _active_request.reset(self._token)
+            self._token = None
 
     def repr_failure(self, excinfo: object) -> str:
         from var_runner.render import render_failure
