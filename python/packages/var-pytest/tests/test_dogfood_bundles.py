@@ -103,5 +103,5 @@ def test_bundle_07_row_check_mismatch_fails_with_cell_diff(pytester):
     result.stdout.fnmatch_lines(["*score*"])
     result.stdout.fnmatch_lines(["*expected*10*"])
     result.stdout.fnmatch_lines(["*actual*99*"])
-    # A line-number reference must appear somewhere in the failure output.
-    assert any("line" in line for line in result.stdout.lines)
+    # The render_failure output emits "line N | column ..." — assert the exact line.
+    result.stdout.fnmatch_lines(["*line 9*"])

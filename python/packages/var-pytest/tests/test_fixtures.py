@@ -43,13 +43,6 @@ I save 2
 db has 2 entries
 """
 
-PYPROJECT = """
-[tool.var]
-vars = ["features/**/*.md"]
-steps = ["steps/**/*.steps.py"]
-"""
-
-
 def _write_fixture(pytester, spec_content: str, steps_content: str) -> None:
     pytester.makepyprojecttoml(PYPROJECT)
     (pytester.path / "steps").mkdir(exist_ok=True)

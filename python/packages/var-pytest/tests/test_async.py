@@ -74,3 +74,5 @@ def test_async_mismatch_is_detected(pytester):
     _write_fixture(pytester, ASYNC_WRONG_SPEC, ASYNC_STEPS)
     result = pytester.runpytest("-v")
     result.assert_outcomes(failed=1)
+    # render_failure emits "expected: 99, actual: 3" — confirm it's a real cell-mismatch.
+    result.stdout.fnmatch_lines(["*expected*99*"])
