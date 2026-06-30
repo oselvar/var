@@ -78,6 +78,9 @@ importers:
       '@oselvar/var-core':
         specifier: workspace:*
         version: link:../var-core
+      '@oselvar/var-runner':
+        specifier: workspace:*
+        version: link:../var-runner
 
   packages/var-core:
     dependencies:

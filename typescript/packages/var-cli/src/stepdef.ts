@@ -1,6 +1,6 @@
 import { appendFileSync, existsSync } from 'node:fs'
 import { createRegistry, generateSnippet } from '@oselvar/var-core'
-import { loadVarConfig } from '@oselvar/var-core/node'
+import { readVarConfig } from '@oselvar/var-runner'
 
 export type StepdefOptions = {
   readonly text: string
@@ -13,7 +13,7 @@ export type StepdefOptions = {
 export type StepdefResult = { readonly exitCode: number }
 
 export async function runStepdef(opts: StepdefOptions): Promise<StepdefResult> {
-  const cfg = await loadVarConfig(opts.cwd)
+  const cfg = await readVarConfig(opts.cwd)
   const snippet = generateSnippet(opts.text, createRegistry(), {
     template: cfg.snippet.template,
   })

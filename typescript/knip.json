@@ -7,7 +7,8 @@
       "project": ["src/**/*.ts", "tests/**/*.ts"]
     },
     "packages/var-cli": {
-      "project": ["src/**/*.ts", "tests/**/*.ts"]
+      "project": ["src/**/*.ts", "tests/**/*.ts"],
+      "ignoreDependencies": ["@oselvar/var"]
     },
     "packages/var-runner": {
       "project": ["src/**/*.ts", "tests/**/*.ts"]

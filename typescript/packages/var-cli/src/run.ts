@@ -1,9 +1,13 @@
 import { readFileSync } from 'node:fs'
 import { relative } from 'node:path'
-import { pathToFileURL } from 'node:url'
-import { buildRegistry, contextFactory } from '@oselvar/var/registry'
-import { collectExamples, parse, plan } from '@oselvar/var-core'
-import { findFiles, loadVarConfig } from '@oselvar/var-core/node'
+import type { Diagnostic } from '@oselvar/var-core'
+import {
+  examplesWithRuns,
+  findSpecs,
+  loadSteps,
+  planSpec,
+  readVarConfig,
+} from '@oselvar/var-runner'
 
 export type RunOptions = {
   readonly cwd: string
@@ -15,21 +19,13 @@ export type RunOptions = {
 export type RunResult = { readonly exitCode: number }
 
 export async function runRun(opts: RunOptions): Promise<RunResult> {
-  const cfg = await loadVarConfig(opts.cwd)
-  const stepFiles = findFiles(opts.cwd, cfg.steps)
+  const cfg = await readVarConfig(opts.cwd)
   // A CLI `--globs` override is include-only; excludes live in var.config.ts.
   const varGlobs =
     opts.globs && opts.globs.length > 0 ? { include: opts.globs, exclude: [] } : cfg.vars
-  const varFiles = findFiles(opts.cwd, varGlobs.include, varGlobs.exclude)
+  const varFiles = findSpecs(opts.cwd, varGlobs.include, varGlobs.exclude)
 
-  // Importing each stepfile runs its `defineState(...)` calls, populating the
-  // @oselvar/var module-scope registry. Order does not matter.
-  for (const path of stepFiles) {
-    await import(pathToFileURL(path).href)
-  }
-
-  const registry = buildRegistry()
-  const createContext = contextFactory()
+  const { registry, createContext } = await loadSteps(cfg.steps, opts.cwd)
 
   let passed = 0
   let failed = 0
@@ -37,30 +33,28 @@ export async function runRun(opts: RunOptions): Promise<RunResult> {
 
   for (const path of varFiles) {
     const source = readFileSync(path, 'utf8')
-    const varDoc = parse(path, source, cfg.scannerPlugins)
-    const execution = plan(varDoc, registry)
+    const execution = planSpec(path, source, registry, cfg.scannerPlugins)
 
-    const queue = collectExamples(execution, {
-      reporter: {
-        diagnostic: (d) => {
-          if (d.severity === 'error') errorDiagnostics++
-          const where = `${path}:${d.span.startLine}:${d.span.startCol}`
-          opts.writeStderr(`${d.severity}: ${d.code} at ${where}\n${indent(d.message, '  ')}\n`)
-        },
+    const reporter = {
+      diagnostic: (d: Diagnostic) => {
+        if (d.severity === 'error') errorDiagnostics++
+        const where = `${path}:${d.span.startLine}:${d.span.startCol}`
+        opts.writeStderr(`${d.severity}: ${d.code} at ${where}\n${indent(d.message, '  ')}\n`)
       },
-      createContext,
-    })
+    }
+
+    const items = examplesWithRuns(execution, createContext, reporter)
 
     const rel = relative(opts.cwd, path) || path
     opts.writeStdout(`${rel}\n`)
-    for (const { name, run } of queue) {
+    for (const { example, run } of items) {
       const start = Date.now()
       try {
         await run()
-        opts.writeStdout(`  ✓ ${name} (${Date.now() - start}ms)\n`)
+        opts.writeStdout(`  ✓ ${example.name} (${Date.now() - start}ms)\n`)
         passed++
       } catch (err) {
-        opts.writeStdout(`  ✗ ${name} (${Date.now() - start}ms)\n`)
+        opts.writeStdout(`  ✗ ${example.name} (${Date.now() - start}ms)\n`)
         opts.writeStdout(`${indent(formatError(err), '      ')}\n`)
         failed++
       }
