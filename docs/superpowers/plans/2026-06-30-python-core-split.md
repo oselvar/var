@@ -185,6 +185,33 @@ Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 
 ---
 
+## Task 4: Add `var-core` conformance unit tests (test-locality parity with TS)
+
+**Why:** TS has TWO conformance tests — `var-core/tests/conformance.test.ts` (unit tests of the projection functions, next to the impl) and `var/tests/conformance.test.ts` (the bundle harness, correctly in the facade because bundle fixtures call `defineState`). Python only has the harness. Add the missing var-core unit tests so both implementations match. The harness STAYS in `var/tests` (it needs the facade) — do not move it.
+
+**Files:**
+- Create: `python/packages/var-core/tests/test_conformance.py`
+- Reference (port from): `typescript/packages/var-core/tests/conformance.test.ts`
+
+**Interfaces (Consumes):** `var_core.conformance` (`canonical_stringify`, `run_conformance`, `to_var_doc_artifact`, `to_registry_artifact`, `to_plan_artifact`, `to_failure_artifact`, `BundleArtifacts`); `var_core.registry` (`create_registry`, `add_step`); `var_core.parse.parse`, `var_core.plan.plan`; the error types `CellMismatchError` (`var_core.cell_diff`), `DocStringMismatchError` (`var_core.doc_string_diff`), `UnexpectedPassError` (`var_core.execute`).
+
+- [ ] **Step 1: Port the unit tests from TS.** Translate `var-core/tests/conformance.test.ts` to `python/packages/var-core/tests/test_conformance.py`. These exercise the conformance IMPL directly, WITHOUT the facade — build the registry via `create_registry()` + `add_step(...)` (NOT `define_state`/`build_registry`). Cover at minimum (mirroring the TS file):
+  - `canonical_stringify` sorts keys recursively + trailing newline; preserves array order.
+  - `to_failure_artifact` projects a `CellMismatchError` → `{"kind":"cell-mismatch", "line", "cells":[…]}` (filtering failing cells); a `DocStringMismatchError` → `doc-string-mismatch`; a `ReturnShapeError` → `return-shape`; an `UnexpectedPassError` → `unexpected-pass`; an arbitrary exception → `thrown`.
+  - `run_conformance(var_doc, registry, create_context)` over a tiny hand-built example returns a `BundleArtifacts` whose `.var_doc`/`.registry`/`.plan`/`.trace` have the expected shape (read the TS test's assertions and the artifact types in `var_core/conformance.py` for the exact expected fields).
+  Use the EXACT current Python signatures (confirm by reading `python/packages/var-core/src/var_core/conformance.py` after Task 3 — `run_conformance` returns `BundleArtifacts`; `to_failure_artifact(error, line)`).
+
+- [ ] **Step 2: Run → all pass.** `cd /Users/aslakhellesoy/git/oselvar/bdd/python && uv run pytest packages/var-core/tests/test_conformance.py -q`. Then full `uv run pytest -q` and `uv run ruff check` green. (The bundle harness in `var/tests/test_conformance.py` is untouched and still green.)
+
+- [ ] **Step 3: Commit.**
+```bash
+git add -A && git commit -m "test(py): var-core conformance unit tests next to the impl (parity with TS)
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
+```
+
+---
+
 ## Self-Review
 
 **Spec coverage (against the consistency design):**
