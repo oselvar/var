@@ -67,30 +67,48 @@ whatever `docs/` placeholder the template scaffolds). Nothing is imported from
 
 ## Styling port
 
-Port the **earthy palette** (from `2026-06-26-earthy-color-scheme-design.md`)
-as hex values, mapped directly onto Starlight's own theming variables — not
-by recreating the Aksel-token-bridge architecture (`--ax-*`), which was always
-an internal implementation detail of the hand-built site, not something
-Starlight needs.
+We build our own Vár theme rather than installing one of the pre-built
+community themes from Starlight's [themes gallery](https://starlight.astro.build/resources/themes/)
+(e.g. Rapide, Obsidian, Catppuccin) — those bundle someone else's CSS,
+components, and opinions as a single package; we want our own palette and
+only the component overrides we actually decide we need. Two official,
+documented mechanisms, no forking of Starlight internals:
 
-- A `src/styles/custom.css` wired in via Starlight's `customCss` config array,
-  overriding (verify exact names against the installed Starlight version's
-  `props.css` during implementation — these are the expected ones):
-  - `--sl-color-accent*` (accent scale) ← terracotta/sienna accent
-    (`#B0552F` light / `#CC6B3C` dark)
-  - `--sl-color-gray-*`, `--sl-color-bg*`, `--sl-color-text*` ← linen/umber
-    light (`#F4F0E6` bg / `#2A2017` text) and warm-dark
-    (`#17120D` bg / `#EFE7D7` text) scales
-  - `--sl-font` ← `@fontsource-variable/source-sans-3` (same font as today)
-- Starlight ships light/dark switching natively — no custom `ThemeToggle`
-  port needed for this step.
-- **Skip `@astrojs/starlight-tailwind`.** The old site's Tailwind v4 usage
-  (`@theme`, `@tailwindcss/typography`) existed to serve the Aksel token
-  bridge, not as utility classes central to the visual design. Reproducing
-  the *look* doesn't require bringing Tailwind into the new package; add it
-  later only if a real need for utility classes shows up.
-- No syntax-highlighting or editor-capsule token work here — that's entirely
-  inside the deferred live-editor sub-project.
+1. **[CSS & Tailwind guide](https://starlight.astro.build/guides/css-and-tailwind/)**
+   for the palette. Port the **earthy palette** (from
+   `2026-06-26-earthy-color-scheme-design.md`) as hex values, mapped directly
+   onto Starlight's own theming variables — not by recreating the
+   Aksel-token-bridge architecture (`--ax-*`), which was always an internal
+   implementation detail of the hand-built site, not something Starlight
+   needs.
+   - A `src/styles/custom.css` wired in via Starlight's `customCss` config
+     array, overriding (verify exact names against the installed Starlight
+     version's `props.css` during implementation — these are the expected
+     ones):
+     - `--sl-color-accent*` (accent scale) ← terracotta/sienna accent
+       (`#B0552F` light / `#CC6B3C` dark)
+     - `--sl-color-gray-*`, `--sl-color-bg*`, `--sl-color-text*` ← linen/umber
+       light (`#F4F0E6` bg / `#2A2017` text) and warm-dark
+       (`#17120D` bg / `#EFE7D7` text) scales
+     - `--sl-font` ← `@fontsource-variable/source-sans-3` (same font as today)
+   - Starlight ships light/dark switching natively — no custom `ThemeToggle`
+     port needed for this step.
+   - **Skip `@astrojs/starlight-tailwind`.** The old site's Tailwind v4 usage
+     (`@theme`, `@tailwindcss/typography`) existed to serve the Aksel token
+     bridge, not as utility classes central to the visual design.
+     Reproducing the *look* doesn't require bringing Tailwind into the new
+     package; add it later only if a real need for utility classes shows up.
+2. **[Overriding components guide](https://starlight.astro.build/guides/overriding-components/)**
+   for anything CSS can't reach. This sub-project doesn't need any component
+   overrides yet — the default template shell is enough to prove the
+   palette. But when a later sub-project *does* want to replace a built-in
+   (sidebar, page frame, social icons, …), the pattern is set now: register
+   it in `starlight()`'s `components` config and, where we want to keep most
+   of Starlight's own markup, import and render its `Default` export inside
+   ours — never a copy-pasted fork of Starlight's internals.
+
+No syntax-highlighting or editor-capsule token work here — that's entirely
+inside the deferred live-editor sub-project.
 
 ## Done criteria
 
