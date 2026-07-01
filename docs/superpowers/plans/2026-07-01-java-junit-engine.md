@@ -583,13 +583,15 @@ handled the identical case.
 
 ## Task 15: Final workspace check
 
-- [ ] **Step 1:** From `java/`: `mvn clean verify` — all 6 modules (`var-core`, `var`,
-  `var-runner`, `var-junit`, plus any others) green.
-- [ ] **Step 2:** Confirm `var-runner` has zero `org.junit.platform.*` imports (`grep
-  -rn "org.junit.platform" java/var-runner/src/main` → empty).
-- [ ] **Step 3:** Confirm `var-core`/`var` are untouched by this plan (`git diff
-  --stat <task-1-base>..HEAD -- java/var-core java/var` → empty, aside from the
-  parent `pom.xml`'s `<modules>` addition).
+- [x] **Step 1:** From `java/`: `mvn clean verify` — all 5 modules (parent, `var-core`,
+  `var`, `var-runner`, `var-junit`) green. 315 tests total (205 var-core + 41 var + 35
+  var-runner + 34 var-junit), 0 failures.
+- [x] **Step 2:** Confirmed `var-runner` has zero `org.junit.platform.*` imports
+  (`grep -rn "org.junit.platform" java/var-runner/src/main` → empty).
+- [x] **Step 3:** Confirmed `var-core`/`var` are untouched by this plan (`git diff
+  --stat 2a2bfad..HEAD -- java/var-core java/var` → empty — the only prior diff was
+  the parent `pom.xml`'s `<modules>` addition in Task 1, which doesn't touch either
+  module's own tree).
 - [ ] **Step 4: Commit** (if anything needed fixing) or note the plan is complete with
   no further action.
 
