@@ -20,7 +20,11 @@
   },
   "dependencies": {
     "@oselvar/var-core": "workspace:*",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "web-tree-sitter": "^0.26.10"
+  },
+  "devDependencies": {
+    "tree-sitter-typescript": "^0.23.2"
   },
   "publishConfig": {
     "exports": {
