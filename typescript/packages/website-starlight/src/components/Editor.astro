@@ -100,7 +100,17 @@ const mountAttrs = {
   <div {...mountAttrs}></div>
 )}
 <style>
-  .cm-mount :global(.cm-editor) { font-size: 14px; }
+  /*
+   * line-height: CodeMirror never sets its own — it measures whatever's
+   * inherited at mount time and caches that for its vertical-motion math
+   * (cursorLineDown/Up, scrollIntoView). Starlight's own reset sets
+   * `body { line-height: 1.75 }` for prose, which this component would
+   * otherwise inherit — both the visibly loose leading and (if that
+   * measurement races the variable font finishing loading and going
+   * stale) the ArrowUp/ArrowDown skipping a line. Pin it explicitly so
+   * the editor never depends on an ambient page-level value.
+   */
+  .cm-mount :global(.cm-editor) { font-size: 14px; line-height: normal; }
   .cm-mount :global(.cm-editor.cm-focused) { outline: none; }
   .file-editor .cm-mount { margin: 0; }
 </style>
