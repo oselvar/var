@@ -11,7 +11,9 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -51,12 +53,27 @@ import org.junit.platform.engine.support.discovery.SelectorResolver;
  * pass by {@link VarTestEngine#discover}, not per file — see {@link VarEngineDescriptor}'s
  * javadoc), and adds one {@link VarExampleDescriptor} leaf per {@link Plan.PlannedExample} as a
  * child of the {@link VarFileDescriptor} it creates.
+ *
+ * <p><strong>Task 17:</strong> {@link #fileDescriptors} caches the one {@link VarFileDescriptor}
+ * built per {@code specPath}, for the lifetime of this resolver instance — one discovery pass (see
+ * {@link DiscoverySelectorResolver}'s constructor, which builds a fresh {@link
+ * VarFileSelectorResolver} per {@code EngineDiscoveryRequestResolver}, itself built fresh per
+ * {@link VarTestEngine#discover} call). Without it, resolving two bare {@code UniqueIdSelector}s
+ * for two different examples in the same file — no accompanying file/classpath selector — silently
+ * dropped the second example from the discovered tree entirely (see {@link #resolveOneExample}'s
+ * javadoc for why, and why it wasn't "two containers" as first suspected).
  */
 final class VarFileSelectorResolver implements SelectorResolver {
 
     private final VarConfig config;
     private final StepLoader.LoadedSteps loadedSteps;
     private final Path root = Path.of("").toAbsolutePath().normalize();
+
+    /**
+     * One {@link VarFileDescriptor} per {@code specPath}, reused across every {@code resolve(...)}
+     * call in this discovery pass (Task 17) — see this class's javadoc.
+     */
+    private final Map<String, VarFileDescriptor> fileDescriptors = new HashMap<>();
 
     VarFileSelectorResolver(VarConfig config, StepLoader.LoadedSteps loadedSteps) {
         this.config = config;
@@ -130,17 +147,36 @@ final class VarFileSelectorResolver implements SelectorResolver {
      *       naively resolving the whole file and picking one descriptor back out of it.
      * </ul>
      *
-     * <p><strong>Known narrow limitation</strong> (not exercised by this task's tests, flagged as a
-     * follow-up): selecting two <em>different</em> examples from the <em>same</em> file via two bare
-     * {@code UniqueIdSelector}s in one request, with no accompanying file/classpath selector, builds
-     * two independent single-child {@link VarFileDescriptor} instances for that file rather than
-     * merging into one two-child container — because each call plans+filters independently, and the
-     * platform's own selector-level dedup (keyed by the file's {@code UniqueId}, populated only from
-     * a fully-resolved selector's matches) never observes the file itself as a {@code Match} here.
-     * Real callers pair a bare example {@code UniqueIdSelector} with a file/classpath/package
-     * selector in practice (see {@code DiscoverySelectorResolverTest}'s note on the same point for
-     * the file-container case), which resolves the file once, normally, before this method is ever
-     * reached for its examples.
+     * <p><strong>Task 17 — the multi-selector merge gap (was believed to produce two containers;
+     * confirmed by direct experiment to actually be worse — silent loss):</strong> selecting two
+     * <em>different</em> examples from the <em>same</em> file via two bare {@code UniqueIdSelector}s
+     * in one request, with no accompanying file/classpath selector, used to build a brand-new {@link
+     * VarFileDescriptor} object on every call. The real {@code
+     * EngineDiscoveryRequestResolution.DefaultContext#createAndAdd} (decompiled/read from {@code
+     * junit-platform-engine-6.1.1-sources.jar}) only substitutes a previously-added descriptor for a
+     * colliding {@code UniqueId} when that id was already registered via a {@code Resolution}'s
+     * {@code Match} — and the {@code Match} this method returns wraps the <em>example</em>
+     * descriptor, never the file descriptor itself, so the file's own {@code UniqueId} is never in
+     * that registry. The second call's freshly-built {@link VarFileDescriptor} (with the second
+     * example as its only child) therefore fell through to a plain {@code
+     * parent.addChild(secondDescriptor)} — and since {@link
+     * org.junit.platform.engine.support.descriptor.AbstractTestDescriptor}'s children are stored in
+     * a {@code Set} keyed by {@code UniqueId} equality, adding a second, different object with the
+     * <em>same</em> {@code UniqueId} as the first is a silent no-op: the second object never actually
+     * joins the real tree rooted at the engine descriptor, even though {@code addChild} unconditionally
+     * points its {@code parent} field back at the engine descriptor (a dangling, unreachable object).
+     * Net effect, confirmed empirically before this fix: exactly ONE container reaches the final tree,
+     * with only the FIRST selector's example as its child — the second example silently vanishes, no
+     * exception, no duplicate.
+     *
+     * <p>The fix: {@link #fileDescriptors} caches the one {@link VarFileDescriptor} built per {@code
+     * specPath} for this resolver's lifetime (one discovery pass). A later call for the same {@code
+     * specPath} reuses that exact object and adds the newly-requested example as an additional child
+     * of it, via {@link #createDescriptor}/{@link #mergeChildren} — so {@code
+     * context.addToParent}'s eventual {@code parent.addChild(...)} re-adds the very same object
+     * already wired into the tree (a genuine no-op, not a silently-discarded duplicate), and the new
+     * child is reachable because it was added to the object that IS in the tree, not a throwaway
+     * clone of it.
      */
     @Override
     public Resolution resolve(UniqueIdSelector selector, Context context) {
@@ -173,11 +209,23 @@ final class VarFileSelectorResolver implements SelectorResolver {
         TestSource source = sourceForSelector(fileSelector);
         Optional<VarFileDescriptor> fileDescriptor =
                 context.addToParent(parent -> Optional.of(createDescriptor(parent, specPath, source, line)));
+        // Task 17: look up the child that matches THIS call's line, rather than blindly taking
+        // getChildren()'s first entry — once the cache (below) lets a second resolveOneExample call
+        // for the same file return the SAME, now-two-child VarFileDescriptor, "first child" would
+        // incorrectly re-resolve to the FIRST example again for every subsequent selector.
         return fileDescriptor
-                .flatMap(fd -> fd.getChildren().stream().findFirst())
+                .flatMap(fd -> childForLine(fd, line))
                 .map(Match::exact)
                 .map(Resolution::match)
                 .orElseGet(Resolution::unresolved);
+    }
+
+    /** The child of {@code fileDescriptor} whose {@code UniqueId} last segment is {@code line}. */
+    private static Optional<? extends TestDescriptor> childForLine(VarFileDescriptor fileDescriptor, int line) {
+        String value = String.valueOf(line);
+        return fileDescriptor.getChildren().stream()
+                .filter(child -> value.equals(child.getUniqueId().getLastSegment().getValue()))
+                .findFirst();
     }
 
     private static Optional<String> segmentValue(UniqueId uniqueId, String segmentType) {
@@ -234,25 +282,55 @@ final class VarFileSelectorResolver implements SelectorResolver {
     }
 
     /**
-     * Builds one {@link VarFileDescriptor}, planned against {@link #loadedSteps}, with one {@link
-     * VarExampleDescriptor} child per {@link Plan.PlannedExample} — or, if {@code onlyLine} is
-     * non-{@code null}, only the one example whose {@code span().startLine()} equals it (used by
-     * {@link #resolveOneExample} so selecting a single example by {@code UniqueId} doesn't pull its
-     * siblings into the discovered tree).
+     * Returns the ONE {@link VarFileDescriptor} for {@code specPath} within this discovery pass —
+     * from {@link #fileDescriptors} if a previous call (for this or a different example/selector)
+     * already built it, otherwise a freshly-planned one, cached for every subsequent call. Either
+     * way, ensures a {@link VarExampleDescriptor} child exists for every {@link Plan.PlannedExample}
+     * matching {@code onlyLine} (or, if {@code onlyLine} is {@code null}, every example in the
+     * file) — via {@link #mergeChildren} — WITHOUT discarding children a previous call already
+     * added. This is the Task 17 fix: reusing the same object, rather than building a new one per
+     * call, is what lets a second bare {@code UniqueIdSelector} for a different example in the same
+     * file add a sibling instead of silently vanishing (see {@link #resolveOneExample}'s javadoc).
      */
     private VarFileDescriptor createDescriptor(
             TestDescriptor parent, String specPath, TestSource source, Integer onlyLine) {
+        VarFileDescriptor existing = fileDescriptors.get(specPath);
+        if (existing != null) {
+            mergeChildren(existing, source, onlyLine);
+            return existing;
+        }
         UniqueId uniqueId = parent.getUniqueId().append(VarFileDescriptor.SEGMENT_TYPE, specPath);
         String content = readContent(source);
         Plan.ExecutionPlan plan = Run.planSpec(specPath, content, loadedSteps.registry());
         VarFileDescriptor fileDescriptor = new VarFileDescriptor(uniqueId, specPath, source, content, loadedSteps, plan);
-        for (Plan.PlannedExample example : plan.examples()) {
-            if (onlyLine != null && example.span().startLine() != onlyLine) {
+        mergeChildren(fileDescriptor, source, onlyLine);
+        fileDescriptors.put(specPath, fileDescriptor);
+        return fileDescriptor;
+    }
+
+    /**
+     * Adds one {@link VarExampleDescriptor} child to {@code fileDescriptor} per {@link
+     * Plan.PlannedExample} matching {@code onlyLine} (every example, if {@code onlyLine} is {@code
+     * null}) that isn't ALREADY one of its children — the "already a child" check is what makes this
+     * safe to call repeatedly on the same, cached {@code fileDescriptor} across several {@code
+     * resolve(...)} calls in one discovery pass, adding only the genuinely new sibling each time
+     * rather than re-adding (or duplicating) ones a previous call already attached.
+     */
+    private void mergeChildren(VarFileDescriptor fileDescriptor, TestSource source, Integer onlyLine) {
+        Set<String> existingLines = new HashSet<>();
+        for (TestDescriptor child : fileDescriptor.getChildren()) {
+            existingLines.add(child.getUniqueId().getLastSegment().getValue());
+        }
+        for (Plan.PlannedExample example : fileDescriptor.plan().examples()) {
+            int line = example.span().startLine();
+            if (onlyLine != null && line != onlyLine) {
+                continue;
+            }
+            if (existingLines.contains(String.valueOf(line))) {
                 continue;
             }
             fileDescriptor.addChild(createExampleDescriptor(fileDescriptor, source, example));
         }
-        return fileDescriptor;
     }
 
     private VarExampleDescriptor createExampleDescriptor(

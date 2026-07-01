@@ -12,6 +12,8 @@ import com.oselvar.var.junit.fixtures.WidgetSteps;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
@@ -115,6 +117,51 @@ class VarExampleDescriptorTest {
 
         assertEquals(1, selectedExamples.size(), "selecting one example's UniqueId must not pull in its siblings");
         assertEquals(targetLeaf.getUniqueId(), selectedExamples.get(0).getUniqueId());
+    }
+
+    /**
+     * Task 17: selecting TWO DIFFERENT examples from the SAME file via two bare {@code
+     * UniqueIdSelector}s (no accompanying file/classpath selector) — the shape an IDE's "run these
+     * N selected tests" could plausibly emit — must merge into ONE container with BOTH examples as
+     * children, not two single-child containers (the originally suspected bug) and not silently
+     * lose the second example (what direct experimentation against the pre-fix code actually
+     * showed: {@code VarFileSelectorResolver.resolveOneExample} built a fresh {@link
+     * VarFileDescriptor} on every call, which fell victim to {@code
+     * AbstractTestDescriptor}'s children {@code Set} silently no-op'ing on a same-{@code UniqueId},
+     * different-object add — see {@code VarFileSelectorResolver.resolve(UniqueIdSelector, Context)}'s
+     * javadoc for the full mechanism).
+     */
+    @Test
+    void selectingTwoDifferentExamplesByBareUniqueIdMergesIntoOneContainerWithBothChildren() {
+        TestDescriptor wholeFileEngine = discoverWidgets().getEngineDescriptor();
+        TestDescriptor fileDescriptor = onlyFileDescriptor(wholeFileEngine);
+        List<? extends TestDescriptor> examples = List.copyOf(fileDescriptor.getChildren());
+        UniqueId line3 = examples.get(0).getUniqueId();
+        UniqueId line7 = examples.get(1).getUniqueId();
+        assertNotEquals(line3, line7);
+
+        EngineDiscoveryResults twoSelectors =
+                EngineTestKit.engine("var")
+                        .selectors(selectUniqueId(line3), selectUniqueId(line7))
+                        .configurationParameter("var.vars.include", "examplefixture/**/*.md")
+                        .configurationParameter("var.steps", STEPS)
+                        .discover();
+
+        List<? extends TestDescriptor> topLevel =
+                List.copyOf(twoSelectors.getEngineDescriptor().getChildren());
+        assertEquals(
+                1,
+                topLevel.size(),
+                "both selectors target the same file -- exactly one container, not two, and not zero");
+
+        TestDescriptor mergedFile = topLevel.get(0);
+        assertEquals("examplefixture/widgets.md", mergedFile.getDisplayName());
+        List<? extends TestDescriptor> mergedExamples = List.copyOf(mergedFile.getChildren());
+        assertEquals(2, mergedExamples.size(), "both selected examples must be children of the ONE container");
+        assertEquals(
+                Set.of(line3, line7),
+                mergedExamples.stream().map(TestDescriptor::getUniqueId).collect(Collectors.toSet()),
+                "the merged container's two children must be exactly the two selected examples");
     }
 
     @Test

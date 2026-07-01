@@ -55,7 +55,8 @@ import org.junit.platform.engine.support.discovery.EngineDiscoveryRequestResolve
  * <p>{@code UniqueIdSelector} (re-running a single file or example by id, standalone — no
  * accompanying file/classpath selector) is handled too, by {@code
  * VarFileSelectorResolver.resolve(UniqueIdSelector, Context)} — see that method's javadoc for the
- * file-vs-example distinction and its one documented, narrow multi-select limitation.
+ * file-vs-example distinction, and Task 17's fix for merging multiple bare {@code
+ * UniqueIdSelector}s that target different examples in the same file into one container.
  */
 final class DiscoverySelectorResolver {
 
