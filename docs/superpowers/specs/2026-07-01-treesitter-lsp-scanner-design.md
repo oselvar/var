@@ -70,6 +70,16 @@ bytes* is per-environment.
     `(regex)` and `(template_string)`, because Cucumber-JS supports regex step
     defs), this query has no such branch. This also matches the current
     TS-compiler scanner, which only accepts `ts.isStringLiteral`.
+
+    **Anchoring matters.** `(arguments (string) @expression . (_)? @handler)`
+    (no leading `.`) matches the *first string anywhere adjacent to another
+    argument* — verified empirically that it wrongly matches
+    `action(someVar, 'text', handler)`, capturing `'text'` as the expression
+    even though it's argument index 1, not 0. The current TS-compiler scanner
+    only ever looks at `node.arguments[0]`. Fixed with a leading anchor:
+    `(arguments . (string) @expression . (_)? @handler)` — confirmed this
+    correctly produces zero matches for that case while still matching all 12
+    existing fixtures unchanged.
   - parameter types: `defineState(...)` calls whose second-argument object
     literal has entries with a `regexp` property (regex or string literal —
     this *is* a real regexp, since it defines a custom parameter type's
@@ -108,12 +118,23 @@ bytes* is per-environment.
 and `tsx` (for `.tsx`). They are not interchangeable: the `tsx` grammar treats
 `<...>` as JSX first, which can misparse the legacy TS angle-bracket type
 assertion (`<Foo>value`) that's valid in `.ts` but disallowed in `.tsx` (where
-`as Foo` is required instead). Using the `tsx` grammar for everything risks
-silently misparsing that rare-but-real `.ts` syntax. Since both grammars live in
-the one `tree-sitter-typescript` npm package, there's no real cost to building
-both and selecting by file extension — this also means `.tsx` step files (e.g.
-a downstream project with `steps: ['**/*.steps.tsx']` in its `var.config.ts`)
-work correctly from day one, not just `.ts`.
+`as Foo` is required instead).
+
+This is worse than an isolated misparse. Verified directly: parsing
+```ts
+const y = <string>value
+action('a real step', () => {})
+```
+with the `tsx` grammar produces a single `ERROR` node that swallows the
+*entire rest of the file* as JSX content — the step-definition query then
+finds **zero** matches, versus 1 with the `typescript` grammar. One legacy
+cast anywhere earlier in a step file would silently blank out every step
+definition after it. That's not a rare edge case worth accepting — it's data
+loss. Since both grammars live in the one `tree-sitter-typescript` npm
+package, there's no real cost to building both and selecting by file
+extension — this also means `.tsx` step files (e.g. a downstream project with
+`steps: ['**/*.steps.tsx']` in its `var.config.ts`) work correctly from day
+one, not just `.ts`.
 
 ### Grammar sourcing — depend on tree-sitter-typescript's own shipped wasm
 
@@ -242,11 +263,12 @@ Explicitly declined:
 - Add a fixture with non-ASCII expression text (accented characters, an emoji)
   asserting the reported `Range` matches the TS-compiler scanner's — locks in
   that no byte-offset conversion is needed, verified empirically above.
-- One fixture per grammar exercising a plain angle-bracket type assertion in a
-  `.ts` file, to lock in that the `typescript` grammar (not `tsx`) is selected
-  for `.ts` files. Verified empirically that the `tsx` grammar produces a real
-  parse `ERROR` node for this input, while `typescript` parses it cleanly as
-  `type_assertion`.
+- A fixture with an angle-bracket cast followed by a real step definition in
+  the same `.ts` file, asserting the step is still found — locks in that the
+  `typescript` grammar (not `tsx`) is selected for `.ts` files. Verified
+  empirically that using the `tsx` grammar here finds zero step defs (the
+  cast's `ERROR` node swallows the rest of the file as JSX), while
+  `typescript` finds the one real step def correctly.
 - One fixture with an escaped quote inside the expression string (e.g.
   `action('I said \'hi\'', ...)`) to lock in the quote-stripping/unescape step.
 - `var-lsp`'s existing `store.test.ts`/`handlers.test.ts` continue to pass
