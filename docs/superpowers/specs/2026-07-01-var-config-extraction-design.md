@@ -23,12 +23,27 @@ specifically because they're impure and shouldn't be reachable from code
 that expects the "pure core" contract.
 
 Checked whether Python or Java's ports need an equivalent extraction (per
-ADR 0001's module-for-module porting principle) — they don't. Java's port
-(sub-project 1, in progress) has no config-loading code at all among its 20
-pure-core classes; config loading is scoped to a later, adapter-layer
-sub-project. Python's config loading (`python/packages/var-runner/src/var_runner/config.py`)
-is already a separate, hand-written file, never a literal port of TS's
-`config.ts`. So this is purely a TypeScript-internal cleanup, not a
+ADR 0001's module-for-module porting principle) — they don't, and the
+evidence is now stronger than "Java doesn't have config loading yet."
+Java's `var-runner`/`var-junit` sub-project (merged to `main` after this
+design was first drafted) landed its own
+`java/var-runner/src/main/java/com/oselvar/var/runner/VarConfig.java`. Its
+own Javadoc documents it as a "port of `var_runner.config.VarConfig`
+(Python), same field semantics as every other language port" — but a
+hand-rolled, JUnit-Platform-native mechanism (`VarConfig.fromLookup` reads
+three `junit-platform.properties`-style keys via a caller-supplied
+`Function<String, Optional<String>>`, explicitly chosen so the module never
+imports a JUnit-Platform type). It shares only the *field semantics*
+(`include`/`exclude` glob shape) with Python's config, never code or a
+package — exactly the pattern this design doc already assumed, now
+confirmed by a second independent implementation rather than an absence.
+It's also a strict subset of TS's `VarConfig`: no `snippet.template`, no
+`scannerPlugins` — those are authoring/LSP-only fields Java (and Python) has
+no equivalent of, reinforcing that TS's fuller `VarConfig` shape is
+TS-ecosystem-specific, not a cross-language contract other ports need to
+track. Python's config loading (`python/packages/var-runner/src/var_runner/config.py`)
+is likewise a separate, hand-written file, never a literal port of TS's
+`config.ts`. So this remains purely a TypeScript-internal cleanup, not a
 cross-language contract — the same category of fix as the
 [SnippetEmitter relocation](2026-07-01-snippet-emitter-port-design.md), but
 this time nothing needs updating on the Python/Java side.
