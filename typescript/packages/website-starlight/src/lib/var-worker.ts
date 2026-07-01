@@ -6,6 +6,8 @@ import {
   createConnection,
 } from 'vscode-languageserver/browser'
 import helloSteps from '../../../var-examples/hello-var/hello-var.steps.ts?raw'
+import romanNumeralsSpec from '../../../var-examples/roman-numerals/roman-numerals.md?raw'
+import romanNumeralsSteps from '../../../var-examples/roman-numerals/roman-numerals.steps.ts?raw'
 import yahtzeeSpec from '../../../var-examples/yahtzee/yahtzee.md?raw'
 import yahtzeeSteps from '../../../var-examples/yahtzee/yahtzee.steps.ts?raw'
 import { createIdbFileSystem } from './idb-file-system.ts'
@@ -19,11 +21,19 @@ import { createTsDiagnostics } from './ts-diagnostics.ts'
 // run-worker (run-client.ts -> run-worker.ts) executes specs from stepFiles
 // passed directly to it. A doc's hidden `steps` prop (Editor's data-steps)
 // reaches only the run-worker, so any step file a doc spec must HIGHLIGHT
-// against has to be seeded here too. The docs use hello + yahtzee steps.
+// against has to be seeded here too. The docs use hello + yahtzee + roman-
+// numerals steps.
+//
+// NOTE — seeding only happens once, on first use of the IndexedDB store (see
+// idb-file-system.ts: it writes the seed only when the store is empty). A
+// browser that already visited before this file was added to SEED_FILES
+// keeps its old (smaller) seed until its IndexedDB is cleared.
 const SEED_FILES: Record<string, string> = {
   '/yahtzee.md': yahtzeeSpec,
   '/yahtzee.steps.ts': yahtzeeSteps,
   '/01-hello.steps.ts': helloSteps,
+  '/roman-numerals.md': romanNumeralsSpec,
+  '/roman-numerals.steps.ts': romanNumeralsSteps,
 }
 
 const reader = new BrowserMessageReader(self as DedicatedWorkerGlobalScope)

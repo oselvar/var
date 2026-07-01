@@ -16,16 +16,27 @@ hero:
       variant: minimal
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Card, CardGrid, Tabs, TabItem } from '@astrojs/starlight/components';
 import Editor from '../../components/Editor.astro';
 import yahtzeeSource from '../../../../var-examples/yahtzee/yahtzee.md?raw';
 import yahtzeeSteps from '../../../../var-examples/yahtzee/yahtzee.steps.ts?raw';
+import romanNumeralsSource from '../../../../var-examples/roman-numerals/roman-numerals.md?raw';
+import romanNumeralsSteps from '../../../../var-examples/roman-numerals/roman-numerals.steps.ts?raw';
 
 ## This is a real spec
 
-Not a snippet — the whole file, unmodified, running in this repo's own test suite. Edit it:
+Not a snippet — the whole file, unmodified, running in this repo's own test suite. Pick an example, edit it:
 
-<Editor uri="file:///yahtzee.md" chrome lineNumbers folding group="yahtzee" steps={[{ path: 'yahtzee.steps.ts', source: yahtzeeSteps }]}>{yahtzeeSource}</Editor>
+<Tabs syncKey="example">
+  <TabItem label="Yahtzee">
+    <Editor uri="file:///yahtzee.md" chrome lineNumbers folding group="yahtzee" steps={[{ path: 'yahtzee.steps.ts', source: yahtzeeSteps }]}>{yahtzeeSource}</Editor>
+  </TabItem>
+  <TabItem label="Roman numerals">
+    Deliberately unimplemented — the step throws, so this one runs *red*. Never trust a test you haven't seen fail.
+
+    <Editor uri="file:///roman-numerals.md" chrome lineNumbers folding group="roman-numerals" steps={[{ path: 'roman-numerals.steps.ts', source: romanNumeralsSteps }]}>{romanNumeralsSource}</Editor>
+  </TabItem>
+</Tabs>
 
 ## Next steps
 
