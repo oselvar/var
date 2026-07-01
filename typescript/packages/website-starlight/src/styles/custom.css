@@ -27,19 +27,26 @@
  * both themes (no direct earthy-doc equivalent) — the only two values
  * here not taken verbatim from the design doc; revisit visually if the
  * wash reads wrong.
+ *
+ * Starlight's own gray-N convention (verified against
+ * node_modules/@astrojs/starlight/style/props.css) runs gray-1 = the
+ * color furthest from the background (--sl-color-text is literally
+ * `var(--sl-color-gray-2)`) ascending to gray-6/7 = closest to the
+ * background (nav/sidebar/inline-code tints). Order the earthy values
+ * to match that, not the reverse.
  */
 
 :root {
   --sl-font: 'Source Sans 3 Variable', 'Source Sans 3', system-ui, sans-serif;
 
   --sl-color-black: #110d09;
-  --sl-color-gray-1: #17120d;
-  --sl-color-gray-2: #221a12;
-  --sl-color-gray-3: #3a2e22;
+  --sl-color-gray-1: #efe7d7;
+  --sl-color-gray-2: #b7a892;
+  --sl-color-gray-3: #94866f;
   --sl-color-gray-4: #6a523b;
-  --sl-color-gray-5: #94866f;
-  --sl-color-gray-6: #b7a892;
-  --sl-color-gray-7: #efe7d7;
+  --sl-color-gray-5: #3a2e22;
+  --sl-color-gray-6: #221a12;
+  --sl-color-gray-7: #17120d;
   --sl-color-white: #efe7d7;
 
   --sl-color-accent-low: #3a2418;
@@ -51,13 +58,13 @@
   --sl-font: 'Source Sans 3 Variable', 'Source Sans 3', system-ui, sans-serif;
 
   --sl-color-black: #f4f0e6;
-  --sl-color-gray-1: #fbf8f0;
-  --sl-color-gray-2: #ece5d5;
-  --sl-color-gray-3: #dcd3c0;
+  --sl-color-gray-1: #2a2017;
+  --sl-color-gray-2: #6b5d4c;
+  --sl-color-gray-3: #8a7b66;
   --sl-color-gray-4: #c8bba3;
-  --sl-color-gray-5: #8a7b66;
-  --sl-color-gray-6: #6b5d4c;
-  --sl-color-gray-7: #2a2017;
+  --sl-color-gray-5: #dcd3c0;
+  --sl-color-gray-6: #ece5d5;
+  --sl-color-gray-7: #fbf8f0;
   --sl-color-white: #2a2017;
 
   --sl-color-accent-low: #efd9c9;
