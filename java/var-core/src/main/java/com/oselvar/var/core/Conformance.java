@@ -20,8 +20,8 @@ import java.util.Map;
  * readability while debugging) because {@link CanonicalJson} recursively sorts keys
  * itself.
  *
- * <p>Plan/trace projections are later tasks (Milestones 3-4) — this class currently
- * covers the var-doc and registry projections.
+ * <p>Trace projection is a later task (Milestone 4) — this class currently covers the
+ * var-doc, registry, and plan projections.
  */
 public final class Conformance {
 
@@ -57,6 +57,103 @@ public final class Conformance {
         out.put("steps", registry.steps().stream().map(Conformance::step).toList());
         out.put("parameterTypes", List.of());
         return out;
+    }
+
+    /**
+     * Projects an {@link Plan.ExecutionPlan} to the plan wire artifact: {@code {examples,
+     * diagnostics}}. Port of {@code toPlanArtifact} in {@code conformance.ts}.
+     *
+     * <p>Per example: {@code name}, {@code scopeStack}, {@code span}, {@code expectedOutcome}
+     * (defaults to {@code "pass"}), {@code expectedErrorMessage} (omitted when absent), {@code
+     * steps}. Per step: {@code text}, {@code matchSpan}, {@code paramSpans}, {@code
+     * matchedExpression}, {@code args} (one {@code {value, parameterType}} per param span — {@code
+     * value} is a direct source substring at the param span's offsets, {@code parameterType} the
+     * matched expression's parameter-type name at that position, {@code null} for a fixed-text
+     * position), {@code dataTable}/{@code docString} (omitted when absent).
+     *
+     * <p>{@code docString}'s wire shape ({@code {content, contentType, span}}) is deliberately NOT
+     * the body-block {@link Ast.Fence} shape ({@code {kind, span, info, body, bodySpan}}): {@code
+     * content} = {@code fence.body()}, {@code contentType} = {@code fence.info()}, and — the
+     * field-mapping trap confirmed against {@code conformance/bundles/04-tables-and-docstrings/
+     * golden/plan.json} — {@code span} = {@code fence.bodySpan()} (the body-only range), NOT {@code
+     * fence.span()} (the whole fence including the opening/closing {@code ```} delimiters). {@code
+     * dataTable}'s wire shape, by contrast, IS identical to a body-block {@link Ast.Table} (checked
+     * against {@code conformance/bundles/11-emoji-offsets/golden/plan.json}), so it reuses {@link
+     * #table(Ast.Table)} directly.
+     */
+    public static Map<String, Object> toPlanArtifact(Plan.ExecutionPlan plan) {
+        String source = plan.varDoc().source();
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put(
+                "examples",
+                plan.examples().stream().map(ex -> plannedExample(source, ex)).toList());
+        out.put("diagnostics", plan.diagnostics().stream().map(Conformance::diagnostic).toList());
+        return out;
+    }
+
+    private static Map<String, Object> plannedExample(String source, Plan.PlannedExample ex) {
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("name", ex.name());
+        out.put("scopeStack", List.copyOf(ex.scopeStack()));
+        out.put("span", span(ex.span()));
+        out.put("expectedOutcome", ex.expectedOutcome() != null ? ex.expectedOutcome() : "pass");
+        if (ex.expectedErrorMessage() != null) {
+            out.put("expectedErrorMessage", ex.expectedErrorMessage());
+        }
+        out.put("steps", ex.steps().stream().map(s -> plannedStep(source, s)).toList());
+        return out;
+    }
+
+    private static Map<String, Object> plannedStep(String source, Plan.PlannedStep step) {
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("text", step.text());
+        out.put("matchSpan", span(step.matchSpan()));
+        out.put("paramSpans", step.paramSpans().stream().map(Conformance::span).toList());
+        out.put("matchedExpression", step.stepDef().expression());
+
+        List<String> paramNames = parameterTypeNames(step.stepDef().expression());
+        List<Object> args = new ArrayList<>(step.paramSpans().size());
+        for (int i = 0; i < step.paramSpans().size(); i++) {
+            Span paramSpan = step.paramSpans().get(i);
+            Map<String, Object> arg = new LinkedHashMap<>();
+            arg.put("value", source.substring(paramSpan.startOffset(), paramSpan.endOffset()));
+            arg.put("parameterType", i < paramNames.size() ? paramNames.get(i) : null);
+            args.add(arg);
+        }
+        out.put("args", args);
+
+        if (step.dataTable() != null) out.put("dataTable", table(step.dataTable()));
+        if (step.docString() != null) out.put("docString", docString(step.docString()));
+        return out;
+    }
+
+    /**
+     * The {@code docString} attachment's wire shape ({@code {content, contentType, span}}) —
+     * NOT the same as a body-block {@link Ast.Fence} (see {@link #toPlanArtifact}'s javadoc for
+     * the field-mapping trap this deliberately avoids).
+     */
+    private static Map<String, Object> docString(Ast.Fence f) {
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("content", f.body());
+        out.put("contentType", f.info());
+        out.put("span", span(f.bodySpan()));
+        return out;
+    }
+
+    private static Map<String, Object> diagnostic(Diagnostics.Diagnostic d) {
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("code", diagnosticCode(d.code()));
+        out.put("severity", d.severity().name().toLowerCase(java.util.Locale.ROOT));
+        out.put("span", span(d.span()));
+        return out;
+    }
+
+    /** Maps the closed {@link Diagnostics.DiagnosticCode} enum to TS's kebab-case wire strings. */
+    private static String diagnosticCode(Diagnostics.DiagnosticCode code) {
+        return switch (code) {
+            case AMBIGUOUS_MATCH -> "ambiguous-match";
+            case ERROR_FENCE_WITHOUT_STEP -> "error-fence-without-step";
+        };
     }
 
     private static Map<String, Object> step(Registry.StepRegistration s) {

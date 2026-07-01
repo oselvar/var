@@ -3,8 +3,11 @@ package com.oselvar.var;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.oselvar.var.core.Ast;
 import com.oselvar.var.core.CanonicalJson;
 import com.oselvar.var.core.Conformance;
+import com.oselvar.var.core.Parse;
+import com.oselvar.var.core.Plan;
 import com.oselvar.var.core.Registry;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -120,5 +123,35 @@ class ConformanceTest {
         String expected =
                 Files.readString(bundle.resolve("golden").resolve("registry.json"), StandardCharsets.UTF_8);
         assertEquals(expected, actual, () -> bundle.getFileName() + "/registry.json mismatch");
+    }
+
+    /**
+     * The Milestone 3 conformance gate: parses each bundle's {@code example.md}, builds its
+     * {@link Registry} from its Java step-definition fixture (as {@link #registryMatchesGolden}
+     * does), plans the two together via {@link Plan#plan}, projects the resulting {@link
+     * Plan.ExecutionPlan} via {@link Conformance#toPlanArtifact}, and asserts byte-for-byte
+     * equality with the committed {@code golden/plan.json}. Port of the plan stage of {@code
+     * typescript/packages/var/tests/conformance.test.ts} and {@code python/packages/var/tests/
+     * test_conformance.py::test_plan_matches_golden}.
+     */
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("bundleDirs")
+    void planMatchesGolden(Path bundle) throws IOException {
+        String bundleName = bundle.getFileName().toString();
+        StepDefinitions fixture = loadFixture(bundleName);
+
+        RegistryRegistrar registrar = new RegistryRegistrar();
+        fixture.defineSteps(registrar);
+        Registry registry = registrar.registry();
+
+        String source = Files.readString(bundle.resolve("example.md"), StandardCharsets.UTF_8);
+        Ast.VarDoc doc = Parse.parse("example.md", source);
+        Plan.ExecutionPlan plan = Plan.plan(doc, registry);
+
+        var artifact = Conformance.toPlanArtifact(plan);
+        String actual = CanonicalJson.canonicalStringify(artifact);
+        String expected =
+                Files.readString(bundle.resolve("golden").resolve("plan.json"), StandardCharsets.UTF_8);
+        assertEquals(expected, actual, () -> bundle.getFileName() + "/plan.json mismatch");
     }
 }
