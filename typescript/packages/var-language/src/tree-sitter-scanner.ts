@@ -1,5 +1,5 @@
 import type { StepKind } from '@oselvar/var-core'
-import { Language, Parser, Query, type Node, type QueryMatch } from 'web-tree-sitter'
+import { Language, type Node, Parser, Query, type QueryMatch } from 'web-tree-sitter'
 import type { GrammarLoader } from './grammar-loader.js'
 import type { StepDefScanner } from './scanner.js'
 import type {
@@ -44,8 +44,7 @@ export async function createTreeSitterScanner(
   await initPromise
   const typescript = await loadDialect(grammarLoader, 'typescript')
   const typescriptTsx = await loadDialect(grammarLoader, 'typescript-tsx')
-  const dialectFor = (path: string): Dialect =>
-    path.endsWith('.tsx') ? typescriptTsx : typescript
+  const dialectFor = (path: string): Dialect => (path.endsWith('.tsx') ? typescriptTsx : typescript)
 
   return {
     discoverStepDefs: (path, source) => discoverStepDefs(dialectFor(path), path, source),
@@ -130,17 +129,13 @@ function extractHandlerParams(handlerNode: Node): HandlerParams | undefined {
     const typeAnnotation = p.childForFieldName('type')
     return {
       name: pattern ? pattern.text : p.text,
-      typeText: typeAnnotation ? typeAnnotation.namedChild(0)?.text ?? '' : '',
+      typeText: typeAnnotation ? (typeAnnotation.namedChild(0)?.text ?? '') : '',
     }
   })
   return { range: toRange(first, last), params: structured }
 }
 
-function discoverStepDefs(
-  dialect: Dialect,
-  file: string,
-  source: string,
-): ReadonlyArray<StepDef> {
+function discoverStepDefs(dialect: Dialect, file: string, source: string): ReadonlyArray<StepDef> {
   const tree = dialect.parser.parse(source)
   if (!tree) return []
   const out: StepDef[] = []

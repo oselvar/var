@@ -26,10 +26,12 @@
       "project": ["src/**/*.ts", "tests/**/*.ts", "../../../conformance/bundles/**/*.{ts,md}"]
     },
     "packages/var-language": {
-      "project": ["src/**/*.ts", "tests/**/*.ts"]
+      "project": ["src/**/*.ts", "tests/**/*.ts"],
+      "ignoreDependencies": ["tree-sitter-typescript"]
     },
     "packages/var-lsp": {
-      "project": ["src/**/*.ts", "tests/**/*.ts"]
+      "project": ["src/**/*.ts", "tests/**/*.ts"],
+      "ignoreDependencies": ["tree-sitter-typescript"]
     },
     "packages/var-vscode": {
       "project": ["src/**/*.ts"],
