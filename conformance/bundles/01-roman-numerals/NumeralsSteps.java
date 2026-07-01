@@ -14,9 +14,9 @@ import java.util.Map;
  *
  * <p>Fixture-layout note (Task 13): this file lives under the language-neutral
  * conformance corpus (a sibling of every {@code *.steps.ts}/{@code *.steps.py} in this
- * directory), not under {@code var-core}'s {@code src/}. It reaches the test compile
+ * directory), not under {@code var}'s {@code src/}. It reaches the test compile
  * classpath via {@code build-helper-maven-plugin}'s {@code add-test-source} goal
- * configured in {@code java/var-core/pom.xml}, which adds {@code conformance/bundles}
+ * configured in {@code java/var/pom.xml}, which adds {@code conformance/bundles}
  * as an additional test-source root — Maven's compiler plugin does not require a
  * source file's directory to match its package declaration, only that the directory be
  * a configured source root.
