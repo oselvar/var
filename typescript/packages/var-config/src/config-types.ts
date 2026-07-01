@@ -1,4 +1,4 @@
-import type { ScannerPlugin } from './scanner.js'
+import type { ScannerPlugin } from '@oselvar/var-core'
 
 // Spec discovery globs. `include` is globbed; anything also matching `exclude`
 // is dropped. Both are plain globs — no `!` prefix semantics.

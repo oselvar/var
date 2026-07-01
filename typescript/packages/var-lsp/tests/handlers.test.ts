@@ -1,7 +1,7 @@
 import { mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { loadVarConfig } from '@oselvar/var-core/node'
+import { loadVarConfig } from '@oselvar/var-config'
 import { expect, test } from 'vitest'
 import { buildHandlers } from '../src/handlers.js'
 import { createNodeFileSystem } from '../src/node-file-system.js'

@@ -22,7 +22,6 @@ export {
   isCellMismatchError,
   ReturnShapeError,
 } from './cell-diff.js'
-export type { VarConfig, VarGlobs } from './config-types.js'
 export type {
   BundleArtifacts,
   FailureArtifact,

@@ -3,6 +3,9 @@
   "ignoreExportsUsedInFile": true,
   "ignoreWorkspaces": ["packages/cucumber"],
   "workspaces": {
+    "packages/var-config": {
+      "project": ["src/**/*.ts", "tests/**/*.ts"]
+    },
     "packages/var-core": {
       "project": ["src/**/*.ts", "tests/**/*.ts"]
     },

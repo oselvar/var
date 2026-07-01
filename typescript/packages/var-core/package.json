@@ -6,10 +6,6 @@
     ".": {
       "types": "./src/index.ts",
       "import": "./src/index.ts"
-    },
-    "./node": {
-      "types": "./src/node.ts",
-      "import": "./src/node.ts"
     }
   },
   "main": "./src/index.ts",
@@ -30,10 +26,6 @@
       ".": {
         "types": "./dist/index.d.ts",
         "import": "./dist/index.js"
-      },
-      "./node": {
-        "types": "./dist/node.d.ts",
-        "import": "./dist/node.js"
       }
     },
     "main": "./dist/index.js",

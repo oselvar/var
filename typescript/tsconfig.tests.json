@@ -14,6 +14,7 @@
     "sourceMap": false
   },
   "include": [
+    "packages/var-config/tests",
     "packages/var-core/tests",
     "packages/var-cli/tests",
     "packages/var-language/tests",

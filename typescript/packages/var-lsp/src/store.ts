@@ -1,4 +1,4 @@
-import type { VarConfig } from '@oselvar/var-core'
+import type { VarConfig } from '@oselvar/var-config'
 import { createRegistry } from '@oselvar/var-core'
 import {
   buildWorkspaceIndex,

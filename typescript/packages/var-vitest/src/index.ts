@@ -1,4 +1,5 @@
-export type { VarConfig, VarDoc } from '@oselvar/var-core'
+export type { VarConfig } from '@oselvar/var-config'
+export type { VarDoc } from '@oselvar/var-core'
 export { readVarConfig } from '@oselvar/var-runner'
 export type { GenerateInput, VarVitestPluginOptions } from './plugin.js'
 export { generateVirtualModule } from './plugin.js'

@@ -26,6 +26,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@oselvar/var-config": "workspace:*",
     "@oselvar/var-core": "workspace:*",
     "@oselvar/var-language": "workspace:*",
     "tree-sitter-typescript": "^0.23.2",

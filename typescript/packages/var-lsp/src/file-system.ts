@@ -1,4 +1,4 @@
-import type { VarGlobs } from '@oselvar/var-core'
+import type { VarGlobs } from '@oselvar/var-config'
 
 export interface FileSystem {
   list(globs: VarGlobs): Promise<string[]>

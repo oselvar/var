@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { loadVarConfig } from '@oselvar/var-core/node'
+import { loadVarConfig } from '@oselvar/var-config'
 import { createConnection, ProposedFeatures } from 'vscode-languageserver/node'
 import { createNodeFileSystem } from './node-file-system.js'
 import { createNodeGrammarLoader } from './node-grammar-loader.js'

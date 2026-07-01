@@ -82,6 +82,12 @@ importers:
         specifier: workspace:*
         version: link:../var-runner
 
+  packages/var-config:
+    dependencies:
+      '@oselvar/var-core':
+        specifier: workspace:*
+        version: link:../var-core
+
   packages/var-core:
     dependencies:
       '@cucumber/cucumber-expressions':
@@ -121,6 +127,9 @@ importers:
 
   packages/var-lsp:
     dependencies:
+      '@oselvar/var-config':
+        specifier: workspace:*
+        version: link:../var-config
       '@oselvar/var-core':
         specifier: workspace:*
         version: link:../var-core
@@ -142,6 +151,9 @@ importers:
       '@oselvar/var':
         specifier: workspace:*
         version: link:../var
+      '@oselvar/var-config':
+        specifier: workspace:*
+        version: link:../var-config
       '@oselvar/var-core':
         specifier: workspace:*
         version: link:../var-core
@@ -151,6 +163,9 @@ importers:
       '@oselvar/var':
         specifier: workspace:*
         version: link:../var
+      '@oselvar/var-config':
+        specifier: workspace:*
+        version: link:../var-config
       '@oselvar/var-core':
         specifier: workspace:*
         version: link:../var-core

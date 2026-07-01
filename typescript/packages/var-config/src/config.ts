@@ -1,8 +1,8 @@
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
+import type { ScannerPlugin } from '@oselvar/var-core'
 import type { VarConfig, VarGlobs } from './config-types.js'
-import type { ScannerPlugin } from './scanner.js'
 
 export type { VarConfig, VarGlobs } from './config-types.js'
 
@@ -14,9 +14,10 @@ const DEFAULT_CONFIG: VarConfig = {
   // No default template here — generateSnippet (in @oselvar/var-language)
   // already falls back to its own DEFAULT_SNIPPET_TEMPLATE when no template
   // is supplied. Keeping a second copy of that default here would just be
-  // the same value duplicated one layer up, and var-core can't import
-  // var-language's snippet-template.ts without creating a backwards
-  // dependency (var-language already depends on var-core).
+  // the same value duplicated one layer up, and this package can't import
+  // var-language's snippet-template.ts without creating a circular
+  // dependency (var-language depends on var-core, which this package also
+  // depends on).
   snippet: {},
   scannerPlugins: [],
 }

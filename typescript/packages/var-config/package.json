@@ -1,5 +1,5 @@
 {
-  "name": "@oselvar/var-runner",
+  "name": "@oselvar/var-config",
   "version": "0.0.0",
   "type": "module",
   "exports": {
@@ -19,8 +19,6 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@oselvar/var": "workspace:*",
-    "@oselvar/var-config": "workspace:*",
     "@oselvar/var-core": "workspace:*"
   },
   "publishConfig": {
