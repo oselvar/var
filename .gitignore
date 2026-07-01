@@ -6,7 +6,8 @@ coverage
 *.timestamp-*
 .superpowers
 .var/
-.claude/
+.claude/*
+!.claude/skills/
 
 # Python
 .venv/
