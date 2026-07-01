@@ -14,7 +14,13 @@ export type { FileSystem } from './file-system.js'
 export type StoreDeps = {
   readonly fs: FileSystem
   readonly config: VarConfig
-  readonly grammarLoader: GrammarLoader
+  // Optional: when supplied, step-def extraction uses the tree-sitter
+  // scanner. When omitted, buildWorkspaceIndex falls back to its own
+  // default (the TypeScript-compiler-based scanner) — this is how a
+  // consumer without a GrammarLoader for its environment (e.g. the
+  // website's browser worker, which has no wasm-loading story yet) keeps
+  // working unchanged.
+  readonly grammarLoader?: GrammarLoader
 }
 
 export type Store = {
@@ -41,8 +47,9 @@ export function createStore(deps: StoreDeps): Store {
   let scannerPromise: Promise<StepDefScanner> | undefined
   return {
     async reindex() {
-      scannerPromise ??= createTreeSitterScanner(grammarLoader)
-      const scanner = await scannerPromise
+      const scanner = grammarLoader
+        ? await (scannerPromise ??= createTreeSitterScanner(grammarLoader))
+        : undefined
       const stepPaths = await fs.list({ include: config.steps, exclude: [] })
       const varPaths = await fs.list(config.vars)
       const stepFiles = await Promise.all(
@@ -55,7 +62,7 @@ export function createStore(deps: StoreDeps): Store {
         stepFiles,
         varFiles,
         scannerPlugins: config.scannerPlugins,
-        scanner,
+        ...(scanner ? { scanner } : {}),
       })
     },
     index: () => current,

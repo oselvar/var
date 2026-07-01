@@ -185,9 +185,15 @@ Mirrors the existing `FileSystem` port / `node-file-system.ts` pattern exactly:
   since the `.wasm` files are a real npm package asset, not something a test
   needs to vary).
 
-`buildWorkspaceIndex`'s own default stays `createTypeScriptScanner()` — only
-`var-lsp` explicitly passes the tree-sitter scanner. `website` and
-`var-vscode` keep working unchanged.
+`buildWorkspaceIndex`'s own default stays `createTypeScriptScanner()`.
+`grammarLoader` on `StoreDeps` is optional — `var-lsp`'s own Node CLI/server
+(`bin.ts`) supplies one and gets the tree-sitter scanner; a consumer without
+one (the website's browser worker, which shares this same `store.ts` since
+`@oselvar/var-lsp`'s package exports resolve to source) falls through to
+`buildWorkspaceIndex`'s default and keeps using the TypeScript-compiler
+scanner unchanged. `var-vscode` is untouched by this task entirely — it only
+consumes `var-lsp`'s built `protocol` types and spawned binary, not
+`store.ts` directly.
 
 ### Lessons from cucumber/language-service
 

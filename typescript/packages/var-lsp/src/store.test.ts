@@ -68,4 +68,15 @@ describe('createStore over a FileSystem', () => {
     expect(store.isVarDoc('/never/written/draft.md')).toBe(true)
     expect(store.isVarDoc('/s.steps.ts')).toBe(false)
   })
+
+  it('falls back to the TypeScript-compiler scanner when no grammarLoader is supplied', async () => {
+    const fs = fakeFs({
+      '/s.steps.ts': `action('I greet {string}', (ctx, name: string) => {})\n`,
+      '/hello.md': `# Hi\n\nFirst I greet "world" okay?\n`,
+    })
+    const store = createStore({ fs, config })
+    await store.reindex()
+    const matches = store.index().matches.filter((m) => m.varPath === '/hello.md')
+    expect(matches.length).toBeGreaterThan(0)
+  })
 })
