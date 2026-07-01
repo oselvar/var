@@ -1,11 +1,14 @@
 package com.oselvar.var.junit;
 
+import com.oselvar.var.core.Diagnostics;
 import com.oselvar.var.core.Plan;
 import com.oselvar.var.runner.Run;
 import com.oselvar.var.runner.StepLoader;
 import java.util.List;
+import java.util.Map;
 import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.UniqueId;
+import org.junit.platform.engine.reporting.ReportEntry;
 import org.junit.platform.engine.support.descriptor.AbstractTestDescriptor;
 import org.junit.platform.engine.support.hierarchical.Node;
 
@@ -100,8 +103,40 @@ final class VarFileDescriptor extends AbstractTestDescriptor implements Node<Var
         // creates its own fresh per-(example, file) state when IT is invoked (see
         // Execute.runExample), so caching this list introduces no shared mutable state
         // between examples, in or out of document order.
-        exampleRuns = Run.examplesWithRuns(plan, loadedSteps.createContext(), new Run.RecordingReporter());
+        Run.RecordingReporter reporter = new Run.RecordingReporter();
+        exampleRuns = Run.examplesWithRuns(plan, loadedSteps.createContext(), reporter);
+        publishDiagnostics(context, reporter.diagnostics());
         return context;
+    }
+
+    /**
+     * Surfaces every plan-stage diagnostic (Task 16) — e.g. bundle 05's {@code ambiguous-match},
+     * bundle 10's {@code error-fence-without-step} — collected above via {@link
+     * Run.RecordingReporter}. Without this, they're silently swallowed: the affected example
+     * either passes vacuously or produces zero examples, with no signal reaching JUnit
+     * reporting/IDEs.
+     *
+     * <p>Reported against this file container itself, one {@link ReportEntry} per diagnostic, via
+     * {@code context}'s {@link org.junit.platform.engine.EngineExecutionListener} (threaded in
+     * from the real {@code ExecutionRequest} by {@link VarTestEngine#createExecutionContext} —
+     * {@link Node#before} never receives a listener directly). File-level, not matched back to a
+     * specific example leaf: {@code Diagnostics.Diagnostic} carries a {@code span}, but pinning it
+     * to one of this file's {@link VarExampleDescriptor} children would require matching span
+     * ranges against {@link Plan.PlannedExample#span()} for no clear benefit over just reporting
+     * the line — not attempted here, per the task's own "don't over-engineer" guidance.
+     */
+    private void publishDiagnostics(
+            VarEngineExecutionContext context, List<Diagnostics.Diagnostic> diagnostics) {
+        for (Diagnostics.Diagnostic diagnostic : diagnostics) {
+            context.listener()
+                    .reportingEntryPublished(
+                            this,
+                            ReportEntry.from(
+                                    Map.of(
+                                            "code", diagnostic.code().name(),
+                                            "severity", diagnostic.severity().name(),
+                                            "line", String.valueOf(diagnostic.span().startLine()))));
+        }
     }
 
     /**

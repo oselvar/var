@@ -48,6 +48,6 @@ public final class VarTestEngine extends HierarchicalTestEngine<VarEngineExecuti
 
     @Override
     protected VarEngineExecutionContext createExecutionContext(ExecutionRequest request) {
-        return new VarEngineExecutionContext();
+        return new VarEngineExecutionContext(request.getEngineExecutionListener());
     }
 }
