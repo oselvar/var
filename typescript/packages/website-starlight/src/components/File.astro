@@ -1,0 +1,32 @@
+---
+import { decodeEntities } from '../lib/step-highlight.js'
+
+interface Props {
+  // The document identity. Must be a `file:///…` URI. The language is
+  // inferred from its extension and the tab label from its basename.
+  uri: string
+}
+const { uri } = Astro.props
+
+// Authored two ways, same mechanism as the old <Editor>'s states:
+//  1. Default slot — a single document.
+//  2. N named slots — each is a "state"; source order is authoritative and
+//     the first is shown initially. Slot name = replay button label.
+const renderState = async (name: string) =>
+  decodeEntities((await Astro.slots.render(name)).replace(/^\n+/, '').replace(/\n+$/, ''))
+
+const stateNames = Object.keys(Astro.slots).filter((name) => name !== 'default')
+const states = await Promise.all(
+  stateNames.map(async (name) => ({ name, text: await renderState(name) })),
+)
+
+const doc = states.length > 0 ? states[0].text : await renderState('default')
+const hasStates = states.length >= 2
+---
+<div
+  data-var-file
+  data-uri={uri}
+  data-doc={doc}
+  data-states={hasStates ? JSON.stringify(states) : undefined}
+  hidden
+></div>

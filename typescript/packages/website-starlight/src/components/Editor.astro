@@ -1,112 +1,33 @@
 ---
-import { decodeEntities } from '../lib/step-highlight.js'
-
 interface Props {
-  // The document identity. Must be a `file:///…` URI. The language is inferred
-  // from its extension and the header filename (see `chrome`) from its basename.
-  uri: string
-  // Show the line-number gutter (default false).
+  // Show the line-number gutter for every File tab (default false).
   lineNumbers?: boolean
-  // Show the fold (collapse/expand) gutter (default false).
+  // Show the fold (collapse/expand) gutter for every File tab (default false).
   folding?: boolean
-  // Offer the "Define step definition" affordance on a settled selection
-  // (default false). Markdown editors only.
+  // Offer the "Define step definition" affordance on a settled selection in
+  // markdown File tabs (default true).
   define?: boolean
-  // Render a borderless header bar (filename derived from `uri`) directly above
-  // the editor (default false). The editor itself looks identical without it.
-  chrome?: boolean
-  // Editors sharing a group run together; their specs run against the step
-  // files in the same group. Omit to use the page-wide default group.
-  group?: string
-  // Hidden companion step sources fed to this editor's run group without
-  // rendering a visible editor. Use when a doc shows only the spec.
-  steps?: ReadonlyArray<{ path: string; source: string }>
   // Milliseconds between keystrokes when replaying between named states.
-  // Lower is faster. Only relevant with ≥2 named-slot states.
+  // Lower is faster. Only relevant for a File with ≥2 named-slot states.
   replayMs?: number
 }
-const {
-  uri,
-  lineNumbers = false,
-  folding = false,
-  define = false,
-  chrome = false,
-  group,
-  steps,
-  replayMs = 100,
-} = Astro.props
-
-// Language is inferred from the uri extension: TypeScript for `.ts` (incl.
-// `.steps.ts`), Markdown otherwise (`.md`, `.md`).
-const lang = uri.endsWith('.ts') ? 'typescript' : 'markdown'
-
-// The header filename is the uri's basename (strip the file:// scheme and any
-// directory) — shown only when `chrome` is set.
-const filename = uri.replace(/^file:\/\//, '').replace(/^.*\//, '')
-
-// The document may be authored two ways:
-//  1. Default slot — a single document (backward-compatible original form).
-//  2. N named slots — each is a "state"; source order is authoritative and the
-//     first is shown initially. Slot name = button label. Astro's Slots class
-//     exposes one enumerable property per slot in markup order, so
-//     `Object.keys(Astro.slots)` preserves authoring order.
-// The rendered slot is HTML-escaped, so decode it back to raw source for
-// CodeMirror (via `data-doc`) and for the carried state list (via `data-states`).
-const renderState = async (name: string) =>
-  decodeEntities((await Astro.slots.render(name)).replace(/^\n+/, '').replace(/\n+$/, ''))
-
-const stateNames = Object.keys(Astro.slots).filter((name) => name !== 'default')
-const states = await Promise.all(
-  stateNames.map(async (name) => ({ name, text: await renderState(name) })),
-)
-
-const doc = states.length > 0 ? states[0].text : await renderState('default')
-const hasStates = states.length >= 2
-
-const mountAttrs = {
-  // not-content: opts this subtree out of Starlight's automatic prose
-  // spacing (markdown.css's `:not(a, strong, …) + :not(a, strong, …,
-  // :where(.not-content *))` sibling-margin rule). Without it, every
-  // `.cm-line` CodeMirror renders is a plain <div> sibling of the last and
-  // picks up an extra ~16px margin-top that CodeMirror's own height model
-  // never measures (it only measures line-height) — so its internal
-  // Y-coordinate math for clicks and ArrowUp/Down silently diverges from
-  // the real rendered layout, worse the further down the document you go.
-  class: 'cm-mount not-content border border-line-subtle rounded-none overflow-hidden my-6',
-  'data-uri': uri,
-  'data-lang': lang,
-  'data-doc': doc,
-  'data-line-numbers': String(lineNumbers),
-  'data-folding': String(folding),
-  'data-define': String(define),
-  'data-group': group,
-  'data-steps': steps ? JSON.stringify(steps) : undefined,
-  'data-states': hasStates ? JSON.stringify(states) : undefined,
-  'data-replay-ms': replayMs != null ? String(replayMs) : undefined,
-}
+const { lineNumbers = false, folding = false, define = true, replayMs = 100 } = Astro.props
 ---
-{chrome ? (
-  <figure class="file-editor my-6">
-    <figcaption class="fe-bar flex items-center gap-2 px-[14px] py-2 bg-line-subtle text-ink font-mono text-[14px] font-semibold tracking-[0.01em]">
-      <span>{filename}</span>
-      {hasStates && (
-        <span class="fe-states-btns ml-auto flex items-center gap-1">
-          {states.map((s, i) => (
-            <button
-              type="button"
-              class="fe-state-btn px-2 py-0.5 text-[12px] font-normal rounded-none border border-line bg-surface text-ink cursor-pointer hover:bg-raised aria-pressed:bg-accent aria-pressed:text-accent-contrast aria-pressed:border-accent"
-              data-state-index={i}
-              aria-pressed="false"
-            >{s.name}</button>
-          ))}
-        </span>
-      )}
-    </figcaption>
-    <div {...mountAttrs}></div>
-  </figure>
-) : (
-  <div {...mountAttrs}></div>
-)}
+<figure class="file-editor my-6">
+  <figcaption
+    class="fe-tabs flex items-center gap-1 px-[6px] pt-[6px] bg-line-subtle"
+    role="tablist"
+  ></figcaption>
+  <div
+    class="cm-mount not-content border border-line-subtle rounded-none overflow-hidden"
+    data-line-numbers={String(lineNumbers)}
+    data-folding={String(folding)}
+    data-define={String(define)}
+    data-replay-ms={String(replayMs)}
+  ></div>
+  <div class="fe-footer flex items-center gap-1 px-[14px] py-2 bg-line-subtle" hidden></div>
+  <div hidden><slot /></div>
+</figure>
 <style>
   /*
    * line-height: CodeMirror never sets its own — it measures whatever's
@@ -121,6 +42,32 @@ const mountAttrs = {
   .cm-mount :global(.cm-editor) { font-size: 14px; line-height: normal; }
   .cm-mount :global(.cm-editor.cm-focused) { outline: none; }
   .file-editor .cm-mount { margin: 0; }
+  .fe-tab {
+    padding: 6px 12px 8px;
+    font: 600 13px/1 var(--font-mono, monospace);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .fe-tab:hover { background: var(--raised); }
+  .fe-tab[aria-selected='true'] { border-bottom-color: var(--accent); color: var(--accent); }
+  .fe-state-btn {
+    padding: 2px 8px;
+    font-size: 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 0;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .fe-state-btn:hover { background: var(--raised); }
+  .fe-state-btn[aria-pressed='true'] {
+    background: var(--accent);
+    color: var(--accent-contrast);
+    border-color: var(--accent);
+  }
 </style>
 <script>
   import '../scripts/editor-mount.ts'

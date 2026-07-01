@@ -18,6 +18,7 @@ hero:
 
 import { Card, CardGrid, Tabs, TabItem } from '@astrojs/starlight/components';
 import Editor from '../../components/Editor.astro';
+import File from '../../components/File.astro';
 import yahtzeeSource from '../../../../var-examples/yahtzee/yahtzee.md?raw';
 import yahtzeeSteps from '../../../../var-examples/yahtzee/yahtzee.steps.ts?raw';
 import romanNumeralsSource from '../../../../var-examples/roman-numerals/roman-numerals.md?raw';
@@ -29,10 +30,16 @@ Not a snippet — the whole file, unmodified, running in this repo's own test su
 
 <Tabs syncKey="example">
   <TabItem label="Yahtzee">
-    <Editor uri="file:///yahtzee.md" chrome group="yahtzee" steps={[{ path: 'yahtzee.steps.ts', source: yahtzeeSteps }]}>{yahtzeeSource}</Editor>
+    <Editor folding>
+      <File uri="file:///yahtzee.md">{yahtzeeSource}</File>
+      <File uri="file:///yahtzee.steps.ts">{yahtzeeSteps}</File>
+    </Editor>
   </TabItem>
   <TabItem label="Roman numerals">
-    <Editor uri="file:///roman-numerals.md" chrome group="roman-numerals" steps={[{ path: 'roman-numerals.steps.ts', source: romanNumeralsSteps }]}>{romanNumeralsSource}</Editor>
+    <Editor folding>
+      <File uri="file:///roman-numerals.md">{romanNumeralsSource}</File>
+      <File uri="file:///roman-numerals.steps.ts">{romanNumeralsSteps}</File>
+    </Editor>
   </TabItem>
 </Tabs>
 

@@ -12,34 +12,13 @@ import { semanticTokens } from '../lib/cm-semantic-tokens.ts'
 import { varEditorThemeExt } from '../lib/cm-var-theme.ts'
 import { planReplay, type ReplayOp } from '../lib/replay-plan.ts'
 import { runSpec } from '../lib/run-client.ts'
-import type { StepFile } from '../lib/run-grouping.ts'
 import { groupRunInputs } from '../lib/run-grouping.ts'
 import { joinStepParamTokens } from '../lib/var-capsule-tokens.ts'
 import { varTokenTheme } from '../lib/var-token-theme.ts'
 import { workerTransport } from '../lib/worker-transport.ts'
 
-// One shared LSP client (one worker) for the page. Phase C generalises this to
-// a registry keyed by an `lsp=` attribute.
+// One shared LSP client (one worker) for the whole page.
 let sharedClient: LSPClient | null = null
-
-const DEFAULT_GROUP = 'default'
-
-type Group = {
-  readonly views: Map<string, EditorView> // uri -> view (visible editors)
-  readonly hiddenSteps: StepFile[] // carried step sources, no visible editor
-}
-
-const groups = new Map<string, Group>()
-
-function getGroup(id: string): Group {
-  let g = groups.get(id)
-  if (!g) {
-    g = { views: new Map(), hiddenSteps: [] }
-    groups.set(id, g)
-  }
-  return g
-}
-
 function lspClient(): LSPClient {
   if (sharedClient) return sharedClient
   const worker = new Worker(new URL('../lib/var-worker.ts', import.meta.url), { type: 'module' })
@@ -55,76 +34,14 @@ function lspClient(): LSPClient {
   return sharedClient
 }
 
-// Run one group's spec against its step files and paint the result into the
-// group's markdown view.
-async function runSpecNow(groupId: string): Promise<void> {
-  const group = groups.get(groupId)
-  if (!group) return
-  const mdEntry = [...group.views.entries()].find(([u]) => u.endsWith('.md'))
-  if (!mdEntry) return
-  const mdView = mdEntry[1]
-
-  const editors = [...group.views.entries()].map(([uri, v]) => ({
-    uri,
-    group: groupId,
-    source: v.state.doc.toString(),
-  }))
-  const [input] = groupRunInputs(editors, new Map([[groupId, group.hiddenSteps]]))
-  if (!input) return
-
-  try {
-    const results = await runSpec({
-      varPath: input.varPath,
-      varSource: input.varSource,
-      stepFiles: input.stepFiles,
-    })
-    mdView.dispatch({ effects: setRunResults.of(results) })
-  } catch (err) {
-    mdView.dispatch({
-      effects: setRunResults.of({
-        version: 1,
-        specPath: input.varPath,
-        sourceHash: hashSource(input.varSource),
-        examples: [
-          {
-            name: 'error',
-            status: 'failed',
-            lines: [1],
-            failure: { line: 1, message: String(err), stack: String(err) },
-          },
-        ],
-      }),
-    })
-  }
-}
-
-const runTimers = new Map<string, ReturnType<typeof setTimeout>>()
-function scheduleRun(groupId: string): void {
-  const existing = runTimers.get(groupId)
-  if (existing) clearTimeout(existing)
-  runTimers.set(
-    groupId,
-    setTimeout(() => void runSpecNow(groupId), 300),
-  )
-}
-
 // Transactions produced by replay are tagged so the auto-run listener can tell
-// them apart from genuine user edits (a real user edit cancels an active replay
-// — the user always wins).
+// them apart from genuine user edits (a real user edit cancels an active
+// replay — the user always wins).
 const replayTxn = Annotation.define<boolean>()
-
-const REPLAY_MS = 35 // default per-keystroke delay (overridable via `replayMs` prop)
+const REPLAY_MS = 35 // default per-keystroke delay (overridable via <Editor replayMs>)
 
 type ReplayState = { token: number; timer?: ReturnType<typeof setTimeout> }
 const replays = new WeakMap<EditorView, ReplayState>()
-
-// Per-view UI for the active-state highlight: the ordered states and their
-// buttons, so we can mark the button whose text equals the current document.
-type StateUI = {
-  readonly states: ReadonlyArray<{ name: string; text: string }>
-  readonly buttons: ReadonlyArray<HTMLButtonElement>
-}
-const stateUIs = new WeakMap<EditorView, StateUI>()
 
 function cancelReplay(view: EditorView): void {
   const r = replays.get(view)
@@ -135,22 +52,12 @@ function cancelReplay(view: EditorView): void {
   }
 }
 
-// Mark the button whose state text equals the current document; clear the rest.
-function refreshActiveState(view: EditorView): void {
-  const ui = stateUIs.get(view)
-  if (!ui) return
-  const current = view.state.doc.toString()
-  ui.buttons.forEach((btn, i) => {
-    btn.setAttribute('aria-pressed', String(ui.states[i]?.text === current))
-  })
-}
-
 // Animate the live document into `target`, one keystroke per `delayMs` tick.
 // Always diffs from the *current* doc, so manual edits (before or mid-replay)
-// are respected.
-function replayTo(view: EditorView, target: string, delayMs: number = REPLAY_MS): void {
+// are respected. `onSettled` re-renders the footer once the replay finishes.
+function replayTo(view: EditorView, target: string, delayMs: number, onSettled: () => void): void {
   cancelReplay(view)
-  // Clicking the chrome button moved focus off the editor, which hides the
+  // Clicking the footer button moved focus off the editor, which hides the
   // caret. Return focus so the moving cursor stays visible during replay.
   view.focus()
   const r = replays.get(view) ?? { token: 0 }
@@ -162,7 +69,7 @@ function replayTo(view: EditorView, target: string, delayMs: number = REPLAY_MS)
     const cur = replays.get(view)
     if (!cur || cur.token !== token) return // superseded or cancelled
     if (i >= ops.length) {
-      refreshActiveState(view)
+      onSettled()
       return
     }
     const op: ReplayOp = ops[i++] as ReplayOp
@@ -187,103 +94,199 @@ function replayTo(view: EditorView, target: string, delayMs: number = REPLAY_MS)
   step()
 }
 
-// Re-run (debounced) only the group whose editor changed — no run buttons.
-// A genuine user edit (not one of our replay transactions) cancels any active
-// replay and refreshes the active-state highlight.
-function autoRun(groupId: string) {
-  return EditorView.updateListener.of((u) => {
+type FileState = { readonly name: string; readonly text: string }
+type FileData = {
+  readonly uri: string
+  readonly doc: string
+  readonly states?: ReadonlyArray<FileState>
+}
+
+// Reads this editor's own <File> children straight out of the live DOM —
+// no more global group map keyed by a user-supplied string.
+function readFiles(editorEl: HTMLElement): FileData[] {
+  const out: FileData[] = []
+  for (const fileEl of editorEl.querySelectorAll<HTMLElement>('[data-var-file]')) {
+    const uri = fileEl.dataset.uri
+    if (!uri) continue
+    const doc = fileEl.dataset.doc ?? ''
+    let states: FileData['states']
+    if (fileEl.dataset.states) {
+      try {
+        states = JSON.parse(fileEl.dataset.states) as FileState[]
+      } catch {
+        states = undefined // malformed states — the file simply has no replay controls
+      }
+    }
+    out.push({ uri, doc, states })
+  }
+  return out
+}
+
+function filenameOf(uri: string): string {
+  return uri.replace(/^file:\/\//, '').replace(/^.*\//, '')
+}
+
+function mountEditor(editorEl: HTMLElement): void {
+  const files = readFiles(editorEl)
+  if (files.length === 0) return
+
+  const mount = editorEl.querySelector<HTMLElement>('.cm-mount')
+  const tabsEl = editorEl.querySelector<HTMLElement>('.fe-tabs')
+  const footerEl = editorEl.querySelector<HTMLElement>('.fe-footer')
+  if (!mount || !tabsEl || !footerEl) return
+
+  const wantLineNumbers = mount.dataset.lineNumbers !== 'false'
+  const wantFolding = mount.dataset.folding !== 'false'
+  const wantDefine = mount.dataset.define !== 'false'
+  const parsedMs = Number(mount.dataset.replayMs)
+  const delayMs = Number.isFinite(parsedMs) && parsedMs > 0 ? parsedMs : REPLAY_MS
+
+  const client = lspClient()
+  const views = new Map<string, EditorView>()
+  const tabButtons = new Map<string, HTMLButtonElement>()
+  let activeUri: string = files[0] ? files[0].uri : ''
+
+  // Debounced run across this editor's own files — each <Editor> instance is
+  // now its own run unit; no global group-id lookup.
+  let runTimer: ReturnType<typeof setTimeout> | undefined
+  const scheduleRun = (): void => {
+    if (runTimer) clearTimeout(runTimer)
+    runTimer = setTimeout(() => void runNow(), 300)
+  }
+  const runNow = async (): Promise<void> => {
+    const mdEntry = [...views.entries()].find(([u]) => u.endsWith('.md'))
+    if (!mdEntry) return
+    const [, mdView] = mdEntry
+    const editors = [...views.entries()].map(([uri, v]) => ({
+      uri,
+      group: 'editor', // constant within this one call — groupRunInputs only needs a consistent value per call, nothing persists across calls
+      source: v.state.doc.toString(),
+    }))
+    const [input] = groupRunInputs(editors, new Map([['editor', []]]))
+    if (!input) return
+    try {
+      const results = await runSpec({
+        varPath: input.varPath,
+        varSource: input.varSource,
+        stepFiles: input.stepFiles,
+      })
+      mdView.dispatch({ effects: setRunResults.of(results) })
+    } catch (err) {
+      mdView.dispatch({
+        effects: setRunResults.of({
+          version: 1,
+          specPath: input.varPath,
+          sourceHash: hashSource(input.varSource),
+          examples: [
+            {
+              name: 'error',
+              status: 'failed',
+              lines: [1],
+              failure: { line: 1, message: String(err), stack: String(err) },
+            },
+          ],
+        }),
+      })
+    }
+  }
+
+  function renderFooter(uri: string): void {
+    const data = files.find((f) => f.uri === uri)
+    footerEl.replaceChildren()
+    if (!data?.states || data.states.length < 2) {
+      footerEl.hidden = true
+      return
+    }
+    footerEl.hidden = false
+    const view = views.get(uri)
+    if (!view) return
+    const current = view.state.doc.toString()
+    for (const state of data.states) {
+      const btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'fe-state-btn'
+      btn.textContent = state.name
+      btn.setAttribute('aria-pressed', String(state.text === current))
+      btn.addEventListener('click', () => {
+        replayTo(view, state.text, delayMs, () => renderFooter(uri))
+      })
+      footerEl.appendChild(btn)
+    }
+  }
+
+  function showFile(uri: string): void {
+    activeUri = uri
+    for (const [u, view] of views) view.dom.style.display = u === uri ? '' : 'none'
+    for (const [u, btn] of tabButtons) btn.setAttribute('aria-selected', String(u === uri))
+    renderFooter(uri)
+    views.get(uri)?.focus()
+  }
+
+  // Re-run (debounced) and refresh the footer on every genuine edit — shared
+  // across every file in this editor, since editing *any* of them should
+  // reschedule the run. A real user edit cancels an active replay for that
+  // view (the user always wins); replay-produced edits don't.
+  const autoRun = EditorView.updateListener.of((u) => {
     if (!u.docChanged) return
     const isReplay = u.transactions.some((tr) => tr.annotation(replayTxn))
     if (!isReplay) cancelReplay(u.view)
-    refreshActiveState(u.view)
-    scheduleRun(groupId)
+    if (activeUri) renderFooter(activeUri)
+    scheduleRun()
   })
-}
 
-function mountEditor(el: HTMLElement): EditorView {
-  const doc = el.dataset.doc ?? ''
-  const uri = el.dataset.uri ?? 'file:///untitled.md'
-  const lang = el.dataset.lang ?? 'markdown'
-  const groupId = el.dataset.group ?? DEFAULT_GROUP
-  const group = getGroup(groupId)
-
-  // Hidden companion step sources carried by this mount (docs samples that show
-  // only the spec). The browser decodes the data attribute for us, so the JSON
-  // is ready to parse.
-  if (el.dataset.steps) {
-    try {
-      const parsed = JSON.parse(el.dataset.steps) as StepFile[]
-      group.hiddenSteps.push(...parsed)
-    } catch {
-      // Ignore malformed carried steps — the spec simply runs without them.
-    }
-  }
-
-  const language = lang === 'typescript' ? javascript({ typescript: true }) : markdown()
-  const client = lspClient()
-  // basicSetup bundles the line-number and fold gutters. When either is turned
-  // off we can't subtract from it, so drop to minimalSetup and add back only the
-  // gutters that are wanted. (The run-result gutter is added separately below.)
-  const wantLineNumbers = el.dataset.lineNumbers !== 'false'
-  const wantFolding = el.dataset.folding !== 'false'
-  const setup: Extension =
-    wantLineNumbers && wantFolding
-      ? basicSetup
-      : [minimalSetup, wantLineNumbers ? lineNumbers() : [], wantFolding ? foldGutter() : []]
-  const ext = [
-    setup,
-    language,
-    varEditorThemeExt(),
-    varTokenTheme,
-    client.plugin(uri),
-    autoRun(groupId),
-    flashExtension(),
-  ]
-  if (lang === 'markdown') {
-    ext.push(varRunExtension())
-    if (el.dataset.define !== 'false') {
-      const generate: GenerateSnippet = (text, position) =>
-        client.request('var/generateSnippet', { text, uri, position }) as Promise<{
-          fullCode: string
-          expression: string
-        }>
-      const stepsView = () =>
-        [...group.views.entries()].find(([u]) => u.endsWith('.steps.ts'))?.[1] ?? null
-      ext.push(stepGenAffordance({ generate, stepsView }))
-    }
-  }
-  const view = new EditorView({ doc, extensions: ext, parent: el })
-  group.views.set(uri, view)
-
-  // Wire multi-state replay buttons, if this editor carries states. The buttons
-  // were rendered server-side in the enclosing chrome figcaption; bind each to a
-  // replay toward its state's text. Wiring is local to mount — no global view map.
-  if (el.dataset.states) {
-    try {
-      const states = JSON.parse(el.dataset.states) as Array<{ name: string; text: string }>
-      // Optional per-editor keystroke delay; fall back to the default for a
-      // missing or non-positive value.
-      const parsedMs = Number(el.dataset.replayMs)
-      const delayMs = Number.isFinite(parsedMs) && parsedMs > 0 ? parsedMs : REPLAY_MS
-      const figure = el.closest('figure.file-editor')
-      const buttons = figure ? [...figure.querySelectorAll<HTMLButtonElement>('.fe-state-btn')] : []
-      if (buttons.length === states.length && buttons.length > 0) {
-        buttons.forEach((btn, i) => {
-          btn.addEventListener('click', () => replayTo(view, states[i].text, delayMs))
-        })
-        stateUIs.set(view, { states, buttons })
-        refreshActiveState(view)
+  for (const file of files) {
+    const lang = file.uri.endsWith('.ts') ? 'typescript' : 'markdown'
+    const language = lang === 'typescript' ? javascript({ typescript: true }) : markdown()
+    // basicSetup bundles the line-number and fold gutters. When either is
+    // turned off we can't subtract from it, so drop to minimalSetup and add
+    // back only the gutters that are wanted.
+    const setup: Extension =
+      wantLineNumbers && wantFolding
+        ? basicSetup
+        : [minimalSetup, wantLineNumbers ? lineNumbers() : [], wantFolding ? foldGutter() : []]
+    const ext = [
+      setup,
+      language,
+      varEditorThemeExt(),
+      varTokenTheme,
+      client.plugin(file.uri),
+      autoRun,
+      flashExtension(),
+    ]
+    if (lang === 'markdown') {
+      ext.push(varRunExtension())
+      if (wantDefine) {
+        const generate: GenerateSnippet = (text, position) =>
+          client.request('var/generateSnippet', { text, uri: file.uri, position }) as Promise<{
+            fullCode: string
+            expression: string
+          }>
+        const stepsView = () =>
+          [...views.entries()].find(([u]) => u.endsWith('.steps.ts'))?.[1] ?? null
+        ext.push(stepGenAffordance({ generate, stepsView }))
       }
-    } catch {
-      // Malformed states — the editor simply renders without replay buttons.
     }
+    const view = new EditorView({ doc: file.doc, extensions: ext, parent: mount })
+    view.dom.style.display = file.uri === activeUri ? '' : 'none'
+    views.set(file.uri, view)
+
+    const tabBtn = document.createElement('button')
+    tabBtn.type = 'button'
+    tabBtn.className = 'fe-tab'
+    tabBtn.setAttribute('role', 'tab')
+    tabBtn.setAttribute('aria-selected', String(file.uri === activeUri))
+    tabBtn.textContent = filenameOf(file.uri)
+    tabBtn.addEventListener('click', () => showFile(file.uri))
+    tabButtons.set(file.uri, tabBtn)
+    tabsEl.appendChild(tabBtn)
   }
 
-  return view
+  renderFooter(activeUri)
+  scheduleRun()
 }
 
 function mountAll(): void {
-  for (const el of document.querySelectorAll<HTMLElement>('.cm-mount')) {
+  for (const el of document.querySelectorAll<HTMLElement>('.file-editor')) {
     if (el.dataset.mounted) continue
     el.dataset.mounted = 'true'
     mountEditor(el)
@@ -291,5 +294,3 @@ function mountAll(): void {
 }
 
 mountAll()
-// Initial run once all editors in each group are mounted.
-for (const groupId of groups.keys()) scheduleRun(groupId)
