@@ -126,6 +126,34 @@ sites).
   needs to vary it. Wiring it through the config/store layer now would be
   speculative — there is no second consumer today.
 
+## Fallout: `VarConfig.snippet.template` becomes optional
+
+Found while checking every internal consumer before finalizing the
+implementation plan (not caught by the earlier file-level grep, which only
+looked for cross-*package* imports): `var-core/src/config.ts` itself imports
+`DEFAULT_SNIPPET_TEMPLATE` from `./snippet-template.js`, to seed its own
+`DEFAULT_CONFIG.snippet.template`. Once that file moves to `var-language`,
+`config.ts` importing it back would make `var-core` depend on `var-language`
+— backwards, since `var-language` already depends on `var-core`.
+
+`generateSnippet` (in the moved `snippet.ts`) already has its own fallback —
+`options.template ?? DEFAULT_SNIPPET_TEMPLATE` — so `config.ts`'s copy of
+that same default was redundant duplication one layer up, not a load-bearing
+second source of truth. Fix: `VarConfig.snippet.template` becomes optional
+(`{ readonly template?: string }`), `config.ts` drops the import and default
+entirely (`DEFAULT_CONFIG.snippet = {}`), and `generateSnippet`'s own fallback
+becomes the single place the default template is defined.
+
+Ripples: `Store.snippetTemplate()` in `var-lsp` returns `string | undefined`
+instead of `string`; its two callers in `handlers.ts` (the fresh-snippet path
+and the rename path) each need the same `exactOptionalPropertyTypes`-driven
+conditional-spread pattern already used for `store.ts`'s `grammarLoader` fix
+in the tree-sitter plan. `var-cli`'s own read of `cfg.snippet.template` is
+moot — that file is deleted in this plan's first task. `website`'s
+`var-worker.ts` builds its own literal config object with an explicit
+`template: DEFAULT_SNIPPET_TEMPLATE`, so it never relied on this default and
+is unaffected either way.
+
 ## `typeText` doc tightening
 
 In `var-language/src/step-defs.ts` (already moved there by the tree-sitter
