@@ -19,6 +19,8 @@
   <modules>
     <module>var-core</module>
     <module>var</module>
+    <module>var-runner</module>
+    <module>var-junit</module>
   </modules>
 
   <properties>

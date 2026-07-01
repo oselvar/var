@@ -130,26 +130,25 @@ property is needed).
 green modules (`var-core`, `var`, `var-runner`, `var-junit`), each with a trivial smoke
 test.
 
-- [ ] **Step 1:** Add both modules to `java/pom.xml`'s `<modules>` list, in dependency
-  order (`var-runner` before `var-junit`).
-- [ ] **Step 2:** Write `java/var-runner/pom.xml` — depends on `com.oselvar:var`
-  (which transitively brings `var-core`). **No `junit-platform-*` dependency** — this
-  is the hexagonal-boundary constraint; grep-verify after writing.
-- [ ] **Step 3:** Write `java/var-junit/pom.xml` — depends on `com.oselvar:var-runner`
-  + `org.junit.platform:junit-platform-engine` (main scope — this is the SPI the
-  engine class implements); test-scoped `org.junit.platform:junit-platform-testkit`
-  (for `EngineTestKit`-based tests) and **explicitly** `org.junit.jupiter:junit-jupiter`
-  test-scoped. The explicit Jupiter dependency is not incidental: once `var-junit`'s
-  own `TestEngine` is on its test classpath, Maven Surefire auto-detects it, and
-  `cucumber-junit-platform-engine`'s own `pom.xml` carries the identical comment
-  verbatim — *"Surefire detects the CucumberEngine and will not use the JupiterEngine
-  unless we add it explicitly"* — because Surefire only auto-configures engines it
-  can find on the classpath, and without an explicit Jupiter dependency declared,
-  `var-junit`'s own `@Test`-based unit tests (the ones written in Tasks 7–14 to test
-  the engine itself, using ordinary Jupiter `@Test`, not the `var` engine) would not
-  run at all.
-- [ ] **Step 4:** One trivial smoke test per new module.
-- [ ] **Step 5:** Run → PASS. `mvn -f java/pom.xml clean test` — 4 modules, all green.
+- [x] **Step 1:** Added both modules to `java/pom.xml`'s `<modules>` list.
+- [x] **Step 2:** Wrote `java/var-runner/pom.xml` — depends on `com.oselvar:var`
+  only. No `junit-platform-*` dependency.
+- [x] **Step 3:** Wrote `java/var-junit/pom.xml` — depends on `com.oselvar:var-runner`
+  + `org.junit.platform:junit-platform-engine`; test-scoped
+  `junit-platform-testkit` + explicit `junit-jupiter` (with the Surefire-detection
+  rationale recorded in the POM comment).
+- [x] **Step 4:** One trivial smoke test per new module.
+- [x] **Step 5:** Run → PASS. `mvn -f java/pom.xml clean test` — 6 modules, all
+  green (`var-core`, `var`, `var-runner`, `var-junit` + parent).
+- [x] **Also corrected mid-task (real, not hypothetical):** `java/pom.xml`'s
+  `junit.version` was still pinned to `5.11.4` from the core-port plan. Queried
+  `repo1.maven.org` directly (not the previously-stale `search.maven.org` index):
+  **JUnit 6.1.1** is the actual current `<latest>`/`<release>` for
+  `junit-bom`/`junit-jupiter`/`junit-platform-engine`, unifying Platform+Jupiter+
+  Vintage under one version stream, requiring Java 17+ (already satisfied at 21).
+  Bumped the pin; verified as a drop-in upgrade (`mvn clean test` still 41/41 green
+  on `var-core`+`var` before adding the new modules). This directly serves the
+  "latest JUnit system" goal ADR 0003 was written for.
 - [ ] **Step 6: Commit** — `feat(java): scaffold var-runner + var-junit Maven modules`
 
 ---
