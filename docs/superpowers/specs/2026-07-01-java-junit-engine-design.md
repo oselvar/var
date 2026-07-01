@@ -59,10 +59,21 @@ var-junit    # NEW: JUnit Platform TestEngine (id "var"), descriptor tree, confi
 
 No `[tool.var]`/`var.config.ts` equivalent file exists yet for Java — JUnit Platform's
 own `ConfigurationParameters` mechanism is the idiomatic surface (this is what
-`cucumber-junit-platform-engine`'s `Constants`/`CucumberConfiguration` use, resolved
-through system properties → environment variables → a `junit-platform.properties` file
-on the classpath, in that precedence order). Mirror the same three config keys every
-other adapter has:
+`cucumber-junit-platform-engine`'s `Constants`/`CucumberConfiguration` use). **Verified
+empirically (Task 12, `ConfigPrecedenceTest`) against the real
+`org.junit.platform.launcher.core.LauncherConfigurationParameters` (6.1.1 sources) —
+correcting this section's original stated assumption:** there is no environment-variable
+tier at all; `ConfigurationParameters#get`'s own javadoc says so explicitly ("an attempt
+will be made to look up the value as a JVM system property. If no such system property
+exists, an attempt will be made to look up the value in the `junit-platform.properties`
+file" — no mention of environment variables). The real precedence, first match wins, is:
+explicit configuration parameters (e.g. passed via a `LauncherDiscoveryRequestBuilder` or
+an IDE/build-tool integration) → explicitly-added configuration-parameter classpath
+resources → a parent `ConfigurationParameters` (nested `Launcher`) → **JVM system
+property** → **`junit-platform.properties` classpath file**. For the two tiers a `var-junit`
+user actually sets by hand — a system property vs. the `junit-platform.properties`
+file — **system property wins**. Mirror the same three config keys every other adapter
+has:
 
 ```properties
 # junit-platform.properties (classpath root)
@@ -158,10 +169,13 @@ no special engine-side rendering beyond building a good `getMessage()`.
   `TestEngine` on the test classpath automatically via the Platform launcher, same as
   `cucumber-junit-platform-engine` users experience, but this needs a real end-to-end
   smoke test, not an assumption carried over from reading Cucumber's docs).
-- **Config precedence** — confirm `ConfigurationParameters`' system-property → env-var →
-  `junit-platform.properties` resolution order matches what's documented; a mismatch
-  here silently breaks `var.vars` in CI environments that set env vars but not system
-  properties (or vice versa).
+- **Config precedence** — **RESOLVED (Task 12).** Confirmed empirically
+  (`ConfigPrecedenceTest`) against the real `LauncherConfigurationParameters`: there is no
+  environment-variable tier — system property beats the `junit-platform.properties` file,
+  full order in "Config & discovery" above. The original assumption (system property →
+  environment variable → file) was wrong about the middle tier; corrected above so
+  `var.vars` behavior in CI matches what's documented, not a carried-over guess from
+  Cucumber's docs.
 - **Author-API dependency** — this sub-project's step-loading mechanism depends directly
   on however sub-project 1's Task 1 resolves the author-API registration shape (static
   initializer vs. explicit call vs. annotation-driven) — do not start `var-runner`'s
