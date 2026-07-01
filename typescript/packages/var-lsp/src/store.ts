@@ -47,9 +47,8 @@ export function createStore(deps: StoreDeps): Store {
   let scannerPromise: Promise<StepDefScanner> | undefined
   return {
     async reindex() {
-      const scanner = grammarLoader
-        ? await (scannerPromise ??= createTreeSitterScanner(grammarLoader))
-        : undefined
+      if (grammarLoader) scannerPromise ??= createTreeSitterScanner(grammarLoader)
+      const scanner = grammarLoader ? await scannerPromise : undefined
       const stepPaths = await fs.list({ include: config.steps, exclude: [] })
       const varPaths = await fs.list(config.vars)
       const stepFiles = await Promise.all(
