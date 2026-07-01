@@ -93,11 +93,16 @@ documented mechanisms, no forking of Starlight internals:
      - `--sl-font` ← `@fontsource-variable/source-sans-3` (same font as today)
    - Starlight ships light/dark switching natively — no custom `ThemeToggle`
      port needed for this step.
-   - **Skip `@astrojs/starlight-tailwind`.** The old site's Tailwind v4 usage
-     (`@theme`, `@tailwindcss/typography`) existed to serve the Aksel token
-     bridge, not as utility classes central to the visual design.
-     Reproducing the *look* doesn't require bringing Tailwind into the new
-     package; add it later only if a real need for utility classes shows up.
+   - **Superseded:** the scaffold originally skipped `@astrojs/starlight-tailwind`
+     (the old site's Tailwind v4 usage served the Aksel token bridge, not
+     utility classes central to the look, so it seemed avoidable). Porting
+     `Editor.astro` in the live-editor sub-project needs it after all — that
+     component's markup is Tailwind-utility-class-driven. Added via
+     Starlight's own retrofit path (`astro add tailwind` +
+     `@astrojs/starlight-tailwind`, a `tailwind.css` entry loaded *first* in
+     `customCss` so our earthy `custom.css` still wins the cascade) rather
+     than reopening the "no pre-built theme" decision above — same
+     no-forking spirit, just an additional official mechanism in play.
 2. **[Overriding components guide](https://starlight.astro.build/guides/overriding-components/)**
    for anything CSS can't reach. This sub-project doesn't need any component
    overrides yet — the default template shell is enough to prove the
