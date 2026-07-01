@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.oselvar</groupId>
+    <artifactId>var-parent</artifactId>
+    <version>0.0.0</version>
+  </parent>
+
+  <artifactId>var</artifactId>
+  <packaging>jar</packaging>
+  <name>var (Java) — author facade</name>
+  <description>
+    Author-facing API over var-core: context/action/sensor registration (see
+    docs/superpowers/specs/2026-07-01-java-core-port-design.md#author-api).
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.oselvar</groupId>
+      <artifactId>var-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- Fixture-layout solution (Task 13 — Milestone 2's registry conformance
+           gate). The shared, language-neutral conformance corpus lives at
+           conformance/bundles/<n>-<name>/ (repo root), a sibling of java/, outside
+           any Maven module's src/. Bundle directory names are not valid Java
+           identifiers (leading digits, hyphens: e.g. 01-roman-numerals), so they
+           cannot be package segments — but Maven's compiler plugin does NOT require
+           a source file's directory path to match its `package` declaration; it
+           only requires the directory to be a configured source root, and then
+           compiles whatever .java files it finds there, using each file's own
+           `package` statement. build-helper-maven-plugin's add-test-source goal
+           adds an ADDITIONAL test-source root (on top of the conventional
+           src/test/java), so conformance/bundles/** fixture files (package
+           com.oselvar.var.conformance.bundleNN, physically under e.g.
+           01-roman-numerals/) compile and land on this module's test classpath
+           unmodified.
+
+           This lives in var's pom, not var-core's: the registry-stage harness
+           (ConformanceTest, this module's test scope) needs both var-core's
+           Registry/Conformance AND var's own Registrar/StepDefinitions author API
+           that the fixtures are written against. Wiring the fixtures'
+           test-source root into var-core instead — with a var-core-side
+           test-scoped dependency on var — was tried first and rejected: it
+           creates a real Maven reactor cycle (var-core[test] -> var -> var-core
+           [main]), confirmed empirically via `mvn -pl var-core -am test-compile`
+           failing with "The projects in the reactor contain a cyclic reference".
+           var's test scope already depends on var-core (this module's own main
+           dependency, above) with no such cycle, since var-core has no
+           dependency back on var.
+
+           Empirically verified: `mvn -f java/pom.xml -pl var -am test-compile`
+           succeeds and javac places NumeralsSteps.class (and its 11 siblings)
+           under var/target/test-classes/com/oselvar/var/conformance/bundle01/
+           despite the hyphenated, digit-leading source directory name. -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.6.1</version>
+        <executions>
+          <execution>
+            <id>add-conformance-fixtures-as-test-source</id>
+            <phase>generate-test-sources</phase>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${project.basedir}/../../conformance/bundles</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

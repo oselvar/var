@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.oselvar</groupId>
+    <artifactId>var-parent</artifactId>
+    <version>0.0.0</version>
+  </parent>
+
+  <artifactId>var-runner</artifactId>
+  <packaging>jar</packaging>
+  <name>var-runner (Java) — shared imperative shell</name>
+  <description>
+    Config, discovery, step loading, run orchestration, and failure rendering for
+    var test-runner adapters. Depends only on var (no JUnit-Platform types — that
+    is var-junit's job). See
+    docs/superpowers/specs/2026-07-01-java-junit-engine-design.md.
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.oselvar</groupId>
+      <artifactId>var</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+</project>

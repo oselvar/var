@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.oselvar</groupId>
+    <artifactId>var-parent</artifactId>
+    <version>0.0.0</version>
+  </parent>
+
+  <artifactId>var-core</artifactId>
+  <packaging>jar</packaging>
+  <name>var-core (Java) — pure functional core</name>
+  <description>
+    Pure pipeline: parse -&gt; match -&gt; plan -&gt; execute, diffs, conformance
+    projections. No filesystem, network, time, or test-framework imports (see
+    docs/superpowers/specs/2026-07-01-java-core-port-design.md).
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-expressions</artifactId>
+    </dependency>
+  </dependencies>
+</project>

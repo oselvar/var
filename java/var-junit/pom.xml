@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.oselvar</groupId>
+    <artifactId>var-parent</artifactId>
+    <version>0.0.0</version>
+  </parent>
+
+  <artifactId>var-junit</artifactId>
+  <packaging>jar</packaging>
+  <name>var-junit — JUnit Platform TestEngine</name>
+  <description>
+    Custom JUnit Platform TestEngine (id "var") turning .md specs into first-class,
+    individually selectable JUnit tests — one container per spec file, one leaf per
+    example. See docs/adr/0003-java-junit-integration.md and
+    docs/superpowers/specs/2026-07-01-java-junit-engine-design.md.
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.oselvar</groupId>
+      <artifactId>var-runner</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-engine</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-testkit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- Explicit, not incidental: once var-junit's own TestEngine is on the test
+         classpath, Maven Surefire auto-detects it and will not also run the Jupiter
+         engine unless junit-jupiter is an explicit dependency here too — otherwise
+         this module's own @Test-based unit tests (testing the engine itself,
+         written in ordinary Jupiter, not the var engine) would silently not run.
+         cucumber-junit-platform-engine's own pom.xml carries the identical
+         dependency for the identical reason (verified during ADR 0003's research). -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- Task 14 (Milestone 2's dogfood gate): the same fixture-layout solution
+           documented at length in java/var/pom.xml (Task 13) — see that comment
+           block for the full rationale. Repeated here because var-junit is a
+           SEPARATE Maven module from var, with its own separate test classpath;
+           var's build-helper wiring only puts the fixtures on var's test
+           classpath, not this module's. ConformanceDogfoodTest (this module's
+           test scope) needs them too, to run each bundle through the real
+           VarTestEngine via EngineTestKit.
+
+           No reactor-cycle risk here (unlike var-core's rejected alternative,
+           Task 13): this plugin execution adds a test-SOURCE root, not a Maven
+           module dependency — conformance/bundles/**'s .java files compile
+           directly into var-junit's own test-classes, with no new <dependency>
+           on any other reactor module. var-junit's real module dependency chain
+           is var-junit -> var-runner -> var -> var-core, one direction only;
+           none of var-core/var/var-runner depends back on var-junit, so there is
+           no cycle to create. Empirically verified: `mvn -pl var-junit -am
+           test-compile` (run from java/) succeeds. -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.6.1</version>
+        <executions>
+          <execution>
+            <id>add-conformance-fixtures-as-test-source</id>
+            <phase>generate-test-sources</phase>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${project.basedir}/../../conformance/bundles</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
