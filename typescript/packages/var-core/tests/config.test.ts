@@ -74,11 +74,11 @@ test('loads snippet.template from var.config.ts when provided', async () => {
   }
 })
 
-test('defaults snippet.template to DEFAULT_SNIPPET_TEMPLATE when absent', async () => {
+test('omits snippet.template when absent (generateSnippet in @oselvar/var-language supplies its own default)', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'var-cfg-snippet-default-'))
   try {
     const cfg = await loadVarConfig(dir)
-    expect(cfg.snippet.template).toContain("{{role}}('{{expression}}'")
+    expect(cfg.snippet.template).toBeUndefined()
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }

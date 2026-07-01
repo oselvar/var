@@ -1,6 +1,6 @@
 import { ParameterType } from '@cucumber/cucumber-expressions'
+import { createRegistry } from '@oselvar/var-core'
 import { expect, test } from 'vitest'
-import { createRegistry } from '../src/registry.js'
 import { generateSnippet } from '../src/snippet.js'
 
 test('integers become {int}', () => {

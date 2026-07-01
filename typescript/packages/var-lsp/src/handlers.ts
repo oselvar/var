@@ -1,12 +1,16 @@
 import {
   diffExpressions,
   expressionSegments,
-  generateSnippet,
   inferStepRole,
   renderExpression,
   type StepKind,
 } from '@oselvar/var-core'
-import type { MatchRef } from '@oselvar/var-language'
+import {
+  createTypeScriptSnippetEmitter,
+  generateSnippet,
+  type MatchRef,
+  type SnippetEmitter,
+} from '@oselvar/var-language'
 import type {
   HandlerSync,
   PlanParamFate,
@@ -140,8 +144,9 @@ export function buildHandlers(store: Store): Handlers {
         uri !== undefined && position !== undefined
           ? inferStepRole(neighbourRolesForSelection(store, uri, position))
           : undefined
+      const template = store.snippetTemplate()
       const snippet = generateSnippet(text, store.index().registry, {
-        template: store.snippetTemplate(),
+        ...(template !== undefined ? { template } : {}),
         ...(role !== undefined ? { role } : {}),
       })
       return { fullCode: snippet.fullCode, expression: snippet.expression }
@@ -410,8 +415,9 @@ function prepareRename(
   let newExpression: string
   if (isVarDoc) {
     try {
+      const template = store.snippetTemplate()
       newExpression = generateSnippet(newName, store.index().registry, {
-        template: store.snippetTemplate(),
+        ...(template !== undefined ? { template } : {}),
       }).expression
     } catch (e) {
       return {
@@ -507,8 +513,10 @@ function buildHandlerSync(input: {
   registry: {
     parameterTypes: { parameterTypes: Iterable<{ name?: string | undefined; type: unknown }> }
   }
+  snippetEmitter?: SnippetEmitter
 }): HandlerSync {
   const { old, paramFates, newExpressionParams, registry } = input
+  const emitter = input.snippetEmitter ?? createTypeScriptSnippetEmitter()
   // Index parameter types by name once so per-fate lookup is O(1).
   const paramTypeByName = new Map<string, { type: unknown }>()
   for (const pt of registry.parameterTypes.parameterTypes) {
@@ -539,7 +547,8 @@ function buildHandlerSync(input: {
       }
     }
     const baseName = freshName(newPtName, usedNames)
-    const typeText = tsTypeFor(newPtName, paramTypeByName)
+    const paramType = paramTypeByName.get(newPtName)
+    const typeText = paramType ? emitter.typeNameFor(paramType) : 'string'
     newUserParams.push({ name: baseName, typeText })
   }
 
@@ -571,11 +580,6 @@ function freshName(ptName: string, used: Map<string, number>): string {
 
 function bumpUsed(used: Map<string, number>, name: string): void {
   used.set(name, (used.get(name) ?? 0) + 1)
-}
-
-function tsTypeFor(ptName: string, index: Map<string, { type: unknown }>): string {
-  const pt = index.get(ptName)
-  return pt && (pt.type as unknown) === Number ? 'number' : 'string'
 }
 
 function toLspRange(range: { start: Position; end: Position }): Range {

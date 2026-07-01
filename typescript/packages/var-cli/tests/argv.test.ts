@@ -2,14 +2,14 @@ import { expect, test } from 'vitest'
 import { parseArgv } from '../src/argv.js'
 
 test('parses a subcommand with positionals', () => {
-  const r = parseArgv(['stepdef', 'I have 5 cukes'])
-  expect(r.command).toBe('stepdef')
-  expect(r.positionals).toEqual(['I have 5 cukes'])
+  const r = parseArgv(['lint', 'packages/**/*.md'])
+  expect(r.command).toBe('lint')
+  expect(r.positionals).toEqual(['packages/**/*.md'])
   expect(r.flags).toEqual({})
 })
 
 test('parses long flags with values', () => {
-  const r = parseArgv(['stepdef', 'I have 5 cukes', '--file', 'steps/foo.steps.ts'])
+  const r = parseArgv(['lint', 'packages/**/*.md', '--file', 'steps/foo.steps.ts'])
   expect(r.flags.file).toBe('steps/foo.steps.ts')
 })
 
@@ -19,7 +19,7 @@ test('parses long flags without values as true', () => {
 })
 
 test('parses --key=value syntax', () => {
-  const r = parseArgv(['stepdef', 'x', '--file=steps/foo.steps.ts'])
+  const r = parseArgv(['lint', 'x', '--file=steps/foo.steps.ts'])
   expect(r.flags.file).toBe('steps/foo.steps.ts')
 })
 

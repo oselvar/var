@@ -6,7 +6,10 @@ export type Range = { readonly start: Position; readonly end: Position }
 
 export type HandlerParam = {
   // The source text after the colon, e.g. `string` for `name: string` or
-  // empty when no annotation is present (e.g. `ctx`).
+  // empty when no annotation is present (e.g. `ctx`). Opaque: produced
+  // verbatim by whichever per-language scanner extracted it (TypeScript
+  // compiler AST or tree-sitter node text) and never parsed downstream —
+  // every consumer only concatenates it into rendered source.
   readonly typeText: string
   readonly name: string
 }

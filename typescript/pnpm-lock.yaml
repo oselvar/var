@@ -102,6 +102,9 @@ importers:
 
   packages/var-language:
     dependencies:
+      '@cucumber/cucumber-expressions':
+        specifier: ^20.0.0
+        version: 20.0.0
       '@oselvar/var-core':
         specifier: workspace:*
         version: link:../var-core
@@ -218,6 +221,9 @@ importers:
       '@oselvar/var-core':
         specifier: workspace:*
         version: link:../var-core
+      '@oselvar/var-language':
+        specifier: workspace:*
+        version: link:../var-language
       '@oselvar/var-lsp':
         specifier: workspace:*
         version: link:../var-lsp

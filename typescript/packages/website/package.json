@@ -27,6 +27,7 @@
     "@lezer/highlight": "^1.2.3",
     "@oselvar/var": "workspace:*",
     "@oselvar/var-core": "workspace:*",
+    "@oselvar/var-language": "workspace:*",
     "@oselvar/var-lsp": "workspace:*",
     "@tailwindcss/typography": "^0.5.20",
     "@tailwindcss/vite": "^4.3.2",

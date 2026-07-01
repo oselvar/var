@@ -1,7 +1,7 @@
 import { CucumberExpressionGenerator } from '@cucumber/cucumber-expressions'
-import type { Registry } from './registry.js'
+import type { Registry, StepKind } from '@oselvar/var-core'
+import { createTypeScriptSnippetEmitter, type SnippetEmitter } from './snippet-emitter.js'
 import { DEFAULT_SNIPPET_TEMPLATE } from './snippet-template.js'
-import type { StepKind } from './step-role.js'
 import { renderTemplate } from './template.js'
 
 export type Snippet = {
@@ -21,8 +21,13 @@ const FRIENDLY_NAMES: Record<string, string> = {
 export function generateSnippet(
   rawText: string,
   registry: Registry,
-  options: { readonly template?: string; readonly role?: StepKind } = {},
+  options: {
+    readonly template?: string
+    readonly role?: StepKind
+    readonly snippetEmitter?: SnippetEmitter
+  } = {},
 ): Snippet {
+  const emitter = options.snippetEmitter ?? createTypeScriptSnippetEmitter()
   // The expression is the selection verbatim — no Given/When/Then stripping
   // and no other narration heuristics. The user owns what they selected.
   const originalText = rawText.trim()
@@ -41,11 +46,7 @@ export function generateSnippet(
     const count = (usedNames.get(baseName) ?? 0) + 1
     usedNames.set(baseName, count)
     const argName = count === 1 ? baseName : `${baseName}${count}`
-    // Number-typed parameter types map to TS `number`; everything else,
-    // including custom user-defined types, defaults to `string`. Users can
-    // refine the snippet manually if they want a more specific TS type.
-    const tsType = pt.type === Number ? 'number' : 'string'
-    return `${argName}: ${tsType}`
+    return `${argName}: ${emitter.typeNameFor(pt)}`
   })
 
   const handlerSignature = `(state, ${handlerArgs.join(', ')}) => {`

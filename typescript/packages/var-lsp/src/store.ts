@@ -26,7 +26,7 @@ export type StoreDeps = {
 export type Store = {
   reindex(): Promise<void>
   index(): WorkspaceIndex
-  snippetTemplate(): string
+  snippetTemplate(): string | undefined
   stepGlobs(): ReadonlyArray<string>
   // Whether a file is a var spec — i.e. it was discovered by the `vars` globs.
   // There is no `.md` extension to key off of; the config defines specs.

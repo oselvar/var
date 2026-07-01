@@ -19,6 +19,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@cucumber/cucumber-expressions": "^20.0.0",
     "@oselvar/var-core": "workspace:*",
     "typescript": "^6.0.3",
     "web-tree-sitter": "^0.26.10"

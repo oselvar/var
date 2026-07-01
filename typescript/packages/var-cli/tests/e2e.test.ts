@@ -22,18 +22,6 @@ function run(args: ReadonlyArray<string>, cwd: string) {
 }
 
 describe('var CLI (source via tsx)', () => {
-  test('stepdef --print emits the templated snippet to stdout', () => {
-    const dir = mkdtempSync(join(tmpdir(), 'var-e2e-'))
-    try {
-      const r = run(['stepdef', 'I have 5 cukes', '--print'], dir)
-      expect(r.status).toBe(0)
-      expect(r.stdout).toContain("action('I have {int} cukes', (state, count: number) => {")
-      expect(r.stdout).toContain("throw new Error('not implemented')")
-    } finally {
-      rmSync(dir, { recursive: true, force: true })
-    }
-  })
-
   test('init scaffolds three files and exits 0', () => {
     const dir = mkdtempSync(join(tmpdir(), 'var-e2e-init-'))
     try {

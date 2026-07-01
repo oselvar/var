@@ -10,7 +10,7 @@ export type VarGlobs = {
 export type VarConfig = {
   readonly vars: VarGlobs
   readonly steps: ReadonlyArray<string>
-  readonly snippet: { readonly template: string }
+  readonly snippet: { readonly template?: string }
   // Opt-in scanner extensions. Empty by default — projects migrating from
   // Cucumber typically add `[gherkinTables(), gherkinDocStrings()]` here.
   readonly scannerPlugins: ReadonlyArray<ScannerPlugin>
