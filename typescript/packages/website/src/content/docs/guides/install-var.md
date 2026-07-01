@@ -7,44 +7,100 @@ order: 1
 
 # Install Vár
 
-The `@oselvar/var` npm package is all you need to get started. 
-It doesn't matter if you are installing it into an existing project or starting one from scratch.
+This guide covers the TypeScript package, `@oselvar/var`. (A Python port,
+`pytest-var`, also exists — dual-language tabs for this guide are coming.)
+You need Node ≥ 22 LTS. It doesn't matter whether you're installing into an
+existing project or starting one from scratch.
 
-Open a terminal and install var:
+## Install
 
-```terminal
-pnpm install -D @oselvar/var
+Open a terminal and add Vár as a dev dependency:
+
+```bash
+pnpm add -D @oselvar/var
 ```
 
-Initialize your project:
+## Scaffold a project
 
-```terminal
-pnpx var init
+```bash
+pnpm exec var init
 ```
 
-This will create `var.config.ts` and an example test document.
-
-With this in place, we can run our first *oath*:
+This creates a config file and a first example, side by side:
 
 ```
-pnpx var run
+created var.config.ts
+created var-examples/hello-var/hello-var.md
+created var-examples/hello-var/hello-var.steps.ts
 ```
 
-You should see that the oath is *broken*:
+`var.config.ts` says which files are specs and which files bind their steps:
+
+```ts
+export default {
+  vars: ['var-examples/**/*.md'],
+  steps: ['var-examples/**/*.steps.ts'],
+}
+```
+
+And `hello-var.md` is the spec itself — plain prose with one concrete example:
+
+```markdown
+# Hello, Vár
+
+I greet "world". The greeting should be "Hello, world!".
+```
+
+## Run it
+
+```bash
+pnpm exec var run
+```
+
+The freshly scaffolded example passes:
 
 ```
-Expected: 42. Actual: 43 
+var-examples/hello-var/hello-var.md
+  ✓ Hello, Vár
+
+1 example, 1 passed
 ```
 
-Fix the test. Open `src/var/hello.steps.ts` in your editor and change `43` to `42`.
+## Watch it fail on purpose
+
+[Never trust a test you haven't seen fail.](/var/docs/concepts/the-oaths-of-var/)
+A passing example you've never seen go red might be testing nothing at all.
+Open `var-examples/hello-var/hello-var.steps.ts` and change the greeting it
+produces:
+
+```ts
+action('I greet {string}', (_state, name) => ({ greeting: `Hi, ${name}!` }))
+```
+
 Run var again:
 
-```
-pnpx var run
+```bash
+pnpm exec var run
 ```
 
-The oath is now *kept*:
+Now the oath is *broken* — the spec still says `"Hello, world!"`, but the step
+produces something else:
 
 ```
-1 example, 1 passed.
+var-examples/hello-var/hello-var.md
+  ✗ Hello, Vár
+      expected "Hello, world!", actual "Hi, world!"
+
+1 example, 0 passed, 1 failed
 ```
+
+Revert the change and run once more. The oath is *kept* again:
+
+```
+1 example, 1 passed
+```
+
+## Next
+
+- [Hello Vár: your first spec](/var/docs/start-here/hello-var-your-first-spec/) walks through writing a spec from a blank file.
+- [Wire Vár into your AI agent's instructions](/var/docs/guides/wire-var-into-agent-instructions/) so an agent writes specs first.
