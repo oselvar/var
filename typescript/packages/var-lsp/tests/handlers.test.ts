@@ -5,6 +5,7 @@ import { loadVarConfig } from '@oselvar/var-core/node'
 import { expect, test } from 'vitest'
 import { buildHandlers } from '../src/handlers.js'
 import { createNodeFileSystem } from '../src/node-file-system.js'
+import { createNodeGrammarLoader } from '../src/node-grammar-loader.js'
 import { createStore } from '../src/store.js'
 
 function tempWorkspace(setup: (dir: string) => void): { dir: string; cleanup: () => void } {
@@ -16,7 +17,7 @@ function tempWorkspace(setup: (dir: string) => void): { dir: string; cleanup: ()
 async function makeStore(dir: string) {
   const config = await loadVarConfig(dir)
   const fs = createNodeFileSystem(dir)
-  const store = createStore({ fs, config })
+  const store = createStore({ fs, config, grammarLoader: createNodeGrammarLoader() })
   await store.reindex()
   return store
 }

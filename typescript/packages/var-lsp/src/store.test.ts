@@ -1,5 +1,6 @@
 import { DEFAULT_SNIPPET_TEMPLATE } from '@oselvar/var-core'
 import { describe, expect, it } from 'vitest'
+import { createNodeGrammarLoader } from './node-grammar-loader.js'
 import { createStore, type FileSystem } from './store.js'
 
 function fakeFs(files: Record<string, string>): FileSystem {
@@ -32,13 +33,15 @@ const config = {
   scannerPlugins: [],
 }
 
+const grammarLoader = createNodeGrammarLoader()
+
 describe('createStore over a FileSystem', () => {
   it('indexes matches from in-memory step + var files', async () => {
     const fs = fakeFs({
       '/s.steps.ts': `action('I greet {string}', (ctx, name: string) => {})\n`,
       '/hello.md': `# Hi\n\nFirst I greet "world" okay?\n`,
     })
-    const store = createStore({ fs, config })
+    const store = createStore({ fs, config, grammarLoader })
     await store.reindex()
     const matches = store.index().matches.filter((m) => m.varPath === '/hello.md')
     expect(matches.length).toBeGreaterThan(0)
@@ -46,7 +49,7 @@ describe('createStore over a FileSystem', () => {
 
   it('reflects a written file on reindex', async () => {
     const fs = fakeFs({ '/s.steps.ts': '', '/a.md': '# none\n' })
-    const store = createStore({ fs, config })
+    const store = createStore({ fs, config, grammarLoader })
     await store.reindex()
     expect(store.index().matches.length).toBe(0)
     await fs.write('/s.steps.ts', `action('I greet {string}', () => {})`)
@@ -57,12 +60,23 @@ describe('createStore over a FileSystem', () => {
 
   it('recognises spec docs by the vars globs, including unsaved buffers', async () => {
     const fs = fakeFs({ '/s.steps.ts': '', '/hello.md': '# Hi\n' })
-    const store = createStore({ fs, config })
+    const store = createStore({ fs, config, grammarLoader })
     await store.reindex()
     // A saved spec and an unsaved buffer that matches `vars` are both var docs;
     // a `.steps.ts` is not (it doesn't match the `**/*.md` vars glob).
     expect(store.isVarDoc('/hello.md')).toBe(true)
     expect(store.isVarDoc('/never/written/draft.md')).toBe(true)
     expect(store.isVarDoc('/s.steps.ts')).toBe(false)
+  })
+
+  it('falls back to the TypeScript-compiler scanner when no grammarLoader is supplied', async () => {
+    const fs = fakeFs({
+      '/s.steps.ts': `action('I greet {string}', (ctx, name: string) => {})\n`,
+      '/hello.md': `# Hi\n\nFirst I greet "world" okay?\n`,
+    })
+    const store = createStore({ fs, config })
+    await store.reindex()
+    const matches = store.index().matches.filter((m) => m.varPath === '/hello.md')
+    expect(matches.length).toBeGreaterThan(0)
   })
 })
