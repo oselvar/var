@@ -5,10 +5,12 @@ on:
     branches: [main]
     paths:
       - 'python/**'
+      - 'conformance/**'
       - '.github/workflows/python.yml'
   pull_request:
     paths:
       - 'python/**'
+      - 'conformance/**'
       - '.github/workflows/python.yml'
   workflow_dispatch:
 

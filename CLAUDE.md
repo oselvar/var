@@ -11,6 +11,8 @@ This is a multi-language monorepo (ADR 0001). Top level:
   pnpm / vitest / tsc commands from `typescript/`.** Package paths in this file
   (e.g. `packages/var/src/...`) are relative to `typescript/`.
 - `python/` — the uv workspace for the Python port (skeleton today; see issue #2).
+- `java/` — the Maven multi-module workspace for the Java port (JDK 21, pinned in
+  `java/.tool-versions`).
 - `conformance/` — language-neutral corpus (`bundles/<n>/{example.md, *.steps.ts,
   golden/*.json}`) read by every language's conformance harness.
 - `docs/`, `doc/` — shared design docs (ADRs, specs, plans, ARCHITECTURE).
@@ -38,6 +40,11 @@ pnpm workspace · biome · vitest (for the core's own tests) · knip · jscpd ·
 
 ## Workflow
 
+- **Root gate.** `make check` (or plain `make`) at the repo root builds and tests
+  all three ports; `make typescript` / `make python` / `make java` run one. Each
+  target runs the same commands as that port's CI workflow in `.github/workflows/`
+  (`typescript.yml`, `python.yml`, `java.yml` — all three also trigger on
+  `conformance/**`).
 - **Trunk-based development.** We commit small, working increments straight to `main` — no long-lived feature branches. Keep each commit self-contained and green (build + tests pass), so trunk is always releasable.
 - **Type-check is a separate gate.** vitest runs source through esbuild/tsx, which strips types without checking them — a fully green suite can still fail `tsc`. Run `pnpm -r build` (exit 0) before calling any change done, especially after touching a shared type, an AST node, or a package's public exports (new required fields and new exports are the usual culprits). The website has its own Astro build: `pnpm --filter @oselvar/website build`.
   - `pnpm -r build` only type-checks each package's `src/` (its `tsconfig.json` emits with `rootDir: src`). **Test files (`tests/**`) are type-checked by `pnpm typecheck`** (root `tsconfig.tests.json`, `noEmit`, covers every non-website package's `tests/`). It's part of `pnpm check`, so run `pnpm check` (or `pnpm typecheck` alone) after touching tests — a green vitest run does *not* mean the tests type-check. Note `expectTypeOf` assertions are validated here by `tsc`, not by vitest (we don't run `vitest --typecheck`).

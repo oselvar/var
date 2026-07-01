@@ -1,0 +1,40 @@
+name: TypeScript
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'typescript/**'
+      - 'conformance/**'
+      - '.github/workflows/typescript.yml'
+  pull_request:
+    paths:
+      - 'typescript/**'
+      - 'conformance/**'
+      - '.github/workflows/typescript.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: typescript
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: typescript/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm build
+
+      - run: pnpm check
