@@ -11,6 +11,11 @@ type RunInput = {
   stepFiles: ReadonlyArray<{ path: string; source: string }>
   exampleIndex?: number
 }
+// Mirrors run-client.ts's WorkerRequest/WorkerResponse — the requestId lets
+// the client (a single worker shared by every editor group on the page)
+// match each response back to the call that made it, since runs from
+// different groups can be in flight concurrently.
+type WorkerRequest = RunInput & { requestId: number }
 
 function evalStepFile(path: string, source: string): void {
   const js = ts.transpileModule(source, {
@@ -33,8 +38,8 @@ function evalStepFile(path: string, source: string): void {
   )
 }
 
-self.onmessage = async (e: MessageEvent<RunInput>) => {
-  const input = e.data
+self.onmessage = async (e: MessageEvent<WorkerRequest>) => {
+  const { requestId, ...input } = e.data
   let results: SpecResults
   try {
     _resetBuilder()
@@ -60,5 +65,5 @@ self.onmessage = async (e: MessageEvent<RunInput>) => {
       ],
     }
   }
-  ;(self as unknown as Worker).postMessage(results)
+  ;(self as unknown as Worker).postMessage({ requestId, results })
 }
