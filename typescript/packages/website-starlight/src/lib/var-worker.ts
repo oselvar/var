@@ -10,11 +10,13 @@ import romanNumeralsSpec from '../../../var-examples/roman-numerals/roman-numera
 import romanNumeralsSteps from '../../../var-examples/roman-numerals/roman-numerals.steps.ts?raw'
 import yahtzeeSpec from '../../../var-examples/yahtzee/yahtzee.md?raw'
 import yahtzeeSteps from '../../../var-examples/yahtzee/yahtzee.steps.ts?raw'
-import { createIdbFileSystem } from './idb-file-system.ts'
+import { createMemoryFileSystem } from './memory-file-system.ts'
 import { createTsDiagnostics } from './ts-diagnostics.ts'
 
 // Seed the in-browser filesystem from the canonical dogfood files so the
 // language server can cross-reference each spec against its step definitions.
+// Re-seeded fresh on every worker start (i.e. every page load) — see
+// memory-file-system.ts.
 //
 // NOTE — two separate workers: this LSP worker produces the semantic-token
 // highlighting (green step / orange param chips) from THIS index, while the
@@ -23,11 +25,6 @@ import { createTsDiagnostics } from './ts-diagnostics.ts'
 // reaches only the run-worker, so any step file a doc spec must HIGHLIGHT
 // against has to be seeded here too. The docs use hello + yahtzee + roman-
 // numerals steps.
-//
-// NOTE — seeding only happens once, on first use of the IndexedDB store (see
-// idb-file-system.ts: it writes the seed only when the store is empty). A
-// browser that already visited before this file was added to SEED_FILES
-// keeps its old (smaller) seed until its IndexedDB is cleared.
 const SEED_FILES: Record<string, string> = {
   '/yahtzee.md': yahtzeeSpec,
   '/yahtzee.steps.ts': yahtzeeSteps,
@@ -63,7 +60,7 @@ function onDidChangeDocument(uri: string, text: string): void {
   )
 }
 
-registerHandlers(connection, async () => ({ fs: await createIdbFileSystem(SEED_FILES), config }), {
+registerHandlers(connection, async () => ({ fs: createMemoryFileSystem(SEED_FILES), config }), {
   onDidChangeDocument,
 })
 connection.listen()
