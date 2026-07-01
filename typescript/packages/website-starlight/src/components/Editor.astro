@@ -15,11 +15,11 @@ const { lineNumbers = false, folding = false, define = true, replayMs = 100 } = 
 ---
 <figure class="file-editor my-6">
   <figcaption
-    class="fe-tabs flex items-center gap-1 px-[6px] pt-[6px] bg-line-subtle"
+    class="fe-tabs flex items-center gap-1 px-[6px] pt-[6px] bg-line-subtle border-b border-line-subtle"
     role="tablist"
   ></figcaption>
   <div
-    class="cm-mount not-content border border-line-subtle rounded-none overflow-hidden"
+    class="cm-mount not-content m-0 border border-t-0 border-line-subtle rounded-none overflow-hidden"
     data-line-numbers={String(lineNumbers)}
     data-folding={String(folding)}
     data-define={String(define)}
@@ -41,33 +41,6 @@ const { lineNumbers = false, folding = false, define = true, replayMs = 100 } = 
    */
   .cm-mount :global(.cm-editor) { font-size: 14px; line-height: normal; }
   .cm-mount :global(.cm-editor.cm-focused) { outline: none; }
-  .file-editor .cm-mount { margin: 0; }
-  .fe-tab {
-    padding: 6px 12px 8px;
-    font: 600 13px/1 var(--font-mono, monospace);
-    background: none;
-    border: none;
-    border-bottom: 2px solid transparent;
-    color: var(--ink);
-    cursor: pointer;
-  }
-  .fe-tab:hover { background: var(--raised); }
-  .fe-tab[aria-selected='true'] { border-bottom-color: var(--accent); color: var(--accent); }
-  .fe-state-btn {
-    padding: 2px 8px;
-    font-size: 12px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 0;
-    color: var(--ink);
-    cursor: pointer;
-  }
-  .fe-state-btn:hover { background: var(--raised); }
-  .fe-state-btn[aria-pressed='true'] {
-    background: var(--accent);
-    color: var(--accent-contrast);
-    border-color: var(--accent);
-  }
 </style>
 <script>
   import '../scripts/editor-mount.ts'

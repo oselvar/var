@@ -232,7 +232,8 @@ function mountEditor(editorEl: HTMLElement): void {
     for (const state of data.states) {
       const btn = document.createElement('button')
       btn.type = 'button'
-      btn.className = 'fe-state-btn'
+      btn.className =
+        'fe-state-btn px-2 py-0.5 text-[12px] font-normal rounded-none border border-line bg-surface text-ink cursor-pointer hover:bg-raised aria-pressed:bg-accent aria-pressed:text-accent-contrast aria-pressed:border-accent'
       btn.textContent = state.name
       btn.setAttribute('aria-pressed', String(state.text === current))
       btn.addEventListener('click', () => {
@@ -307,7 +308,8 @@ function mountEditor(editorEl: HTMLElement): void {
 
     const tabBtn = document.createElement('button')
     tabBtn.type = 'button'
-    tabBtn.className = 'fe-tab'
+    tabBtn.className =
+      'fe-tab relative top-px -mb-px px-[14px] py-[7px] font-mono font-semibold text-[13px] leading-none bg-transparent border border-transparent rounded-t-md text-ink opacity-60 cursor-pointer hover:opacity-100 hover:bg-raised aria-selected:opacity-100 aria-selected:bg-[var(--ed-bg)] aria-selected:border-line-subtle aria-selected:border-b-[var(--ed-bg)]'
     tabBtn.setAttribute('role', 'tab')
     tabBtn.setAttribute('aria-selected', String(file.uri === activeUri))
     tabBtn.textContent = filenameOf(file.uri)
