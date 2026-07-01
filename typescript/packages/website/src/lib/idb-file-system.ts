@@ -44,7 +44,7 @@ export async function createIdbFileSystem(seed: Record<string, string> = {}): Pr
         (s) => s.getAllKeys() as IDBRequest<IDBValidKey[]>,
       )
       const paths = all.map(String)
-      const exts = globs.map((g) => g.slice(g.lastIndexOf('.')))
+      const exts = globs.include.map((g) => g.slice(g.lastIndexOf('.')))
       return paths.filter((p) => exts.some((e) => p.endsWith(e)))
     },
     async read(path) {
@@ -62,7 +62,7 @@ export async function createIdbFileSystem(seed: Record<string, string> = {}): Pr
     matches(path, globs) {
       // Mirror `list`'s crude extension matcher: in the browser, specs are
       // distinguished from `.steps.ts` by extension, which is enough here.
-      const exts = globs.filter((g) => !g.startsWith('!')).map((g) => g.slice(g.lastIndexOf('.')))
+      const exts = globs.include.map((g) => g.slice(g.lastIndexOf('.')))
       return exts.some((e) => path.endsWith(e))
     },
   }

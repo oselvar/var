@@ -1,7 +1,18 @@
 {
   "threshold": 0,
   "reporters": ["consoleFull"],
-  "ignore": ["**/node_modules/**", "**/dist/**", "**/tests/**", "**/*.test.ts", "**/*.json"],
+  "ignore": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/tests/**",
+    "**/*.test.ts",
+    "**/*.json",
+    "packages/website-starlight/src/lib/**",
+    "packages/website-starlight/src/scripts/editor-mount.ts",
+    "packages/website-starlight/src/components/Editor.astro",
+    "packages/website-starlight/src/styles/custom.css",
+    "packages/website-starlight/src/styles/tailwind.css"
+  ],
   "absolute": true,
   "gitignore": true
 }

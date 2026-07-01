@@ -16,6 +16,10 @@ import { uriToPath } from './uri.js'
 // Keep these re-exports so knip continues to count the workspace deps as used
 // in the build. T6 onward uses them directly.
 export type { StepDef } from '@oselvar/var-language'
+// FileSystem is the port external adapters implement (node-file-system.ts
+// internally, idb-file-system.ts in the website packages) — it must be
+// public for those adapters to type against it.
+export type { FileSystem } from './file-system.js'
 
 // vscode-languageserver 10's `onRequest(method, handler)` overload mis-infers the
 // result generic from a discriminated `{ ok: true } | { ok: false }` union (it

@@ -1,0 +1,74 @@
+---
+interface Props {
+  // Show the line-number gutter for every File tab (default false).
+  lineNumbers?: boolean
+  // Show the fold (collapse/expand) gutter for every File tab (default false).
+  folding?: boolean
+  // Offer the "Define step definition" affordance on a settled selection in
+  // markdown File tabs (default true).
+  define?: boolean
+  // Milliseconds between keystrokes when replaying between named states.
+  // Lower is faster. Only relevant for a File with ≥2 named-slot states.
+  replayMs?: number
+}
+const { lineNumbers = false, folding = false, define = true, replayMs = 100 } = Astro.props
+---
+<figure class="file-editor my-6">
+  <figcaption
+    class="fe-tabs flex items-center gap-1 px-[6px] pt-[6px] bg-line-subtle"
+    role="tablist"
+  ></figcaption>
+  <div
+    class="cm-mount not-content border border-line-subtle rounded-none overflow-hidden"
+    data-line-numbers={String(lineNumbers)}
+    data-folding={String(folding)}
+    data-define={String(define)}
+    data-replay-ms={String(replayMs)}
+  ></div>
+  <div class="fe-footer flex items-center gap-1 px-[14px] py-2 bg-line-subtle" hidden></div>
+  <div hidden><slot /></div>
+</figure>
+<style>
+  /*
+   * line-height: CodeMirror never sets its own — it measures whatever's
+   * inherited at mount time and caches that for its vertical-motion math
+   * (cursorLineDown/Up, scrollIntoView). Starlight's own reset sets
+   * `body { line-height: 1.75 }` for prose, which this component would
+   * otherwise inherit — both the visibly loose leading and (if that
+   * measurement races the variable font finishing loading and going
+   * stale) the ArrowUp/ArrowDown skipping a line. Pin it explicitly so
+   * the editor never depends on an ambient page-level value.
+   */
+  .cm-mount :global(.cm-editor) { font-size: 14px; line-height: normal; }
+  .cm-mount :global(.cm-editor.cm-focused) { outline: none; }
+  .file-editor .cm-mount { margin: 0; }
+  .fe-tab {
+    padding: 6px 12px 8px;
+    font: 600 13px/1 var(--font-mono, monospace);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .fe-tab:hover { background: var(--raised); }
+  .fe-tab[aria-selected='true'] { border-bottom-color: var(--accent); color: var(--accent); }
+  .fe-state-btn {
+    padding: 2px 8px;
+    font-size: 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 0;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .fe-state-btn:hover { background: var(--raised); }
+  .fe-state-btn[aria-pressed='true'] {
+    background: var(--accent);
+    color: var(--accent-contrast);
+    border-color: var(--accent);
+  }
+</style>
+<script>
+  import '../scripts/editor-mount.ts'
+</script>

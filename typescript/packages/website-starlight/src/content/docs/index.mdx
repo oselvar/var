@@ -1,0 +1,65 @@
+---
+title: Vár
+description: Get started building your docs site with Starlight.
+template: splash # Remove or comment out this line to display the site sidebar on this page.
+hero:
+  tagline: Executable markdown documentation for humans and agents. Turn your docs into tests.
+  image:
+    file: ../../assets/var-logo.webp
+  actions:
+    - text: Example Guide
+      link: /guides/example/
+      icon: right-arrow
+    - text: Read the Starlight docs
+      link: https://starlight.astro.build
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid, Tabs, TabItem } from '@astrojs/starlight/components';
+import Editor from '../../components/Editor.astro';
+import File from '../../components/File.astro';
+import yahtzeeSource from '../../../../var-examples/yahtzee/yahtzee.md?raw';
+import yahtzeeSteps from '../../../../var-examples/yahtzee/yahtzee.steps.ts?raw';
+import romanNumeralsSource from '../../../../var-examples/roman-numerals/roman-numerals.md?raw';
+import romanNumeralsSteps from '../../../../var-examples/roman-numerals/roman-numerals.steps.ts?raw';
+
+## This is a real spec
+
+Not a snippet — the whole file, unmodified, running in this repo's own test suite. Pick an example, edit it:
+
+<Tabs syncKey="example">
+  <TabItem label="Yahtzee">
+    <Editor folding>
+      <File uri="file:///yahtzee.md">{yahtzeeSource}</File>
+      <File uri="file:///yahtzee.steps.ts">{yahtzeeSteps}</File>
+    </Editor>
+  </TabItem>
+  <TabItem label="Roman numerals">
+    <Editor folding>
+      <File uri="file:///roman-numerals.md">{romanNumeralsSource}</File>
+      <File uri="file:///roman-numerals.steps.ts">{romanNumeralsSteps}</File>
+    </Editor>
+  </TabItem>
+</Tabs>
+
+## Next steps
+
+<CardGrid stagger>
+	<Card title="Update content" icon="pencil">
+		Edit `src/content/docs/index.mdx` to see this page change.
+	</Card>
+	<Card title="Change page layout" icon="document">
+		Delete `template: splash` in `src/content/docs/index.mdx` to display a
+		sidebar on this page.
+	</Card>
+	<Card title="Add new content" icon="add-document">
+		Add Markdown or MDX files to `src/content/docs` to create new pages.
+	</Card>
+	<Card title="Configure your site" icon="setting">
+		Edit your `sidebar` and other config in `astro.config.mjs`.
+	</Card>
+	<Card title="Read the docs" icon="open-book">
+		Learn more in [the Starlight Docs](https://starlight.astro.build/).
+	</Card>
+</CardGrid>

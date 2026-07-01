@@ -1,0 +1,161 @@
+@import '@fontsource-variable/source-sans-3';
+
+/*
+ * "Norse" by Joël Carrouché (https://www.fontspace.com/norse-font-f21080),
+ * freeware, free for personal and commercial use, embedding in web pages
+ * permitted — self-hosted below. Splash-page hero heading only; the rest
+ * of the site stays on --sl-font.
+ */
+@font-face {
+  font-family: 'Norse';
+  src: url('/fonts/norse.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.hero h1 {
+  font-family: 'Norse', var(--sl-font);
+}
+
+/*
+ * Vár earthy palette, ported from
+ * docs/superpowers/specs/2026-06-26-earthy-color-scheme-design.md
+ * onto Starlight's own theming variables. Dark is the default `:root`
+ * (Starlight's convention); light overrides live under
+ * `:root[data-theme='light']`. accent-low is a derived subtle wash in
+ * both themes (no direct earthy-doc equivalent) — the only two values
+ * here not taken verbatim from the design doc; revisit visually if the
+ * wash reads wrong.
+ *
+ * Starlight's own gray-N convention (verified against
+ * node_modules/@astrojs/starlight/style/props.css) runs gray-1 = the
+ * color furthest from the background (--sl-color-text is literally
+ * `var(--sl-color-gray-2)`) ascending to gray-6/7 = closest to the
+ * background (nav/sidebar/inline-code tints). Order the earthy values
+ * to match that, not the reverse.
+ */
+
+:root {
+  --sl-font: 'Source Sans 3 Variable', 'Source Sans 3', system-ui, sans-serif;
+
+  --sl-color-black: #110d09;
+  --sl-color-gray-1: #efe7d7;
+  --sl-color-gray-2: #b7a892;
+  --sl-color-gray-3: #94866f;
+  --sl-color-gray-4: #6a523b;
+  --sl-color-gray-5: #3a2e22;
+  --sl-color-gray-6: #221a12;
+  --sl-color-gray-7: #17120d;
+  --sl-color-white: #efe7d7;
+
+  --sl-color-accent-low: #3a2418;
+  --sl-color-accent: #cc6b3c;
+  --sl-color-accent-high: #d9a441;
+
+  /*
+   * Legacy names, ported verbatim from packages/website/src/styles/global.css
+   * (.dark -> Starlight's default :root) for the live Editor component —
+   * Editor.astro's Tailwind classes and the CodeMirror theme files
+   * (cm-var-theme.ts, var-token-theme.ts) reference these directly, not
+   * --sl-color-*. Same underlying earthy values, different names.
+   */
+  --surface: #17120d;
+  --raised: #221a12;
+  --sunken: #110d09;
+  --ink: #efe7d7;
+  --subtle: #b7a892;
+  --muted: #94866f;
+  --accent: #cc6b3c;
+  --accent-contrast: #17120d;
+  --strong: #cc6b3c;
+  --strong-hover: #d9743f;
+  --highlight: #d9a441;
+  --line: #6a523b;
+  --line-subtle: #3a2e22;
+  --yellow: var(--highlight);
+  --radius-5: 0;
+
+  /* Editor (CodeMirror) surface + run-result tokens. */
+  --ed-bg: #221a12;
+  --ed-text: #efe7d7;
+  --ed-gutter: #7c6e58;
+  --ed-selection: #3a2e22;
+  --ed-pass-bg: rgba(0, 158, 115, 0.24);
+  --ed-fail-bg: rgba(213, 84, 0, 0.26);
+  --ed-pass-mark: #2fb88e;
+  --ed-fail-mark: #f2772b;
+  --ed-step-bg: #6fa89b;
+  --ed-step-text: #17120d;
+  --ed-chip-bg: #8a6b4a;
+  --ed-chip-text: #17120d;
+  --ed-flash: rgba(111, 168, 155, 0.45);
+
+  /* Editor syntax highlighting. */
+  --syn-keyword: #e08a57;
+  --syn-string: #9cbe82;
+  --syn-comment: #7c6e58;
+  --syn-function: #d4a24c;
+  --syn-number: #d38b4e;
+  --syn-heading: #efe7d7;
+  --syn-meta: #94866f;
+}
+
+:root[data-theme='light'] {
+  --sl-font: 'Source Sans 3 Variable', 'Source Sans 3', system-ui, sans-serif;
+
+  --sl-color-black: #f4f0e6;
+  --sl-color-gray-1: #2a2017;
+  --sl-color-gray-2: #6b5d4c;
+  --sl-color-gray-3: #8a7b66;
+  --sl-color-gray-4: #c8bba3;
+  --sl-color-gray-5: #dcd3c0;
+  --sl-color-gray-6: #ece5d5;
+  --sl-color-gray-7: #fbf8f0;
+  --sl-color-white: #2a2017;
+
+  --sl-color-accent-low: #efd9c9;
+  --sl-color-accent: #b0552f;
+  --sl-color-accent-high: #c8924a;
+
+  /* Legacy names — see the :root block above for why these exist. */
+  --surface: #f4f0e6;
+  --raised: #fbf8f0;
+  --sunken: #ece5d5;
+  --ink: #2a2017;
+  --subtle: #6b5d4c;
+  --muted: #8a7b66;
+  --accent: #b0552f;
+  --accent-contrast: #fbf8f0;
+  --strong: #3b2e20;
+  --strong-hover: #2a2017;
+  --highlight: #c8924a;
+  --line: #c8bba3;
+  --line-subtle: #dcd3c0;
+  --yellow: var(--highlight);
+  --radius-5: 0;
+
+  /* Editor (CodeMirror) surface + run-result tokens. */
+  --ed-bg: #fbf8f0;
+  --ed-text: #2a2017;
+  --ed-gutter: #8a7b66;
+  --ed-selection: #e4dac4;
+  --ed-pass-bg: rgba(0, 158, 115, 0.15);
+  --ed-fail-bg: rgba(213, 84, 0, 0.15);
+  --ed-pass-mark: #009e73;
+  --ed-fail-mark: #d55e00;
+  --ed-step-bg: #5e9488;
+  --ed-step-text: #fbf8f0;
+  --ed-chip-bg: #3b2e20;
+  --ed-chip-text: #f4f0e6;
+  --ed-flash: rgba(94, 148, 136, 0.4);
+
+  /* Editor syntax highlighting. */
+  --syn-keyword: #9a3e1b;
+  --syn-string: #5e7a4e;
+  --syn-comment: #a08c72;
+  --syn-function: #7a5c2e;
+  --syn-number: #8a5a2b;
+  --syn-heading: #3b2e20;
+  --syn-meta: #8a7b66;
+}

@@ -1,0 +1,28 @@
+@layer base, starlight, theme, components, utilities;
+@import '@astrojs/starlight-tailwind';
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+/*
+ * Semantic colors -> Tailwind utilities, ported verbatim from
+ * packages/website/src/styles/global.css so Editor.astro's utility classes
+ * (bg-surface, text-ink, border-line-subtle, aria-pressed:bg-accent, …)
+ * resolve. `inline` means the utilities emit var(--…) references, so they
+ * still pick up whichever theme is active. The underlying --ink/--surface/…
+ * custom properties are defined per-theme in custom.css, alongside --sl-color-*.
+ */
+@theme inline {
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-sunken: var(--sunken);
+  --color-ink: var(--ink);
+  --color-subtle: var(--subtle);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-contrast: var(--accent-contrast);
+  --color-strong: var(--strong);
+  --color-strong-hover: var(--strong-hover);
+  --color-highlight: var(--highlight);
+  --color-line: var(--line);
+  --color-line-subtle: var(--line-subtle);
+}
