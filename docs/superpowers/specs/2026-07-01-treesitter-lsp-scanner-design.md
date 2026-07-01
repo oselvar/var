@@ -53,17 +53,36 @@ bytes* is per-environment.
   characters, an emoji — a UTF-16 surrogate pair).
 - `src/tree-sitter-queries.ts` — the per-language surface, as string constants
   (not `.scm` asset files — avoids a second asset-loading mechanism alongside
-  `GrammarLoader` in the same sub-project):
+  `GrammarLoader` in the same sub-project). Capture names follow
+  [cucumber/language-service](https://github.com/cucumber/language-service)'s
+  convention (`@root`, `@function-name`, `@expression`, `@name`, `@name-key`,
+  `@regexp-key`) rather than inventing new ones:
   - step-def calls: `context`/`action`/`sensor` call expressions with a
-    string-literal first argument, capturing the function name as `kind` and
-    an optional arrow/function second argument for handler params.
+    **string-literal only** first argument (`@expression`), capturing the
+    function name (`@function-name`) as `kind` and an optional arrow/function
+    second argument for handler params. Var has no raw-regexp step
+    definitions — only cucumber expressions — so, unlike
+    cucumber/language-service's own step-definition query (which also matches
+    `(regex)` and `(template_string)`, because Cucumber-JS supports regex step
+    defs), this query has no such branch. This also matches the current
+    TS-compiler scanner, which only accepts `ts.isStringLiteral`.
   - parameter types: `defineState(...)` calls whose second-argument object
-    literal has entries with a `regexp` property (regex or string literal).
+    literal has entries with a `regexp` property (regex or string literal —
+    this *is* a real regexp, since it defines a custom parameter type's
+    matching pattern; unrelated to the "no regexp step defs" rule above).
 
   The exact tree-sitter-typescript node shapes for these three source shapes
   (string literals, regex literals, arrow functions, call expressions) must be
   verified empirically against real parse trees during implementation — grammar
   internals have shifted across versions before, so this is not assumed.
+
+  **String-literal decoding.** Unlike `ts.StringLiteral.text` (already decoded),
+  a tree-sitter `string` node's children include the quote-character tokens and
+  the content is *not* unescaped. Extracting the expression text needs the
+  same two steps cucumber/language-service's `helpers.ts` uses: filter out the
+  quote-token children (`childrenToString(node, NO_QUOTES)`), then unescape
+  `\'`/`\"`. Skipping this would make `action('I said \'hi\'', ...)` extract
+  wrong. Gets its own test fixture (see Testing strategy).
 - `src/tree-sitter-scanner.ts` — `createTreeSitterScanner(grammarLoader:
   GrammarLoader): Promise<StepDefScanner>`. Selects the `typescript` grammar
   for `.ts` files and `typescript-tsx` for `.tsx` files (see TSX below), memoizes
@@ -139,6 +158,57 @@ Mirrors the existing `FileSystem` port / `node-file-system.ts` pattern exactly:
 `var-lsp` explicitly passes the tree-sitter scanner. `website` and
 `var-vscode` keep working unchanged.
 
+### Lessons from cucumber/language-service
+
+Read the actual source, not just `scripts/build.js`, before finalizing this
+design. Adopted:
+
+- The query-string-with-named-captures pattern and its capture-name vocabulary
+  (`@root`/`@function-name`/`@expression`/`@name`), rather than manual
+  tree-walking.
+- The quote-stripping + unescape steps needed to decode a `string` node's
+  content (see above) — an easy-to-miss gap this design didn't originally
+  cover.
+- Confirmation that our `byte-offset.ts` conversion is a real, not
+  hypothetical, gap: `helpers.ts`'s `createLocationLink` passes tree-sitter's
+  raw `startPosition.column` (a UTF-8 byte offset) directly into an LSP
+  `Range`, with no UTF-16 conversion visible anywhere in the source. If that's
+  accurate, the reference implementation itself mishandles non-ASCII columns —
+  which is a reason to keep our conversion, not drop it as gold-plating.
+
+Explicitly declined:
+
+- Their `NodeParserAdapter` (native node-tree-sitter) and `WasmParserAdapter`
+  (web-tree-sitter) actually **disagree** on which grammar to use for
+  TypeScript: the native adapter maps both `tsx` and `javascript` language
+  names to the plain `typescript` grammar, while the wasm adapter maps them to
+  the `tsx` grammar's `.wasm`. Their own `scripts/build.js` only builds `tsx`
+  wasm — there is no `typescript.wasm` at all in their wasm distribution. This
+  inconsistency in the reference implementation reinforces, rather than
+  undermines, this design's choice to build *both* grammars and select
+  correctly by extension (see "Why two grammars, not one") instead of picking
+  one and hoping it doesn't matter.
+- Their dual `ParserAdapter` (native bindings *and* wasm, switched per
+  environment). `doc/ARCHITECTURE.md` already deliberately rejected native
+  bindings in favour of one wasm extractor everywhere; nothing here changes
+  that reasoning.
+- Their unified `Language` object, which bundles the extraction queries
+  *and* the snippet-template/parameters together per language. ARCHITECTURE.md
+  §4 and §7 step 4 already deliberately keep `StepDefScanner` (extraction) and
+  the future `SnippetEmitter` (generation) as separate ports; no reason to
+  merge them.
+- Their `treeByContent` cache, which parses a source once and reuses the tree
+  for both the parameter-type and step-definition queries. Considered, but
+  `buildWorkspaceIndex` calls `discoverParameterTypes` across *all* step files
+  in one pass, then `discoverStepDefs` across all of them in a separate later
+  pass — so a naive per-source cache wouldn't actually be hit for the real
+  call pattern here, and an unbounded cache living inside a scanner instance
+  that's memoized for the LSP server's entire lifetime (`store.ts` reindexes
+  repeatedly as files change) risks a slow memory leak across long editing
+  sessions. Not worth it without evidence double-parsing is a real bottleneck
+  — and today's TS-compiler scanner already double-parses every file the same
+  way, so this isn't a regression.
+
 ## Testing strategy
 
 - Extract the 12 existing `step-defs.test.ts` cases into shared fixtures; run
@@ -150,6 +220,8 @@ Mirrors the existing `FileSystem` port / `node-file-system.ts` pattern exactly:
 - One fixture per grammar exercising a plain angle-bracket type assertion in a
   `.ts` file, to lock in that the `typescript` grammar (not `tsx`) is selected
   for `.ts` files.
+- One fixture with an escaped quote inside the expression string (e.g.
+  `action('I said \'hi\'', ...)`) to lock in the quote-stripping/unescape step.
 - `byte-offset.ts` gets its own focused unit tests.
 - `var-lsp`'s existing `store.test.ts`/`handlers.test.ts` continue to pass
   unchanged (aside from the new `grammarLoader` field) — the integration-level
