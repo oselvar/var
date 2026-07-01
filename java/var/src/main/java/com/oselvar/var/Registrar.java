@@ -8,12 +8,25 @@ import java.util.function.Supplier;
  * global mutable accumulator and no reliance on static-initializer side effects.
  *
  * <p>This diverges deliberately from the TS/Python module-scope builder ({@code
- * internal.ts}'s {@code let steps = []}, {@code internal.py}'s {@code _steps}): those
- * work because Node/Python spin up a fresh process per run, so the module-level mutable
- * state is effectively run-scoped. A long-lived JVM (Surefire fork reuse, IDE runner,
- * Gradle daemon) has no such reset, making a static accumulator a genuine cross-run
- * leakage hazard. Threading a fresh Registrar per run keeps the mutable accumulation in
- * the imperative shell where CLAUDE.md's "functional core, imperative shell" wants it.
+ * internal.ts}'s {@code let steps = []}, {@code internal.py}'s {@code _steps}). Those
+ * accumulators are not purely run-scoped either — they just usually get away with it
+ * because Node/Python typically execute a whole test file as a fresh process — which is
+ * why both ship a reset hatch ({@code _resetBuilder()} in {@code internal.ts}, {@code
+ * _reset_builder()} in {@code internal.py}) "for use in tests between isolated
+ * scenarios". Java's classloader lifetime is not the same as a run's lifetime, and this
+ * is already live in this project: {@code var-junit} (the future JUnit Platform {@code
+ * TestEngine}, per ADR 0003) runs in-process in the test JVM, where {@code
+ * LauncherSession} reuse, {@code @RepeatedTest}, "rerun failed tests," and this
+ * project's own unit test suite (many {@code @Test} methods, one classloader) all drive
+ * more than one registration cycle through a single classloader. Relying on that reset
+ * hatch constantly is easy to forget — a fresh {@link Registrar} injected per run avoids
+ * needing it at all.
+ *
+ * <p>Independently of any JVM-specific argument, CLAUDE.md's "functional core,
+ * imperative shell" / hexagonal-architecture rule settles this: mutable accumulation
+ * belongs in a shell-owned adapter, never a global inside the pure facade. A static
+ * accumulator here would violate that on principle regardless of what any particular
+ * test runner does.
  *
  * <p>Preserves the semantics the design doc requires: one state factory per
  * step-definition class (one {@link #defineState} call), fresh per example (the runner

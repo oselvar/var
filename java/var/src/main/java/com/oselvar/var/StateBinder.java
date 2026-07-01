@@ -14,6 +14,11 @@ package com.oselvar.var;
  * resolving captures from the Cucumber expression is {@code (State, Object[])}; these
  * typed SAMs are author-facing sugar over that.
  *
+ * <p>Because the {@code Context0}/{@code Context1} (and {@code Sensor0}/{@code Sensor1})
+ * overloads are disambiguated by lambda arity, not by parameter type, a capturing
+ * handler's parameter type cannot be inferred from a bare {@code (ctx, n) -> …} — write
+ * it as {@code (Ctx ctx, Integer n) -> …} with explicit types.
+ *
  * @param <C> this step file's context-state type
  */
 public interface StateBinder<C extends State> {
