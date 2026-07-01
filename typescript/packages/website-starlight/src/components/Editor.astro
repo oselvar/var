@@ -64,7 +64,15 @@ const doc = states.length > 0 ? states[0].text : await renderState('default')
 const hasStates = states.length >= 2
 
 const mountAttrs = {
-  class: 'cm-mount border border-line-subtle rounded-none overflow-hidden my-6',
+  // not-content: opts this subtree out of Starlight's automatic prose
+  // spacing (markdown.css's `:not(a, strong, …) + :not(a, strong, …,
+  // :where(.not-content *))` sibling-margin rule). Without it, every
+  // `.cm-line` CodeMirror renders is a plain <div> sibling of the last and
+  // picks up an extra ~16px margin-top that CodeMirror's own height model
+  // never measures (it only measures line-height) — so its internal
+  // Y-coordinate math for clicks and ArrowUp/Down silently diverges from
+  // the real rendered layout, worse the further down the document you go.
+  class: 'cm-mount not-content border border-line-subtle rounded-none overflow-hidden my-6',
   'data-uri': uri,
   'data-lang': lang,
   'data-doc': doc,
