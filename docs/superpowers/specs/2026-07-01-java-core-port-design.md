@@ -190,11 +190,11 @@ keep the *concept* names parallel for reviewability, not the casing:
 | Sentence splitting | `sentences.ts` | `Sentences.java` |
 | Step roles | `step-role.ts` | `StepRole.java` |
 | Registry / author API | `registry.ts` (+ `@oselvar/var` `internal.ts`) | `Registry.java` (core); facade equivalent lives in the `var` module, package `com.oselvar.var` |
-| Matching | `matcher.ts`, `expression-segments.ts` | `Matcher.java`, `ExpressionSegments.java` (only as far as the matcher/conformance needs it, same scope limit as Python) |
+| Matching | `matcher.ts`, `expression-segments.ts` | `Matcher.java` only — **`ExpressionSegments.java` was not ported** (Task 14): `parameterTypeNames` re-parses via `cucumber-expressions`' own `CucumberExpressionParser` instead, so no separate segment-splitting module was needed |
 | Planning | `plan.ts` | `Plan.java` |
 | Execution | `execute.ts` | `Execute.java` |
 | Diffs / failures | `cell-diff.ts`, `doc-string-diff.ts`, `param-diff.ts`, `table-cells.ts`, `failure.ts`, `result.ts` | `CellDiff.java`, `DocStringDiff.java`, `ParamDiff.java`, `TableCells.java`, `Failure.java`, `Result.java` |
-| Conformance | `conformance.ts`, `deep-equal.ts` (+ canonical JSON) | `Conformance.java`, `DeepEqual.java`, `CanonicalJson.java` |
+| Conformance | `conformance.ts`, `deep-equal.ts` (+ canonical JSON) | `Conformance.java`, `CanonicalJson.java` only — **`DeepEqual.java` was not ported** (Task 19): conformance compares canonical-JSON *strings* for byte-for-byte equality, so no separate structural deep-equality helper was needed |
 
 **Out of scope** (matches Python and the skill's "what's shared" table): `config.ts`,
 `find-files.ts`, `hash.ts`, `node.ts`, `ports.ts`, `run-diagnostics.ts`,
