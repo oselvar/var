@@ -10,6 +10,9 @@ import com.oselvar.var.runner.StepLoader.LoadedSteps;
 import com.oselvar.var.runner.fixtures.AlphaSteps;
 import com.oselvar.var.runner.fixtures.BetaSteps;
 import com.oselvar.var.runner.fixtures.ContextOnlySteps;
+import com.oselvar.var.runner.fixtures.DeltaSteps;
+import com.oselvar.var.runner.fixtures.EpsilonSteps;
+import com.oselvar.var.runner.fixtures.GammaSteps;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -143,5 +146,32 @@ class StepLoaderTest {
                                 StepLoader.loadSteps(
                                         List.of(AlphaSteps.class.getName(), AlphaSteps.class.getName()), LOADER));
         assertTrue(e.getMessage().contains("duplicate step definition"));
+    }
+
+    @Test
+    void mergesCustomParameterTypesFromMultipleClassesWithDifferentNames() {
+        LoadedSteps loaded =
+                StepLoader.loadSteps(
+                        List.of(GammaSteps.class.getName(), DeltaSteps.class.getName()), LOADER);
+
+        assertEquals(2, loaded.registry().customParameterTypes().size());
+        var customTypes = loaded.registry().customParameterTypes();
+        assertEquals("color", customTypes.get(0).name());
+        assertEquals("size", customTypes.get(1).name());
+    }
+
+    @Test
+    void duplicateCustomParameterTypeNameAcrossTwoClassesThrows() {
+        // GammaSteps and EpsilonSteps both register a "color" parameter type; loading
+        // both (as if two step-definition files accidentally declared the same custom
+        // parameter-type name) must reject it.
+        IllegalArgumentException e =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () ->
+                                StepLoader.loadSteps(
+                                        List.of(GammaSteps.class.getName(), EpsilonSteps.class.getName()),
+                                        LOADER));
+        assertTrue(e.getMessage().contains("duplicate custom parameter-type name \"color\""));
     }
 }

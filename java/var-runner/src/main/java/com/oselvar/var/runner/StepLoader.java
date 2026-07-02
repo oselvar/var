@@ -80,7 +80,9 @@ import java.util.function.Supplier;
  * customParameterTypes()} is merged the same way — plain concatenation, no
  * recompilation — since it exists purely to be projected into the registry
  * conformance artifact ({@link com.oselvar.var.core.Conformance#toRegistryArtifact}),
- * never consulted to compile anything itself.
+ * never consulted to compile anything itself. Duplicate custom parameter-type names are
+ * rejected (two classes accidentally registering the same name is a genuine authoring
+ * bug this merge should catch).
  */
 public final class StepLoader {
 
@@ -99,9 +101,10 @@ public final class StepLoader {
      * @param loader the classloader to resolve {@code stepClassNames} against
      * @throws IllegalArgumentException if a name can't be resolved to a class, the
      *     resolved class neither implements {@link StepDefinitions} nor exposes a matching
-     *     static factory method, two classes register the identical step expression, or
-     *     two load units' steps report the same {@code expressionSourceFile} (one
-     *     defineState per step-definition file)
+     *     static factory method, two classes register the identical step expression, two
+     *     classes register a custom parameter type with the same name, or two load units'
+     *     steps report the same {@code expressionSourceFile} (one defineState per
+     *     step-definition file)
      * @throws IllegalStateException if a resolved class can't be instantiated or invoked
      */
     public static LoadedSteps loadSteps(List<String> stepClassNames, ClassLoader loader) {
@@ -127,7 +130,10 @@ public final class StepLoader {
                     requireNoDuplicate(mergedSteps, step);
                     mergedSteps.add(step);
                 }
-                mergedCustomParameterTypes.addAll(own.customParameterTypes());
+                for (Registry.CustomParameterType cpt : own.customParameterTypes()) {
+                    requireNoDuplicateParameterTypeName(mergedCustomParameterTypes, cpt);
+                    mergedCustomParameterTypes.add(cpt);
+                }
 
                 if (!own.steps().isEmpty()) {
                     String file = own.steps().get(0).expressionSourceFile();
@@ -185,6 +191,16 @@ public final class StepLoader {
                                 + incoming.expressionSourceFile()
                                 + ":"
                                 + incoming.expressionSourceLine());
+            }
+        }
+    }
+
+    private static void requireNoDuplicateParameterTypeName(
+            List<Registry.CustomParameterType> mergedTypes, Registry.CustomParameterType incoming) {
+        for (Registry.CustomParameterType existing : mergedTypes) {
+            if (existing.name().equals(incoming.name())) {
+                throw new IllegalArgumentException(
+                        "duplicate custom parameter-type name \"" + incoming.name() + "\"");
             }
         }
     }
