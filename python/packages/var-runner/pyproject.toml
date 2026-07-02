@@ -1,10 +1,10 @@
 [project]
 name = "oselvar-var-runner"
-version = "0.0.0"
+version = "0.1.0"
 description = "Shared spec discovery + run orchestration for var runners"
 requires-python = ">=3.11"
 license = "MIT"
-dependencies = ["oselvar-var", "oselvar-var-config"]
+dependencies = ["oselvar-var==0.1.0", "oselvar-var-config"]
 
 [build-system]
 requires = ["hatchling"]

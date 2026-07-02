@@ -1,10 +1,10 @@
 [project]
 name = "pytest-var"
-version = "0.0.0"
+version = "0.1.0"
 description = "pytest plugin for Markdown-native BDD"
 requires-python = ">=3.11"
 license = "MIT"
-dependencies = ["oselvar-var", "oselvar-var-config", "oselvar-var-runner", "pytest>=8"]
+dependencies = ["oselvar-var==0.1.0", "oselvar-var-config", "oselvar-var-runner==0.1.0", "pytest>=8"]
 
 [project.entry-points.pytest11]
 var = "var_pytest.plugin"

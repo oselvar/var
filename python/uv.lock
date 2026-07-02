@@ -47,7 +47,7 @@ wheels = [
 
 [[package]]
 name = "oselvar-var"
-version = "0.0.0"
+version = "0.1.0"
 source = { editable = "packages/var" }
 dependencies = [
     { name = "cucumber-expressions" },
@@ -62,12 +62,12 @@ requires-dist = [
 
 [[package]]
 name = "oselvar-var-config"
-version = "0.0.0"
+version = "0.1.0"
 source = { editable = "packages/var-config" }
 
 [[package]]
 name = "oselvar-var-core"
-version = "0.0.0"
+version = "0.1.0"
 source = { editable = "packages/var-core" }
 dependencies = [
     { name = "cucumber-expressions" },
@@ -78,7 +78,7 @@ requires-dist = [{ name = "cucumber-expressions", specifier = "==20.0.0" }]
 
 [[package]]
 name = "oselvar-var-runner"
-version = "0.0.0"
+version = "0.1.0"
 source = { editable = "packages/var-runner" }
 dependencies = [
     { name = "oselvar-var" },
@@ -93,7 +93,7 @@ requires-dist = [
 
 [[package]]
 name = "oselvar-var-unittest"
-version = "0.0.0"
+version = "0.1.0"
 source = { editable = "packages/var-unittest" }
 dependencies = [
     { name = "oselvar-var" },
@@ -147,7 +147,7 @@ wheels = [
 
 [[package]]
 name = "pytest-var"
-version = "0.0.0"
+version = "0.1.0"
 source = { editable = "packages/var-pytest" }
 dependencies = [
     { name = "oselvar-var" },
