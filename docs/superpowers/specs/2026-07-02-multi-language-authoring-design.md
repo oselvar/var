@@ -233,10 +233,9 @@ map. The VS Code extension picks the emit language from the config:
 4. On a tie, pick the language that appears **first in `config.steps`
    order**.
 
-When the user then chooses a target file in the "append to which steps
-file?" quick-pick, a file whose extension disagrees with the picked language
-re-renders the snippet in the target file's language — the selection
-algorithm chooses the default, the user's file choice always wins.
+The "append to which steps file?" quick-pick is then filtered to files of
+the picked language, so the rendered snippet and the target file can never
+disagree.
 
 ### LSP
 
