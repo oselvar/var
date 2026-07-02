@@ -1,5 +1,4 @@
 ---
-import yahtzeeSpecBroken from '../../../var-examples/yahtzee/yahtzee.broken.md?raw'
 import yahtzeeSpec from '../../../var-examples/yahtzee/yahtzee.md?raw'
 import yahtzeeSteps from '../../../var-examples/yahtzee/yahtzee.steps.ts?raw'
 import yahtzeeLogic from '../../../var-examples/yahtzee/yahtzee.ts?raw'
@@ -65,7 +64,6 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '')
           chrome
         >
           <Fragment slot="passing">{yahtzeeSpec}</Fragment>
-          <Fragment slot="failing">{yahtzeeSpecBroken}</Fragment>
         </Editor>
         <p class="text-center mt-4">
           <a
