@@ -18,5 +18,11 @@
     "@types/node": "^26.0.1",
     "tsx": "^4.22.4",
     "vitest": "^4.1.9"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oselvar/var.git",
+    "directory": "typescript/packages/cucumber"
   }
 }

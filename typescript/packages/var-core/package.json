@@ -30,5 +30,11 @@
     },
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oselvar/var.git",
+    "directory": "typescript/packages/var-core"
   }
 }

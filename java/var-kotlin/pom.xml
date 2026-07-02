@@ -20,6 +20,13 @@
     keyword and would force back-ticked imports.
   </description>
 
+  <properties>
+    <!-- No .java sources here, so maven-javadoc-plugin (bound in the parent's
+         release profile) has nothing to document; skip it and attach a Dokka
+         javadoc jar instead (see the release profile below). -->
+    <maven.javadoc.skip>true</maven.javadoc.skip>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.oselvar</groupId>
@@ -92,4 +99,28 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jetbrains.dokka</groupId>
+            <artifactId>dokka-maven-plugin</artifactId>
+            <!-- Confirmed on repo1.maven.org maven-metadata.xml 2026-07-02:
+                 <latest>/<release> both 2.2.0 (2.2.0-Beta excluded). -->
+            <version>2.2.0</version>
+            <executions>
+              <execution>
+                <id>attach-javadoc-jar</id>
+                <phase>package</phase>
+                <goals><goal>javadocJar</goal></goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

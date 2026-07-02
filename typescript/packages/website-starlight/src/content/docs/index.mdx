@@ -1,65 +1,82 @@
 ---
 title: Vár
-description: Get started building your docs site with Starlight.
+description: Executable markdown documentation for humans and agents. Turn your docs into tests.
 template: splash # Remove or comment out this line to display the site sidebar on this page.
 hero:
   tagline: Executable markdown documentation for humans and agents. Turn your docs into tests.
   image:
     file: ../../assets/var-logo.webp
   actions:
-    - text: Example Guide
-      link: /guides/example/
-      icon: right-arrow
-    - text: Read the Starlight docs
-      link: https://starlight.astro.build
-      icon: external
+    - text: Get started
+      link: /tutorials/get-started/
+      icon: rocket
+    - text: Try Vár in your browser
+      link: /tutorials/try-in-browser/
+      icon: laptop
       variant: minimal
 ---
 
-import { Card, CardGrid, Tabs, TabItem } from '@astrojs/starlight/components';
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 import Editor from '../../components/Editor.astro';
 import File from '../../components/File.astro';
+import Version from '../../components/Version.astro';
+import deepThoughtSource from '../../../../var-examples/deep-thought/deep-thought.md?raw';
+import deepThoughtSteps from '../../../../var-examples/deep-thought/deep-thought.steps.ts?raw';
 import yahtzeeSource from '../../../../var-examples/yahtzee/yahtzee.md?raw';
 import yahtzeeSteps from '../../../../var-examples/yahtzee/yahtzee.steps.ts?raw';
+import yahtzeeLogic from '../../../../var-examples/yahtzee/yahtzee.ts?raw';
 import romanNumeralsSource from '../../../../var-examples/roman-numerals/roman-numerals.md?raw';
 import romanNumeralsSteps from '../../../../var-examples/roman-numerals/roman-numerals.steps.ts?raw';
+import romanNumeralsLogic from '../../../../var-examples/roman-numerals/roman-numerals.ts?raw';
 
-## This is a real spec
+## Examples
 
-Not a snippet — the whole file, unmodified, running in this repo's own test suite. Pick an example, edit it:
+The examples below give a taste of how Vár works. If the markdown disagrees with the code, your tests will fail.
 
 <Tabs syncKey="example">
-  <TabItem label="Yahtzee">
-    <Editor folding>
-      <File uri="file:///yahtzee.md">{yahtzeeSource}</File>
-      <File uri="file:///yahtzee.steps.ts">{yahtzeeSteps}</File>
+  <TabItem label="Deep Thought">
+    <Editor>
+      <File uri="file:///deep-thought.md">
+        <Version label="Fix it">{deepThoughtSource}</Version>
+        <Version label="Break it">{deepThoughtSource.replace('42', '41')}</Version>
+      </File>
+      <File uri="file:///deep-thought.steps.ts">
+        <Version label="Fix it">{deepThoughtSteps}</Version>
+        <Version label="Break it">{deepThoughtSteps.replace('42', '43')}</Version>
+      </File>
     </Editor>
+    New to this? [Take the guided tour of this example](/tutorials/try-in-browser/).
+  </TabItem>
+  <TabItem label="Yahtzee">
+    <Editor>
+      <File uri="file:///yahtzee.md">
+        <Version label="Misunderstand full house rule">{yahtzeeSource.replace('| 0 ', '| 12').replace('is **not**', 'counts as')}</Version>
+        <Version label="Fix misunderstood full house rule">{yahtzeeSource}</Version>
+      </File>
+      <File uri="file:///yahtzee.steps.ts">{yahtzeeSteps}</File>
+      <File uri="file:///yahtzee.ts">{yahtzeeLogic}</File>
+    </Editor>
+    Every cell in these tables is checked against the code — see [Check tables and doc strings](/how-to/tables-and-doc-strings/).
   </TabItem>
   <TabItem label="Roman numerals">
-    <Editor folding>
-      <File uri="file:///roman-numerals.md">{romanNumeralsSource}</File>
+    <Editor>
+      <File uri="file:///roman-numerals.md">
+        <Version label="Subtractive notation">{romanNumeralsSource}</Version>
+        <Version label="Additive notation">{romanNumeralsSource.replace('IX   ', 'VIIII')}</Version>
+      </File>
       <File uri="file:///roman-numerals.steps.ts">{romanNumeralsSteps}</File>
+      <File uri="file:///roman-numerals.ts">
+        <Version label="Subtractive notation">{romanNumeralsLogic}</Version>
+        <Version label="Additive notation">{romanNumeralsLogic.replace('IX', 'VIIII')}</Version>
+      </File>
     </Editor>
+    Each table row runs as its own example — see [Check tables and doc strings](/how-to/tables-and-doc-strings/).
   </TabItem>
 </Tabs>
 
-## Next steps
+## Who is Vár?
 
-<CardGrid stagger>
-	<Card title="Update content" icon="pencil">
-		Edit `src/content/docs/index.mdx` to see this page change.
-	</Card>
-	<Card title="Change page layout" icon="document">
-		Delete `template: splash` in `src/content/docs/index.mdx` to display a
-		sidebar on this page.
-	</Card>
-	<Card title="Add new content" icon="add-document">
-		Add Markdown or MDX files to `src/content/docs` to create new pages.
-	</Card>
-	<Card title="Configure your site" icon="setting">
-		Edit your `sidebar` and other config in `astro.config.mjs`.
-	</Card>
-	<Card title="Read the docs" icon="open-book">
-		Learn more in [the Starlight Docs](https://starlight.astro.build/).
-	</Card>
-</CardGrid>
+In Norse mythology, Vár is a goddess who listens to people's oaths and private agreements. 
+She punishes those who break them.[^1]
+
+[^1]: [Vár on Wikipedia](https://en.wikipedia.org/wiki/V%C3%A1r)

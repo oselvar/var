@@ -257,10 +257,12 @@ sync — works from the extracted `StepDef`s, including `handlerParams`.
   is a possible follow-up for workspaces with unconventional globs.
 - `activationEvents` add `onLanguage:python`, `onLanguage:java`,
   `onLanguage:kotlin`.
-- The dev install (typescript/scripts/install-vscode.mjs symlink) resolves
-  all five grammar wasm files through the workspace's node_modules; a real
-  packaging pipeline (vsce bundle incl. wasm + built LSP) does not exist yet
-  and is deferred to a future packaging project.
+- Packaging: the release system's self-contained .vsix (esbuild-bundled
+  extension + LSP server) copies all five grammar wasm files flat next to
+  the server bundle and points the grammar loader at them via
+  VAR_GRAMMAR_DIR (typescript/packages/var-vscode/esbuild.mjs). The dev
+  install (typescript/scripts/install-vscode.mjs symlink) resolves the same
+  wasm files through the workspace's node_modules.
 - `innerStringRange` (quote stripping for rename) already handles `"`/`'`
   and needs no per-language change.
 

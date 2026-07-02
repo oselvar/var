@@ -38,6 +38,24 @@ describe('semanticTokenData', () => {
     ])
   })
 
+  it('paints headerCellRanges as parameter tokens in the table header row', () => {
+    // Line 1: binding paragraph "the dice roll"; line 3: header row "| dice |".
+    const source = 'the dice roll\n\n| dice |'
+    const matches = [
+      {
+        varPath: '/t.md',
+        range: r(1, 1, 1, 14),
+        paramRanges: [r(1, 5, 1, 9)], // "dice" in the paragraph
+        paramValues: ['dice'],
+        headerCellRanges: [r(3, 3, 3, 7)], // "dice" in the header row
+      } as unknown as MatchRef,
+    ]
+    const data = semanticTokenData(matches, '/t.md', source)
+    // Last token: the header cell — 2 lines below the paragraph tokens,
+    // char 2 (0-based), length 4, type parameter (1).
+    expect(data.slice(-5)).toEqual([2, 2, 4, 1, 0])
+  })
+
   it('returns [] when there are no matches for the file', () => {
     expect(semanticTokenData([], '/a.md', 'hello')).toEqual([])
   })

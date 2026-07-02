@@ -3,7 +3,7 @@
   "examples": [
     {
       "expectedOutcome": "pass",
-      "name": "I fly to LHR",
+      "name": "I fly to LHR. The destination code is lhr",
       "scopeStack": [
         "Custom parameter types",
         "Flying to London"

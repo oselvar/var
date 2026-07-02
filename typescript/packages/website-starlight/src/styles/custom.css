@@ -1,10 +1,15 @@
-@import '@fontsource-variable/source-sans-3';
+/* IBM Plex Serif — static weights; Starlight uses 400 for body and 600/700
+   for emphasis and UI accents. */
+@import '@fontsource/ibm-plex-serif/400.css';
+@import '@fontsource/ibm-plex-serif/400-italic.css';
+@import '@fontsource/ibm-plex-serif/600.css';
+@import '@fontsource/ibm-plex-serif/700.css';
 
 /*
  * "Norse" by Joël Carrouché (https://www.fontspace.com/norse-font-f21080),
  * freeware, free for personal and commercial use, embedding in web pages
- * permitted — self-hosted below. Splash-page hero heading only; the rest
- * of the site stays on --sl-font.
+ * permitted — self-hosted below. All headings use it; body text stays on
+ * --sl-font.
  */
 @font-face {
   font-family: 'Norse';
@@ -14,8 +19,29 @@
   font-display: swap;
 }
 
-.hero h1 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: 'Norse', var(--sl-font);
+}
+
+/*
+ * CTA / link buttons: square corners (the site is sharp-edged throughout) and
+ * a real hover — Starlight's pill button re-asserts the same colours on
+ * :hover, so it has no visible effect of its own.
+ */
+.sl-link-button {
+  border-radius: 0;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+.sl-link-button.primary:hover {
+  background: color-mix(in srgb, var(--sl-color-text-accent) 85%, black);
+  border-color: color-mix(in srgb, var(--sl-color-text-accent) 85%, black);
 }
 
 /*
@@ -37,7 +63,13 @@
  */
 
 :root {
-  --sl-font: 'Source Sans 3 Variable', 'Source Sans 3', system-ui, sans-serif;
+  --sl-font: 'IBM Plex Serif', Georgia, serif;
+
+  /* One background everywhere. Starlight paints the header/nav and sidebar
+     with their own tints (gray-6 here) — a visible two-tone step against the
+     page. In dark mode the page colour wins: pull nav and sidebar down to it. */
+  --sl-color-bg-nav: var(--sl-color-bg);
+  --sl-color-bg-sidebar: var(--sl-color-bg);
 
   --sl-color-black: #110d09;
   --sl-color-gray-1: #efe7d7;
@@ -102,7 +134,11 @@
 }
 
 :root[data-theme='light'] {
-  --sl-font: 'Source Sans 3 Variable', 'Source Sans 3', system-ui, sans-serif;
+  --sl-font: 'IBM Plex Serif', Georgia, serif;
+
+  /* Same story as :root — the header/nav uses gray-7 in light mode; give the
+     page the identical light cream. */
+  --sl-color-bg: #fbf8f0;
 
   --sl-color-black: #f4f0e6;
   --sl-color-gray-1: #2a2017;

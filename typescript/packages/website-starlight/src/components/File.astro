@@ -8,25 +8,15 @@ interface Props {
 }
 const { uri } = Astro.props
 
-// Authored two ways, same mechanism as the old <Editor>'s states:
-//  1. Default slot — a single document.
-//  2. N named slots — each is a "state"; source order is authoritative and
-//     the first is shown initially. Slot name = replay button label.
-const renderState = async (name: string) =>
-  decodeEntities((await Astro.slots.render(name)).replace(/^\n+/, '').replace(/\n+$/, ''))
-
-const stateNames = Object.keys(Astro.slots).filter((name) => name !== 'default')
-const states = await Promise.all(
-  stateNames.map(async (name) => ({ name, text: await renderState(name) })),
-)
-
-const doc = states.length > 0 ? states[0].text : await renderState('default')
-const hasStates = states.length >= 2
+// A <File> is authored either as plain content (the default slot *is* the
+// document) or as a list of <Version label="…"> children (the first version
+// is the initial document; the editor offers a button that cycles through
+// the rest). Version children render themselves as data-var-version divs, so
+// their presence in the rendered slot is the discriminator.
+const html = await Astro.slots.render('default')
+const hasVersions = html.includes('data-var-version')
+const doc = hasVersions ? undefined : decodeEntities(html.replace(/^\n+/, '').replace(/\n+$/, ''))
 ---
-<div
-  data-var-file
-  data-uri={uri}
-  data-doc={doc}
-  data-states={hasStates ? JSON.stringify(states) : undefined}
-  hidden
-></div>
+<div data-var-file data-uri={uri} data-doc={doc} hidden>
+  {hasVersions && <Fragment set:html={html} />}
+</div>

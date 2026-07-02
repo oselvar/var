@@ -3,7 +3,7 @@
   "examples": [
     {
       "expectedOutcome": "pass",
-      "name": "I increment",
+      "name": "I increment. The count is 1",
       "scopeStack": [
         "Counter",
         "First example starts fresh"
@@ -63,7 +63,7 @@
     },
     {
       "expectedOutcome": "pass",
-      "name": "I increment the count",
+      "name": "I increment the count. The count is 1",
       "scopeStack": [
         "Counter",
         "Second example starts fresh"

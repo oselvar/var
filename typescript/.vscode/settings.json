@@ -1,0 +1,11 @@
+{
+  // The vitest extension spawns plain `node`, but this workspace's TS sources
+  // use `.js` specifiers resolved by tsx (see the root `test` script). Without
+  // tsx, config load fails with ERR_MODULE_NOT_FOUND on e.g. var-core/src/cell-diff.js.
+  "vitest.nodeEnv": {
+    "NODE_OPTIONS": "--import tsx"
+  },
+  // Single root config with test.projects — stops the extension from spawning
+  // one Vitest process per package config.
+  "vitest.rootConfig": "vitest.config.ts"
+}

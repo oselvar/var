@@ -3,6 +3,7 @@ name = "oselvar-var-runner"
 version = "0.0.0"
 description = "Shared spec discovery + run orchestration for var runners"
 requires-python = ">=3.11"
+license = "MIT"
 dependencies = ["oselvar-var", "oselvar-var-config"]
 
 [build-system]

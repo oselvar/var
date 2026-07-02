@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises'
+import { basename, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { GrammarLoader } from '@oselvar/var-language'
 
@@ -15,6 +16,16 @@ export function createNodeGrammarLoader(): GrammarLoader {
     async load(languageId) {
       const specifier = GRAMMAR_FILES[languageId]
       if (!specifier) throw new Error(`No grammar wasm known for language "${languageId}"`)
+      // The packaged VS Code extension bundles this server to cjs, where
+      // `import.meta.resolve` doesn't exist (esbuild rewrites `import.meta`
+      // to `{}`). The extension's esbuild step copies the grammar wasm files
+      // next to the bundle and sets VAR_GRAMMAR_DIR when forking the server,
+      // so check that override first. Wasm basenames are unique across the
+      // grammar packages, so a flat directory is enough.
+      const grammarDir = process.env.VAR_GRAMMAR_DIR
+      if (grammarDir) {
+        return readFile(join(grammarDir, basename(specifier)))
+      }
       // Resolved dynamically at runtime, so knip can't trace this import —
       // hence the `ignoreDependencies: [...]` entry for this package in
       // knip.json.

@@ -25,8 +25,8 @@ class PlanTest {
 
     @Test
     void planProducesAPlannedExampleWithStepsInDocumentOrder() {
-        // The first sentence becomes the example name (terminator stripped) AND is also matched
-        // as a step. The heading becomes a `describe` scope.
+        // The whole paragraph becomes the example name (trailing terminator stripped), even when
+        // only parts of it match steps. The heading becomes a `describe` scope.
         String source =
                 "# Withdrawing\n\nGiven I have 100 in my account. When I withdraw 40. Then I should"
                         + " have 60 left.";
@@ -35,7 +35,9 @@ class PlanTest {
         assertEquals(0, result.diagnostics().size());
         assertEquals(1, result.examples().size());
         Plan.PlannedExample ex = result.examples().get(0);
-        assertEquals("Given I have 100 in my account", ex.name());
+        assertEquals(
+                "Given I have 100 in my account. When I withdraw 40. Then I should have 60 left",
+                ex.name());
         assertEquals(List.of("Withdrawing"), ex.scopeStack());
         assertEquals(
                 List.of("I have 100 in my account", "I withdraw 40", "I should have 60 left"),

@@ -3,5 +3,6 @@
   "vitest.maximumConfigs": 10,
   "vitest.nodeEnv": {
     "NODE_OPTIONS": "--import tsx"
-  }
+  },
+  "java.compile.nullAnalysis.mode": "automatic"
 }

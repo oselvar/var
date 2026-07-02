@@ -49,5 +49,11 @@
     },
     "main": "./dist/server.js",
     "types": "./dist/server.d.ts"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oselvar/var.git",
+    "directory": "typescript/packages/var-lsp"
   }
 }

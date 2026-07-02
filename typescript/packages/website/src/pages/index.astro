@@ -1,7 +1,7 @@
 ---
-import yahtzeeSpecBroken from '../../../var-examples/yahtzee/yahtzee.broken.md?raw'
 import yahtzeeSpec from '../../../var-examples/yahtzee/yahtzee.md?raw'
 import yahtzeeSteps from '../../../var-examples/yahtzee/yahtzee.steps.ts?raw'
+import yahtzeeLogic from '../../../var-examples/yahtzee/yahtzee.ts?raw'
 import Editor from '../components/Editor.astro'
 import Base from '../layouts/Base.astro'
 
@@ -57,11 +57,13 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '')
       <section class="p-0" aria-label="See it live">
         <Editor
           uri="file:///yahtzee.md"
-          steps={[{ path: "file:///yahtzee.steps.ts", source: yahtzeeSteps }]}
+          steps={[
+            { path: "file:///yahtzee.steps.ts", source: yahtzeeSteps },
+            { path: "file:///yahtzee.ts", source: yahtzeeLogic },
+          ]}
           chrome
         >
           <Fragment slot="passing">{yahtzeeSpec}</Fragment>
-          <Fragment slot="failing">{yahtzeeSpecBroken}</Fragment>
         </Editor>
         <p class="text-center mt-4">
           <a

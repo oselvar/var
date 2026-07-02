@@ -3,7 +3,7 @@
   "examples": [
     {
       "expectedOutcome": "pass",
-      "name": "I convert 1 to roman numerals",
+      "name": "I convert 1 to roman numerals. The result is I",
       "scopeStack": [
         "Roman numerals",
         "Converting 1"

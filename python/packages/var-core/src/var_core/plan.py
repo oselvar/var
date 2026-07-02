@@ -259,12 +259,13 @@ def _derive_example_name(body: tuple[Block, ...]) -> str:
     )
     if primary is None:
         return ""
-    sentences = split_sentences(primary.text)  # type: ignore[union-attr]
-    if not sentences:
-        return ""
-    first = sentences[0]
-    # Strip a single trailing . ! ? (embedded terminators are left alone).
-    return re.sub(r"[.!?]$", "", first.text)
+    # The entire paragraph is the test name — an example is often a paragraph
+    # where only some sentences match steps, and the narration around them is
+    # part of what the test asserts about. Hard line breaks inside the
+    # paragraph collapse to single spaces (test names must be one line), and a
+    # single trailing . ! ? is stripped (embedded terminators are left alone).
+    name = re.sub(r"\s+", " ", primary.text).strip()  # type: ignore[union-attr]
+    return re.sub(r"[.!?]$", "", name)
 
 
 # ---------------------------------------------------------------------------

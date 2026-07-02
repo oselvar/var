@@ -41,7 +41,7 @@ test('planSpec returns an ExecutionPlan with examples and steps', () => {
   expect(result.examples).toHaveLength(1)
   const ex = result.examples[0]
   if (!ex) throw new Error('no example')
-  expect(ex.name).toBe('I have 10 cucumbers')
+  expect(ex.name).toBe('I have 10 cucumbers. I eat 3 cucumbers. I should have 7 cucumbers left')
   expect(ex.scopeStack).toEqual(['Cucumbers'])
   expect(ex.steps.map((s) => s.text)).toEqual([
     'I have 10 cucumbers',
@@ -90,7 +90,9 @@ test('examplesWithRuns pairs examples with run functions', async () => {
 
   expect(pairs).toHaveLength(1)
   const { example, run } = pairs[0]!
-  expect(example.name).toBe('I have 10 cucumbers')
+  expect(example.name).toBe(
+    'I have 10 cucumbers. I eat 3 cucumbers. I should have 7 cucumbers left',
+  )
   // Passing run resolves without throwing
   await expect(run()).resolves.toBeUndefined()
 })

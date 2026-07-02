@@ -30,8 +30,9 @@ function reg() {
 }
 
 test('plan produces a PlannedExample with steps in document order', () => {
-  // The first sentence becomes the example name (terminator stripped) AND
-  // is also matched as a step. The heading becomes a `describe` scope.
+  // The whole paragraph becomes the example name (trailing terminator
+  // stripped), even when only parts of it match steps. The heading becomes
+  // a `describe` scope.
   const source =
     '# Withdrawing\n\nGiven I have 100 in my account. When I withdraw 40. Then I should have 60 left.'
   const varDoc = parse('w.md', source)
@@ -40,7 +41,9 @@ test('plan produces a PlannedExample with steps in document order', () => {
   expect(result.examples).toHaveLength(1)
   const ex = result.examples[0]
   if (!ex) throw new Error('no example')
-  expect(ex.name).toBe('Given I have 100 in my account')
+  expect(ex.name).toBe(
+    'Given I have 100 in my account. When I withdraw 40. Then I should have 60 left',
+  )
   expect(ex.scopeStack).toEqual(['Withdrawing'])
   expect(ex.steps.map((s) => s.text)).toEqual([
     'I have 100 in my account',
@@ -48,6 +51,20 @@ test('plan produces a PlannedExample with steps in document order', () => {
     'I should have 60 left',
   ])
   expect(ex.steps[0]?.args).toEqual([100])
+})
+
+test('the example name is the entire paragraph even when only part of it matches steps', () => {
+  const source = 'It was a dark night. I withdraw 40. Nobody was watching.'
+  const result = plan(parse('w.md', source), reg())
+  expect(result.examples).toHaveLength(1)
+  expect(result.examples[0]?.name).toBe('It was a dark night. I withdraw 40. Nobody was watching')
+  expect(result.examples[0]?.steps.map((s) => s.text)).toEqual(['I withdraw 40'])
+})
+
+test('hard line breaks inside the paragraph collapse to single spaces in the name', () => {
+  const source = 'I withdraw 40.\nI should have 60 left.'
+  const result = plan(parse('w.md', source), reg())
+  expect(result.examples[0]?.name).toBe('I withdraw 40. I should have 60 left')
 })
 
 test('plan emits an ambiguous-match diagnostic and does NOT include the example steps', () => {
@@ -328,6 +345,36 @@ each row lists the dice, the category and the score:
   const lines = result.examples.map((e) => e.span.startLine)
   expect(new Set(lines).size).toBe(2)
   expect(lines[0]).toBeLessThan(lines[1] as number)
+})
+
+test('a header-bound example carries headerCellSpans pointing at the table header cells', () => {
+  let r = createRegistry()
+  r = addStep(r, {
+    expression: 'each row lists the dice, the category and the score',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    kind: 'action',
+    handler: () => {},
+  })
+  const source = `# Yahtzee
+
+each row lists the dice, the category and the score:
+
+| dice          | category   | score |
+| ------------- | ---------- | ----- |
+| 3, 3, 3, 4, 4 | full house | 17    |`
+  const result = plan(parse('y.md', source), r)
+  const binding = result.examples[0]?.headerBinding
+  if (!binding) throw new Error('no headerBinding')
+  // One span per header cell, located in the table's header row (distinct from
+  // paramSpans, which point at the same words in the binding paragraph).
+  expect(binding.headerCellSpans.map((s) => source.slice(s.startOffset, s.endOffset))).toEqual([
+    'dice',
+    'category',
+    'score',
+  ])
+  const headerRowLine = binding.headerCellSpans[0]?.startLine
+  expect(headerRowLine).toBeGreaterThan(binding.paramSpans[0]?.startLine as number)
 })
 
 test('a table not attached to a step is allowed — no diagnostic', () => {

@@ -2,7 +2,7 @@ import { javascript } from '@codemirror/lang-javascript'
 import { markdown } from '@codemirror/lang-markdown'
 import { foldGutter } from '@codemirror/language'
 import { LSPClient, languageServerExtensions } from '@codemirror/lsp-client'
-import { Annotation, type Extension } from '@codemirror/state'
+import { Annotation, EditorSelection, type Extension } from '@codemirror/state'
 import { lineNumbers } from '@codemirror/view'
 import { hashSource } from '@oselvar/var-core'
 import { basicSetup, EditorView, minimalSetup } from 'codemirror'
@@ -145,6 +145,24 @@ function refreshActiveState(view: EditorView): void {
   })
 }
 
+// One keyboard-sized caret step from `cur` toward `target`: vertical
+// line-by-line with the column carried along and clamped (like holding ↓/↑),
+// then word-boundary hops within the target line (like holding ⌥←/⌥→),
+// clamped so the caret lands exactly on the target.
+function nextCaretStep(view: EditorView, cur: number, target: number): number {
+  const doc = view.state.doc
+  const curLine = doc.lineAt(cur)
+  const targetLine = doc.lineAt(target)
+  if (curLine.number !== targetLine.number) {
+    const next = doc.line(curLine.number + (targetLine.number > curLine.number ? 1 : -1))
+    return Math.min(next.from + (cur - curLine.from), next.to)
+  }
+  const forward = target > cur
+  const hopped = view.moveByGroup(EditorSelection.cursor(cur), forward).head
+  if (hopped === cur) return target // at a document edge — don't stall
+  return forward ? Math.min(hopped, target) : Math.max(hopped, target)
+}
+
 // Animate the live document into `target`, one keystroke per `delayMs` tick.
 // Always diffs from the *current* doc, so manual edits (before or mid-replay)
 // are respected.
@@ -165,7 +183,22 @@ function replayTo(view: EditorView, target: string, delayMs: number = REPLAY_MS)
       refreshActiveState(view)
       return
     }
-    const op: ReplayOp = ops[i++] as ReplayOp
+    const op: ReplayOp = ops[i] as ReplayOp
+    // Walk the caret to the edit location first — a visible arrow-key travel
+    // instead of a teleport when the next edit is far from where it sits.
+    // (A backspace-style delete sits *after* the char it removes.)
+    const editCaret = op.kind === 'insert' ? op.at : op.at + 1
+    const head = view.state.selection.main.head
+    if (head !== editCaret) {
+      view.dispatch({
+        selection: { anchor: nextCaretStep(view, head, editCaret) },
+        scrollIntoView: true,
+        annotations: replayTxn.of(true),
+      })
+      cur.timer = setTimeout(step, delayMs)
+      return
+    }
+    i++
     if (op.kind === 'insert') {
       const caret = op.at + op.text.length
       view.dispatch({

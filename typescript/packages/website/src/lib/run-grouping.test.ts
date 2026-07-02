@@ -31,6 +31,29 @@ describe('groupRunInputs', () => {
     expect(inputs[0]?.stepFiles).toEqual([{ path: 'hidden.steps.ts', source: 'hidden()' }])
   })
 
+  it('strips the file:/// scheme from hidden step paths', () => {
+    const inputs = groupRunInputs(
+      [{ uri: 'file:///a.md', group: 'g1', source: '# spec' }],
+      new Map([['g1', [{ path: 'file:///hidden.steps.ts', source: 'hidden()' }]]]),
+    )
+    expect(inputs[0]?.stepFiles).toEqual([{ path: 'hidden.steps.ts', source: 'hidden()' }])
+  })
+
+  it('includes plain .ts library files alongside .steps.ts', () => {
+    const inputs = groupRunInputs(
+      [
+        { uri: 'file:///a.md', group: 'g1', source: '# spec' },
+        { uri: 'file:///a.steps.ts', group: 'g1', source: "import { f } from './a'" },
+        { uri: 'file:///a.ts', group: 'g1', source: 'export const f = () => 1' },
+      ],
+      noHidden,
+    )
+    expect(inputs[0]?.stepFiles).toEqual([
+      { path: 'a.steps.ts', source: "import { f } from './a'" },
+      { path: 'a.ts', source: 'export const f = () => 1' },
+    ])
+  })
+
   it('keeps groups isolated from each other', () => {
     const inputs = groupRunInputs(
       [

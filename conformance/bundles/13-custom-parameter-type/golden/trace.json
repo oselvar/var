@@ -1,15 +1,15 @@
 {
   "examples": [
     {
-      "name": "I fly to LHR",
+      "name": "I fly to LHR. The destination code is lhr",
       "outcome": "pass",
       "steps": [
         {
           "contextKey": {
-            "exampleName": "I fly to LHR",
+            "exampleName": "I fly to LHR. The destination code is lhr",
             "stepFile": "airports.steps"
           },
-          "exampleName": "I fly to LHR",
+          "exampleName": "I fly to LHR. The destination code is lhr",
           "matchedExpression": "I fly to {airport}",
           "ordinal": 1,
           "outcome": "pass",
@@ -17,10 +17,10 @@
         },
         {
           "contextKey": {
-            "exampleName": "I fly to LHR",
+            "exampleName": "I fly to LHR. The destination code is lhr",
             "stepFile": "airports.steps"
           },
-          "exampleName": "I fly to LHR",
+          "exampleName": "I fly to LHR. The destination code is lhr",
           "matchedExpression": "The destination code is {word}",
           "ordinal": 2,
           "outcome": "pass",

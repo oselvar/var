@@ -1,0 +1,9 @@
+{
+  "name": "var-website",
+  "compatibility_date": "2026-07-02",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  },
+  "routes": [{ "pattern": "var.oselvar.com", "custom_domain": true }]
+}

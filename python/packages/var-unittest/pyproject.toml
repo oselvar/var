@@ -3,6 +3,7 @@ name = "oselvar-var-unittest"
 version = "0.0.0"
 description = "unittest adapter for Markdown-native BDD (skeleton — see issue #2)"
 requires-python = ">=3.11"
+license = "MIT"
 dependencies = ["oselvar-var"]
 
 [build-system]

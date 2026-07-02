@@ -108,4 +108,17 @@ each row lists the dice, the category and the score:
   expect(m.range.start.line).toBe(3) // the paragraph, not a table row
   // The three header cells are painted as parameters inside the paragraph.
   expect(m.paramValues).toEqual(['dice', 'category', 'score'])
+  // The table's own header cells are also carried, so editors can highlight
+  // them the same way as the paragraph words.
+  expect(m.headerCellRanges).toHaveLength(3)
+  // Header row is line 5 (1-based): below the paragraph, above the data rows.
+  expect(m.headerCellRanges?.every((r) => r.start.line === 5)).toBe(true)
+})
+
+test('a plain (non-header-bound) match carries no headerCellRanges', () => {
+  const idx = buildWorkspaceIndex({
+    stepFiles: [{ path: '/s.steps.ts', source: `action('I have {int} cukes', (ctx, n) => {})\n` }],
+    varFiles: [{ path: '/b.md', source: '# Belly\n\nGiven I have 5 cukes' }],
+  })
+  expect(idx.matches[0]?.headerCellRanges).toBeUndefined()
 })

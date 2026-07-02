@@ -1,15 +1,15 @@
 {
   "examples": [
     {
-      "name": "I increment",
+      "name": "I increment. The count is 1",
       "outcome": "pass",
       "steps": [
         {
           "contextKey": {
-            "exampleName": "I increment",
+            "exampleName": "I increment. The count is 1",
             "stepFile": "counter.steps"
           },
-          "exampleName": "I increment",
+          "exampleName": "I increment. The count is 1",
           "matchedExpression": "I increment",
           "ordinal": 1,
           "outcome": "pass",
@@ -17,10 +17,10 @@
         },
         {
           "contextKey": {
-            "exampleName": "I increment",
+            "exampleName": "I increment. The count is 1",
             "stepFile": "counter.steps"
           },
-          "exampleName": "I increment",
+          "exampleName": "I increment. The count is 1",
           "matchedExpression": "The count is {int}",
           "ordinal": 2,
           "outcome": "pass",
@@ -29,15 +29,15 @@
       ]
     },
     {
-      "name": "I increment the count",
+      "name": "I increment the count. The count is 1",
       "outcome": "pass",
       "steps": [
         {
           "contextKey": {
-            "exampleName": "I increment the count",
+            "exampleName": "I increment the count. The count is 1",
             "stepFile": "counter.steps"
           },
-          "exampleName": "I increment the count",
+          "exampleName": "I increment the count. The count is 1",
           "matchedExpression": "I increment",
           "ordinal": 1,
           "outcome": "pass",
@@ -45,10 +45,10 @@
         },
         {
           "contextKey": {
-            "exampleName": "I increment the count",
+            "exampleName": "I increment the count. The count is 1",
             "stepFile": "counter.steps"
           },
-          "exampleName": "I increment the count",
+          "exampleName": "I increment the count. The count is 1",
           "matchedExpression": "The count is {int}",
           "ordinal": 2,
           "outcome": "pass",

@@ -25,7 +25,7 @@ def test_plan_produces_a_planned_example_with_steps_in_document_order() -> None:
     assert result.diagnostics == ()
     assert len(result.examples) == 1
     ex = result.examples[0]
-    assert ex.name == "Given I have 100 in my account"
+    assert ex.name == "Given I have 100 in my account. When I withdraw 40. Then I should have 60 left"
     assert ex.scope_stack == ("Withdrawing",)
     assert [s.text for s in ex.steps] == [
         "I have 100 in my account",

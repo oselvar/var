@@ -19,9 +19,14 @@ const resultsField = StateField.define<SpecResults | null>({
 const decoField = StateField.define<DecorationSet>({
   create: () => Decoration.none,
   update(deco, tr) {
-    const results = tr.state.field(resultsField)
-    if (!tr.docChanged && !tr.effects.some((e) => e.is(setRunResults))) return deco.map(tr.changes)
-    if (!results) return Decoration.none
+    // Between an edit and its (debounced) re-run there are no fresh results —
+    // keep the previous wash, remapped through the edit, instead of blanking
+    // it and repainting a few hundred ms later (a visible green→white→green
+    // flicker). Only a setRunResults effect rebuilds (or clears) the wash.
+    let results: SpecResults | null | undefined
+    for (const e of tr.effects) if (e.is(setRunResults)) results = e.value
+    if (results === undefined) return deco.map(tr.changes)
+    if (results === null) return Decoration.none
     const builder = new RangeSetBuilder<Decoration>()
     const cls = (s: 'passed' | 'failed') => (s === 'passed' ? 'cm-run-pass' : 'cm-run-fail')
     const lines = results.examples

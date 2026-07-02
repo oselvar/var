@@ -1,0 +1,149 @@
+# C4 component diagram (level 3) of the Vár TypeScript workspace.
+# One component per package in typescript/packages/*; every arrow is a real
+# `workspace:` dependency taken from that package's package.json.
+# Boundaries follow the hexagonal architecture: pure functional core,
+# imperative shell (adapters), editor tooling.
+
+direction: down
+
+title: "Vár — TypeScript workspace [C4 Component]" {
+  near: top-center
+  shape: text
+  style: {
+    font-size: 28
+    bold: true
+  }
+}
+
+classes: {
+  person: {
+    shape: person
+    style: {
+      fill: "#08427B"
+      font-color: "#FFFFFF"
+      stroke: "#052E56"
+    }
+  }
+  component: {
+    style: {
+      fill: "#85BBF0"
+      font-color: "#000000"
+      stroke: "#5D82A8"
+      border-radius: 4
+    }
+  }
+  external: {
+    style: {
+      fill: "#999999"
+      font-color: "#FFFFFF"
+      stroke: "#6B6B6B"
+      border-radius: 4
+    }
+  }
+  boundary: {
+    style: {
+      fill: "transparent"
+      stroke: "#444444"
+      stroke-dash: 5
+      font-color: "#444444"
+    }
+  }
+}
+
+developer: "Spec author / developer\n[Person]\n\nWrites *.md specs and\n*.steps.ts step definitions" {
+  class: person
+}
+
+vitest: "Vitest\n[External system]\n\nTest runner" {
+  class: external
+}
+
+vscode: "VS Code\n[External system]\n\nEditor" {
+  class: external
+}
+
+core: "Functional core — pure functions over immutable data, no I/O" {
+  class: boundary
+
+  var-core: "@oselvar/var-core\n[Component: npm package]\n\nPure core: parser, matcher, planner,\nexecutor, AST, diagnostics,\nreturn-based comparison" {
+    class: component
+  }
+
+  var: "@oselvar/var\n[Component: npm package]\n\nAuthoring API: defineState with\ncontext / action / sensor role functions" {
+    class: component
+  }
+
+  var-language: "@oselvar/var-language\n[Component: npm package]\n\nStatic analysis: step-definition scanner,\nworkspace indexer, snippet emitter" {
+    class: component
+  }
+
+  var-config: "@oselvar/var-config\n[Component: npm package]\n\nvar.config.ts schema and\nspec-glob resolution" {
+    class: component
+  }
+}
+
+shell: "Imperative shell — adapters, the only place side effects live" {
+  class: boundary
+
+  var-runner: "@oselvar/var-runner\n[Component: npm package]\n\nRunner shell: loads spec and step files,\nexecutes plans" {
+    class: component
+  }
+
+  var-vitest: "@oselvar/var-vitest\n[Component: npm package]\n\nVitest adapter: drives vitest's\ninclude/exclude from var.config.ts" {
+    class: component
+  }
+
+  var-cli: "@oselvar/var-cli\n[Component: npm package]\n\nCommand-line interface" {
+    class: component
+  }
+}
+
+tooling: "Editor tooling" {
+  class: boundary
+
+  var-lsp: "@oselvar/var-lsp\n[Component: npm package]\n\nLanguage server: diagnostics,\ngo-to-definition, completions" {
+    class: component
+  }
+
+  var-vscode: "oselvar-var\n[Component: VS Code extension]\n\nHighlights matched steps,\nmissing-step diagnostics" {
+    class: component
+  }
+}
+
+# --- People and external systems ---
+
+developer -> core.var: authors specs and steps with
+developer -> tooling.var-vscode: edits specs in
+
+shell.var-vitest -> vitest: plugs into
+tooling.var-vscode -> vscode: installs into
+
+# --- Functional core ---
+
+core.var -> core.var-core
+core.var-language -> core.var-core
+core.var-config -> core.var-core
+
+# --- Imperative shell ---
+
+shell.var-runner -> core.var
+shell.var-runner -> core.var-config
+shell.var-runner -> core.var-core
+
+shell.var-vitest -> shell.var-runner
+shell.var-vitest -> core.var
+shell.var-vitest -> core.var-config
+shell.var-vitest -> core.var-core
+
+shell.var-cli -> shell.var-runner
+shell.var-cli -> core.var
+shell.var-cli -> core.var-core
+
+# --- Editor tooling ---
+
+tooling.var-lsp -> core.var-language
+tooling.var-lsp -> core.var-config
+tooling.var-lsp -> core.var-core
+
+tooling.var-vscode -> tooling.var-lsp
+tooling.var-vscode -> core.var-language

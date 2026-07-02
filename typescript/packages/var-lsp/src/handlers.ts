@@ -101,7 +101,7 @@ export function buildHandlers(store: Store): Handlers {
     hover({ uri, position }) {
       const m = findMatchAt(store, uri, position)
       if (!m) return null
-      const contents = `Matched by \`step('${m.stepDef.expression}')\` at ${m.stepDef.file}:${m.stepDef.expressionRange.start.line}`
+      const contents = `\`"${m.stepDef.expression}"\` at ${m.stepDef.file}:${m.stepDef.expressionRange.start.line}`
       return { contents }
     },
     definition({ uri, position }) {

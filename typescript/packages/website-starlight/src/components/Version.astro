@@ -1,0 +1,15 @@
+---
+import { decodeEntities } from '../lib/step-highlight.js'
+
+interface Props {
+  // Shown on the editor's cycle button when this version is the next one to
+  // apply (the button always advertises the *next* version, wrapping around).
+  label: string
+}
+const { label } = Astro.props
+
+const doc = decodeEntities(
+  (await Astro.slots.render('default')).replace(/^\n+/, '').replace(/\n+$/, ''),
+)
+---
+<div data-var-version data-label={label} data-doc={doc} hidden></div>

@@ -37,7 +37,10 @@ self.onmessage = (e: MessageEvent<{ seed: Record<string, string> }>) => {
   const timers = new Map<string, ReturnType<typeof setTimeout>>()
 
   function onDidChangeDocument(uri: string, text: string): void {
-    if (!uri.endsWith('.steps.ts')) return
+    // Every .ts doc feeds the TS service — plain .ts library tabs both get
+    // their own diagnostics and make `./yahtzee`-style imports in .steps.ts
+    // tabs resolve.
+    if (!uri.endsWith('.ts')) return
     tsd.updateDoc(uri, text)
     clearTimeout(timers.get(uri))
     timers.set(

@@ -3,6 +3,7 @@ name = "pytest-var"
 version = "0.0.0"
 description = "pytest plugin for Markdown-native BDD"
 requires-python = ">=3.11"
+license = "MIT"
 dependencies = ["oselvar-var", "oselvar-var-config", "oselvar-var-runner", "pytest>=8"]
 
 [project.entry-points.pytest11]

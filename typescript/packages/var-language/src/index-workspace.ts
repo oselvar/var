@@ -31,6 +31,11 @@ export type MatchRef = {
   // parameter list. Used by the rename refactor to preserve values across
   // expressions whose parameter list survives the edit.
   readonly paramValues: ReadonlyArray<string>
+  // Present only on header-binding matches: one range per header cell, located
+  // in the table's header row. Kept separate from `paramRanges` because that
+  // array must stay aligned 1:1 with the expression's parameter list (rename
+  // relies on it). Editors paint these as parameters too.
+  readonly headerCellRanges?: ReadonlyArray<Range>
   readonly stepDef: StepDef
 }
 
@@ -120,6 +125,7 @@ export function buildWorkspaceIndex(input: WorkspaceInput): WorkspaceIndex {
           range: toRange(b.matchSpan),
           paramRanges: b.paramSpans.map(toRange),
           paramValues: b.paramSpans.map((s) => file.source.slice(s.startOffset, s.endOffset)),
+          headerCellRanges: b.headerCellSpans.map(toRange),
           stepDef: def,
         })
         continue

@@ -27,9 +27,10 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@oselvar/var": "workspace:*",
     "@oselvar/var-config": "workspace:*",
     "@oselvar/var-core": "workspace:*",
-    "@oselvar/var": "workspace:*",
+    "@oselvar/var-language": "workspace:*",
     "@oselvar/var-runner": "workspace:*"
   },
   "peerDependencies": {
@@ -53,5 +54,11 @@
     },
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oselvar/var.git",
+    "directory": "typescript/packages/var-vitest"
   }
 }

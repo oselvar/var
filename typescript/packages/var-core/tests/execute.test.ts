@@ -30,7 +30,7 @@ test('executePlan calls sink.example for each PlannedExample', () => {
     handler: () => {},
   })
   // With the paragraph-as-test model, each paragraph is its own example and
-  // its name comes from the first sentence (with the trailing terminator
+  // its name is the entire paragraph (with the trailing terminator
   // stripped). Two paragraphs → two named tests.
   const p = plan(parse('e.md', '# A\n\nGiven I have 5 cukes\n\n# B\n\nGiven I have 9 cukes'), r)
   const names: string[] = []

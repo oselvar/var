@@ -37,5 +37,11 @@
     "tailwindcss": "^4.3.2",
     "typescript": "^6.0.3",
     "vscode-languageserver": "^10.0.1"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oselvar/var.git",
+    "directory": "typescript/packages/website"
   }
 }

@@ -394,18 +394,19 @@ public final class Plan {
             }
         }
         if (primary == null) return "";
-        List<Sentences.Sentence> sentences = Sentences.splitSentences(textOf(primary));
-        if (sentences.isEmpty()) return "";
-        String first = sentences.get(0).text();
-        // Strip a single trailing . ! ? for the test name; embedded terminators (e.g. inside
-        // `i.e.` or a quoted string) are left alone.
-        if (!first.isEmpty()) {
-            char last = first.charAt(first.length() - 1);
+        // The entire paragraph is the test name — an example is often a paragraph where only
+        // some sentences match steps, and the narration around them is part of what the test
+        // asserts about. Hard line breaks inside the paragraph collapse to single spaces (test
+        // names must be one line), and a single trailing . ! ? is stripped; embedded
+        // terminators (e.g. inside `i.e.` or a quoted string) are left alone.
+        String name = textOf(primary).replaceAll("\\s+", " ").trim();
+        if (!name.isEmpty()) {
+            char last = name.charAt(name.length() - 1);
             if (last == '.' || last == '!' || last == '?') {
-                first = first.substring(0, first.length() - 1);
+                name = name.substring(0, name.length() - 1);
             }
         }
-        return first;
+        return name;
     }
 
     // -----------------------------------------------------------------------------------------

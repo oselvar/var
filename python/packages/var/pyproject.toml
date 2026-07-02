@@ -3,6 +3,7 @@ name = "oselvar-var"
 version = "0.0.0"
 description = "Markdown-native BDD — pure Python core (port of @oselvar/var)"
 requires-python = ">=3.11"
+license = "MIT"
 dependencies = [
     "cucumber-expressions==20.0.0",
     "oselvar-var-core",

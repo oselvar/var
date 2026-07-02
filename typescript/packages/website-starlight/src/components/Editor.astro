@@ -7,25 +7,29 @@ interface Props {
   // Offer the "Define step definition" affordance on a settled selection in
   // markdown File tabs (default true).
   define?: boolean
-  // Milliseconds between keystrokes when replaying between named states.
-  // Lower is faster. Only relevant for a File with ≥2 named-slot states.
+  // Milliseconds between keystrokes when a version button replays its edits.
+  // Lower is faster. Only relevant for a File with ≥2 <Version> children.
   replayMs?: number
 }
 const { lineNumbers = false, folding = false, define = true, replayMs = 100 } = Astro.props
 ---
-<figure class="file-editor my-6">
+<!--
+  not-content opts the whole subtree out of Starlight's sibling-spacing rule
+  (`.sl-markdown-content :not(…) + :not(…) { margin-top: … }`), which would
+  otherwise push every tab after the first down and misalign the tab row.
+-->
+<figure class="file-editor not-content my-6">
   <figcaption
-    class="fe-tabs flex items-center gap-1 px-[6px] pt-[6px] bg-line-subtle border-b border-line-subtle"
+    class="fe-tabs flex items-center gap-1 px-[6px] pt-[6px] border-b border-line-subtle"
     role="tablist"
   ></figcaption>
   <div
-    class="cm-mount not-content m-0 border border-t-0 border-line-subtle rounded-none overflow-hidden"
+    class="cm-mount relative m-0 border border-t-0 border-line-subtle rounded-none overflow-hidden"
     data-line-numbers={String(lineNumbers)}
     data-folding={String(folding)}
     data-define={String(define)}
     data-replay-ms={String(replayMs)}
   ></div>
-  <div class="fe-footer flex items-center gap-1 px-[14px] py-2 bg-line-subtle" hidden></div>
   <div hidden><slot /></div>
 </figure>
 <style>
@@ -39,7 +43,7 @@ const { lineNumbers = false, folding = false, define = true, replayMs = 100 } = 
    * stale) the ArrowUp/ArrowDown skipping a line. Pin it explicitly so
    * the editor never depends on an ambient page-level value.
    */
-  .cm-mount :global(.cm-editor) { font-size: 14px; line-height: normal; }
+  .cm-mount :global(.cm-editor) { font-size: 15px; line-height: normal; }
   .cm-mount :global(.cm-editor.cm-focused) { outline: none; }
 </style>
 <script>

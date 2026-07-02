@@ -37,6 +37,7 @@ export function semanticTokenData(
     if (m.varPath !== varPath) continue
     paint(m.range, 1)
     for (const p of m.paramRanges) paint(p, 2)
+    for (const h of m.headerCellRanges ?? []) paint(h, 2)
   }
 
   const data: number[] = []

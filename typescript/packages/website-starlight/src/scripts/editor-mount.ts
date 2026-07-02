@@ -2,7 +2,7 @@ import { javascript } from '@codemirror/lang-javascript'
 import { markdown } from '@codemirror/lang-markdown'
 import { foldGutter } from '@codemirror/language'
 import { LSPClient, languageServerExtensions } from '@codemirror/lsp-client'
-import { Annotation, type Extension } from '@codemirror/state'
+import { Annotation, EditorSelection, type Extension } from '@codemirror/state'
 import { lineNumbers } from '@codemirror/view'
 import { hashSource } from '@oselvar/var-core'
 import { basicSetup, EditorView, minimalSetup } from 'codemirror'
@@ -31,7 +31,9 @@ function collectPageSeed(): Record<string, string> {
     const uri = fileEl.dataset.uri
     if (!uri) continue
     const path = uri.replace(/^file:\/\/\//, '/')
-    seed[path] = fileEl.dataset.doc ?? ''
+    // A versioned <File> keeps its document on the first <Version> child.
+    const firstVersion = fileEl.querySelector<HTMLElement>('[data-var-version]')
+    seed[path] = firstVersion?.dataset.doc ?? fileEl.dataset.doc ?? ''
   }
   return seed
 }
@@ -67,7 +69,13 @@ function lspClient(): LSPClient {
 const replayTxn = Annotation.define<boolean>()
 const REPLAY_MS = 35 // default per-keystroke delay (overridable via <Editor replayMs>)
 
-type ReplayState = { token: number; timer?: ReturnType<typeof setTimeout> }
+type ReplayState = {
+  token: number
+  timer?: ReturnType<typeof setTimeout>
+  // Resolves the pending replayTo() promise. Called on completion AND on
+  // cancellation — callers only need to know the replay is over, not why.
+  settle?: () => void
+}
 const replays = new WeakMap<EditorView, ReplayState>()
 
 function cancelReplay(view: EditorView): void {
@@ -76,15 +84,36 @@ function cancelReplay(view: EditorView): void {
     r.token += 1
     if (r.timer) clearTimeout(r.timer)
     r.timer = undefined
+    r.settle?.()
+    r.settle = undefined
   }
+}
+
+// One keyboard-sized caret step from `cur` toward `target`: vertical
+// line-by-line with the column carried along and clamped (like holding ↓/↑),
+// then word-boundary hops within the target line (like holding ⌥←/⌥→),
+// clamped so the caret lands exactly on the target.
+function nextCaretStep(view: EditorView, cur: number, target: number): number {
+  const doc = view.state.doc
+  const curLine = doc.lineAt(cur)
+  const targetLine = doc.lineAt(target)
+  if (curLine.number !== targetLine.number) {
+    const next = doc.line(curLine.number + (targetLine.number > curLine.number ? 1 : -1))
+    return Math.min(next.from + (cur - curLine.from), next.to)
+  }
+  const forward = target > cur
+  const hopped = view.moveByGroup(EditorSelection.cursor(cur), forward).head
+  if (hopped === cur) return target // at a document edge — don't stall
+  return forward ? Math.min(hopped, target) : Math.max(hopped, target)
 }
 
 // Animate the live document into `target`, one keystroke per `delayMs` tick.
 // Always diffs from the *current* doc, so manual edits (before or mid-replay)
-// are respected. `onSettled` re-renders the footer once the replay finishes.
-function replayTo(view: EditorView, target: string, delayMs: number, onSettled: () => void): void {
+// are respected. The returned promise settles when the replay reaches the
+// target OR is cancelled/superseded — it never rejects.
+function replayTo(view: EditorView, target: string, delayMs: number): Promise<void> {
   cancelReplay(view)
-  // Clicking the footer button moved focus off the editor, which hides the
+  // Clicking the version button moved focus off the editor, which hides the
   // caret. Return focus so the moving cursor stays visible during replay.
   view.focus()
   const r = replays.get(view) ?? { token: 0 }
@@ -96,10 +125,26 @@ function replayTo(view: EditorView, target: string, delayMs: number, onSettled: 
     const cur = replays.get(view)
     if (!cur || cur.token !== token) return // superseded or cancelled
     if (i >= ops.length) {
-      onSettled()
+      cur.settle?.()
+      cur.settle = undefined
       return
     }
-    const op: ReplayOp = ops[i++] as ReplayOp
+    const op: ReplayOp = ops[i] as ReplayOp
+    // Walk the caret to the edit location first — a visible arrow-key travel
+    // instead of a teleport when the next edit is far from where it sits.
+    // (A backspace-style delete sits *after* the char it removes.)
+    const editCaret = op.kind === 'insert' ? op.at : op.at + 1
+    const head = view.state.selection.main.head
+    if (head !== editCaret) {
+      view.dispatch({
+        selection: { anchor: nextCaretStep(view, head, editCaret) },
+        scrollIntoView: true,
+        annotations: replayTxn.of(true),
+      })
+      cur.timer = setTimeout(step, delayMs)
+      return
+    }
+    i++
     if (op.kind === 'insert') {
       const caret = op.at + op.text.length
       view.dispatch({
@@ -118,14 +163,18 @@ function replayTo(view: EditorView, target: string, delayMs: number, onSettled: 
     }
     cur.timer = setTimeout(step, delayMs)
   }
-  step()
+  return new Promise((resolve) => {
+    r.settle = resolve
+    step()
+  })
 }
 
-type FileState = { readonly name: string; readonly text: string }
+type VersionData = { readonly label: string; readonly doc: string }
 type FileData = {
   readonly uri: string
   readonly doc: string
-  readonly states?: ReadonlyArray<FileState>
+  // ≥2 entries when authored with <Version> children; undefined otherwise.
+  readonly versions?: ReadonlyArray<VersionData>
 }
 
 // Reads this editor's own <File> children straight out of the live DOM —
@@ -135,16 +184,12 @@ function readFiles(editorEl: HTMLElement): FileData[] {
   for (const fileEl of editorEl.querySelectorAll<HTMLElement>('[data-var-file]')) {
     const uri = fileEl.dataset.uri
     if (!uri) continue
-    const doc = fileEl.dataset.doc ?? ''
-    let states: FileData['states']
-    if (fileEl.dataset.states) {
-      try {
-        states = JSON.parse(fileEl.dataset.states) as FileState[]
-      } catch {
-        states = undefined // malformed states — the file simply has no replay controls
-      }
-    }
-    out.push({ uri, doc, states })
+    const versions = [...fileEl.querySelectorAll<HTMLElement>('[data-var-version]')].map((v) => ({
+      label: v.dataset.label ?? '',
+      doc: v.dataset.doc ?? '',
+    }))
+    const doc = versions.length > 0 ? (versions[0]?.doc ?? '') : (fileEl.dataset.doc ?? '')
+    out.push({ uri, doc, versions: versions.length >= 2 ? versions : undefined })
   }
   return out
 }
@@ -159,8 +204,7 @@ function mountEditor(editorEl: HTMLElement): void {
 
   const mount = editorEl.querySelector<HTMLElement>('.cm-mount')
   const tabsEl = editorEl.querySelector<HTMLElement>('.fe-tabs')
-  const footerEl = editorEl.querySelector<HTMLElement>('.fe-footer')
-  if (!mount || !tabsEl || !footerEl) return
+  if (!mount || !tabsEl) return
 
   const wantLineNumbers = mount.dataset.lineNumbers !== 'false'
   const wantFolding = mount.dataset.folding !== 'false'
@@ -218,48 +262,78 @@ function mountEditor(editorEl: HTMLElement): void {
     }
   }
 
-  function renderFooter(uri: string): void {
-    const data = files.find((f) => f.uri === uri)
-    footerEl.replaceChildren()
-    if (!data?.states || data.states.length < 2) {
-      footerEl.hidden = true
+  // Cycling version button — one per editor, floating in the mount's top-right
+  // corner. It always advertises the *next* version of the active file
+  // (wrapping), and clicking it types that version into the view via replay.
+  // While the replay runs the button is disabled and keeps the clicked label
+  // with a spinner to its left; it only advances to advertise the following
+  // version once the replay settles (finished or cancelled by a user edit).
+  const versionIndex = new Map<string, number>() // uri -> last applied version
+  let busyUri: string | null = null // uri whose replay is in flight, if any
+  const versionBtn = document.createElement('button')
+  versionBtn.type = 'button'
+  versionBtn.className =
+    'fe-version-btn absolute top-2 right-2 z-10 px-2 py-0.5 font-mono text-[12px] rounded-none border border-line bg-surface text-ink cursor-pointer hover:bg-raised disabled:opacity-60 disabled:cursor-default disabled:hover:bg-surface'
+  const activeVersions = (): ReadonlyArray<VersionData> | undefined =>
+    files.find((f) => f.uri === activeUri)?.versions
+
+  function renderVersionBtn(): void {
+    const versions = activeVersions()
+    if (!versions) {
+      versionBtn.style.display = 'none'
       return
     }
-    footerEl.hidden = false
-    const view = views.get(uri)
-    if (!view) return
-    const current = view.state.doc.toString()
-    for (const state of data.states) {
-      const btn = document.createElement('button')
-      btn.type = 'button'
-      btn.className =
-        'fe-state-btn px-2 py-0.5 text-[12px] font-normal rounded-none border border-line bg-surface text-ink cursor-pointer hover:bg-raised aria-pressed:bg-accent aria-pressed:text-accent-contrast aria-pressed:border-accent'
-      btn.textContent = state.name
-      btn.setAttribute('aria-pressed', String(state.text === current))
-      btn.addEventListener('click', () => {
-        replayTo(view, state.text, delayMs, () => renderFooter(uri))
-      })
-      footerEl.appendChild(btn)
+    versionBtn.style.display = ''
+    const busy = busyUri === activeUri
+    versionBtn.disabled = busy
+    const cur = versionIndex.get(activeUri) ?? 0
+    // Busy: the version being typed (already stored in versionIndex).
+    // Idle: the next one, wrapping.
+    const label = versions[busy ? cur : (cur + 1) % versions.length]?.label ?? ''
+    const children: Node[] = []
+    if (busy) {
+      const spinner = document.createElement('span')
+      spinner.className =
+        'inline-block w-3 h-3 mr-1.5 align-[-1px] rounded-full border-2 border-current border-t-transparent animate-spin'
+      spinner.setAttribute('aria-hidden', 'true')
+      children.push(spinner)
     }
+    children.push(document.createTextNode(label))
+    versionBtn.replaceChildren(...children)
   }
+
+  versionBtn.addEventListener('click', () => {
+    const versions = activeVersions()
+    const view = views.get(activeUri)
+    if (!versions || !view || busyUri === activeUri) return
+    const uri = activeUri
+    const next = ((versionIndex.get(uri) ?? 0) + 1) % versions.length
+    versionIndex.set(uri, next)
+    busyUri = uri
+    renderVersionBtn()
+    void replayTo(view, versions[next]?.doc ?? '', delayMs).then(() => {
+      // Another file's replay may have taken over the flag in the meantime.
+      if (busyUri === uri) busyUri = null
+      renderVersionBtn()
+    })
+  })
 
   function showFile(uri: string): void {
     activeUri = uri
     for (const [u, pane] of panes) pane.style.display = u === uri ? '' : 'none'
     for (const [u, btn] of tabButtons) btn.setAttribute('aria-selected', String(u === uri))
-    renderFooter(uri)
+    renderVersionBtn()
     views.get(uri)?.focus()
   }
 
-  // Re-run (debounced) and refresh the footer on every genuine edit — shared
-  // across every file in this editor, since editing *any* of them should
-  // reschedule the run. A real user edit cancels an active replay for that
-  // view (the user always wins); replay-produced edits don't.
+  // Re-run (debounced) on every edit — shared across every file in this
+  // editor, since editing *any* of them should reschedule the run. A real
+  // user edit cancels an active replay for that view (the user always wins);
+  // replay-produced edits don't.
   const autoRun = EditorView.updateListener.of((u) => {
     if (!u.docChanged) return
     const isReplay = u.transactions.some((tr) => tr.annotation(replayTxn))
     if (!isReplay) cancelReplay(u.view)
-    if (activeUri) renderFooter(activeUri)
     scheduleRun()
   })
 
@@ -309,7 +383,7 @@ function mountEditor(editorEl: HTMLElement): void {
     const tabBtn = document.createElement('button')
     tabBtn.type = 'button'
     tabBtn.className =
-      'fe-tab relative top-px -mb-px px-[14px] py-[7px] font-mono font-semibold text-[13px] leading-none bg-transparent border border-transparent rounded-t-md text-ink opacity-60 cursor-pointer hover:opacity-100 hover:bg-raised aria-selected:opacity-100 aria-selected:bg-[var(--ed-bg)] aria-selected:border-line-subtle aria-selected:border-b-[var(--ed-bg)]'
+      'fe-tab relative top-px -mb-px px-[14px] py-[7px] font-mono font-semibold text-[13px] leading-none bg-transparent border border-line-subtle rounded-none text-ink opacity-60 cursor-pointer hover:opacity-100 hover:bg-raised aria-selected:opacity-100 aria-selected:bg-[var(--ed-bg)] aria-selected:border-b-[var(--ed-bg)]'
     tabBtn.setAttribute('role', 'tab')
     tabBtn.setAttribute('aria-selected', String(file.uri === activeUri))
     tabBtn.textContent = filenameOf(file.uri)
@@ -318,7 +392,8 @@ function mountEditor(editorEl: HTMLElement): void {
     tabsEl.appendChild(tabBtn)
   }
 
-  renderFooter(activeUri)
+  mount.appendChild(versionBtn)
+  renderVersionBtn()
   scheduleRun()
 }
 

@@ -11,5 +11,11 @@
     "@oselvar/var-core": "workspace:*",
     "@oselvar/var-vitest": "workspace:*",
     "vitest": "^4.1.9"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oselvar/var.git",
+    "directory": "typescript/packages/var-examples"
   }
 }

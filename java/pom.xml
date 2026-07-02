@@ -16,6 +16,28 @@
     typescript/ (reference implementation) and python/ (second port).
   </description>
 
+  <url>https://github.com/oselvar/var</url>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://opensource.org/license/mit/</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>aslakhellesoy</id>
+      <name>Aslak Hellesøy</name>
+      <organization>Oselvar Ltd</organization>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:https://github.com/oselvar/var.git</connection>
+    <developerConnection>scm:git:git@github.com:oselvar/var.git</developerConnection>
+    <url>https://github.com/oselvar/var</url>
+    <tag>HEAD</tag>
+  </scm>
+
   <modules>
     <module>var-core</module>
     <module>var-config</module>
@@ -90,4 +112,74 @@
       </plugins>
     </pluginManagement>
   </build>
+
+  <profiles>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <!-- Confirmed on repo1.maven.org maven-metadata.xml 2026-07-02:
+                 <release> 4.0.0-beta-1 is a beta; 3.4.0 is the latest stable. -->
+            <version>3.4.0</version>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals><goal>jar-no-fork</goal></goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <!-- Confirmed on repo1.maven.org maven-metadata.xml 2026-07-02:
+                 <latest>/<release> both 3.12.0. -->
+            <version>3.12.0</version>
+            <configuration>
+              <doclint>none</doclint>
+            </configuration>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals><goal>jar</goal></goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <!-- Confirmed on repo1.maven.org maven-metadata.xml 2026-07-02:
+                 <latest>/<release> both 3.2.8. -->
+            <version>3.2.8</version>
+            <configuration>
+              <!-- Reads the passphrase from MAVEN_GPG_PASSPHRASE (op-injected). -->
+              <bestPractices>true</bestPractices>
+            </configuration>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals><goal>sign</goal></goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+            <!-- Confirmed on repo1.maven.org maven-metadata.xml 2026-07-02:
+                 <latest>/<release> both 0.11.0. -->
+            <version>0.11.0</version>
+            <extensions>true</extensions>
+            <configuration>
+              <publishingServerId>central</publishingServerId>
+              <autoPublish>true</autoPublish>
+              <waitUntil>published</waitUntil>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

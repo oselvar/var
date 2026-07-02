@@ -6,7 +6,7 @@
   "version": "0.0.0",
   "type": "module",
   "engines": {
-    "vscode": "^1.92.0",
+    "vscode": "^1.105.0",
     "node": ">=22"
   },
   "categories": [
@@ -14,7 +14,7 @@
     "Linters",
     "Testing"
   ],
-  "main": "./dist/extension.js",
+  "main": "./dist/extension.cjs",
   "activationEvents": [
     "onLanguage:markdown",
     "onLanguage:typescript",
@@ -48,7 +48,7 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json && node esbuild.mjs"
   },
   "dependencies": {
     "@oselvar/var-language": "workspace:*",
@@ -56,6 +56,14 @@
     "vscode-languageclient": "^10.0.1"
   },
   "devDependencies": {
-    "@types/vscode": "^1.125.0"
-  }
+    "@types/vscode": "~1.105.0",
+    "esbuild": "^0.28.1"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oselvar/var.git",
+    "directory": "typescript/packages/var-vscode"
+  },
+  "private": true
 }

@@ -6,22 +6,29 @@ import { defineConfig } from 'astro/config'
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://var.oselvar.com',
   integrations: [
     starlight({
       title: 'Vár',
       customCss: ['./src/styles/tailwind.css', './src/styles/custom.css'],
-      social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withastro/starlight' }],
+      social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/oselvar/var' }],
       sidebar: [
         {
-          label: 'Guides',
+          label: 'Start here',
+          items: ['tutorials/try-in-browser', 'tutorials/get-started', 'tutorials/first-spec'],
+        },
+        {
+          label: 'How-to guides',
           items: [
-            // Each item here is one entry in the navigation menu.
-            { label: 'Example Guide', slug: 'guides/example' },
+            'how-to/tables-and-doc-strings',
+            'how-to/run-with-vitest',
+            'how-to/agent-instructions',
+            'how-to/drive-a-feature-with-an-agent',
           ],
         },
         {
-          label: 'Reference',
-          items: [{ autogenerate: { directory: 'reference' } }],
+          label: 'Understanding Vár',
+          items: ['explanation/thin-steps', 'explanation/var-for-cucumber-users'],
         },
       ],
     }),
