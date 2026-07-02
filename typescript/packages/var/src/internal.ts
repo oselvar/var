@@ -206,6 +206,26 @@ export function buildRegistry(): Registry {
   return r
 }
 
+// Conformance-harness accessor: the custom parameter types accumulated by
+// defineState since the last _resetBuilder, projected to the {name, regexp}
+// wire shape toRegistryArtifact serializes. regexp is the bare pattern
+// source (RegExp.source — no flags/delimiters), the cross-port convention
+// every language's registry golden uses. Internal-only: exported via
+// @oselvar/var/registry beside _resetBuilder, never from the package root.
+export function _customParameterTypes(): ReadonlyArray<{
+  readonly name: string
+  readonly regexp: string
+}> {
+  return customTypes.map((t) => {
+    if (Array.isArray(t.regexp)) {
+      throw new Error(
+        `parameter type "${t.name}": regexp arrays are not supported by the conformance projection yet`,
+      )
+    }
+    return { name: t.name, regexp: (t.regexp as RegExp).source }
+  })
+}
+
 export function _resetBuilder(): void {
   steps = []
   contextFactoriesByFile.clear()

@@ -12,7 +12,7 @@ import { DocStringMismatchError } from '../src/doc-string-diff.js'
 import { UnexpectedPassError } from '../src/execute.js'
 import { parse } from '../src/parse.js'
 import { plan } from '../src/plan.js'
-import { addStep, createRegistry } from '../src/registry.js'
+import { addStep, createRegistry, defineParameterType } from '../src/registry.js'
 
 test('canonicalStringify sorts keys recursively and ends with a newline', () => {
   const out = canonicalStringify({ b: 1, a: { d: 2, c: 3 } })
@@ -83,6 +83,22 @@ test('toRegistryArtifact reads parameter names from the AST, ignoring escaped br
     handler: () => {},
   })
   expect(toRegistryArtifact(r).steps[0]?.parameterTypeNames).toEqual(['int'])
+})
+
+test('toRegistryArtifact projects passed custom parameter types', () => {
+  let r = createRegistry()
+  r = defineParameterType(r, { name: 'airport', regexp: /[A-Z]{3}/ })
+  r = addStep(r, {
+    expression: 'I fly to {airport}',
+    expressionSourceFile: 'airports.steps',
+    expressionSourceLine: 1,
+    kind: 'action',
+    handler: () => {},
+  })
+  expect(toRegistryArtifact(r, [{ name: 'airport', regexp: '[A-Z]{3}' }])).toEqual({
+    steps: [{ expression: 'I fly to {airport}', parameterTypeNames: ['airport'] }],
+    parameterTypes: [{ name: 'airport', regexp: '[A-Z]{3}' }],
+  })
 })
 
 test('toPlanArtifact projects examples, expectedOutcome and stringified args', () => {

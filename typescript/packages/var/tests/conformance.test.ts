@@ -3,7 +3,12 @@ import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { canonicalStringify, parse, runConformance } from '@oselvar/var-core'
 import { describe, expect, test } from 'vitest'
-import { _resetBuilder, buildRegistry, contextFactory } from '../src/registry.js'
+import {
+  _customParameterTypes,
+  _resetBuilder,
+  buildRegistry,
+  contextFactory,
+} from '../src/registry.js'
 
 const BUNDLES = resolve(import.meta.dirname, '../../../../conformance/bundles')
 const UPDATE = process.env.VAR_UPDATE_GOLDENS === '1'
@@ -38,7 +43,12 @@ for (const name of readdirSync(BUNDLES, { withFileTypes: true })
       const createContext = contextFactory()
       const source = readFileSync(resolve(dir, 'example.md'), 'utf8')
       const varDoc = parse('example.md', source)
-      const artifacts = await runConformance(varDoc, registry, createContext)
+      const artifacts = await runConformance(
+        varDoc,
+        registry,
+        createContext,
+        _customParameterTypes(),
+      )
 
       const goldenDir = resolve(dir, 'golden')
       if (UPDATE && !existsSync(goldenDir)) mkdirSync(goldenDir, { recursive: true })
