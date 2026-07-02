@@ -55,7 +55,7 @@ pnpm workspace · biome · vitest (for the core's own tests) · knip · jscpd ·
 - Test files in the project's own test suite: `*.test.ts` (vitest).
 - BDD example files (dogfood + docs): plain `*.md`. There is no special `.var.md`
   extension — a file is a spec iff its path matches the `docs` globs in `var.config.json`.
-  `docs` is `{ include, exclude }` (a plain array is shorthand for include-only); both
+  `docs` is `{ include, exclude }` (canonical shape — no array shorthand); both
   are plain globs, no `!` prefix. `include` has no default (empty discovers nothing);
   `exclude` removes matches (e.g. a not-implemented tutorial exercise). That config is
   the single source of truth for "what is a spec", consulted by the runner, the LSP, and
