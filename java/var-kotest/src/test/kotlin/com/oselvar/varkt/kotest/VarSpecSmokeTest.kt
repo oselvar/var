@@ -36,6 +36,11 @@ class VarSpecRegistrationTest : FunSpec({
             root = Path.of("src/test/resources/kotest-smoke"),
             lookup = SMOKE_CONFIG::get,
         ) {}
+        // tests() is @KotestInternal (@RequiresOptIn, WARNING level) — accepted
+        // knowingly: it is the only accessor for a spec's registered roots, and
+        // this guard's whole point is inspecting registration without running
+        // the engine. The @OptIn keeps the build warning-free.
+        @OptIn(io.kotest.common.KotestInternal::class)
         val roots = spec.tests()
         roots.size shouldBe 1
         roots[0].name.name shouldBe "specs/cukes.md"

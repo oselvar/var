@@ -1,7 +1,8 @@
 # var-kotlin: an idiomatic Kotlin authoring facade over the Java engine
 
 Date: 2026-07-01
-Status: design
+Status: implemented (see docs/superpowers/plans/2026-07-01-kotlin-facade.md; risk
+resolutions recorded in "Risks" below)
 
 The Kotlin port. Unlike every previous port (Python, Java), Kotlin does **not**
 re-port the pipeline: it layers an idiomatic Kotlin authoring API on the
@@ -263,25 +264,46 @@ stable major):
   into `var`/`var-core`/`var-runner`/`var-junit` (the `@RegistrarGlue`
   annotation is plain Java).
 
-## Risks / open questions (resolve in the task plan)
+## Risks / open questions — RESOLVED during implementation (2026-07-02)
 
-- **Zero-parameter lambda overload ambiguity** — `sensor("…") { cukes }` has
-  no parameter list, making it potentially ambiguous between the arity-0
-  receiver type `C.() -> R` and arity-1 `C.(A) -> R` (where the parameter
-  would be `it`). Verify against the real compiler early (Task 1 territory);
-  if ambiguous, candidate mitigations: `{ -> cukes }` authoring convention,
-  `@OverloadResolutionByLambdaReturnType`, or distinct arity-0 signatures.
-  Whatever lands must keep the approved example compiling *as written*.
-- **StackWalker through Kotlin lambdas** — confirm empirically that the frame
-  after the glue skip reports the fixture file and the `context(…)` call line
-  (not the lambda declaration line) on the reactor's JDK. The facade unit
-  test for source location is the gate.
-- **`suspend` + SAM wrapper allocation** — `runBlocking` per step execution is
-  fine for test workloads; don't prematurely optimize, but confirm no
-  surprising thread-affinity issues under Kotest's coroutine-based execution.
-- **Kotest major version** — pin the current stable major at plan time and
-  record which registration API (`FunSpecRootScope` extension vs. abstract
-  spec) it makes cleanest.
+- **Zero-parameter lambda overload ambiguity** — **materialized exactly as
+  flagged**: K2 rejects `sensor("…") { cukes }` with "Overload resolution
+  ambiguity" when the arity-0 and arity-1 overloads are same-scope members (a
+  parameterless lambda type-checks against both a 0-parameter and a
+  1-parameter function type via implicit `it`). Resolved with a
+  **member/extension split**: the zero-parameter overloads are `StepsScope`
+  members, the capturing arities are top-level extension functions — members
+  win resolution for parameterless lambdas, parameter-declaring lambdas are
+  inapplicable to the member and bind the extension. The approved example
+  compiles verbatim (gated by `DefineStateTest.canonicalSteps` and, from a
+  foreign package, `CrossPackageTest`). Two consequences:
+  - *Author-visible*: a `.steps.kt` in its own package imports the extensions
+    alongside `defineState` (`import com.oselvar.varkt.{context,action,sensor}`
+    or a wildcard; IDE auto-import handles it).
+  - *Runtime semantics*: `Execute.invokeHandler` dispatches by EXACT parameter
+    count, so an arity-0 registration on a capturing expression would fail at
+    execution. Handlers therefore register through arity-tolerant
+    `ContextAdapter`/`SensorAdapter` shims (one `apply` overload per call
+    shape, state + 0..3 args) that drop surplus captured arguments — the TS
+    facade's semantics, and the only reading under which the approved
+    `sensor("… {int} …") { cukes }` *runs*, not just compiles. Declaring more
+    parameters than the step supplies raises an authoring error.
+- **StackWalker through Kotlin lambdas** — verified on temurin-21: after the
+  glue skip the frame is the author's DSL-block lambda with the correct file
+  and per-call line. One addition beyond the design: the extension overloads
+  live in `DefineState.kt`'s file-facade class, which kotlinc lets us annotate
+  with `@file:RegistrarGlue` (Java TYPE-targeted annotations are legal file
+  annotations and land on the facade class) — without it, extension-registered
+  steps attributed to `DefineState.kt`.
+- **`suspend` + SAM wrapper allocation** — no issues observed; `runBlocking`
+  bridging is exercised by a genuinely suspending handler (`delay`) in
+  `ExecuteIntegrationTest` and under Kotest's coroutine-based execution in
+  `var-kotest`'s smoke specs.
+- **Kotest major version** — pinned 6.2.1. The abstract-spec shape
+  (`VarSpec : FunSpec()` registering from `init`) is the clean form. The
+  junit-bom-6.1.1-vs-Kotest platform-version conflict did not materialize.
+  One API note: `Spec.rootTests()` does not exist in 6.2.1; the registration
+  guard uses `Spec.tests()` (`@KotestInternal`, opted in knowingly).
 
 ## References
 
