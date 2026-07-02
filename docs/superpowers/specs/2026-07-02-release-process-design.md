@@ -151,7 +151,7 @@ NPM_TOKEN=op://Var/npm-oselvar/token
 UV_PUBLISH_TOKEN=op://Var/pypi-oselvar/token
 CENTRAL_USERNAME=op://Var/sonatype-central/username
 CENTRAL_PASSWORD=op://Var/sonatype-central/token
-GPG_PASSPHRASE=op://Var/maven-gpg/passphrase
+MAVEN_GPG_PASSPHRASE=op://Var/maven-gpg/passphrase
 VSCE_PAT=op://Var/vscode-marketplace/pat
 OVSX_PAT=op://Var/open-vsx/pat
 ```
