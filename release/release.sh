@@ -23,7 +23,7 @@ for tool in git node pnpm uv mvn gh vsce ovsx op gpg curl jq python3 make; do
 done
 
 [[ "$(git branch --show-current)" == "main" ]] || die "releases run from main"
-git diff --quiet && git diff --cached --quiet || die "working tree not clean"
+[[ -z "$(git status --porcelain)" ]] || die "working tree not clean"
 git fetch origin main --tags
 git merge-base --is-ancestor origin/main HEAD ||
   die "local main is behind (or diverged from) origin/main — pull first"
@@ -56,7 +56,7 @@ else
   if git diff --quiet; then
     log "manifests already at $VERSION"
   else
-    git add -A
+    git add typescript/packages/*/package.json python/packages/*/pyproject.toml python/uv.lock java/pom.xml java/*/pom.xml
     git commit -m "Release $TAG"
     log "committed version stamp"
   fi
@@ -74,6 +74,7 @@ fi
 RESULTS=()
 FAILED=0
 for target in release/targets/*.sh; do
+  [[ -e "$target" ]] || die "no release targets found in release/targets/"
   name="$(basename "$target" .sh)"
   log "── target $name ──"
   if DRY_RUN="$DRY_RUN" op run --env-file=release/release.env -- bash "$target" "$VERSION"; then
@@ -97,6 +98,10 @@ fi
 
 # ── 8. Summary ───────────────────────────────────────────────────────────────
 log "──────── summary ────────"
-for r in "${RESULTS[@]}"; do log "  $r"; done
+for r in ${RESULTS[@]+"${RESULTS[@]}"}; do log "  $r"; done
 [[ "$FAILED" == "0" ]] || die "some targets failed — fix and re-run: release/release.sh $VERSION"
-[[ "$DRY_RUN" == "0" ]] && log "release $TAG complete 🎉" || log "dry run complete"
+if [[ "$DRY_RUN" == "0" ]]; then
+  log "release $TAG complete 🎉"
+else
+  log "dry run complete"
+fi
