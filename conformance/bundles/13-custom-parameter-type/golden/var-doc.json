@@ -1,0 +1,204 @@
+{
+  "examples": [
+    {
+      "body": [
+        {
+          "inlineMap": [
+            {
+              "sourceOffset": 47,
+              "textOffset": 0
+            },
+            {
+              "sourceOffset": 48,
+              "textOffset": 1
+            },
+            {
+              "sourceOffset": 49,
+              "textOffset": 2
+            },
+            {
+              "sourceOffset": 50,
+              "textOffset": 3
+            },
+            {
+              "sourceOffset": 51,
+              "textOffset": 4
+            },
+            {
+              "sourceOffset": 52,
+              "textOffset": 5
+            },
+            {
+              "sourceOffset": 53,
+              "textOffset": 6
+            },
+            {
+              "sourceOffset": 54,
+              "textOffset": 7
+            },
+            {
+              "sourceOffset": 55,
+              "textOffset": 8
+            },
+            {
+              "sourceOffset": 56,
+              "textOffset": 9
+            },
+            {
+              "sourceOffset": 57,
+              "textOffset": 10
+            },
+            {
+              "sourceOffset": 58,
+              "textOffset": 11
+            },
+            {
+              "sourceOffset": 59,
+              "textOffset": 12
+            },
+            {
+              "sourceOffset": 60,
+              "textOffset": 13
+            },
+            {
+              "sourceOffset": 61,
+              "textOffset": 14
+            },
+            {
+              "sourceOffset": 62,
+              "textOffset": 15
+            },
+            {
+              "sourceOffset": 63,
+              "textOffset": 16
+            },
+            {
+              "sourceOffset": 64,
+              "textOffset": 17
+            },
+            {
+              "sourceOffset": 65,
+              "textOffset": 18
+            },
+            {
+              "sourceOffset": 66,
+              "textOffset": 19
+            },
+            {
+              "sourceOffset": 67,
+              "textOffset": 20
+            },
+            {
+              "sourceOffset": 68,
+              "textOffset": 21
+            },
+            {
+              "sourceOffset": 69,
+              "textOffset": 22
+            },
+            {
+              "sourceOffset": 70,
+              "textOffset": 23
+            },
+            {
+              "sourceOffset": 71,
+              "textOffset": 24
+            },
+            {
+              "sourceOffset": 72,
+              "textOffset": 25
+            },
+            {
+              "sourceOffset": 73,
+              "textOffset": 26
+            },
+            {
+              "sourceOffset": 74,
+              "textOffset": 27
+            },
+            {
+              "sourceOffset": 75,
+              "textOffset": 28
+            },
+            {
+              "sourceOffset": 76,
+              "textOffset": 29
+            },
+            {
+              "sourceOffset": 77,
+              "textOffset": 30
+            },
+            {
+              "sourceOffset": 78,
+              "textOffset": 31
+            },
+            {
+              "sourceOffset": 79,
+              "textOffset": 32
+            },
+            {
+              "sourceOffset": 80,
+              "textOffset": 33
+            },
+            {
+              "sourceOffset": 81,
+              "textOffset": 34
+            },
+            {
+              "sourceOffset": 82,
+              "textOffset": 35
+            },
+            {
+              "sourceOffset": 83,
+              "textOffset": 36
+            },
+            {
+              "sourceOffset": 84,
+              "textOffset": 37
+            },
+            {
+              "sourceOffset": 85,
+              "textOffset": 38
+            },
+            {
+              "sourceOffset": 86,
+              "textOffset": 39
+            },
+            {
+              "sourceOffset": 87,
+              "textOffset": 40
+            },
+            {
+              "sourceOffset": 88,
+              "textOffset": 41
+            }
+          ],
+          "kind": "paragraph",
+          "span": {
+            "endCol": 43,
+            "endLine": 5,
+            "endOffset": 89,
+            "startCol": 1,
+            "startLine": 5,
+            "startOffset": 47
+          },
+          "text": "I fly to LHR. The destination code is lhr."
+        }
+      ],
+      "scopeStack": [
+        "Custom parameter types",
+        "Flying to London"
+      ],
+      "span": {
+        "endCol": 43,
+        "endLine": 5,
+        "endOffset": 89,
+        "startCol": 1,
+        "startLine": 5,
+        "startOffset": 47
+      }
+    }
+  ],
+  "orphanAttachments": [],
+  "path": "example.md"
+}

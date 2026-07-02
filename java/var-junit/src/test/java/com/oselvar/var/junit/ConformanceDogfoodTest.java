@@ -18,7 +18,7 @@ import org.junit.platform.testkit.engine.EngineExecutionResults;
 import org.junit.platform.testkit.engine.EngineTestKit;
 
 /**
- * Task 14 (Milestone 2's capstone): runs all 12 bundles under the shared, language-neutral
+ * Task 14 (Milestone 2's capstone): runs all 13 bundles under the shared, language-neutral
  * {@code conformance/bundles/} corpus through the REAL {@link VarTestEngine} via {@link
  * EngineTestKit} — the sub-project-2 analogue of the core plan's Task 19 conformance gate
  * ({@code var}'s {@code ConformanceTest}), but proving the test-runner ADAPTER end to end
@@ -75,7 +75,7 @@ import org.junit.platform.testkit.engine.EngineTestKit;
  * the bundle-to-fixture-class mapping, rather than adding a hand-rolled scanner whose own
  * correctness would need separately trusting.
  *
- * <p>Each bundle is its own {@code @ParameterizedTest} case (12 independently reported, not one
+ * <p>Each bundle is its own {@code @ParameterizedTest} case (13 independently reported, not one
  * loop hiding a failure behind the first mismatch) — same discipline as {@code ConformanceTest}
  * and the core plan's Task 19 harness.
  */
@@ -184,6 +184,12 @@ class ConformanceDogfoodTest {
                         new BundleCase(
                                 "12-combining-marks",
                                 "com.oselvar.var.conformance.bundle12.GreetSteps",
+                                1,
+                                0),
+                        // 13-custom-parameter-type/golden/trace.json: one example, "pass".
+                        new BundleCase(
+                                "13-custom-parameter-type",
+                                "com.oselvar.var.conformance.bundle13.AirportsSteps",
                                 1,
                                 0))
                 .map(bundleCase -> Named.of(bundleCase.bundleName(), bundleCase));

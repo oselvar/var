@@ -1,0 +1,22 @@
+{
+  "parameterTypes": [
+    {
+      "name": "airport",
+      "regexp": "[A-Z]{3}"
+    }
+  ],
+  "steps": [
+    {
+      "expression": "I fly to {airport}",
+      "parameterTypeNames": [
+        "airport"
+      ]
+    },
+    {
+      "expression": "The destination code is {word}",
+      "parameterTypeNames": [
+        "word"
+      ]
+    }
+  ]
+}

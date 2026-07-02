@@ -103,6 +103,8 @@ class ConformanceTest {
                     new com.oselvar.var.conformance.bundle10.CukesSteps();
             case "11-emoji-offsets" -> new com.oselvar.var.conformance.bundle11.GreetSteps();
             case "12-combining-marks" -> new com.oselvar.var.conformance.bundle12.GreetSteps();
+            case "13-custom-parameter-type" ->
+                    new com.oselvar.var.conformance.bundle13.AirportsSteps();
             default ->
                     throw new IllegalStateException(
                             "No Java step fixture registered for bundle " + bundleName);

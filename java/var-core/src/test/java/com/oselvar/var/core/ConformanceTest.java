@@ -41,7 +41,7 @@ class ConformanceTest {
     // Maven runs tests with the module directory (java/var-core/) as the working
     // directory, so the shared corpus — a sibling of java/, typescript/, python/ at the
     // repo root — is two levels up. Verified empirically: BUNDLES_DIR.toAbsolutePath()
-    // resolves to .../conformance/bundles and bundleDirs() finds all 12 bundles.
+    // resolves to .../conformance/bundles and bundleDirs() finds all 13 bundles.
     private static final Path BUNDLES_DIR = Paths.get("..", "..", "conformance", "bundles");
 
     // Wrapping each Path in Named<> (rather than returning a bare Stream<Path>) gives every
