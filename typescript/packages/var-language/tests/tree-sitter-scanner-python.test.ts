@@ -45,7 +45,7 @@ def _(state, n: int, row=None):
       'a.steps.py',
       `@action("I said \\"hi\\"\\n\\ttwice \\u00e9\\a\\z")\ndef _(state):\n    pass\n`,
     )
-    expect(defs[0]?.expression).toBe('I said "hi"\n\ttwice é\\z')
+    expect(defs[0]?.expression).toBe('I said "hi"\n\ttwice é\u0007\\z')
   })
 
   test('discovers parameter types from string, raw-string, and re.compile regexps', async () => {
