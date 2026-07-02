@@ -82,9 +82,7 @@ export function parseVarConfig(jsonText: string, sourcePath: string): ParsedVarC
 
 export async function loadVarConfig(cwd: string): Promise<VarConfig> {
   const path = resolve(cwd, 'var.config.json')
-  const parsed = existsSync(path)
-    ? parseVarConfig(readFileSync(path, 'utf8'), path)
-    : EMPTY_PARSED
+  const parsed = existsSync(path) ? parseVarConfig(readFileSync(path, 'utf8'), path) : EMPTY_PARSED
   return {
     docs: parsed.docs,
     steps: parsed.steps,

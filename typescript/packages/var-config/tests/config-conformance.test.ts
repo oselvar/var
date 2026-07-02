@@ -7,9 +7,7 @@ import { parseVarConfig } from '../src/config.js'
 
 // tests/ -> var-config -> packages -> typescript -> repo root. (import.meta.url,
 // not __dirname — this is an ESM package and vitest runs test files as ESM.)
-const CASES_DIR = fileURLToPath(
-  new URL('../../../../conformance/config/cases', import.meta.url),
-)
+const CASES_DIR = fileURLToPath(new URL('../../../../conformance/config/cases', import.meta.url))
 
 const EMPTY = { docs: { include: [], exclude: [] }, steps: [], snippets: {}, scannerPlugins: [] }
 
