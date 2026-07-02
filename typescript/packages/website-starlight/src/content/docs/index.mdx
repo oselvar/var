@@ -19,26 +19,45 @@ hero:
 import { Card, CardGrid, Tabs, TabItem } from '@astrojs/starlight/components';
 import Editor from '../../components/Editor.astro';
 import File from '../../components/File.astro';
+import Version from '../../components/Version.astro';
+import deepThoughtSource from '../../../../var-examples/deep-thought/deep-thought.md?raw';
+import deepThoughtSteps from '../../../../var-examples/deep-thought/deep-thought.steps.ts?raw';
 import yahtzeeSource from '../../../../var-examples/yahtzee/yahtzee.md?raw';
 import yahtzeeSteps from '../../../../var-examples/yahtzee/yahtzee.steps.ts?raw';
+import yahtzeeLogic from '../../../../var-examples/yahtzee/yahtzee.ts?raw';
 import romanNumeralsSource from '../../../../var-examples/roman-numerals/roman-numerals.md?raw';
 import romanNumeralsSteps from '../../../../var-examples/roman-numerals/roman-numerals.steps.ts?raw';
+import romanNumeralsLogic from '../../../../var-examples/roman-numerals/roman-numerals.ts?raw';
 
 ## This is a real spec
 
 Not a snippet — the whole file, unmodified, running in this repo's own test suite. Pick an example, edit it:
 
 <Tabs syncKey="example">
+  <TabItem label="Deep Thought">
+    <Editor>
+      <File uri="file:///deep-thought.md">
+        <Version label="Fix it">{deepThoughtSource}</Version>
+        <Version label="Break it">{deepThoughtSource.replace('42', '41')}</Version>
+      </File>
+      <File uri="file:///deep-thought.steps.ts">
+        <Version label="Fix it">{deepThoughtSteps}</Version>
+        <Version label="Break it">{deepThoughtSteps.replace('42', '43')}</Version>
+      </File>
+    </Editor>
+  </TabItem>
   <TabItem label="Yahtzee">
     <Editor>
       <File uri="file:///yahtzee.md">{yahtzeeSource}</File>
       <File uri="file:///yahtzee.steps.ts">{yahtzeeSteps}</File>
+      <File uri="file:///yahtzee.ts">{yahtzeeLogic}</File>
     </Editor>
   </TabItem>
   <TabItem label="Roman numerals">
     <Editor>
       <File uri="file:///roman-numerals.md">{romanNumeralsSource}</File>
       <File uri="file:///roman-numerals.steps.ts">{romanNumeralsSteps}</File>
+      <File uri="file:///roman-numerals.ts">{romanNumeralsLogic}</File>
     </Editor>
   </TabItem>
 </Tabs>

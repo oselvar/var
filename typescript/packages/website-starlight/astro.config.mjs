@@ -13,6 +13,10 @@ export default defineConfig({
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withastro/starlight' }],
       sidebar: [
         {
+          label: 'How-to Guides',
+          items: [{ autogenerate: { directory: 'how-to' } }],
+        },
+        {
           label: 'Guides',
           items: [
             // Each item here is one entry in the navigation menu.
@@ -22,6 +26,10 @@ export default defineConfig({
         {
           label: 'Reference',
           items: [{ autogenerate: { directory: 'reference' } }],
+        },
+        {
+          label: 'Explanation',
+          items: [{ autogenerate: { directory: 'explanation' } }],
         },
       ],
     }),
