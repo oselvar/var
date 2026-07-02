@@ -39,6 +39,9 @@ export type HeaderBinding = {
   readonly matchSpan: Span
   // One span per header cell, located where it appears in the paragraph.
   readonly paramSpans: ReadonlyArray<Span>
+  // One span per header cell, located in the table's header row, so editor
+  // tooling can highlight the cells themselves alongside the paragraph words.
+  readonly headerCellSpans: ReadonlyArray<Span>
   readonly stepDef: StepRegistration
 }
 
@@ -104,6 +107,7 @@ export function plan(varDoc: VarDoc, registry: Registry): ExecutionPlan {
       const headerBinding: HeaderBinding = {
         matchSpan: bound.step.matchSpan,
         paramSpans: bound.headerSpans,
+        headerCellSpans: bound.table.header.cellSpans,
         stepDef: bound.step.stepDef,
       }
       for (const row of bound.table.rows) {

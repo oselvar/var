@@ -330,6 +330,36 @@ each row lists the dice, the category and the score:
   expect(lines[0]).toBeLessThan(lines[1] as number)
 })
 
+test('a header-bound example carries headerCellSpans pointing at the table header cells', () => {
+  let r = createRegistry()
+  r = addStep(r, {
+    expression: 'each row lists the dice, the category and the score',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    kind: 'action',
+    handler: () => {},
+  })
+  const source = `# Yahtzee
+
+each row lists the dice, the category and the score:
+
+| dice          | category   | score |
+| ------------- | ---------- | ----- |
+| 3, 3, 3, 4, 4 | full house | 17    |`
+  const result = plan(parse('y.md', source), r)
+  const binding = result.examples[0]?.headerBinding
+  if (!binding) throw new Error('no headerBinding')
+  // One span per header cell, located in the table's header row (distinct from
+  // paramSpans, which point at the same words in the binding paragraph).
+  expect(binding.headerCellSpans.map((s) => source.slice(s.startOffset, s.endOffset))).toEqual([
+    'dice',
+    'category',
+    'score',
+  ])
+  const headerRowLine = binding.headerCellSpans[0]?.startLine
+  expect(headerRowLine).toBeGreaterThan(binding.paramSpans[0]?.startLine as number)
+})
+
 test('a table not attached to a step is allowed — no diagnostic', () => {
   // Tables are valid Markdown on their own. A table that happens not to follow
   // a step-bearing paragraph is just content, not a mistake.
