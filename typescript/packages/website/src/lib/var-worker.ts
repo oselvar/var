@@ -8,6 +8,7 @@ import {
 import helloSteps from '../../../var-examples/hello-var/hello-var.steps.ts?raw'
 import yahtzeeSpec from '../../../var-examples/yahtzee/yahtzee.md?raw'
 import yahtzeeSteps from '../../../var-examples/yahtzee/yahtzee.steps.ts?raw'
+import yahtzeeLogic from '../../../var-examples/yahtzee/yahtzee.ts?raw'
 import { createIdbFileSystem } from './idb-file-system.ts'
 import { createTsDiagnostics } from './ts-diagnostics.ts'
 
@@ -23,6 +24,7 @@ import { createTsDiagnostics } from './ts-diagnostics.ts'
 const SEED_FILES: Record<string, string> = {
   '/yahtzee.md': yahtzeeSpec,
   '/yahtzee.steps.ts': yahtzeeSteps,
+  '/yahtzee.ts': yahtzeeLogic,
   '/01-hello.steps.ts': helloSteps,
 }
 
@@ -38,10 +40,17 @@ const config = {
 }
 
 const tsd = createTsDiagnostics()
+// yahtzee.ts isn't an open editor on any docs page, so it never arrives via
+// didChange — pre-seed it so the `./yahtzee` import in yahtzee.steps.ts
+// resolves when that tab is type-checked.
+tsd.updateDoc('file:///yahtzee.ts', yahtzeeLogic)
 const timers = new Map<string, ReturnType<typeof setTimeout>>()
 
 function onDidChangeDocument(uri: string, text: string): void {
-  if (!uri.endsWith('.steps.ts')) return
+  // Every .ts doc feeds the TS service — plain .ts library docs both get
+  // their own diagnostics and make `./yahtzee`-style imports in .steps.ts
+  // docs resolve.
+  if (!uri.endsWith('.ts')) return
   tsd.updateDoc(uri, text)
   clearTimeout(timers.get(uri))
   timers.set(

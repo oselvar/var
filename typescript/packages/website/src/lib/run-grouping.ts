@@ -39,13 +39,21 @@ export function groupRunInputs(
   const inputs: RunInput[] = []
   for (const group of order) {
     const bucket = byGroup.get(group) ?? []
-    // The spec is the markdown view; the others in the group are `.steps.ts`.
+    // The spec is the markdown view; every other `.ts` view in the group goes
+    // to the runner — `.steps.ts` files register steps, plain `.ts` files are
+    // library modules the steps import (e.g. `./yahtzee`).
     const spec = bucket.find((e) => e.uri.endsWith('.md'))
     if (!spec) continue
     const visibleSteps: StepFile[] = bucket
-      .filter((e) => e.uri.endsWith('.steps.ts'))
+      .filter((e) => e.uri.endsWith('.ts'))
       .map((e) => ({ path: stripFileScheme(e.uri), source: e.source }))
-    const hidden = hiddenStepsByGroup.get(group) ?? []
+    // Hidden paths are page-author input and arrive both with and without the
+    // file:/// scheme — normalize so the worker sees one path style and
+    // relative imports between files resolve.
+    const hidden = (hiddenStepsByGroup.get(group) ?? []).map((s) => ({
+      path: stripFileScheme(s.path),
+      source: s.source,
+    }))
     inputs.push({
       group,
       varPath: stripFileScheme(spec.uri),
