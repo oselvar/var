@@ -1,7 +1,7 @@
 # Multi-language authoring support: unified config + tree-sitter scanners for Python, Java, Kotlin
 
 **Date:** 2026-07-02
-**Status:** Sub-project A implemented (this plan); B–D unimplemented
+**Status:** Sub-projects A and B implemented; C–D unimplemented
 **Realizes:** ADR 0001's "shared LSP with tree-sitter adapters" direction and its
 "per-language fixtures, shared expectations" conformance strategy for the
 step-definition extraction seam.
