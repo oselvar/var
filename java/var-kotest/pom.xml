@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.oselvar</groupId>
+    <artifactId>var-parent</artifactId>
+    <version>0.0.0</version>
+  </parent>
+
+  <artifactId>var-kotest</artifactId>
+  <packaging>jar</packaging>
+  <name>var (Kotlin) — Kotest adapter</name>
+  <description>
+    Runs var specs as Kotest tests: subclass VarSpec, one Kotest test per
+    planned example. Delegates discovery/loading/planning wholesale to
+    var-runner; no pipeline logic here.
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.oselvar</groupId>
+      <artifactId>var-kotlin</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.oselvar</groupId>
+      <artifactId>var-runner</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-stdlib</artifactId>
+      <version>${kotlin.version}</version>
+    </dependency>
+    <!-- Compile scope, not test: VarSpec extends FunSpec, so the adapter's
+         whole public surface is Kotest types. -->
+    <dependency>
+      <groupId>io.kotest</groupId>
+      <artifactId>kotest-runner-junit5-jvm</artifactId>
+      <version>${kotest.version}</version>
+    </dependency>
+    <!-- Drives the Kotest engine programmatically in VarSpecFailureTest (the
+         failing-example path must be asserted, not just observed via a green
+         build). Version from the parent's junit-bom. -->
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-testkit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <sourceDirectory>src/main/kotlin</sourceDirectory>
+    <testSourceDirectory>src/test/kotlin</testSourceDirectory>
+    <plugins>
+      <plugin>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-maven-plugin</artifactId>
+        <version>${kotlin.version}</version>
+        <executions>
+          <execution>
+            <id>compile</id>
+            <goals><goal>compile</goal></goals>
+          </execution>
+          <execution>
+            <id>test-compile</id>
+            <goals><goal>test-compile</goal></goals>
+          </execution>
+        </executions>
+        <configuration>
+          <jvmTarget>21</jvmTarget>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

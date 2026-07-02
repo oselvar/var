@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.oselvar</groupId>
+    <artifactId>var-parent</artifactId>
+    <version>0.0.0</version>
+  </parent>
+
+  <artifactId>var-kotlin</artifactId>
+  <packaging>jar</packaging>
+  <name>var (Kotlin) — author facade over the Java engine</name>
+  <description>
+    Idiomatic Kotlin authoring API layered on the Java engine — no second
+    pipeline port (see docs/superpowers/specs/2026-07-01-kotlin-facade-design.md).
+    Author-facing package is com.oselvar.varkt because `var` is a Kotlin hard
+    keyword and would force back-ticked imports.
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.oselvar</groupId>
+      <artifactId>var</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-stdlib</artifactId>
+      <version>${kotlin.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains.kotlinx</groupId>
+      <artifactId>kotlinx-coroutines-core-jvm</artifactId>
+      <version>${kotlinx-coroutines.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.oselvar</groupId>
+      <artifactId>var-runner</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.oselvar</groupId>
+      <artifactId>var-junit</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-testkit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <sourceDirectory>src/main/kotlin</sourceDirectory>
+    <testSourceDirectory>src/test/kotlin</testSourceDirectory>
+    <plugins>
+      <plugin>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-maven-plugin</artifactId>
+        <version>${kotlin.version}</version>
+        <executions>
+          <execution>
+            <id>compile</id>
+            <goals><goal>compile</goal></goals>
+          </execution>
+          <execution>
+            <id>test-compile</id>
+            <goals><goal>test-compile</goal></goals>
+            <configuration>
+              <sourceDirs>
+                <sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
+                <!-- The shared, language-neutral conformance corpus (repo root).
+                     kotlinc compiles only the *.steps.kt fixtures it finds there;
+                     the sibling *.steps.ts/.py/.java and golden/*.json are ignored
+                     (kotlinc reads .java for resolution only, emits nothing for it).
+                     Same fixture-layout rationale as java/var/pom.xml's
+                     build-helper block — see that comment for why fixture files
+                     live in the corpus, not under src/. -->
+                <sourceDir>${project.basedir}/../../conformance/bundles</sourceDir>
+              </sourceDirs>
+            </configuration>
+          </execution>
+        </executions>
+        <configuration>
+          <jvmTarget>21</jvmTarget>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

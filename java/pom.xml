@@ -21,11 +21,20 @@
     <module>var</module>
     <module>var-runner</module>
     <module>var-junit</module>
+    <module>var-kotlin</module>
+    <module>var-kotest</module>
   </modules>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>21</maven.compiler.release>
+    <!-- Kotlin toolchain + libraries for the var-kotlin/var-kotest facade modules.
+         Versions confirmed on repo1.maven.org (maven-metadata.xml) 2026-07-01:
+         kotlin 2.4.0 = latest stable (2.4.20-Beta1 excluded), coroutines 1.11.0,
+         kotest 6.2.1. -->
+    <kotlin.version>2.4.0</kotlin.version>
+    <kotlinx-coroutines.version>1.11.0</kotlinx-coroutines.version>
+    <kotest.version>6.2.1</kotest.version>
     <!-- io.cucumber:cucumber-expressions 20.0.0 — confirmed on Maven Central
          (repo1.maven.org maven-metadata.xml <latest>/<release> both 20.0.0,
          lastUpdated 2026-06-11) via direct repo query, not the search.maven.org

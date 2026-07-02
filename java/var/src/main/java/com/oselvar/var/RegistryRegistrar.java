@@ -61,25 +61,41 @@ public final class RegistryRegistrar implements Registrar {
         String thisClass = RegistryRegistrar.class.getName();
         String nestedPrefix = thisClass + "$";
         StackWalker.StackFrame caller =
-                StackWalker.getInstance()
+                StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE)
                         .walk(
                                 frames ->
                                         frames.filter(
                                                         f -> {
-                                                            String cn = f.getClassName();
+                                                            Class<?> declaring = f.getDeclaringClass();
+                                                            String cn = declaring.getName();
                                                             // Exact match (this class) or a nested class of
                                                             // it (e.g. Binder) — NOT mere string-prefix, which
                                                             // would wrongly also skip an unrelated class whose
                                                             // name happens to start with the same characters
                                                             // (e.g. a caller named "RegistryRegistrarTest").
                                                             return !cn.equals(thisClass)
-                                                                    && !cn.startsWith(nestedPrefix);
+                                                                    && !cn.startsWith(nestedPrefix)
+                                                                    && !isRegistrarGlue(declaring);
                                                         })
                                                 .findFirst()
                                                 .orElseThrow());
         registry =
                 Registry.addStep(
                         registry, expression, caller.getFileName(), caller.getLineNumber(), handler, kind);
+    }
+
+    /**
+     * A frame belongs to registration glue if its declaring class — or any class
+     * enclosing it (covers lambdas/anonymous classes synthesized inside a glue
+     * class) — is annotated {@link RegistrarGlue}.
+     */
+    private static boolean isRegistrarGlue(Class<?> declaring) {
+        for (Class<?> c = declaring; c != null; c = c.getEnclosingClass()) {
+            if (c.isAnnotationPresent(RegistrarGlue.class)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private final class Binder<C extends State> implements StateBinder<C> {
