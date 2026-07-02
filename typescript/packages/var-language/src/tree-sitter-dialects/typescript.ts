@@ -1,5 +1,6 @@
 import type { Node } from 'web-tree-sitter'
 import type { HandlerParam, HandlerParams } from '../step-defs.js'
+import { decodeSimpleOrHexEscape } from './escape-decode.js'
 import type { LanguageSpec } from './types.js'
 import { toRange } from './types.js'
 
@@ -72,11 +73,8 @@ const SIMPLE_ESCAPES: Readonly<Record<string, string>> = {
 // JavaScript's own native escape decoding for every branch below.
 function decodeEscapeSequence(text: string): string {
   const body = text.slice(1)
-  const simple = SIMPLE_ESCAPES[body]
-  if (simple !== undefined) return simple
-  if (body.startsWith('x') && body.length === 3) {
-    return String.fromCodePoint(Number.parseInt(body.slice(1), 16))
-  }
+  const decoded = decodeSimpleOrHexEscape(body, SIMPLE_ESCAPES)
+  if (decoded !== undefined) return decoded
   if (body.startsWith('u{')) {
     return String.fromCodePoint(Number.parseInt(body.slice(2, -1), 16))
   }

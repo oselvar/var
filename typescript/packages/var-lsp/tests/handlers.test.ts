@@ -413,6 +413,46 @@ action('I fly to {string}', (ctx, name: string) => {})
   }
 })
 
+test('planRename on a .py step returns the expression edit but NO handlerSync (TS-only signature sync)', async () => {
+  const { dir, cleanup } = tempWorkspace((dir) => {
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.py"] }\n',
+    )
+    writeFileSync(
+      join(dir, 'a.steps.py'),
+      `from var import define_state
+
+context, action, sensor = define_state(lambda: {})
+
+
+@action("I greet {string}")
+def _(state, name):
+    pass
+`,
+    )
+    writeFileSync(join(dir, 'a.md'), '# A\n\nGiven I greet "world"\n')
+  })
+  try {
+    const store = await makeStore(dir)
+    const h = buildHandlers(store)
+    const plan = h.planRename({
+      uri: `file://${join(dir, 'a.steps.py')}`,
+      position: { line: 5, character: 8 },
+      newName: 'I greet {string} {int} times',
+    })
+    expect(plan.ok).toBe(true)
+    if (!plan.ok) return
+    // The expression edit is still produced...
+    expect(plan.newExpression).toBe('I greet {string} {int} times')
+    // ...but handler-signature sync is TS-only: a .py handler must never be
+    // rewritten with TypeScript-shaped text.
+    expect(plan.handlerSync).toBeUndefined()
+  } finally {
+    cleanup()
+  }
+})
+
 test('renderExpressionText rebuilds a sentence from an expression + captured values', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
     writeFileSync(

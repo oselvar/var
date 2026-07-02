@@ -1,7 +1,7 @@
 # Multi-language authoring support: unified config + tree-sitter scanners for Python, Java, Kotlin
 
 **Date:** 2026-07-02
-**Status:** Sub-projects A and B implemented; C–D unimplemented
+**Status:** Sub-projects A–C implemented; D unimplemented
 **Realizes:** ADR 0001's "shared LSP with tree-sitter adapters" direction and its
 "per-language fixtures, shared expectations" conformance strategy for the
 step-definition extraction seam.
@@ -167,11 +167,10 @@ Dialects load **lazily on first use** — a TS-only workspace never fetches the
 other wasm files. `var-lsp`'s `createNodeGrammarLoader` maps each id to its
 wasm file.
 
-**Risk (verify first at plan time):** the Kotlin community grammar may not ship
-a prebuilt `.wasm`. If not, build it once and vendor the artifact; record
-provenance (grammar repo + commit) next to it. This is the project's one
-supply-chain wrinkle; Python/Java grammars are first-party tree-sitter
-packages.
+**Risk (resolved during sub-project C):** `@tree-sitter-grammars/tree-sitter-kotlin@1.1.0`
+ships a prebuilt `.wasm` directly from npm, so no vendoring or provenance
+tracking was needed — it loads the same way as the first-party Python/Java
+grammars.
 
 ### Queries
 

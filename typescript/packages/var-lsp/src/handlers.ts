@@ -236,7 +236,15 @@ export function buildHandlers(store: Store): Handlers {
         .stepDefs.find(
           (d) => d.expression === stepAt.expression && `file://${d.file}` === stepAt.stepDefUri,
         )
-      const handlerSync = stepDefRecord?.handlerParams
+      // Handler-signature sync renders TypeScript source (the only
+      // SnippetEmitter today). Python/Java/Kotlin step defs now carry
+      // handlerParams too (tree-sitter dialects), but until sub-project D
+      // ships per-language emitters, syncing would write TS-shaped text into
+      // .py/.java/.kt files — so sync stays TS-only.
+      const syncable =
+        stepDefRecord?.handlerParams !== undefined &&
+        (stepDefRecord.file.endsWith('.ts') || stepDefRecord.file.endsWith('.tsx'))
+      const handlerSync = syncable
         ? buildHandlerSync({
             stepDefUri: stepAt.stepDefUri,
             old: stepDefRecord.handlerParams,
