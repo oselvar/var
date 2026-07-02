@@ -35,15 +35,13 @@ intact through the loader, so var sees a `.md` file whose contents are
 Gherkin.
 
 To make the var scanner understand Gherkin tables and doc strings the package
-opts into two scanner plugins in `var.config.ts`:
+opts into two scanner plugins in `var.config.json`:
 
-```ts
-import { gherkinDocStrings, gherkinTables } from '@oselvar/var'
-
-export default {
-  vars: ['features/**/*.md'],
-  steps: ['steps/**/*.steps.ts'],
-  scannerPlugins: [gherkinTables(), gherkinDocStrings()],
+```json
+{
+  "docs": { "include": ["features/**/*.feature"], "exclude": [] },
+  "steps": ["steps/**/*.steps.ts"],
+  "scannerPlugins": ["gherkinTables", "gherkinDocStrings"]
 }
 ```
 
@@ -78,8 +76,8 @@ directly, with no test runner in the way — which is most of the gap.
 ## Migration path, summarised
 
 1. Symlink (or rename) `.feature` to `.md`.
-2. Add `gherkinTables()` and `gherkinDocStrings()` to `scannerPlugins` in
-   `var.config.ts` so the existing Gherkin syntax parses unchanged.
+2. Add `"gherkinTables"` and `"gherkinDocStrings"` to `scannerPlugins` in
+   `var.config.json` so the existing Gherkin syntax parses unchanged.
 3. Re-write the step file: replace `Given('expr', fn)` / `When(...)` /
    `Then(...)` with the role function that matches what each step does —
    `context('expr', fn)` to set up state, `action('expr', fn)` to perform an

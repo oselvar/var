@@ -10,7 +10,13 @@ const TSX = resolve(WORKSPACE_ROOT, 'node_modules', '.bin', 'tsx')
 const FIXTURES = resolve(HERE, 'fixtures')
 
 function run(args: ReadonlyArray<string>, cwd: string) {
-  const { NODE_OPTIONS: _drop, ...env } = process.env
+  // Drop the outer vitest process's NODE_OPTIONS (`--import tsx`, which would
+  // conflict with invoking the tsx binary directly below) but keep stderr
+  // clean of Node's one-time `ExperimentalWarning: globSync` notice (emitted
+  // by @oselvar/var-config's file finder) so the assertions below test the
+  // CLI's own output, not engine warnings.
+  const { NODE_OPTIONS: _drop, ...rest } = process.env
+  const env = { ...rest, NODE_OPTIONS: '--no-warnings' }
   return spawnSync(TSX, [BIN_TS, ...args], { cwd, encoding: 'utf8', env })
 }
 

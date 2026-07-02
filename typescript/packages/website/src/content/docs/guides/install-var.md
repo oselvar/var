@@ -29,17 +29,17 @@ pnpm exec var init
 This creates a config file and a first example, side by side:
 
 ```
-created var.config.ts
+created var.config.json
 created var-examples/hello-var/hello-var.md
 created var-examples/hello-var/hello-var.steps.ts
 ```
 
-`var.config.ts` says which files are specs and which files bind their steps:
+`var.config.json` says which files are specs and which files bind their steps:
 
-```ts
-export default {
-  vars: ['var-examples/**/*.md'],
-  steps: ['var-examples/**/*.steps.ts'],
+```json
+{
+  "docs": { "include": ["var-examples/**/*.md"], "exclude": [] },
+  "steps": ["var-examples/**/*.steps.ts"]
 }
 ```
 

@@ -27,10 +27,11 @@ function fakeFs(files: Record<string, string>): FileSystem {
 }
 
 const config = {
-  vars: { include: ['**/*.md'], exclude: [] },
+  docs: { include: ['**/*.md'], exclude: [] },
   steps: ['**/*.steps.ts'],
-  snippet: { template: DEFAULT_SNIPPET_TEMPLATE },
+  snippets: { typescript: DEFAULT_SNIPPET_TEMPLATE },
   scannerPlugins: [],
+  scannerPluginNames: [],
 }
 
 const grammarLoader = createNodeGrammarLoader()
@@ -58,12 +59,12 @@ describe('createStore over a FileSystem', () => {
     expect(store.index().matches.length).toBeGreaterThan(0)
   })
 
-  it('recognises spec docs by the vars globs, including unsaved buffers', async () => {
+  it('recognises spec docs by the docs globs, including unsaved buffers', async () => {
     const fs = fakeFs({ '/s.steps.ts': '', '/hello.md': '# Hi\n' })
     const store = createStore({ fs, config, grammarLoader })
     await store.reindex()
-    // A saved spec and an unsaved buffer that matches `vars` are both var docs;
-    // a `.steps.ts` is not (it doesn't match the `**/*.md` vars glob).
+    // A saved spec and an unsaved buffer that matches `docs` are both var docs;
+    // a `.steps.ts` is not (it doesn't match the `**/*.md` docs glob).
     expect(store.isVarDoc('/hello.md')).toBe(true)
     expect(store.isVarDoc('/never/written/draft.md')).toBe(true)
     expect(store.isVarDoc('/s.steps.ts')).toBe(false)

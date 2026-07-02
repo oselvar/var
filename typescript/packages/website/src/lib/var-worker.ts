@@ -31,10 +31,11 @@ const writer = new BrowserMessageWriter(self as DedicatedWorkerGlobalScope)
 const connection = createConnection(reader, writer)
 
 const config = {
-  vars: { include: ['**/*.md'], exclude: [] },
+  docs: { include: ['**/*.md'], exclude: [] },
   steps: ['**/*.steps.ts'],
-  snippet: { template: DEFAULT_SNIPPET_TEMPLATE },
+  snippets: { typescript: DEFAULT_SNIPPET_TEMPLATE },
   scannerPlugins: [],
+  scannerPluginNames: [],
 }
 
 const tsd = createTsDiagnostics()

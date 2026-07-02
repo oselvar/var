@@ -24,7 +24,10 @@ async function makeStore(dir: string) {
 
 test('hoverOnMd returns the matching step def expression and source location', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
     writeFileSync(
       join(dir, 'a.steps.ts'),
       `action('I have {int} cukes', () => {})
@@ -50,7 +53,10 @@ test('hoverOnMd returns the matching step def expression and source location', a
 
 test('definitionFromMd returns the steps.ts location for a matched step', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
     writeFileSync(
       join(dir, 'a.steps.ts'),
       `action('I have {int} cukes', () => {})
@@ -83,7 +89,10 @@ test('definitionFromMd returns the steps.ts location for a matched step', async 
 
 test('hover on the second of two adjacent steps returns the second step (off-by-one regression)', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
     writeFileSync(
       join(dir, 'a.steps.ts'),
       `action('I greet {string}', () => {})
@@ -112,7 +121,10 @@ sensor('the greeting is {string}', () => {})
 
 test('stepAt resolves the step from a .md match and returns every matched site with values', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
     writeFileSync(
       join(dir, 'a.steps.ts'),
       `action('I greet {string}', () => {})
@@ -143,7 +155,10 @@ test('stepAt resolves the step from a .md match and returns every matched site w
 
 test('stepAt resolves the step from a .ts cucumber-expression literal position', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
     writeFileSync(
       join(dir, 'a.steps.ts'),
       `action('I greet {string}', () => {})
@@ -170,7 +185,10 @@ test('stepAt resolves the step from a .ts cucumber-expression literal position',
 
 test('stepAt returns null when the cursor is on plain prose, outside any step', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
     writeFileSync(join(dir, 'a.md'), '# A\n\nThis is just prose, no step here.\n')
   })
   try {
@@ -188,7 +206,10 @@ test('stepAt returns null when the cursor is on plain prose, outside any step', 
 
 test('renameStep (literal-only) produces a cascade across the step def + every match site', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
     writeFileSync(
       join(dir, 'a.steps.ts'),
       `action('I greet {string}', () => {})
@@ -221,7 +242,10 @@ test('renameStep (literal-only) produces a cascade across the step def + every m
 
 test('planRename returns added/removed fates so the client can prompt', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
     writeFileSync(
       join(dir, 'a.steps.ts'),
       `action('I greet {string}', () => {})
@@ -260,7 +284,10 @@ test('planRename returns added/removed fates so the client can prompt', async ()
 
 test('planRename surfaces a type change as kept + nameUnchanged:false (the client prompts for the new value)', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
     writeFileSync(
       join(dir, 'a.steps.ts'),
       `const { action } = defineState(() => ({}), { airport: { regexp: /[A-Z]{3}/ } })
@@ -296,7 +323,10 @@ action('I fly to {string}', () => {})
 
 test('planRename emits a handlerSync that adds a new typed arg when a parameter is added', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
     writeFileSync(
       join(dir, 'a.steps.ts'),
       `action('I greet {string}', (ctx, name: string) => {})
@@ -324,7 +354,10 @@ test('planRename emits a handlerSync that adds a new typed arg when a parameter 
 
 test('planRename emits a handlerSync that drops a removed arg', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
     writeFileSync(
       join(dir, 'a.steps.ts'),
       `action('I greet {string} loudly', (ctx, name: string) => {})
@@ -350,7 +383,10 @@ test('planRename emits a handlerSync that drops a removed arg', async () => {
 
 test('planRename emits a handlerSync that swaps the TS type when a param type changes', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
     writeFileSync(
       join(dir, 'a.steps.ts'),
       `const { action } = defineState(() => ({}), { airport: { regexp: /[A-Z]{3}/ } })
@@ -379,7 +415,10 @@ action('I fly to {string}', (ctx, name: string) => {})
 
 test('renderExpressionText rebuilds a sentence from an expression + captured values', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
     writeFileSync(
       join(dir, 'a.steps.ts'),
       `const { action } = defineState(() => ({}), { airport: { regexp: /[A-Z]{3}/ } })
@@ -403,7 +442,10 @@ test('renderExpressionText rebuilds a sentence from an expression + captured val
 
 test('renameStep refuses when a parameter is added (Phase 4 territory)', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
     writeFileSync(
       join(dir, 'a.steps.ts'),
       `action('I greet {string}', () => {})
@@ -429,7 +471,10 @@ test('renameStep refuses when a parameter is added (Phase 4 territory)', async (
 
 test('renameStep from a .md uses CucumberExpressionGenerator on the new sentence', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
     writeFileSync(
       join(dir, 'a.steps.ts'),
       `action('I greet {string}', () => {})
@@ -457,7 +502,10 @@ test('renameStep from a .md uses CucumberExpressionGenerator on the new sentence
 
 test('completions: returns a snippet item per registered step, replacing from line start when no keyword is present', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
     writeFileSync(
       join(dir, 'a.steps.ts'),
       `action('I have {int} cukes', () => {})
@@ -488,7 +536,10 @@ action('I greet {string}', () => {})
 
 test('completions: replace range starts at the first non-whitespace of the line (no keyword sniffing)', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
     writeFileSync(
       join(dir, 'a.steps.ts'),
       `action('I greet {string}', () => {})
@@ -517,7 +568,10 @@ test('completions: replace range starts at the first non-whitespace of the line 
 
 test('completions: a custom {airport} type uses its name as the placeholder', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
     writeFileSync(
       join(dir, 'a.steps.ts'),
       `const { action } = defineState(() => ({}), { airport: { regexp: /[A-Z]{3}/ } })
@@ -542,7 +596,10 @@ action('I fly to {airport}', () => {})
 
 test('completions: returns nothing for non-.md files', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
     writeFileSync(
       join(dir, 'a.steps.ts'),
       `action('I greet {string}', () => {})
@@ -565,7 +622,10 @@ test('completions: returns nothing for non-.md files', async () => {
 
 test('generateSnippet turns selected text into a step-definition stub (verbatim, no keyword strip)', async () => {
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
   })
   try {
     const store = await makeStore(dir)
@@ -583,7 +643,10 @@ test('generateSnippet turns selected text into a step-definition stub (verbatim,
 test('generateSnippet infers action role when position is before a sensor and nothing else exists', async () => {
   // before=[], after=['sensor'] → inferStepRole → 'action'
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
     writeFileSync(join(dir, 'a.steps.ts'), `sensor('the greeting is {string}', () => {})\n`)
     writeFileSync(join(dir, 'b.md'), '# B\n\nThen the greeting is "Hello, world!"\n')
   })
@@ -605,7 +668,10 @@ test('generateSnippet infers action role when position is before a sensor and no
 test('generateSnippet infers sensor role when position is after all matched steps', async () => {
   // before=['action'], after=[] → inferStepRole → 'sensor'
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
     writeFileSync(join(dir, 'a.steps.ts'), `action('I greet {string}', () => {})\n`)
     writeFileSync(join(dir, 'b.md'), '# B\n\nGiven I greet "world"\n')
   })
@@ -627,7 +693,10 @@ test('generateSnippet infers sensor role when position is after all matched step
 test('diagnosticsFor does NOT emit anything for a keyword-led but unmatched sentence', async () => {
   // No Given/When/Then heuristic — step-def generation is selection-driven.
   const { dir, cleanup } = tempWorkspace((dir) => {
-    writeFileSync(join(dir, 'var.config.ts'), "export default { vars: ['**/*.md'] }\n")
+    writeFileSync(
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
+    )
     writeFileSync(join(dir, 'b.md'), '# B\n\nGiven I have 5 cukes')
   })
   try {

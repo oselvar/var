@@ -18,7 +18,7 @@
   "activationEvents": [
     "onLanguage:markdown",
     "onLanguage:typescript",
-    "workspaceContains:**/var.config.ts"
+    "workspaceContains:**/var.config.json"
   ],
   "contributes": {
     "commands": [

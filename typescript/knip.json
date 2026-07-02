@@ -42,13 +42,9 @@
     },
     "packages/var-examples": {
       "entry": ["**/*.md", "**/*.steps.ts"],
-      "project": ["**/*.{ts,md}"]
+      "project": ["**/*.{ts,md}"],
+      "ignoreDependencies": ["@oselvar/var-core"]
     }
   },
-  "ignore": [
-    "var.config.ts",
-    "**/tests/fixtures/**",
-    "packages/website/src/layouts/Doc.astro",
-    "**/!(package).json"
-  ]
+  "ignore": ["**/tests/fixtures/**", "packages/website/src/layouts/Doc.astro", "**/!(package).json"]
 }

@@ -4,27 +4,27 @@ import { join } from 'node:path'
 import { expect, test } from 'vitest'
 import { findSpecs, readVarConfig } from '../src/config.js'
 
-test('readVarConfig loads var.config.ts when present', async () => {
+test('readVarConfig loads var.config.json when present', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'var-runner-cfg-'))
   try {
     writeFileSync(
-      join(dir, 'var.config.ts'),
-      `export default { vars: ['specs/**/*.md'], steps: ['**/*.steps.ts'] }\n`,
+      join(dir, 'var.config.json'),
+      '{ "docs": { "include": ["specs/**/*.md"], "exclude": [] }, "steps": ["**/*.steps.ts"] }\n',
     )
     const cfg = await readVarConfig(dir)
-    expect(cfg.vars).toEqual({ include: ['specs/**/*.md'], exclude: [] })
+    expect(cfg.docs).toEqual({ include: ['specs/**/*.md'], exclude: [] })
     expect(cfg.steps).toEqual(['**/*.steps.ts'])
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }
 })
 
-test('readVarConfig returns defaults when var.config.ts is absent', async () => {
+test('readVarConfig returns an empty config when var.config.json is absent', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'var-runner-cfg-empty-'))
   try {
     const cfg = await readVarConfig(dir)
-    expect(cfg.vars).toEqual({ include: [], exclude: [] })
-    expect(cfg.steps).toEqual(['**/*.steps.ts'])
+    expect(cfg.docs).toEqual({ include: [], exclude: [] })
+    expect(cfg.steps).toEqual([])
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }
