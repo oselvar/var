@@ -10,26 +10,28 @@ export default defineConfig({
     starlight({
       title: 'Vár',
       customCss: ['./src/styles/tailwind.css', './src/styles/custom.css'],
-      social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withastro/starlight' }],
+      social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/oselvar/var' }],
       sidebar: [
         {
-          label: 'How-to Guides',
-          items: [{ autogenerate: { directory: 'how-to' } }],
-        },
-        {
-          label: 'Guides',
+          label: 'Start here',
           items: [
-            // Each item here is one entry in the navigation menu.
-            { label: 'Example Guide', slug: 'guides/example' },
+            'tutorials/try-in-browser',
+            'tutorials/get-started',
+            'tutorials/first-spec',
           ],
         },
         {
-          label: 'Reference',
-          items: [{ autogenerate: { directory: 'reference' } }],
+          label: 'How-to guides',
+          items: [
+            'how-to/tables-and-doc-strings',
+            'how-to/run-with-vitest',
+            'how-to/agent-instructions',
+            'how-to/drive-a-feature-with-an-agent',
+          ],
         },
         {
-          label: 'Explanation',
-          items: [{ autogenerate: { directory: 'explanation' } }],
+          label: 'Understanding Vár',
+          items: ['explanation/thin-steps', 'explanation/var-for-cucumber-users'],
         },
       ],
     }),

@@ -1,0 +1,81 @@
+---
+title: Try Vár in your browser
+description: Break an executable spec, watch it fail, and mend it — nothing to install.
+---
+
+import Editor from '../../../components/Editor.astro';
+import File from '../../../components/File.astro';
+import Version from '../../../components/Version.astro';
+import deepThoughtSource from '../../../../../var-examples/deep-thought/deep-thought.md?raw';
+import deepThoughtSteps from '../../../../../var-examples/deep-thought/deep-thought.steps.ts?raw';
+
+In this tutorial we take Vár's smallest example, break the promise it makes, and
+repair it. Everything runs right here in your browser. Nothing to install, and
+nothing you can damage — reload the page and the example resets.
+
+The editor below holds two files:
+
+- **deep-thought.md** — the spec: plain Markdown claiming the answer is 42.
+- **deep-thought.steps.ts** — the step definition that lets Vár check that claim
+  against running code.
+
+<Editor>
+  <File uri="file:///deep-thought.md">
+    <Version label="Mend the oath">{deepThoughtSource}</Version>
+    <Version label="Break the oath">{deepThoughtSource.replace('42', '41')}</Version>
+  </File>
+  <File uri="file:///deep-thought.steps.ts">{deepThoughtSteps}</File>
+</Editor>
+
+## 1. Read the spec
+
+Look at the **deep-thought.md** tab. It is ordinary Markdown prose — no special
+syntax, no keywords. One sentence in it makes a checkable claim:
+
+> The answer to the great question of life, the universe and everything is 42.
+
+Now look at the **deep-thought.steps.ts** tab. The `sensor` matches that
+sentence and returns what the software actually answers: `[42]`. Vár compares
+the returned value against the `42` written in the Markdown. Right now they
+agree — the oath holds.
+
+## 2. Break the oath
+
+Go back to the **deep-thought.md** tab and click the **Break the oath** button
+in the top-right corner of the editor. Watch it retype the sentence so the
+document claims the answer is **41**.
+
+Notice what happens: the code still answers 42, so the document is now lying —
+and the failing text turns red, at the exact characters that are wrong. Hover
+over it to see the actual value.
+
+This is the whole idea of Vár: the document and the code check each other. When
+they disagree, your tests fail, and the failure points at the words.
+
+## 3. Mend the oath
+
+Click **Mend the oath**. The document claims 42 again, the sensor agrees, and
+the red is gone.
+
+## 4. Break it from the other side
+
+The oath binds both parties. This time, edit the code yourself: in the
+**deep-thought.steps.ts** tab, change `[42]` to `[43]`.
+
+The Markdown didn't change, but its `42` goes red anyway — the software no
+longer does what the document says. Change it back and watch it settle.
+
+## What you just learned
+
+- A Vár spec is plain Markdown. You read it like documentation, because it *is*
+  documentation.
+- A **sensor** returns what the software actually does; Vár compares that
+  against what the document claims.
+- When document and code disagree — no matter which side drifted — the failure
+  is anchored to the exact span in the document.
+
+## Next
+
+Ready to run Vár on your own machine?
+[Get started on your computer](/tutorials/get-started/) — install, scaffold a
+first spec, and watch it fail on purpose.
