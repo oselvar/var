@@ -3,6 +3,14 @@
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
 VERSION="$1"
+
+# pnpm refuses env-expanded auth from a committed project .npmrc, so write
+# the token to an ephemeral user-level config for the duration of this run.
+npmrc_tmp="$(mktemp)"
+trap 'rm -f "$npmrc_tmp"' EXIT
+printf '//registry.npmjs.org/:_authToken=%s\n' "${NPM_TOKEN}" >"$npmrc_tmp"
+export NPM_CONFIG_USERCONFIG="$npmrc_tmp"
+
 cd "$REPO_ROOT/typescript"
 
 pnpm install --frozen-lockfile
