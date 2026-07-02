@@ -1,0 +1,22 @@
+{
+  "$schema": "../conformance/config/var.config.schema.json",
+  "docs": {
+    "include": [
+      "../conformance/bundles/01-roman-numerals/*.md",
+      "../conformance/bundles/02-context-isolation/*.md",
+      "../conformance/bundles/04-tables-and-docstrings/*.md",
+      "../conformance/bundles/07-row-check-mismatch/*.md",
+      "../conformance/bundles/08-string-capture/*.md",
+      "../conformance/bundles/09-expected-message-mismatch/*.md"
+    ],
+    "exclude": []
+  },
+  "steps": [
+    "../conformance/bundles/01-roman-numerals/*.steps.py",
+    "../conformance/bundles/02-context-isolation/*.steps.py",
+    "../conformance/bundles/04-tables-and-docstrings/*.steps.py",
+    "../conformance/bundles/07-row-check-mismatch/*.steps.py",
+    "../conformance/bundles/08-string-capture/*.steps.py",
+    "../conformance/bundles/09-expected-message-mismatch/*.steps.py"
+  ]
+}

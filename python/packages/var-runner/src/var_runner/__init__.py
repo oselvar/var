@@ -2,7 +2,7 @@
 
 __version__ = "0.0.0"
 
-from var_runner.config import VarConfig, read_var_config
+from var_config import VarConfig, read_var_config
 from var_runner.discovery import find_specs, match_spec
 from var_runner.render import render_failure
 from var_runner.run import RecordingReporter, examples_with_runs, plan_spec

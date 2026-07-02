@@ -4,10 +4,9 @@ The var core drives coroutines via asyncio.run() in execute.py, so no plugin
 change is expected.  This test confirms end-to-end transparency.
 """
 
-PYPROJECT = """
-[tool.var]
-vars = ["features/**/*.md"]
-steps = ["steps/**/*.steps.py"]
+VAR_CONFIG = """\
+{"docs": {"include": ["features/**/*.md"], "exclude": []},
+ "steps": ["steps/**/*.steps.py"]}
 """
 
 # An action that is async def, returns a partial state dict.
@@ -52,7 +51,7 @@ the async total is 99
 
 
 def _write_fixture(pytester, spec_content: str, steps_content: str) -> None:
-    pytester.makepyprojecttoml(PYPROJECT)
+    (pytester.path / "var.config.json").write_text(VAR_CONFIG, encoding="utf-8")
     (pytester.path / "steps").mkdir(exist_ok=True)
     (pytester.path / "steps" / "async_calc.steps.py").write_text(
         steps_content.strip(), encoding="utf-8"

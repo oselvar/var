@@ -16,14 +16,15 @@ uv run ruff check
 |---|---|
 | `oselvar-var-core` / `var_core` | pure functional core: parse → plan → execute, matcher, diffs, conformance |
 | `oselvar-var` / `var` | author facade: `define_state` (+ `internal`, `registry` glue) |
-| `oselvar-var-runner` / `var_runner` | shared imperative shell: config, discovery, step loading, run orchestration, failure rendering |
+| `oselvar-var-config` / `var_config` | reads `var.config.json` — the shared config file for all var tools |
+| `oselvar-var-runner` / `var_runner` | shared imperative shell: discovery, step loading, run orchestration, failure rendering |
 | `pytest-var` / `var_pytest` | pytest plugin: `.md` specs as first-class tests |
 | `oselvar-var-unittest` / `var_unittest` | unittest adapter (skeleton) |
 
 ## Run Markdown specs as live var tests (dogfood)
 
 The `pytest-var` plugin turns a `.md` file into pytest tests (one item per
-example). `[tool.var]` in `pyproject.toml` points it at a **collision-free
+example). `var.config.json` points it at a **collision-free
 subset** of the shared `conformance/bundles/` (the bundles reuse some
 expressions across bundles — e.g. `I echo…`, `I have {int} cukes`,
 `I greet {string}` — and the plugin builds one global step registry, so it can't
@@ -43,11 +44,12 @@ uv run pytest --rootdir=. ../conformance/bundles
 **Want to edit a spec/step and watch it flip?** Do NOT edit files under
 `conformance/bundles/` — they are the shared golden corpus, and changing them
 breaks the conformance suite (Python *and* TypeScript). Instead, copy a bundle to
-a scratch location you own, point `[tool.var]` at it, and edit freely:
+a scratch location you own, point `var.config.json` at it, and edit freely:
 
 ```sh
 cp -r ../conformance/bundles/01-roman-numerals /tmp/myspec
-# add "/tmp/myspec/*.md" to [tool.var] vars and "/tmp/myspec/*.steps.py" to steps
+# add "/tmp/myspec/*.md" to var.config.json's docs.include and
+# "/tmp/myspec/*.steps.py" to steps
 uv run pytest --rootdir=. /tmp/myspec        # green
 # now change a number in /tmp/myspec/example.md or break a handler → red
 ```

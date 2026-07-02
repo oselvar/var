@@ -5,6 +5,7 @@ requires-python = ">=3.11"
 [manifest]
 members = [
     "oselvar-var",
+    "oselvar-var-config",
     "oselvar-var-core",
     "oselvar-var-runner",
     "oselvar-var-unittest",
@@ -60,6 +61,11 @@ requires-dist = [
 ]
 
 [[package]]
+name = "oselvar-var-config"
+version = "0.0.0"
+source = { editable = "packages/var-config" }
+
+[[package]]
 name = "oselvar-var-core"
 version = "0.0.0"
 source = { editable = "packages/var-core" }
@@ -76,10 +82,14 @@ version = "0.0.0"
 source = { editable = "packages/var-runner" }
 dependencies = [
     { name = "oselvar-var" },
+    { name = "oselvar-var-config" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "oselvar-var", editable = "packages/var" }]
+requires-dist = [
+    { name = "oselvar-var", editable = "packages/var" },
+    { name = "oselvar-var-config", editable = "packages/var-config" },
+]
 
 [[package]]
 name = "oselvar-var-unittest"
@@ -141,6 +151,7 @@ version = "0.0.0"
 source = { editable = "packages/var-pytest" }
 dependencies = [
     { name = "oselvar-var" },
+    { name = "oselvar-var-config" },
     { name = "oselvar-var-runner" },
     { name = "pytest" },
 ]
@@ -148,6 +159,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "oselvar-var", editable = "packages/var" },
+    { name = "oselvar-var-config", editable = "packages/var-config" },
     { name = "oselvar-var-runner", editable = "packages/var-runner" },
     { name = "pytest", specifier = ">=8" },
 ]

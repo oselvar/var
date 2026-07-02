@@ -3,6 +3,7 @@ members = ["packages/*"]
 
 [tool.uv.sources]
 oselvar-var = { workspace = true }
+oselvar-var-config = { workspace = true }
 oselvar-var-core = { workspace = true }
 oselvar-var-runner = { workspace = true }
 
@@ -20,24 +21,7 @@ addopts = "--import-mode=importlib"
 # conformance bundles intentionally reuse expressions across bundles
 # (`I echo…`, `I have {int} cukes`, `I greet {string}`). So this is a
 # COLLISION-FREE subset — a mix of passing bundles and two that fail by design
-# (07 row-check-mismatch, 09 expected-message-mismatch).
-[tool.var]
-vars = [
-  "../conformance/bundles/01-roman-numerals/*.md",
-  "../conformance/bundles/02-context-isolation/*.md",
-  "../conformance/bundles/04-tables-and-docstrings/*.md",
-  "../conformance/bundles/07-row-check-mismatch/*.md",
-  "../conformance/bundles/08-string-capture/*.md",
-  "../conformance/bundles/09-expected-message-mismatch/*.md",
-]
-steps = [
-  "../conformance/bundles/01-roman-numerals/*.steps.py",
-  "../conformance/bundles/02-context-isolation/*.steps.py",
-  "../conformance/bundles/04-tables-and-docstrings/*.steps.py",
-  "../conformance/bundles/07-row-check-mismatch/*.steps.py",
-  "../conformance/bundles/08-string-capture/*.steps.py",
-  "../conformance/bundles/09-expected-message-mismatch/*.steps.py",
-]
+# (07 row-check-mismatch, 09 expected-message-mismatch). See var.config.json.
 
 [tool.ruff]
 line-length = 100

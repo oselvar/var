@@ -1,7 +1,7 @@
 """test_dogfood_bundles.py — integration tests running real conformance bundles.
 
 Each test copies a bundle's example.md and <name>.steps.py into the pytester
-tree, runs pytest with a [tool.var] config pointing at them, and asserts the
+tree, runs pytest with a var.config.json pointing at them, and asserts the
 outcome matches the bundle's intent as documented by its golden trace.json.
 
 Bundles exercised:
@@ -39,12 +39,10 @@ def _setup_bundle(pytester, bundle_name: str, steps_filename: str) -> None:
     example_md = (bundle_dir / "example.md").read_text(encoding="utf-8")
     steps_py = (bundle_dir / steps_filename).read_text(encoding="utf-8")
 
-    pytester.makepyprojecttoml(
-        """
-[tool.var]
-vars = ["specs/**/*.md"]
-steps = ["steps/**/*.steps.py"]
-"""
+    (pytester.path / "var.config.json").write_text(
+        '{"docs": {"include": ["specs/**/*.md"], "exclude": []},'
+        ' "steps": ["steps/**/*.steps.py"]}',
+        encoding="utf-8",
     )
     (pytester.path / "specs").mkdir()
     (pytester.path / "specs" / "example.md").write_text(example_md, encoding="utf-8")

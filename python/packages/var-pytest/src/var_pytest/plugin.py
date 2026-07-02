@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from var_runner.config import read_var_config
+from var_config import read_var_config
 from var_runner.discovery import match_spec
 from var_runner.run import RecordingReporter, examples_with_runs, plan_spec
 from var_runner.steps import load_steps
@@ -16,7 +16,7 @@ _STASH: dict = {}  # keyed by config id → (VarConfig, LoadedSteps, root)
 
 def pytest_configure(config: pytest.Config) -> None:
     root = Path(config.rootpath)
-    cfg = read_var_config(root / "pyproject.toml")
+    cfg = read_var_config(root)
     loaded = load_steps(cfg.steps, root)
     wrapped_registry = wrap_registry_for_fixtures(loaded.registry, get_active_request)
     loaded = dataclasses.replace(loaded, registry=wrapped_registry)
@@ -31,7 +31,7 @@ def pytest_collect_file(file_path: Path, parent: pytest.Collector):
     if file_path.suffix != ".md":
         return None
     cfg, _loaded, root = _STASH[id(parent.config)]
-    if not match_spec(file_path, cfg.vars_include, cfg.vars_exclude, root):
+    if not match_spec(file_path, cfg.docs_include, cfg.docs_exclude, root):
         return None
     return VarFile.from_parent(parent, path=file_path)
 

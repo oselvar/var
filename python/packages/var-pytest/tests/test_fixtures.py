@@ -9,10 +9,9 @@ Tests:
   fixture injections.
 """
 
-PYPROJECT = """
-[tool.var]
-vars = ["features/**/*.md"]
-steps = ["steps/**/*.steps.py"]
+VAR_CONFIG = """\
+{"docs": {"include": ["features/**/*.md"], "exclude": []},
+ "steps": ["steps/**/*.steps.py"]}
 """
 
 # ---------------------------------------------------------------------------
@@ -44,7 +43,7 @@ db has 2 entries
 """
 
 def _write_fixture(pytester, spec_content: str, steps_content: str) -> None:
-    pytester.makepyprojecttoml(PYPROJECT)
+    (pytester.path / "var.config.json").write_text(VAR_CONFIG, encoding="utf-8")
     (pytester.path / "steps").mkdir(exist_ok=True)
     (pytester.path / "steps" / "spec.steps.py").write_text(
         steps_content.strip(), encoding="utf-8"
