@@ -2,5 +2,6 @@
 !dist/extension.cjs
 !dist/server.cjs
 !dist/*.map
+!dist/*.wasm
 !LICENSE
 !README.md

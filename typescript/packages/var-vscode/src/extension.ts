@@ -55,9 +55,14 @@ export function activate(context: ExtensionContext): void {
     }
   } else {
     const bundledServer = resolve(extReal, 'dist', 'server.cjs')
+    // The cjs bundle has no `import.meta.resolve`, so the grammar loader
+    // can't locate the tree-sitter wasm files itself. esbuild.mjs copies
+    // them next to the bundle; point the loader at that directory.
+    const bundledDir = resolve(extReal, 'dist')
+    const options = { env: { ...process.env, VAR_GRAMMAR_DIR: bundledDir } }
     serverOptions = {
-      run: { module: bundledServer, transport: TransportKind.stdio },
-      debug: { module: bundledServer, transport: TransportKind.stdio },
+      run: { module: bundledServer, transport: TransportKind.stdio, options },
+      debug: { module: bundledServer, transport: TransportKind.stdio, options },
     }
   }
   const clientOptions: LanguageClientOptions = {
