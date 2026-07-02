@@ -1,4 +1,4 @@
-import { realpathSync } from 'node:fs'
+import { existsSync, realpathSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import type {
@@ -37,18 +37,28 @@ let client: LanguageClient | undefined
 export function activate(context: ExtensionContext): void {
   // The symlink installer (T8) mirrors `packages/var-vscode/` into
   // ~/.vscode/extensions/. Resolve the symlink before walking `..` so we land
-  // at the real `packages/` directory; otherwise we'd point at
-  // `~/.vscode/extensions/var-lsp/dist/bin.js`, which doesn't exist.
+  // at the real `packages/` directory. When the sibling var-lsp checkout
+  // exists we are in dev: run the live LSP sources through tsx. Otherwise we
+  // are a packaged .vsix: use the bundled server next to the extension.
   const extReal = realpathSync(context.extensionPath)
-  const serverModule = resolve(extReal, '..', 'var-lsp', 'dist', 'bin.js')
-  // `@oselvar/var`'s `exports.import` points at `src/index.ts` so we can run
-  // tests without a build step. The LSP server reaches the core through that
-  // same entry, so we need tsx to load `.ts` files at runtime.
-  const tsxLoader = resolve(extReal, '..', '..', 'node_modules', 'tsx', 'dist', 'loader.mjs')
-  const execArgv = ['--import', pathToFileURL(tsxLoader).href]
-  const serverOptions: ServerOptions = {
-    run: { module: serverModule, transport: TransportKind.stdio, options: { execArgv } },
-    debug: { module: serverModule, transport: TransportKind.stdio, options: { execArgv } },
+  const devServer = resolve(extReal, '..', 'var-lsp', 'dist', 'bin.js')
+  let serverOptions: ServerOptions
+  if (existsSync(devServer)) {
+    // `@oselvar/var`'s `exports.import` points at `src/index.ts` so we can run
+    // tests without a build step. The LSP server reaches the core through that
+    // same entry, so we need tsx to load `.ts` files at runtime.
+    const tsxLoader = resolve(extReal, '..', '..', 'node_modules', 'tsx', 'dist', 'loader.mjs')
+    const execArgv = ['--import', pathToFileURL(tsxLoader).href]
+    serverOptions = {
+      run: { module: devServer, transport: TransportKind.stdio, options: { execArgv } },
+      debug: { module: devServer, transport: TransportKind.stdio, options: { execArgv } },
+    }
+  } else {
+    const bundledServer = resolve(extReal, 'dist', 'server.cjs')
+    serverOptions = {
+      run: { module: bundledServer, transport: TransportKind.stdio },
+      debug: { module: bundledServer, transport: TransportKind.stdio },
+    }
   }
   const clientOptions: LanguageClientOptions = {
     documentSelector: [

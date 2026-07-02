@@ -1,5 +1,6 @@
-**/.vscode/**
-**/tests/**
-**/node_modules/**
-**/.git/**
-tsconfig.json
+**
+!dist/extension.cjs
+!dist/server.cjs
+!dist/*.map
+!LICENSE
+!README.md
