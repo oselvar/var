@@ -21,6 +21,4 @@ Examples of dice, category and score:
 | 6, 6, 6, 6, 2 | four of a kind  | 24    |
 | 1, 2, 3, 4, 5 | chance          | 15    |
 
-Five of a kind is **not** a full house — that 
-box scores 0. But written under Yahtzee, 
-the same roll is a flat 50.
+Five of a kind is **not** a full house.

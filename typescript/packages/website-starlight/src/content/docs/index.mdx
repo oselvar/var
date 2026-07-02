@@ -10,10 +10,6 @@ hero:
     - text: Example Guide
       link: /guides/example/
       icon: right-arrow
-    - text: Read the Starlight docs
-      link: https://starlight.astro.build
-      icon: external
-      variant: minimal
 ---
 
 import { Card, CardGrid, Tabs, TabItem } from '@astrojs/starlight/components';
@@ -48,7 +44,10 @@ The examples below give a taste of how Vár works. If the markdown disagrees wit
   </TabItem>
   <TabItem label="Yahtzee">
     <Editor>
-      <File uri="file:///yahtzee.md">{yahtzeeSource}</File>
+      <File uri="file:///yahtzee.md">
+        <Version label="Misunderstand full house rule">{yahtzeeSource.replace('| 0 ', '| 12').replace('is **not**', 'counts as')}</Version>
+        <Version label="Fix misunderstood full house rule">{yahtzeeSource}</Version>
+      </File>
       <File uri="file:///yahtzee.steps.ts">{yahtzeeSteps}</File>
       <File uri="file:///yahtzee.ts">{yahtzeeLogic}</File>
     </Editor>

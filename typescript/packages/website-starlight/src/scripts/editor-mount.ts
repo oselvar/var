@@ -343,7 +343,7 @@ function mountEditor(editorEl: HTMLElement): void {
     const tabBtn = document.createElement('button')
     tabBtn.type = 'button'
     tabBtn.className =
-      'fe-tab relative top-px -mb-px px-[14px] py-[7px] font-mono font-semibold text-[13px] leading-none bg-transparent border border-line-subtle rounded-t-md text-ink opacity-60 cursor-pointer hover:opacity-100 hover:bg-raised aria-selected:opacity-100 aria-selected:bg-[var(--ed-bg)] aria-selected:border-b-[var(--ed-bg)]'
+      'fe-tab relative top-px -mb-px px-[14px] py-[7px] font-mono font-semibold text-[13px] leading-none bg-transparent border border-line-subtle rounded-none text-ink opacity-60 cursor-pointer hover:opacity-100 hover:bg-raised aria-selected:opacity-100 aria-selected:bg-[var(--ed-bg)] aria-selected:border-b-[var(--ed-bg)]'
     tabBtn.setAttribute('role', 'tab')
     tabBtn.setAttribute('aria-selected', String(file.uri === activeUri))
     tabBtn.textContent = filenameOf(file.uri)
