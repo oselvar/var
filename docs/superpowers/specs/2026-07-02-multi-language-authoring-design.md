@@ -248,9 +248,11 @@ sync — works from the extracted `StepDef`s, including `handlerParams`.
 
 ### VS Code
 
-- `documentSelector` and rename-provider registration derive their patterns
-  from the server-reported `steps` globs (the `var/stepGlobs` request already
-  exists) instead of the hardcoded `**/*.steps.ts`.
+- `documentSelector` and rename-provider registration cover the four
+  step-file conventions as static patterns (`**/*.steps.ts`, `**/*.steps.py`,
+  `**/*.steps.kt`, `**/*Steps.java`). Deriving them dynamically from the
+  server-reported `steps` globs (the `var/stepGlobs` request already exists)
+  is a possible follow-up for workspaces with unconventional globs.
 - `activationEvents` add `onLanguage:python`, `onLanguage:java`,
   `onLanguage:kotlin`.
 - The dev install (typescript/scripts/install-vscode.mjs symlink) resolves
