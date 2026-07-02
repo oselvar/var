@@ -7,7 +7,7 @@
 #
 # Each target runs the same gate as that port's CI workflow in .github/workflows/.
 
-.PHONY: check typescript python java
+.PHONY: check typescript python java release
 
 check: typescript python java
 
@@ -19,3 +19,9 @@ python:
 
 java:
 	cd java && mvn --batch-mode verify
+
+# Release every port at VERSION (idempotent; re-run the same command on failure).
+#   make release VERSION=0.1.0
+release:
+	@test -n "$(VERSION)" || { echo "usage: make release VERSION=x.y.z"; exit 1; }
+	release/release.sh $(VERSION)
