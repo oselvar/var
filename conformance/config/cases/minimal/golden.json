@@ -1,0 +1,11 @@
+{
+  "docs": {
+    "exclude": [],
+    "include": [
+      "**/*.md"
+    ]
+  },
+  "scannerPlugins": [],
+  "snippets": {},
+  "steps": []
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://oselvar.com/var.config.schema.json",
+  "title": "Var configuration (var.config.json)",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "docs": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "include": { "type": "array", "items": { "type": "string" } },
+        "exclude": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "steps": { "type": "array", "items": { "type": "string" } },
+    "snippets": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "scannerPlugins": { "type": "array", "items": { "type": "string" } }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "docs": {
+    "exclude": [
+      "specs/wip/**"
+    ],
+    "include": [
+      "specs/**/*.md",
+      "docs/**/*.md"
+    ]
+  },
+  "scannerPlugins": [
+    "gherkinTables",
+    "gherkinDocStrings"
+  ],
+  "snippets": {
+    "python": "# {{expression}}",
+    "typescript": "// {{expression}}"
+  },
+  "steps": [
+    "steps/**/*.steps.ts",
+    "steps/**/*_steps.py"
+  ]
+}
