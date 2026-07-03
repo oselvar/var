@@ -72,15 +72,16 @@ importers:
 
   packages/var-cli:
     dependencies:
-      '@oselvar/var':
-        specifier: workspace:*
-        version: link:../var
       '@oselvar/var-core':
         specifier: workspace:*
         version: link:../var-core
       '@oselvar/var-runner':
         specifier: workspace:*
         version: link:../var-runner
+    devDependencies:
+      '@oselvar/var':
+        specifier: workspace:*
+        version: link:../var
 
   packages/var-config:
     dependencies:
