@@ -15,12 +15,28 @@ is_semver() { [[ "$1" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; }
 # 0 iff the URL answers 2xx.
 http_ok() { curl -fsSL -o /dev/null "$1" 2>/dev/null; }
 
-# Print the body of the `## [x.y.z]` CHANGELOG section (up to the next `## [`).
-changelog_body() {
+# Everything before v0.1.0 predates the conventional-commit convention; that
+# release is kept verbatim in cliff.toml's `footer`, and generation starts here.
+CHANGELOG_SINCE="v0.1.0"
+
+# Print the changelog generated from conventional commits (cliff.toml).
+# With an argument (a `vX.Y.Z` tag), unreleased commits are folded into that
+# version's section; without, they render under `## [Unreleased]`.
+generate_changelog() {
+  git-cliff "$CHANGELOG_SINCE.." ${1:+--tag "$1"}
+}
+
+# Print the body of the `## [x.y.z]` section (up to the next `## [`) on stdin.
+changelog_section() {
   awk -v ver="$1" '
     /^## \[/ { if (found) exit; if (index($0, "## [" ver "]") == 1) { found = 1; next } }
     found { print }
-  ' "$REPO_ROOT/CHANGELOG.md"
+  '
+}
+
+# Print the body of the `## [x.y.z]` CHANGELOG.md section.
+changelog_body() {
+  changelog_section "$1" < "$REPO_ROOT/CHANGELOG.md"
 }
 
 # Build the extension .vsix once per version; marketplace + Open VSX share it.

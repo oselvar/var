@@ -50,6 +50,42 @@ pnpm workspace · biome · vitest (for the core's own tests) · knip · jscpd ·
   - `pnpm -r build` only type-checks each package's `src/` (its `tsconfig.json` emits with `rootDir: src`). **Test files (`tests/**`) are type-checked by `pnpm typecheck`** (root `tsconfig.tests.json`, `noEmit`, covers every non-website package's `tests/`). It's part of `pnpm check`, so run `pnpm check` (or `pnpm typecheck` alone) after touching tests — a green vitest run does *not* mean the tests type-check. Note `expectTypeOf` assertions are validated here by `tsc`, not by vitest (we don't run `vitest --typecheck`).
 - **Dogfood specs** in `packages/var-examples/**` (one directory per example, each with a `*.md` spec + its `*.steps.ts`) run via `NODE_OPTIONS="--import tsx" npx vitest run`; `var.config.json` globs them.
 
+## Commit messages & changelog
+
+CHANGELOG.md and the next release's version number are **generated from commit
+messages** (git-cliff, `cliff.toml`) — there is no manual changelog step, and
+`release/release.sh` takes no version argument. That works only if every
+commit follows this convention (`make check` runs `release/lint-commits.sh`
+on everything since the last release tag):
+
+- **Format:** [Conventional Commits](https://www.conventionalcommits.org) —
+  `type(scope): subject`. Types: `feat` / `fix` / `perf` are consumer-visible
+  (they appear in the changelog and bump the version); `chore`, `docs`,
+  `refactor`, `test`, `build`, `ci`, `style`, `revert` are not.
+- **Scope names the consumer.** `feat`/`fix`/`perf` (and anything breaking)
+  must be scoped `ts`, `py`, `java`, `vscode`, or `spec`, optionally
+  `/package`: `feat(ts/var-vitest): …`, `fix(py/var-core): …`,
+  `refactor(java/var-junit)!: …`. The scope decides which changelog section
+  the entry lands in (npm / PyPI / Maven Central / VS Code / all ports).
+  Work that ships nothing to a consumer — website, CI, tooling — is a
+  `chore(website): …` or similar, never a `feat`: it would bump the version
+  while appearing in no changelog section.
+- **The subject is the changelog line, verbatim.** Write it for the consumer
+  reading release notes, not the reviewer reading the diff: what changed for
+  *them*, not how. "generated modules import runtime helpers from
+  @oselvar/var-vitest/runtime", not "refactor virtual module codegen".
+- **Breaking changes:** append `!` to the type and add a
+  `BREAKING CHANGE: <consumer-facing migration note>` footer — the note is
+  rendered in the changelog under the entry.
+- **Versioning is automatic and 0.x-aware:** while on 0.x, a breaking change
+  bumps *minor* and everything else bumps *patch* (matching npm's `^0.x`
+  caret). 1.0.0 is never inferred — it happens only when a human passes it
+  explicitly to `release/release.sh`.
+- Never edit CHANGELOG.md by hand — regenerate with `make changelog`. CI
+  (`.github/workflows/changelog.yml`) refreshes the `[Unreleased]` section on
+  every push to `main`; `release/release.sh` folds it into the release's
+  section at release time.
+
 ## Conventions
 
 - Test files in the project's own test suite: `*.test.ts` (vitest).

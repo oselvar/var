@@ -7,9 +7,14 @@
 #
 # Each target runs the same gate as that port's CI workflow in .github/workflows/.
 
-.PHONY: check typescript python java release
+.PHONY: check commits typescript python java changelog release
 
-check: typescript python java
+check: commits typescript python java
+
+# Commits since the last release tag must be conventional (they drive the
+# changelog and the version bump — see cliff.toml and CLAUDE.md).
+commits:
+	release/lint-commits.sh
 
 typescript:
 	cd typescript && pnpm install && pnpm build && pnpm check
@@ -20,8 +25,13 @@ python:
 java:
 	cd java && mvn --batch-mode verify
 
-# Release every port at VERSION (idempotent; re-run the same command on failure).
-#   make release VERSION=0.1.0
+# Regenerate CHANGELOG.md from conventional commits (releases + Unreleased).
+changelog:
+	release/changelog.sh
+
+# Release every port (idempotent; re-run the same command on failure).
+# The version is inferred from conventional commits; pass VERSION=x.y.z only
+# to override (e.g. the deliberate 1.0.0).
+#   make release
 release:
-	@test -n "$(VERSION)" || { echo "usage: make release VERSION=x.y.z"; exit 1; }
 	release/release.sh $(VERSION)

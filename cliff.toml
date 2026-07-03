@@ -1,0 +1,107 @@
+# git-cliff configuration — https://git-cliff.org/docs/configuration
+#
+# CHANGELOG.md is GENERATED from conventional commit messages; never edit it
+# by hand. Regenerate with `make changelog` (runs `git-cliff v0.1.0.. -o
+# CHANGELOG.md`; everything before v0.1.0 predates the commit convention, so
+# that release is kept verbatim in `footer` below).
+#
+# The changelog is organised for CONSUMERS: one section per distribution
+# channel (npm, PyPI, Maven Central, VS Code Marketplace), derived from the
+# commit scope. See "Commit messages & changelog" in CLAUDE.md for the scope
+# convention (`ts/var-vitest`, `py/var-core`, `java`, `vscode`, `spec`, …).
+
+[changelog]
+header = """
+# Changelog
+
+All notable changes are documented here, following
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions are
+lockstep across every port: one `vX.Y.Z` git tag releases npm, PyPI,
+Maven Central, the VS Code Marketplace, and Open VSX together.
+
+This file is generated from conventional commit messages by
+[git-cliff](https://git-cliff.org) (`make changelog`) — do not edit it by
+hand. The `[Unreleased]` section is refreshed by CI on every push to `main`.
+"""
+
+# Each release renders one subsection per distribution channel (only when
+# non-empty), selected by commit scope; breaking changes lead each subsection.
+body = """
+{%- macro section(title, key, commits) -%}
+    {%- set_global lines = "" -%}
+    {%- for kind in ["Breaking", "Added", "Fixed", "Performance"] -%}
+        {%- for commit in commits -%}
+            {%- set scope = commit.scope | default(value="") -%}
+            {%- if scope == key or scope is starting_with(key ~ "/") -%}
+                {%- set msg = commit.message | upper_first -%}
+                {%- if scope is containing("/") -%}
+                    {%- set pkg = scope | split(pat="/") | last -%}
+                    {%- set entry = "**" ~ pkg ~ ":** " ~ msg -%}
+                {%- else -%}
+                    {%- set entry = msg -%}
+                {%- endif -%}
+                {%- if kind == "Breaking" and commit.breaking -%}
+                    {%- set_global lines = lines ~ "- ⚠️ **Breaking:** " ~ entry ~ "\n" -%}
+                    {%- if commit.breaking_description and commit.breaking_description != commit.message -%}
+                        {%- set_global lines = lines ~ "  " ~ commit.breaking_description ~ "\n" -%}
+                    {%- endif -%}
+                {%- elif not commit.breaking and commit.group == kind -%}
+                    {%- set_global lines = lines ~ "- " ~ kind ~ ": " ~ entry ~ "\n" -%}
+                {%- endif -%}
+            {%- endif -%}
+        {%- endfor -%}
+    {%- endfor -%}
+    {%- if lines -%}
+        {{ "\n### " ~ title ~ "\n\n" ~ lines }}
+    {%- endif -%}
+{%- endmacro -%}
+
+{%- if version -%}
+    {%- set v = version | trim_start_matches(pat="v") -%}
+    {%- set d = timestamp | date(format="%Y-%m-%d") -%}
+    {{ "\n## [" ~ v ~ "] - " ~ d ~ "\n" }}
+{%- else -%}
+    {{ "\n## [Unreleased]\n" }}
+{%- endif -%}
+{{- self::section(title="TypeScript (npm)", key="ts", commits=commits) }}
+{{- self::section(title="Python (PyPI)", key="py", commits=commits) }}
+{{- self::section(title="Java & Kotlin (Maven Central)", key="java", commits=commits) }}
+{{- self::section(title="VS Code extension (Marketplace & Open VSX)", key="vscode", commits=commits) }}
+{{- self::section(title="Specification (all ports)", key="spec", commits=commits) }}
+"""
+
+# The hand-written first release predates the commit convention and is kept
+# verbatim (generation starts at v0.1.0, see `make changelog`).
+footer = """
+{{ "\n## [0.1.0]\n\n### Added\n\n- First public release of var: Markdown-native BDD for TypeScript (npm), Python (PyPI), and Java/Kotlin (Maven Central), plus the Vár VS Code extension (Marketplace and Open VSX).\n" }}
+"""
+
+trim = true
+
+[git]
+conventional_commits = true
+# Non-conventional commits (merges, "Release vX.Y.Z" stamps, pre-convention
+# history) never reach the changelog or the version bump.
+filter_unconventional = true
+# A breaking change is always released, whatever its type (`refactor!:` too).
+protect_breaking_commits = true
+tag_pattern = "v[0-9]*"
+sort_commits = "oldest"
+
+# First match wins. Only consumer-visible kinds are kept; chores, docs, CI,
+# refactors, tests are skipped (unless breaking, see protect_breaking_commits).
+commit_parsers = [
+  { message = "^feat", group = "Added" },
+  { message = "^fix", group = "Fixed" },
+  { message = "^perf", group = "Performance" },
+  { message = ".*", skip = true },
+]
+
+[bump]
+# Pre-1.0 semantics (the Cargo convention, matching npm's `^0.x` caret):
+# while on 0.x a breaking change bumps MINOR and everything else bumps PATCH.
+# git-cliff therefore never proposes 1.0.0 on its own — going 1.0 is a
+# deliberate human decision, made by passing an explicit version to
+# release/release.sh.
+features_always_bump_minor = false
+breaking_always_bump_major = false
