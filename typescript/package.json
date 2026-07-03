@@ -12,7 +12,7 @@
     "typecheck": "tsc -p tsconfig.tests.json",
     "test": "NODE_OPTIONS=\"--import tsx\" vitest run",
     "test:watch": "NODE_OPTIONS=\"--import tsx\" vitest",
-    "lint": "biome check .",
+    "lint": "biome check . && node scripts/lint-no-reexports.mjs",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "knip": "knip",
