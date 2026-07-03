@@ -205,9 +205,6 @@ importers:
 
   packages/var-vscode:
     dependencies:
-      '@oselvar/var-language':
-        specifier: workspace:*
-        version: link:../var-language
       '@oselvar/var-lsp':
         specifier: workspace:*
         version: link:../var-lsp

@@ -1,7 +1,6 @@
 import { existsSync, realpathSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { languageIdForPath } from '@oselvar/var-language'
 import type {
   GenerateSnippetResult,
   Range as LspRange,
@@ -9,6 +8,7 @@ import type {
   PlanRenameResult,
   RenderTextResult,
   StepAtResult,
+  StepGlob,
 } from '@oselvar/var-lsp/protocol'
 import {
   CodeAction,
@@ -144,13 +144,9 @@ function registerGenerateStepDefinition(
           character: editor.selection.start.character,
         },
       }),
-      lspClient.sendRequest<ReadonlyArray<string>>('var/stepGlobs'),
+      lspClient.sendRequest<ReadonlyArray<StepGlob>>('var/stepGlobs'),
     ])
-    const normalize = (id: string | undefined): string | undefined =>
-      id === 'typescript-tsx' ? 'typescript' : id
-    const stepFiles = (await findStepFiles(stepGlobs)).filter(
-      (u) => normalize(languageIdForPath(u.fsPath)) === snippet.language,
-    )
+    const stepFiles = await findStepFiles(stepGlobs, snippet.language)
     if (stepFiles.length === 0) {
       void window.showWarningMessage(
         `No ${snippet.language} steps files found in the workspace. Create one first, then re-run the command.`,
@@ -169,13 +165,22 @@ function registerGenerateStepDefinition(
   context.subscriptions.push(cmd)
 }
 
-async function findStepFiles(stepGlobs: ReadonlyArray<string>): Promise<ReadonlyArray<Uri>> {
+const FALLBACK_STEP_GLOBS: ReadonlyArray<StepGlob> = [
+  { glob: '**/*.steps.ts', language: 'typescript' },
+  { glob: '**/*.steps.py', language: 'python' },
+  { glob: '**/*.steps.kt', language: 'kotlin' },
+  { glob: '**/*Steps.java', language: 'java' },
+]
+
+async function findStepFiles(
+  stepGlobs: ReadonlyArray<StepGlob>,
+  language: string,
+): Promise<ReadonlyArray<Uri>> {
   // Use the workspace globs reported by the server when present (config-driven);
-  // fall back to the convention if the config has no steps glob.
-  const patterns =
-    stepGlobs.length > 0
-      ? stepGlobs
-      : ['**/*.steps.ts', '**/*.steps.py', '**/*.steps.kt', '**/*Steps.java']
+  // fall back to the convention if the config has no steps glob. The server
+  // classifies each glob's language, so the client does no path sniffing.
+  const globs = stepGlobs.length > 0 ? stepGlobs : FALLBACK_STEP_GLOBS
+  const patterns = globs.filter((g) => g.language === language).map((g) => g.glob)
   const seen = new Set<string>()
   const out: Uri[] = []
   for (const pattern of patterns) {

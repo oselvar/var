@@ -61,6 +61,16 @@ export type PlanRenameResult =
     }
   | { readonly ok: false; readonly error: string }
 
+// Output of `var/stepGlobs`: the step-file globs from config.steps, each
+// classified by the server (by glob extension, tsx folded into typescript).
+// The server owns all path→language knowledge; clients only compare the
+// `language` field against `GenerateSnippetResult.language`.
+export type StepGlob = {
+  readonly glob: string
+  // Absent when the glob's extension is not a recognized step language.
+  readonly language?: string
+}
+
 // Output of `var/generateSnippet`.
 export type GenerateSnippetResult = {
   readonly fullCode: string

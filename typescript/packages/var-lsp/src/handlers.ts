@@ -23,6 +23,7 @@ import type {
   RenderTextResult,
   StepAtMatch,
   StepAtResult,
+  StepGlob,
 } from './protocol.js'
 import type { Store } from './store.js'
 import { uriToPath } from './uri.js'
@@ -85,7 +86,7 @@ type Handlers = {
     readonly uri?: string
     readonly position?: Position
   }): GenerateSnippetResult
-  stepGlobs(): ReadonlyArray<string>
+  stepGlobs(): ReadonlyArray<StepGlob>
   stepAt(params: HoverParams): StepAtResult
   renameStep(params: RenameStepParams): RenameStepResult
   planRename(params: RenameStepParams): PlanRenameResult
@@ -156,7 +157,10 @@ export function buildHandlers(store: Store): Handlers {
       return { fullCode: snippet.fullCode, expression: snippet.expression, language }
     },
     stepGlobs() {
-      return store.stepGlobs()
+      return store.stepGlobs().map((glob) => {
+        const language = languageForPath(glob)
+        return language === undefined ? { glob } : { glob, language }
+      })
     },
     renameStep({ uri, position, newName }) {
       const prepared = prepareRename(store, uri, position, newName)
@@ -316,6 +320,15 @@ export function buildHandlers(store: Store): Handlers {
   }
 }
 
+// Language of a path or glob for user-facing decisions: tsx folds into
+// typescript. This is the classification `var/stepGlobs` sends to clients,
+// so they never need their own path→language knowledge.
+function languageForPath(path: string): string | undefined {
+  const id = languageIdForPath(path)
+  if (id === undefined) return undefined
+  return id === 'typescript-tsx' ? 'typescript' : id
+}
+
 // The user-approved snippet-language selection: languages configured in
 // config.steps (by glob extension, config order, tsx folded into
 // typescript); a single configured language wins outright; with several,
@@ -325,21 +338,17 @@ function snippetLanguageFor(
   stepGlobs: ReadonlyArray<string>,
   stepPaths: ReadonlyArray<string>,
 ): string {
-  const normalize = (id: string): string => (id === 'typescript-tsx' ? 'typescript' : id)
   const configured: string[] = []
   for (const glob of stepGlobs) {
-    const id = languageIdForPath(glob)
-    if (id === undefined) continue
-    const language = normalize(id)
-    if (!configured.includes(language)) configured.push(language)
+    const language = languageForPath(glob)
+    if (language !== undefined && !configured.includes(language)) configured.push(language)
   }
   if (configured.length === 0) return 'typescript'
   if (configured.length === 1) return configured[0] as string
   const counts = new Map<string, number>()
   for (const path of stepPaths) {
-    const id = languageIdForPath(path)
-    if (id === undefined) continue
-    const language = normalize(id)
+    const language = languageForPath(path)
+    if (language === undefined) continue
     counts.set(language, (counts.get(language) ?? 0) + 1)
   }
   let best = configured[0] as string

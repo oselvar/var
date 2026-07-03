@@ -51,7 +51,6 @@
     "build": "tsc -p tsconfig.json && node esbuild.mjs"
   },
   "dependencies": {
-    "@oselvar/var-language": "workspace:*",
     "@oselvar/var-lsp": "workspace:*",
     "vscode-languageclient": "^10.1.0"
   },
