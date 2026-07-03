@@ -5,17 +5,17 @@
 
 ## Website
 
-- [ ] Simpler frontpage
-- [ ] Use tailwindcss
-- [ ] Remove @navikt/ds-css
-- [ ] Tabs for examples on front page and tutorial
+- [x] Simpler frontpage
+- [x] Use tailwindcss
+- [x] Remove @navikt/ds-css
+- [x] Tabs for examples on front page and tutorial
 - [ ] Prerender all editors
 
 ## Terminiology
 - [ ] Oath: an .md doc with 1 or more examples
-- [ ] Example: A paragraph with a matching step definition
-- [ ] Sensor: A step definition that returns an actual value from the system
-- [ ] Action: A step definition that interacts with the system
+- [x] Example: A paragraph with a matching step definition
+- [x] Sensor: A step definition that returns an actual value from the system
+- [ ] Input: A step definition that interacts with the system
 
 ## Refactoring (LSP)
 
@@ -23,6 +23,7 @@
       `defineParameterType({ name: ... })` call, every step expression that uses
       `{name}`, and every matched .md site. Mirrors what F2 step rename
       already does for cucumber expressions.
+- [ ] Rename stepdef (only a param) -> Fails to rename
 - [ ] F2 polish: surface malformed-new-expression errors inline; offer a
       preview of sites that would become unmatched before applying.
 
@@ -48,6 +49,9 @@
       switched to `globSync`; lint.ts and the LSP store still use the buggy
       `node:fs/promises.glob`. Hoist together with the findFiles cleanup.
 - [ ] `var run` Phase 2 polish: colors, file grouping summary, `--quiet`.
+  - [ ] CellMismatchError: arg 1: expected "Hello, world!" but was Hello, worlsd!
+    - [ ] Quotes
+    - [ ] arg 1
 - [ ] Cucumber-js compatible API (just change imports).
   - [ ] CLI codemod for migrating from Cucumber.
 - [ ] `var-cli` build is broken (TS6 can't resolve `node:fs` without

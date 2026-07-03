@@ -12,11 +12,11 @@
   "devDependencies": {
     "@cucumber/cucumber": "^13.0.0",
     "@oselvar/var": "workspace:*",
-    "@oselvar/var-core": "workspace:*",
     "@oselvar/var-cli": "workspace:*",
+    "@oselvar/var-core": "workspace:*",
     "@oselvar/var-vitest": "workspace:*",
-    "@types/node": "^26.0.1",
-    "tsx": "^4.22.4",
+    "@types/node": "^26.1.0",
+    "tsx": "^4.22.5",
     "vitest": "^4.1.9"
   },
   "license": "MIT",
