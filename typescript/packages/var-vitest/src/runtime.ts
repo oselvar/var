@@ -1,5 +1,6 @@
 import { buildRegistry, contextFactory } from '@oselvar/var/registry'
 import {
+  type CellDiff,
   isCellMismatchError,
   isDocStringMismatchError,
   type Reporter,
@@ -61,7 +62,14 @@ export function collectVarExamples(
   const examples = examplesWithRuns(p, contextFactory(), reporter).map(({ example, run }) => ({
     name: example.name,
     lines: [...new Set(example.steps.map((s) => s.matchSpan.startLine))],
-    run,
+    run: async () => {
+      try {
+        await run()
+      } catch (error) {
+        attachExpectedActual(error, source)
+        throw error
+      }
+    },
   }))
   if (ports.expectedCount !== undefined && examples.length !== ports.expectedCount) {
     test('var:stale-spec-transform', () => {
@@ -78,24 +86,44 @@ export function collectVarExamples(
 // without importing vitest types into the runtime.
 type TaskContext = { readonly task: { readonly meta: { varResult?: unknown } } }
 
+// The source line(s) the failing cells sit on, verbatim (expected) and with
+// each failing cell's actual value spliced in over its span (actual). Reads as
+// the authored Markdown next to what really happened — "Then the route should
+// be from LGR to JMK" vs "…from LHR to JFK" — both as vitest's line diff and
+// flattened onto one line by VS Code's inline error decoration.
+function spliceActuals(
+  source: string,
+  cells: ReadonlyArray<CellDiff>,
+): { expected: string; actual: string } | undefined {
+  const bad = cells.filter((c) => !c.ok).sort((a, b) => a.span.startOffset - b.span.startOffset)
+  const first = bad[0]
+  const last = bad[bad.length - 1]
+  if (!first || !last) return undefined
+  const from = source.lastIndexOf('\n', Math.max(0, first.span.startOffset - 1)) + 1
+  const nl = source.indexOf('\n', last.span.endOffset)
+  const to = nl === -1 ? source.length : nl
+  let actual = ''
+  let cursor = from
+  for (const c of bad) {
+    actual += source.slice(cursor, c.span.startOffset) + c.actual
+    cursor = c.span.endOffset
+  }
+  actual += source.slice(cursor, to)
+  return { expected: source.slice(from, to), actual }
+}
+
 // vitest renders a `- Expected / + Received` diff for any thrown error that
 // carries `expected` and `actual` (and the VS Code vitest extension shows the
 // same pair in its diff peek), so project the mismatch's structured diff onto
 // those two strings before the error crosses into vitest. Presentation only —
 // the pass/fail verdict stays the core's exact string comparison.
-function attachExpectedActual(error: unknown): void {
+function attachExpectedActual(error: unknown, source: string): void {
   const e = error as { expected?: string; actual?: string }
   if (isCellMismatchError(error)) {
-    const cells = error.cells.filter((c) => !c.ok)
-    const first = cells[0]
-    if (!first) return
-    if (cells.length === 1) {
-      e.expected = first.expected
-      e.actual = first.actual
-    } else {
-      e.expected = cells.map((c) => `${c.column}: ${c.expected}`).join('\n')
-      e.actual = cells.map((c) => `${c.column}: ${c.actual}`).join('\n')
-    }
+    const spliced = spliceActuals(source, error.cells)
+    if (!spliced) return
+    e.expected = spliced.expected
+    e.actual = spliced.actual
   } else if (isDocStringMismatchError(error)) {
     e.expected = error.diff.expected
     e.actual = error.diff.actual
@@ -128,7 +156,6 @@ export function varTestBody(
         lines,
         failure: toFailure(error, path, lines[0] ?? 0),
       }
-      attachExpectedActual(error)
       throw error
     }
   }

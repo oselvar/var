@@ -226,7 +226,14 @@ export function executePlan(plan: ExecutionPlan, ports: ExecutePorts): void {
 function augmentStack(err: unknown, step: PlannedStep, varPath: string): unknown {
   if (!(err instanceof Error) || typeof err.stack !== 'string') return err
   const label = step.text.length > 60 ? `${step.text.slice(0, 60)}…` : step.text
-  const frame = `    at ${label} (${varPath}:${step.matchSpan.startLine}:${step.matchSpan.startCol})`
+  // Editors resolve the failure's location from this frame (the VS Code vitest
+  // extension underlines the word at line:col), so a mismatch anchors at its
+  // own first failing span — the cell/fence body — not the step's match start.
+  const anchor =
+    (err instanceof CellMismatchError ? err.cells.find((c) => !c.ok)?.span : undefined) ??
+    (err instanceof DocStringMismatchError ? err.diff.span : undefined) ??
+    step.matchSpan
+  const frame = `    at ${label} (${varPath}:${anchor.startLine}:${anchor.startCol})`
   const lines = err.stack.split('\n')
   // Find the first existing stack frame (the handler's `.ts` line) and insert
   // immediately after it. If the error has no frames, fall back to position 1.

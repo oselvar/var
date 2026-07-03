@@ -59,21 +59,32 @@ test('varTestBody fails loudly when the transform is stale (name or index mismat
   await expect(varTestBody([], 0, 'gone', 'x.md')(ctx)).rejects.toThrow(/stale/)
 })
 
-const span = { startOffset: 0, endOffset: 1, startLine: 1, startCol: 1, endLine: 1, endCol: 2 }
-const cell = (column: string, expected: string, actual: string): CellDiff => ({
-  column,
-  span,
+const sp = (startOffset: number, endOffset: number) => ({
+  startOffset,
+  endOffset,
+  startLine: 1,
+  startCol: 1,
+  endLine: 1,
+  endCol: 1,
+})
+const span = sp(0, 1)
+const cell = (at: ReturnType<typeof sp>, expected: string, actual: string): CellDiff => ({
+  column: 'c',
+  span: at,
   expected,
   actual,
   ok: expected === actual,
 })
 
-async function rethrown(error: Error): Promise<Error & { expected?: string; actual?: string }> {
+async function rethrown(
+  error: Error,
+  sourceSuffix = '',
+): Promise<Error & { expected?: string; actual?: string }> {
   const { action } = defineState(() => ({}))
   action('It mismatches', () => {
     throw error
   })
-  const examples = collectVarExamples('diff.md', 'It mismatches.', {
+  const examples = collectVarExamples('diff.md', `It mismatches.${sourceSuffix}`, {
     reporter: { diagnostic: () => {} },
   })
   const { ctx } = fakeCtx()
@@ -90,18 +101,30 @@ async function rethrown(error: Error): Promise<Error & { expected?: string; actu
   )
 }
 
-test('a single-cell mismatch rethrows with the raw cell values as expected/actual', async () => {
-  const e = await rethrown(new CellMismatchError([cell('qty', '9', '8')]))
-  expect(e.expected).toBe('9')
-  expect(e.actual).toBe('8')
+test('a cell mismatch rethrows with the authored line as expected and the actual spliced in', async () => {
+  // 'It mismatches.' — the cell span covers 'mismatches' (offsets 3..13).
+  const e = await rethrown(new CellMismatchError([cell(sp(3, 13), 'mismatches', 'passes')]))
+  expect(e.expected).toBe('It mismatches.')
+  expect(e.actual).toBe('It passes.')
 })
 
-test('a multi-cell mismatch rethrows with column-labelled lines so vitest diffs cell-by-cell', async () => {
+test('multiple mismatched cells on one line are all spliced into the actual', async () => {
   const e = await rethrown(
-    new CellMismatchError([cell('qty', '9', '8'), cell('total', '45', '40')]),
+    new CellMismatchError([cell(sp(0, 2), 'It', 'We'), cell(sp(3, 13), 'mismatches', 'agree')]),
   )
-  expect(e.expected).toBe('qty: 9\ntotal: 45')
-  expect(e.actual).toBe('qty: 8\ntotal: 40')
+  expect(e.expected).toBe('It mismatches.')
+  expect(e.actual).toBe('We agree.')
+})
+
+test('mismatched cells across lines expand expected/actual to the covered lines', async () => {
+  // Lines 3-4 of the source; the spans cover LHR (22..25) and OSL (47..50).
+  const suffix = '\n\nRoute LHR to JFK.\nRoute AMS to OSL.'
+  const e = await rethrown(
+    new CellMismatchError([cell(sp(22, 25), 'LHR', 'AAA'), cell(sp(47, 50), 'OSL', 'ZZZ')]),
+    suffix,
+  )
+  expect(e.expected).toBe('Route LHR to JFK.\nRoute AMS to OSL.')
+  expect(e.actual).toBe('Route AAA to JFK.\nRoute AMS to ZZZ.')
 })
 
 test('a doc string mismatch rethrows with the full expected/actual text', async () => {
