@@ -1,8 +1,15 @@
 # C4 component diagram (level 3) of the Vár TypeScript workspace.
-# One component per package in typescript/packages/*; every arrow is a real
-# `workspace:` dependency taken from that package's package.json.
+# One component per published package in typescript/packages/*; private
+# packages (the cucumber compat shim, the dogfood examples) and the website
+# are omitted. Every arrow is a real `workspace:` dependency taken from that
+# package's package.json.
 # Boundaries follow the hexagonal architecture: pure functional core,
-# imperative shell (adapters), editor tooling.
+# imperative shell (adapters), editor tooling — plus the static-analysis
+# layer shared by the test-runner and editor paths.
+# Green components are ported to every language — java/ and python/ have a
+# counterpart by role (var-vitest ↔ var-junit/var-kotest ↔ var-pytest/
+# var-unittest); blue components exist only in TypeScript and serve all
+# ports from here.
 
 direction: down
 
@@ -29,6 +36,14 @@ classes: {
       fill: "#85BBF0"
       font-color: "#000000"
       stroke: "#5D82A8"
+      border-radius: 4
+    }
+  }
+  ported: {
+    style: {
+      fill: "#8FCE8F"
+      font-color: "#000000"
+      stroke: "#639B63"
       border-radius: 4
     }
   }
@@ -66,18 +81,22 @@ core: "Functional core — pure functions over immutable data, no I/O" {
   class: boundary
 
   var-core: "@oselvar/var-core\n[Component: npm package]\n\nPure core: parser, matcher, planner,\nexecutor, AST, diagnostics,\nreturn-based comparison" {
-    class: component
+    class: ported
   }
 
   var: "@oselvar/var\n[Component: npm package]\n\nAuthoring API: defineState with\ncontext / action / sensor role functions" {
-    class: component
-  }
-
-  var-language: "@oselvar/var-language\n[Component: npm package]\n\nStatic analysis: step-definition scanner,\nworkspace indexer, snippet emitter" {
-    class: component
+    class: ported
   }
 
   var-config: "@oselvar/var-config\n[Component: npm package]\n\nvar.config.ts schema and\nspec-glob resolution" {
+    class: ported
+  }
+}
+
+analysis: "Static analysis — pure given sources and an injected grammar loader" {
+  class: boundary
+
+  var-language: "@oselvar/var-language\n[Component: npm package]\n\nStatic analysis: step-definition scanner,\nworkspace indexer, snippet emitter" {
     class: component
   }
 }
@@ -86,11 +105,11 @@ shell: "Imperative shell — adapters, the only place side effects live" {
   class: boundary
 
   var-runner: "@oselvar/var-runner\n[Component: npm package]\n\nRunner shell: loads spec and step files,\nexecutes plans" {
-    class: component
+    class: ported
   }
 
   var-vitest: "@oselvar/var-vitest\n[Component: npm package]\n\nVitest adapter: drives vitest's\ninclude/exclude from var.config.ts" {
-    class: component
+    class: ported
   }
 
   var-cli: "@oselvar/var-cli\n[Component: npm package]\n\nCommand-line interface" {
@@ -110,6 +129,18 @@ tooling: "Editor tooling" {
   }
 }
 
+legend: "Legend" {
+  class: boundary
+
+  ported: "Ported to every language\n(counterpart in java/ and python/)" {
+    class: ported
+  }
+
+  tsonly: "TypeScript-only\n(serves all ports from TypeScript)" {
+    class: component
+  }
+}
+
 # --- People and external systems ---
 
 developer -> core.var: authors specs and steps with
@@ -121,8 +152,11 @@ tooling.var-vscode -> vscode: installs into
 # --- Functional core ---
 
 core.var -> core.var-core
-core.var-language -> core.var-core
 core.var-config -> core.var-core
+
+# --- Static analysis ---
+
+analysis.var-language -> core.var-core
 
 # --- Imperative shell ---
 
@@ -134,6 +168,7 @@ shell.var-vitest -> shell.var-runner
 shell.var-vitest -> core.var
 shell.var-vitest -> core.var-config
 shell.var-vitest -> core.var-core
+shell.var-vitest -> analysis.var-language
 
 shell.var-cli -> shell.var-runner
 shell.var-cli -> core.var
@@ -141,9 +176,8 @@ shell.var-cli -> core.var-core
 
 # --- Editor tooling ---
 
-tooling.var-lsp -> core.var-language
+tooling.var-lsp -> analysis.var-language
 tooling.var-lsp -> core.var-config
 tooling.var-lsp -> core.var-core
 
 tooling.var-vscode -> tooling.var-lsp
-tooling.var-vscode -> core.var-language
