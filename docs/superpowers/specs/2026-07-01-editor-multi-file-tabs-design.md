@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-01
 **Status:** Approved (brainstorm complete)
-**Area:** `packages/website-starlight` only — `packages/website`'s `Editor.astro` is untouched.
+**Area:** `packages/website` only — `packages/website`'s `Editor.astro` is untouched.
 
 ## Goal
 
@@ -186,7 +186,7 @@ manual maintenance per new example.
 ## What's out of scope
 
 - `packages/website`'s `Editor.astro`/`editor-mount.ts` — untouched, keeps
-  today's `steps`/`chrome`/`group` API. This redesign is `website-starlight`
+  today's `steps`/`chrome`/`group` API. This redesign is `website`
   only.
 - No change to how `run-worker.ts` executes a spec once it has a `.md` +
   step-file bundle, or to `run-spec.ts`'s pure execution logic — only *how

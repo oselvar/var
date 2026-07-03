@@ -458,7 +458,7 @@ needed."
 - [ ] **Step 1: Full build**
 
 Run (from `typescript/`): `pnpm -r build`
-Expected: exit 0 across every package, including `@oselvar/website`'s and `@oselvar/website-starlight`'s Astro builds.
+Expected: exit 0 across every package, including `@oselvar/website`'s and `@oselvar/website`'s Astro builds.
 
 - [ ] **Step 2: Full check**
 

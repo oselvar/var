@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-01
 **Status:** Approved (brainstorm complete)
-**Area:** new package `packages/website-starlight`
+**Area:** new package `packages/website`
 
 ## Goal
 
@@ -46,8 +46,8 @@ framework and get tabs (and its other built-in docs affordances) for free.
 
 ## Package setup
 
-- New workspace package: `typescript/packages/website-starlight`
-  (`@oselvar/website-starlight`), matched automatically by the existing
+- New workspace package: `typescript/packages/website`
+  (`@oselvar/website`), matched automatically by the existing
   `packages/*` entry in `pnpm-workspace.yaml` — no workspace config changes
   needed.
 - Scaffolded via Starlight's own starter template
@@ -118,7 +118,7 @@ inside the deferred live-editor sub-project.
 ## Done criteria
 
 - `pnpm -r build` passes with the new package included.
-- `pnpm --filter @oselvar/website-starlight dev` renders a Starlight shell
+- `pnpm --filter @oselvar/website dev` renders a Starlight shell
   that visibly reads as *this* site — earthy palette, correct font, working
   light/dark toggle — rather than Starlight's default blue theme.
 

@@ -5,32 +5,8 @@ import {
   BrowserMessageWriter,
   createConnection,
 } from 'vscode-languageserver/browser'
-import helloSteps from '../../../var-examples/hello-var/hello-var.steps.ts?raw'
-import yahtzeeSpec from '../../../var-examples/yahtzee/yahtzee.md?raw'
-import yahtzeeSteps from '../../../var-examples/yahtzee/yahtzee.steps.ts?raw'
-import yahtzeeLogic from '../../../var-examples/yahtzee/yahtzee.ts?raw'
-import { createIdbFileSystem } from './idb-file-system.ts'
+import { createMemoryFileSystem } from './memory-file-system.ts'
 import { createTsDiagnostics } from './ts-diagnostics.ts'
-
-// Seed the in-browser filesystem from the canonical dogfood files so the
-// language server can cross-reference each spec against its step definitions.
-//
-// NOTE — two separate workers: this LSP worker produces the semantic-token
-// highlighting (green step / orange param chips) from THIS index, while the
-// run-worker (run-client.ts -> run-worker.ts) executes specs from stepFiles
-// passed directly to it. A doc's hidden `steps` prop (Editor's data-steps)
-// reaches only the run-worker, so any step file a doc spec must HIGHLIGHT
-// against has to be seeded here too. The docs use hello + yahtzee steps.
-const SEED_FILES: Record<string, string> = {
-  '/yahtzee.md': yahtzeeSpec,
-  '/yahtzee.steps.ts': yahtzeeSteps,
-  '/yahtzee.ts': yahtzeeLogic,
-  '/01-hello.steps.ts': helloSteps,
-}
-
-const reader = new BrowserMessageReader(self as DedicatedWorkerGlobalScope)
-const writer = new BrowserMessageWriter(self as DedicatedWorkerGlobalScope)
-const connection = createConnection(reader, writer)
 
 const config = {
   docs: { include: ['**/*.md'], exclude: [] },
@@ -40,30 +16,44 @@ const config = {
   scannerPluginNames: [],
 }
 
-const tsd = createTsDiagnostics()
-// yahtzee.ts isn't an open editor on any docs page, so it never arrives via
-// didChange — pre-seed it so the `./yahtzee` import in yahtzee.steps.ts
-// resolves when that tab is type-checked.
-tsd.updateDoc('file:///yahtzee.ts', yahtzeeLogic)
-const timers = new Map<string, ReturnType<typeof setTimeout>>()
+// One-time handshake on the worker's default channel: the main thread sends
+// { seed } plus a dedicated MessagePort (arrives as event.ports[0], not on
+// event.data — the standard way a transferred port shows up) for all
+// subsequent LSP traffic. BrowserMessageReader's constructor claims
+// `port.onmessage` outright (a direct assignment, not addEventListener), so
+// it can't share the worker's default channel with this handshake — every
+// mounted <Editor>'s <File> children are collected into `seed` by
+// editor-mount.ts before this worker is even created.
+self.onmessage = (e: MessageEvent<{ seed: Record<string, string> }>) => {
+  self.onmessage = null // done with the default channel
+  const port = e.ports[0]
+  if (!port) return
 
-function onDidChangeDocument(uri: string, text: string): void {
-  // Every .ts doc feeds the TS service — plain .ts library docs both get
-  // their own diagnostics and make `./yahtzee`-style imports in .steps.ts
-  // docs resolve.
-  if (!uri.endsWith('.ts')) return
-  tsd.updateDoc(uri, text)
-  clearTimeout(timers.get(uri))
-  timers.set(
-    uri,
-    setTimeout(() => {
-      const diagnostics = tsd.diagnostics(uri)
-      void connection.sendDiagnostics({ uri, diagnostics })
-    }, 250),
-  )
+  const reader = new BrowserMessageReader(port as unknown as DedicatedWorkerGlobalScope)
+  const writer = new BrowserMessageWriter(port as unknown as DedicatedWorkerGlobalScope)
+  const connection = createConnection(reader, writer)
+
+  const tsd = createTsDiagnostics()
+  const timers = new Map<string, ReturnType<typeof setTimeout>>()
+
+  function onDidChangeDocument(uri: string, text: string): void {
+    // Every .ts doc feeds the TS service — plain .ts library tabs both get
+    // their own diagnostics and make `./yahtzee`-style imports in .steps.ts
+    // tabs resolve.
+    if (!uri.endsWith('.ts')) return
+    tsd.updateDoc(uri, text)
+    clearTimeout(timers.get(uri))
+    timers.set(
+      uri,
+      setTimeout(() => {
+        const diagnostics = tsd.diagnostics(uri)
+        void connection.sendDiagnostics({ uri, diagnostics })
+      }, 250),
+    )
+  }
+
+  registerHandlers(connection, async () => ({ fs: createMemoryFileSystem(e.data.seed), config }), {
+    onDidChangeDocument,
+  })
+  connection.listen()
 }
-
-registerHandlers(connection, async () => ({ fs: await createIdbFileSystem(SEED_FILES), config }), {
-  onDidChangeDocument,
-})
-connection.listen()

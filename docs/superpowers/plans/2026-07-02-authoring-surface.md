@@ -575,7 +575,7 @@ git commit -m "feat(var-lsp): per-language snippet selection and rename signatur
 
 **Files:**
 - Modify: `typescript/packages/var-vscode/package.json` (activationEvents), `typescript/packages/var-vscode/src/extension.ts` (selectors, rename providers, quick-pick filter, fallback globs)
-- Modify: `typescript/packages/website/src/lib/var-worker.ts`, `typescript/packages/website-starlight/src/lib/var-worker.ts` (no functional need — leave `snippets` typescript-only; ONLY update if the `GenerateSnippetResult` type change surfaces in editor-mount typings; verify)
+- Modify: `typescript/packages/website/src/lib/var-worker.ts`, `typescript/packages/website/src/lib/var-worker.ts` (no functional need — leave `snippets` typescript-only; ONLY update if the `GenerateSnippetResult` type change surfaces in editor-mount typings; verify)
 - Modify: `docs/superpowers/specs/2026-07-02-multi-language-authoring-design.md` (Status; packaging deferral note)
 
 **Interfaces:**

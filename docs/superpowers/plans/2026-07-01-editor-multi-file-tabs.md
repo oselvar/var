@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Replace `packages/website-starlight`'s `<Editor uri chrome steps group>` (one visible file + optional hidden step files) with `<Editor><File uri>…</File><File uri>…</File></Editor>` — every file explicit, visible as a tab in an always-present chrome bar — and derive the LSP worker's cross-reference seed from whatever's actually mounted on the page instead of a hand-maintained list.
+**Goal:** Replace `packages/website`'s `<Editor uri chrome steps group>` (one visible file + optional hidden step files) with `<Editor><File uri>…</File><File uri>…</File></Editor>` — every file explicit, visible as a tab in an always-present chrome bar — and derive the LSP worker's cross-reference seed from whatever's actually mounted on the page instead of a hand-maintained list.
 
 **Architecture:** `<File>` becomes a data-only marker component (no chrome, no CodeMirror); `<Editor>` owns the chrome (tab bar header, mount point, state-replay footer) and processes its `<File>` children client-side. `editor-mount.ts`'s global `groups: Map<string, Group>` is deleted — each `<Editor>` instance is now its own self-contained run+LSP unit. LSP seeding moves from build-time hardcoded imports to a `MessageChannel` handshake: the client collects every mounted `<File>`'s uri+content, hands the worker a dedicated port for LSP traffic plus the seed, in one message.
 
@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- Scope is `packages/website-starlight` only. Do not touch `packages/website`'s `Editor.astro`/`editor-mount.ts`/`var-worker.ts` — verified separately, out of scope per the design spec.
+- Scope is `packages/website` only. Do not touch `packages/website`'s `Editor.astro`/`editor-mount.ts`/`var-worker.ts` — verified separately, out of scope per the design spec.
 - No `steps`, `chrome`, or `group` props anywhere in the new API.
 - `<Editor>` always renders chrome (tab bar + mount + footer) — no conditional.
 - Tab-switching (header) and state-replay (footer) are independent: switching tabs never triggers a replay; picking a replay state never changes the active tab.
@@ -30,13 +30,13 @@
 - `EditorView.dom` (CodeMirror 6's public API) is the view's outermost DOM element — safe to toggle `.style.display` on it to show/hide a mounted, stateful editor without destroying its state.
 - `varTokenTheme` is imported as a plain constant (not a factory) and is already reused as the same value across multiple `EditorView` instances in the current code — confirms reusing one extension value across multiple views in this codebase is an established, safe pattern.
 - Neither current example (`yahtzee.md`, `roman-numerals.md`) uses multi-state replay — Task 1's footer/replay logic must be verified with a throwaway Playwright-injected test case, not committed content, since no live page exercises it.
-- `packages/website-starlight/src/lib/idb-file-system.ts` is dead code — nothing imports it (`var-worker.ts` now imports `createMemoryFileSystem` from `memory-file-system.ts` instead). Confirmed via `grep -rl idb-file-system packages/website-starlight/src`.
+- `packages/website/src/lib/idb-file-system.ts` is dead code — nothing imports it (`var-worker.ts` now imports `createMemoryFileSystem` from `memory-file-system.ts` instead). Confirmed via `grep -rl idb-file-system packages/website/src`.
 
 ---
 
 ## File Structure
 
-`typescript/packages/website-starlight/src/`:
+`typescript/packages/website/src/`:
 - `components/File.astro` — **new**. Data-only marker: one hidden `<div data-var-file data-uri data-doc data-states>` per file.
 - `components/Editor.astro` — **rewritten**. Always-chrome wrapper (tab bar header / mount / footer), no more `uri`/`chrome`/`steps`/`group` props.
 - `scripts/editor-mount.ts` — **rewritten**. Global `groups` map deleted; per-`.file-editor`-instance mounting, tabs, footer, run scheduling. LSP seed collection added in Task 2.
@@ -54,10 +54,10 @@ No other package is touched.
 ## Task 1: `File.astro` + `Editor.astro` rewrite + `editor-mount.ts` restructuring + `index.mdx` migration
 
 **Files:**
-- Create: `typescript/packages/website-starlight/src/components/File.astro`
-- Modify: `typescript/packages/website-starlight/src/components/Editor.astro`
-- Modify: `typescript/packages/website-starlight/src/scripts/editor-mount.ts`
-- Modify: `typescript/packages/website-starlight/src/content/docs/index.mdx`
+- Create: `typescript/packages/website/src/components/File.astro`
+- Modify: `typescript/packages/website/src/components/Editor.astro`
+- Modify: `typescript/packages/website/src/scripts/editor-mount.ts`
+- Modify: `typescript/packages/website/src/content/docs/index.mdx`
 
 **Interfaces:**
 - Produces: `<File uri="...">` (default-slot doc, or named `<Fragment slot="...">` children for states) renders `<div data-var-file data-uri data-doc data-states?>`.
@@ -66,7 +66,7 @@ No other package is touched.
 
 - [ ] **Step 1: Write `File.astro`**
 
-Create `typescript/packages/website-starlight/src/components/File.astro`:
+Create `typescript/packages/website/src/components/File.astro`:
 
 ```astro
 ---
@@ -105,7 +105,7 @@ const hasStates = states.length >= 2
 
 - [ ] **Step 2: Rewrite `Editor.astro`**
 
-Replace the full contents of `typescript/packages/website-starlight/src/components/Editor.astro`:
+Replace the full contents of `typescript/packages/website/src/components/Editor.astro`:
 
 ```astro
 ---
@@ -186,7 +186,7 @@ const { lineNumbers = false, folding = false, define = true, replayMs = 100 } = 
 
 - [ ] **Step 3: Rewrite `editor-mount.ts`**
 
-Replace the full contents of `typescript/packages/website-starlight/src/scripts/editor-mount.ts`:
+Replace the full contents of `typescript/packages/website/src/scripts/editor-mount.ts`:
 
 ```ts
 import { javascript } from '@codemirror/lang-javascript'
@@ -489,7 +489,7 @@ mountAll()
 
 - [ ] **Step 4: Migrate `index.mdx` to the new API**
 
-In `typescript/packages/website-starlight/src/content/docs/index.mdx`, replace the import block and the `<Tabs>` block:
+In `typescript/packages/website/src/content/docs/index.mdx`, replace the import block and the `<Tabs>` block:
 
 ```mdx
 import { Card, CardGrid, Tabs, TabItem } from '@astrojs/starlight/components';
@@ -527,7 +527,7 @@ Not a snippet — the whole file, unmodified, running in this repo's own test su
 From `typescript/`:
 
 ```bash
-pnpm --filter @oselvar/website-starlight build
+pnpm --filter @oselvar/website build
 ```
 
 Expected: exit 0. If there are TypeScript errors in `editor-mount.ts` (e.g. a typo in a property name), fix them before proceeding — don't skip ahead with a broken build.
@@ -541,8 +541,8 @@ This package has no unit tests for this code (established pattern in both sites 
 4. Injects a throwaway multi-state `<File>` (via `page.evaluate` DOM manipulation, not committed content) to verify the footer appears with the right number of state buttons and hides when switching to a single-state file.
 
 ```bash
-cd typescript && pnpm --filter @oselvar/website-starlight build
-cd packages/website-starlight && (nohup pnpm preview --port 4400 > /tmp/preview-task1.log 2>&1 &)
+cd typescript && pnpm --filter @oselvar/website build
+cd packages/website && (nohup pnpm preview --port 4400 > /tmp/preview-task1.log 2>&1 &)
 sleep 3
 curl -s -o /dev/null -w "%{http_code}\n" http://localhost:4400/ --max-time 5
 ```
@@ -629,7 +629,7 @@ Stop the preview server: find its PID via `lsof -iTCP -sTCP:LISTEN -P | grep 440
 
 Neither Yahtzee nor Roman numerals uses multi-state `<File>`, so the footer logic needs its own exercise. Create a temporary page (same mechanism `index.mdx` already uses — a file under `content/docs/`, guaranteed to build and route correctly), verify it, then delete it before committing — it must not survive into the final commit.
 
-Create `typescript/packages/website-starlight/src/content/docs/scratch-states-test.mdx`:
+Create `typescript/packages/website/src/content/docs/scratch-states-test.mdx`:
 
 ```mdx
 ---
@@ -654,8 +654,8 @@ world</Fragment>
 Build and preview:
 
 ```bash
-cd typescript && pnpm --filter @oselvar/website-starlight build
-cd packages/website-starlight && (nohup pnpm preview --port 4402 > /tmp/preview-task1b.log 2>&1 &)
+cd typescript && pnpm --filter @oselvar/website build
+cd packages/website && (nohup pnpm preview --port 4402 > /tmp/preview-task1b.log 2>&1 &)
 sleep 3
 curl -s -o /dev/null -w "%{http_code}\n" http://localhost:4402/scratch-states-test/ --max-time 5
 ```
@@ -716,7 +716,7 @@ Expected: `ALL STATE CHECKS PASSED`, no thrown errors, `page errors: []`.
 Stop the preview server (port 4402), then delete the throwaway page — it must not be committed:
 
 ```bash
-rm typescript/packages/website-starlight/src/content/docs/scratch-states-test.mdx
+rm typescript/packages/website/src/content/docs/scratch-states-test.mdx
 ```
 
 - [ ] **Step 7: Full workspace gate**
@@ -733,12 +733,12 @@ Expected: both exit 0.
 - [ ] **Step 8: Commit**
 
 ```bash
-git add typescript/packages/website-starlight/src/components/File.astro \
-        typescript/packages/website-starlight/src/components/Editor.astro \
-        typescript/packages/website-starlight/src/scripts/editor-mount.ts \
-        typescript/packages/website-starlight/src/content/docs/index.mdx
+git add typescript/packages/website/src/components/File.astro \
+        typescript/packages/website/src/components/Editor.astro \
+        typescript/packages/website/src/scripts/editor-mount.ts \
+        typescript/packages/website/src/content/docs/index.mdx
 git commit -m "$(cat <<'EOF'
-feat(website-starlight): Editor/File multi-file tabs, no more steps/chrome/group props
+feat(website): Editor/File multi-file tabs, no more steps/chrome/group props
 
 <Editor><File uri>…</File></Editor> replaces <Editor uri chrome
 steps group> — every file (spec + step files) is now an explicit,
@@ -774,9 +774,9 @@ EOF
 ## Task 2: MessageChannel handshake — derive the LSP seed from the live DOM
 
 **Files:**
-- Modify: `typescript/packages/website-starlight/src/lib/worker-transport.ts`
-- Modify: `typescript/packages/website-starlight/src/lib/var-worker.ts`
-- Modify: `typescript/packages/website-starlight/src/scripts/editor-mount.ts`
+- Modify: `typescript/packages/website/src/lib/worker-transport.ts`
+- Modify: `typescript/packages/website/src/lib/var-worker.ts`
+- Modify: `typescript/packages/website/src/scripts/editor-mount.ts`
 
 **Interfaces:**
 - Consumes: `readFiles(editorEl)` and `mountAll()` from Task 1 — extended, not replaced.
@@ -784,7 +784,7 @@ EOF
 
 - [ ] **Step 1: Widen `worker-transport.ts` to accept a `MessagePort`**
 
-Replace the full contents of `typescript/packages/website-starlight/src/lib/worker-transport.ts`:
+Replace the full contents of `typescript/packages/website/src/lib/worker-transport.ts`:
 
 ```ts
 import type { Transport } from '@codemirror/lsp-client'
@@ -819,7 +819,7 @@ export function workerTransport(port: PortLike): Transport {
 
 - [ ] **Step 2: Rewrite `var-worker.ts` to receive its seed via a handshake**
 
-Replace the full contents of `typescript/packages/website-starlight/src/lib/var-worker.ts`:
+Replace the full contents of `typescript/packages/website/src/lib/var-worker.ts`:
 
 ```ts
 import { DEFAULT_SNIPPET_TEMPLATE } from '@oselvar/var-core'
@@ -883,7 +883,7 @@ self.onmessage = (e: MessageEvent<{ seed: Record<string, string> }>) => {
 
 - [ ] **Step 3: Collect the page-wide seed and hand off the dedicated port in `editor-mount.ts`**
 
-In `typescript/packages/website-starlight/src/scripts/editor-mount.ts`, replace the `lspClient` function and its call site:
+In `typescript/packages/website/src/scripts/editor-mount.ts`, replace the `lspClient` function and its call site:
 
 ```ts
 // Replace this:
@@ -939,7 +939,7 @@ function lspClient(): LSPClient {
 - [ ] **Step 4: Build**
 
 ```bash
-cd typescript && pnpm --filter @oselvar/website-starlight build
+cd typescript && pnpm --filter @oselvar/website build
 ```
 
 Expected: exit 0. If `var-worker.ts` has a type error on `e.ports[0]` or the `BrowserMessageReader`/`Writer` cast, resolve it — the cast to `DedicatedWorkerGlobalScope` mirrors the existing pattern the old code already used for `self`, just applied to `port` instead.
@@ -947,7 +947,7 @@ Expected: exit 0. If `var-worker.ts` has a type error on `e.ports[0]` or the `Br
 - [ ] **Step 5: Playwright verification — semantic highlighting still works with the dynamic seed**
 
 ```bash
-cd packages/website-starlight && (nohup pnpm preview --port 4401 > /tmp/preview-task2.log 2>&1 &)
+cd packages/website && (nohup pnpm preview --port 4401 > /tmp/preview-task2.log 2>&1 &)
 sleep 3
 curl -s -o /dev/null -w "%{http_code}\n" http://localhost:4401/ --max-time 5
 ```
@@ -1013,11 +1013,11 @@ Expected: both exit 0.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add typescript/packages/website-starlight/src/lib/worker-transport.ts \
-        typescript/packages/website-starlight/src/lib/var-worker.ts \
-        typescript/packages/website-starlight/src/scripts/editor-mount.ts
+git add typescript/packages/website/src/lib/worker-transport.ts \
+        typescript/packages/website/src/lib/var-worker.ts \
+        typescript/packages/website/src/scripts/editor-mount.ts
 git commit -m "$(cat <<'EOF'
-feat(website-starlight): derive LSP seed from the live DOM, not a hardcoded list
+feat(website): derive LSP seed from the live DOM, not a hardcoded list
 
 var-worker.ts's SEED_FILES map + raw imports of every example file
 (hand-maintained, edited twice this session for two new examples) is
@@ -1046,7 +1046,7 @@ EOF
 ## Task 3: Delete dead code, final verification
 
 **Files:**
-- Delete: `typescript/packages/website-starlight/src/lib/idb-file-system.ts`
+- Delete: `typescript/packages/website/src/lib/idb-file-system.ts`
 
 **Interfaces:**
 - Consumes: nothing from Task 1/2 directly — this is cleanup.
@@ -1055,15 +1055,15 @@ EOF
 - [ ] **Step 1: Confirm it's truly unreferenced**
 
 ```bash
-cd typescript && grep -rl "idb-file-system\|createIdbFileSystem" packages/website-starlight/src
+cd typescript && grep -rl "idb-file-system\|createIdbFileSystem" packages/website/src
 ```
 
-Expected: only `packages/website-starlight/src/lib/idb-file-system.ts` itself (self-reference in its own file, e.g. a comment or its own definition) — no other file imports it. If anything else matches, stop and investigate before deleting.
+Expected: only `packages/website/src/lib/idb-file-system.ts` itself (self-reference in its own file, e.g. a comment or its own definition) — no other file imports it. If anything else matches, stop and investigate before deleting.
 
 - [ ] **Step 2: Delete it**
 
 ```bash
-rm typescript/packages/website-starlight/src/lib/idb-file-system.ts
+rm typescript/packages/website/src/lib/idb-file-system.ts
 ```
 
 - [ ] **Step 3: Full workspace gate**
@@ -1077,9 +1077,9 @@ Expected: both exit 0. `knip` should not newly flag anything related to this fil
 - [ ] **Step 4: Commit**
 
 ```bash
-git add -u typescript/packages/website-starlight/src/lib/idb-file-system.ts
+git add -u typescript/packages/website/src/lib/idb-file-system.ts
 git commit -m "$(cat <<'EOF'
-chore(website-starlight): delete idb-file-system.ts, superseded by memory-file-system.ts
+chore(website): delete idb-file-system.ts, superseded by memory-file-system.ts
 
 Dead since var-worker.ts switched to createMemoryFileSystem — nothing
 imports it anymore. Confirmed via grep before deleting.

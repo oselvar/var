@@ -64,12 +64,12 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm --filter @oselvar/website-starlight... build
+      - run: pnpm --filter @oselvar/website... build
 
       - uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: typescript/packages/website-starlight
+          workingDirectory: typescript/packages/website
           wranglerVersion: "4"
           packageManager: pnpm

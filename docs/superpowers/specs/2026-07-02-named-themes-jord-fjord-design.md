@@ -53,5 +53,5 @@ needs no attribute). Default with nothing stored: Jord.
 
 ## Verification
 
-`pnpm --filter @oselvar/website-starlight build` plus dev-server screenshots of
+`pnpm --filter @oselvar/website build` plus dev-server screenshots of
 all four combinations (Jord/Fjord × dark/light) including the live editor.

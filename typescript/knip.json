@@ -50,5 +50,5 @@
       "ignoreDependencies": ["@oselvar/var-core"]
     }
   },
-  "ignore": ["**/tests/fixtures/**"]
+  "ignore": ["**/tests/fixtures/**", "packages/website/drafts/**"]
 }

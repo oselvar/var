@@ -801,7 +801,7 @@ git commit -m "feat(typescript): consume var.config.json in vitest plugin, CLI, 
 - Modify: `typescript/packages/var-lsp/src/store.ts` (lines 52-53, 68-72)
 - Modify: `typescript/packages/var-lsp/src/store.test.ts`, `typescript/packages/var-lsp/tests/handlers.test.ts` (fixture sweep)
 - Modify: `typescript/packages/var-vscode/package.json:21` (activation event)
-- Modify: `typescript/packages/website/src/lib/var-worker.ts:33-37`, `typescript/packages/website-starlight/src/lib/var-worker.ts:11-15`
+- Modify: `typescript/packages/website/src/lib/var-worker.ts:33-37`, `typescript/packages/website/src/lib/var-worker.ts:11-15`
 - Modify: `typescript/knip.json:49`, `typescript/tsconfig.tests.json` (drop var.config.ts references)
 - Modify: `CLAUDE.md` (3 references), `typescript/packages/cucumber/README.md:38,82`, `typescript/packages/website/src/content/docs/guides/install-var.md:32,37`
 
@@ -839,7 +839,7 @@ CRITICAL: the old fixtures relied on the now-deleted default steps glob (`**/*.s
 
 `typescript/packages/var-vscode/package.json` line 21: `"workspaceContains:**/var.config.ts"` → `"workspaceContains:**/var.config.json"`.
 
-In both `typescript/packages/website/src/lib/var-worker.ts` and `typescript/packages/website-starlight/src/lib/var-worker.ts`, the hardcoded config literal becomes:
+In both `typescript/packages/website/src/lib/var-worker.ts` and `typescript/packages/website/src/lib/var-worker.ts`, the hardcoded config literal becomes:
 
 ```ts
 const config = {

@@ -1,4 +1,4 @@
-# Config-driven step-file recognition (var-vscode + website-starlight)
+# Config-driven step-file recognition (var-vscode + website)
 
 Date: 2026-07-01
 Status: design, pending implementation (TDD)
@@ -14,7 +14,7 @@ sub-projects.
 
 Investigated every hardcoded `.steps.ts` literal across the workspace before
 scoping this. Several are legitimate and stay untouched: demo-content file
-imports in `website`/`website-starlight` (`hello-var.steps.ts`,
+imports in `website`/`website` (`hello-var.steps.ts`,
 `yahtzee.steps.ts` — fixed TypeScript example content, bundled at build time,
 unrelated to what a *user's* project might be written in), and
 TypeScript-diagnostics test fixtures (`ts-diagnostics.test.ts` — inherently
@@ -29,17 +29,17 @@ TS-scoped, not a step-file-recognition concern). The five that are real
 3. `var-vscode/src/extension.ts:154` — `findStepFiles`'s stale fallback
    (`stepGlobs.length > 0 ? stepGlobs : ['**/*.steps.ts']`), even though this
    function already receives real `stepGlobs` from the LSP.
-4. `website-starlight/src/lib/run-grouping.ts:46` — filters an editor group's
+4. `website/src/lib/run-grouping.ts:46` — filters an editor group's
    views down to "the step-def files" via `.endsWith('.steps.ts')`.
-5. `website-starlight/src/scripts/editor-mount.ts` — the `stepsView` finder,
+5. `website/src/scripts/editor-mount.ts` — the `stepsView` finder,
    same `.endsWith('.steps.ts')` check.
 
-**`website` (the package `website-starlight` is strangler-fig-replacing) is
+**`website` (the package `website` is strangler-fig-replacing) is
 explicitly out of scope** — same bug exists there (`run-grouping.ts`,
-`editor-mount.ts`), but since `website-starlight` is the near-future
+`editor-mount.ts`), but since `website` is the near-future
 replacement, fixing the package being retired isn't worth the effort.
 
-**`website-starlight/src/scripts/editor-mount.ts`'s CodeMirror
+**`website/src/scripts/editor-mount.ts`'s CodeMirror
 syntax-highlighting selector (`file.uri.endsWith('.ts') ? 'typescript' :
 'markdown'`) is explicitly out of scope** — mapping a file extension to a
 syntax-highlighting mode is a fundamentally different concern from
@@ -47,26 +47,26 @@ recognizing step-definition files. It always needs its own extension→mode
 table regardless of what the `steps` glob is configured to; there's no
 "config-driven" version of it to build here.
 
-## Why `website-starlight` needs more than a literal swap
+## Why `website` needs more than a literal swap
 
 Unlike `var-vscode` (which already fetches real `stepGlobs` from the LSP via
 `lspClient.sendRequest('var/stepGlobs')` for `findStepFiles`, per item 3
-above), `website-starlight`'s browser worker never exposes `stepGlobs` over
+above), `website`'s browser worker never exposes `stepGlobs` over
 the wire in the first place — even though the shared `var-lsp` server code it
 runs already handles that request identically to the Node case (`var-lsp`'s
 `registerHandlers`/`server.ts` is the same module in both environments,
-confirmed by both `website`'s and `website-starlight`'s `var-worker.ts`
+confirmed by both `website`'s and `website`'s `var-worker.ts`
 importing it from `@oselvar/var-lsp`). This is purely a missing client-side
 call, not a missing server capability.
 
-Confirmed technically feasible: `website-starlight` uses
+Confirmed technically feasible: `website` uses
 `@codemirror/lsp-client`'s `LSPClient` (not `vscode-languageclient`, which
 `var-vscode` uses), but it exposes the same shape of capability —
 `request<Params, Result>(method: string, params: Params): Promise<Result>` —
 so `client.request('var/stepGlobs', {})` works the same way
 `var-vscode`'s `sendRequest('var/stepGlobs')` already does.
 
-**The practical payoff differs from `var-vscode`'s.** `website-starlight`'s
+**The practical payoff differs from `var-vscode`'s.** `website`'s
 demo content is fixed TypeScript (`hello-var.steps.ts`, `yahtzee.steps.ts`,
 imported via `?raw` at build time) regardless of this change — a real
 non-TypeScript project can't be loaded into the browser demo today or in any
@@ -102,7 +102,7 @@ of a hardcoded string, e.g. distinguishing "no step files matching your
 configured glob(s)" from a generic message — exact wording is an
 implementation detail for the plan.
 
-### `website-starlight`
+### `website`
 
 1. Add the one-time `client.request('var/stepGlobs', {})` call to
    `editor-mount.ts`, following the same one-shared-client,
@@ -126,12 +126,12 @@ implementation detail for the plan.
 
 ## Testing
 
-Neither `var-vscode` nor `website-starlight` has any existing test files.
+Neither `var-vscode` nor `website` has any existing test files.
 `var-vscode` has no test harness at all (VS Code extension testing needs the
 VS Code test runner, out of scope to stand up here) — verification there is
 type-check plus manual reasoning about the sequencing change.
 
-`website-starlight`, by contrast, gets real unit-testable pure logic out of
+`website`, by contrast, gets real unit-testable pure logic out of
 this change (the glob-matching helper, `groupRunInputs`'s filter). This is a
 natural place to add the package's first tests, mirroring `website`'s
 existing (superseded but still-present) `run-grouping.test.ts` fixture
@@ -142,7 +142,7 @@ instead of hardcoded.
 
 ## Out of scope
 
-- Fixing `website` (superseded by `website-starlight`).
+- Fixing `website` (superseded by `website`).
 - `editor-mount.ts`'s syntax-highlighting language-mode selector (different
   concern, see above).
 - Any actual Python `.steps.py` support in either package's UI — this only

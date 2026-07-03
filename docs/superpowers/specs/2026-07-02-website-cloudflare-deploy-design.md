@@ -1,11 +1,11 @@
-# Deploy website-starlight to var.oselvar.com
+# Deploy website to var.oselvar.com
 
 Date: 2026-07-02
 Status: approved
 
 ## Goal
 
-Build and deploy `typescript/packages/website-starlight` to https://var.oselvar.com
+Build and deploy `typescript/packages/website` to https://var.oselvar.com
 on every green build of `main`, deployed from GitHub via Cloudflare.
 
 ## Decisions
@@ -22,7 +22,7 @@ on every green build of `main`, deployed from GitHub via Cloudflare.
 
 ## Components
 
-- `typescript/packages/website-starlight/wrangler.jsonc`
+- `typescript/packages/website/wrangler.jsonc`
   - Worker name `var-website`
   - `assets: { directory: "./dist", not_found_handling: "404-page" }`
     (Starlight emits `404.html`)
@@ -30,7 +30,7 @@ on every green build of `main`, deployed from GitHub via Cloudflare.
     creates the DNS record and certificate on the oselvar.com zone.
 - `astro.config.mjs`: add `site: 'https://var.oselvar.com'` for canonical URLs.
 - `deploy-website` job: checkout → pnpm install →
-  `pnpm --filter @oselvar/website-starlight... build` (builds workspace deps first) →
+  `pnpm --filter @oselvar/website... build` (builds workspace deps first) →
   `cloudflare/wrangler-action` with `workingDirectory` pointing at the package.
   Concurrency group `deploy-website` so overlapping merges don't race.
 
