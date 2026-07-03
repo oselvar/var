@@ -19,6 +19,26 @@ hand. The `[Unreleased]` section is refreshed by CI on every push to `main`.
 
 ### Specification (all ports)
 
+- ⚠️ **Breaking:** Sensors return a single parameter, table or doc string bare — positional arrays only for two or more values
+  sensors no longer wrap a single comparison value in an
+array/list/tuple. When a step has exactly one comparison slot (one
+expression parameter, or just a trailing table/doc string), return the
+value itself: `return total`, not `return [total]`. Keep the positional
+array only when there are two or more slots. A sensor with no slots must
+return nothing — returning a value now raises ReturnShapeError (throw to
+fail instead). Single-slot returns are never read as positional arrays,
+so a custom parameter type transforming to an array is deep-compared
+as-is.
+- ⚠️ **Breaking:** Context and action merge into a single stimulus step kind — defineState returns { stimulus, sensor }
+  the context and action step kinds are gone; register
+both kinds of step with stimulus instead (TS/Kotlin `stimulus(...)`,
+Python `@stimulus(...)`, Java `s.stimulus(...)`). Behaviour is
+unchanged — a stimulus evolves state exactly as context/action did, and
+sensors are untouched. The arrange/act (given/when) concepts remain
+useful narration in your Markdown, but they share one mechanism.
+Snippet generation now infers stimulus for any step with steps after it
+and sensor for the last one, and generated snippets offer the other
+role as a single commented alternative.
 - Added: Conformance pins each failure's anchor span, so a mismatch points at its first failing cell in every port
 
 ## [0.2.0] - 2026-07-03
