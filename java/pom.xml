@@ -129,6 +129,28 @@
             <phase>verify</phase>
             <goals><goal>report</goal></goals>
           </execution>
+          <!-- Ratchet: 0.75 sits just under the weakest module measured when
+               the threshold was introduced (2026-07-03: var-kotlin 76.9%;
+               the strongest, var-runner, was 93.9%). Raise as coverage
+               grows; never lower. -->
+          <execution>
+            <id>check</id>
+            <goals><goal>check</goal></goals>
+            <configuration>
+              <rules>
+                <rule>
+                  <element>BUNDLE</element>
+                  <limits>
+                    <limit>
+                      <counter>LINE</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.75</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
     </plugins>
