@@ -11,6 +11,29 @@ hand. The `[Unreleased]` section is refreshed by CI on every push to `main`.
 
 ## [Unreleased]
 
+### TypeScript (npm)
+
+- ⚠️ **Breaking:** **var-lsp:** Var/stepGlobs reports each step glob's language
+  the `var/stepGlobs` custom request now returns
+`ReadonlyArray<StepGlob>` (`{ glob, language? }`) instead of
+`ReadonlyArray<string>`; clients should filter globs by the `language`
+field rather than classifying file paths themselves.
+- ⚠️ **Breaking:** Packages no longer re-export other packages' APIs
+  import VarConfig, loadVarConfig (was readVarConfig) and
+findFiles (was findSpecs) from @oselvar/var-config; VarDoc and
+resolveScannerPlugins from @oselvar/var-core; StepDef from
+@oselvar/var-language. @oselvar/var-vitest/runtime's collectVarExamples
+now takes scanner-plugin names (strings) instead of resolved plugin
+instances.
+- Fixed: **var-vitest:** Generated modules import runtime helpers from @oselvar/var-vitest/runtime
+- Fixed: **var-cli:** Installing @oselvar/var-cli no longer pulls in @oselvar/var
+
+### Python (PyPI)
+
+- ⚠️ **Breaking:** **var-runner:** Var_runner no longer re-exports var_config's API
+  import VarConfig and read_var_config from var_config
+instead of var_runner.
+
 ## [0.1.0]
 
 ### Added
