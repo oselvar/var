@@ -15,7 +15,7 @@ import org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine;
  * <p>Registered via {@code META-INF/services/org.junit.platform.engine.TestEngine} —
  * installing the {@code var-junit} dependency is the entire integration story; no user
  * wiring is required (mirrors {@code var-pytest}'s {@code pytest11} entry-point
- * ergonomics). See {@code docs/adr/0003-java-junit-integration.md}.
+ * ergonomics). See {@code doc/adr/0003-java-junit-integration.md}.
  *
  * <p>{@link #discover} loads every {@code steps} class named by var.config.json exactly once per
  * discovery pass ({@link StepLoader#loadSteps}, mirroring Python's {@code pytest_configure}) —

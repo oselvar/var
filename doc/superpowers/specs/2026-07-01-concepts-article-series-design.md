@@ -25,7 +25,7 @@ before writing a word:
    themselves mini-arguments; short code blocks and the occasional 2-column
    table; every piece ends in a forward link. No hedging, no marketing fluff.
 2. **The technical backing for article #4** — read the "Ports & injection" section
-   of `docs/superpowers/specs/2026-06-30-cross-implementation-consistency-design.md`.
+   of `doc/superpowers/specs/2026-06-30-cross-implementation-consistency-design.md`.
    That is the concrete truth behind #4's "test at any level" claim: Vár's pure
    core receives only **injected data + port callbacks** (a `sink`, a `reporter`,
    `createContext`); an "adapter" is *just* those port implementations, so a

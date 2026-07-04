@@ -17,7 +17,7 @@
 - **Corpus step-defs must be deterministic** — no time, randomness, or I/O — so traces are reproducible across languages.
 - **Conformance covers the *runner*** (parse → match → plan → execute). `registry.json` is built from *executed* step-defs (runtime self-registration), never static source parsing.
 
-Spec: [`docs/superpowers/specs/2026-06-28-conformance-infrastructure-design.md`](../specs/2026-06-28-conformance-infrastructure-design.md).
+Spec: [`doc/superpowers/specs/2026-06-28-conformance-infrastructure-design.md`](../specs/2026-06-28-conformance-infrastructure-design.md).
 
 ---
 

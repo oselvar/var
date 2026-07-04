@@ -16,7 +16,7 @@
   <description>
     Reads var.config.json, the shared config file for all var tools (see
     conformance/config/README.md and
-    docs/superpowers/specs/2026-07-02-multi-language-authoring-design.md).
+    doc/superpowers/specs/2026-07-02-multi-language-authoring-design.md).
     Zero runtime dependencies: JSON parsing is hand-rolled, mirroring
     var-core's hand-rolled CanonicalJson writer.
   </description>

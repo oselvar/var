@@ -16,8 +16,8 @@
   <description>
     Custom JUnit Platform TestEngine (id "var") turning .md specs into first-class,
     individually selectable JUnit tests — one container per spec file, one leaf per
-    example. See docs/adr/0003-java-junit-integration.md and
-    docs/superpowers/specs/2026-07-01-java-junit-engine-design.md.
+    example. See doc/adr/0003-java-junit-integration.md and
+    doc/superpowers/specs/2026-07-01-java-junit-engine-design.md.
   </description>
 
   <dependencies>

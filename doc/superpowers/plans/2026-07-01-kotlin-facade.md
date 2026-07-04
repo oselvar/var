@@ -5,7 +5,7 @@
 **Goal:** An idiomatic Kotlin authoring API (top-level `val steps = defineState(::Ctx) { … }`) over the existing Java engine, runnable through both the `var-junit` JUnit Platform engine and a new Kotest adapter, gated by the registry-stage conformance corpus.
 
 **Architecture:** Kotlin does NOT re-port the pipeline (see
-`docs/superpowers/specs/2026-07-01-kotlin-facade-design.md`). `defineState`
+`doc/superpowers/specs/2026-07-01-kotlin-facade-design.md`). `defineState`
 returns an inert, replayable `com.oselvar.var.StepDefinitions` — the DSL block
 is stored unexecuted and replayed against whatever fresh `Registrar` the shell
 injects, preserving the Java port's no-static-accumulator principle. State is
@@ -248,7 +248,7 @@ and to `<properties>`:
   <name>var (Kotlin) — author facade over the Java engine</name>
   <description>
     Idiomatic Kotlin authoring API layered on the Java engine — no second
-    pipeline port (see docs/superpowers/specs/2026-07-01-kotlin-facade-design.md).
+    pipeline port (see doc/superpowers/specs/2026-07-01-kotlin-facade-design.md).
     Author-facing package is com.oselvar.varkt because `var` is a Kotlin hard
     keyword and would force back-ticked imports.
   </description>
@@ -1861,7 +1861,7 @@ git commit -m "feat(kotest): var-kotest module with VarSpec adapter"
 ### Task 10: Full-reactor gate + spec status
 
 **Files:**
-- Modify: `docs/superpowers/specs/2026-07-01-kotlin-facade-design.md` (status line only)
+- Modify: `doc/superpowers/specs/2026-07-01-kotlin-facade-design.md` (status line only)
 
 - [ ] **Step 1: Run everything**
 
@@ -1870,7 +1870,7 @@ Expected: BUILD SUCCESS across all six modules (`var-core`, `var`, `var-runner`,
 
 - [ ] **Step 2: Update the spec status**
 
-In `docs/superpowers/specs/2026-07-01-kotlin-facade-design.md`, change:
+In `doc/superpowers/specs/2026-07-01-kotlin-facade-design.md`, change:
 
 ```markdown
 Status: design
@@ -1879,13 +1879,13 @@ Status: design
 to:
 
 ```markdown
-Status: implemented (see docs/superpowers/plans/2026-07-01-kotlin-facade.md)
+Status: implemented (see doc/superpowers/plans/2026-07-01-kotlin-facade.md)
 ```
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add docs/superpowers/specs/2026-07-01-kotlin-facade-design.md
+git add doc/superpowers/specs/2026-07-01-kotlin-facade-design.md
 git commit -m "docs: mark Kotlin facade design as implemented"
 ```
 

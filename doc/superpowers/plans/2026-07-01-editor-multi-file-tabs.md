@@ -17,7 +17,7 @@
 - `BrowserMessageReader`'s constructor does `port.onmessage = this._messageListener` (verified against `node_modules/vscode-jsonrpc@8.2.0/lib/browser/main.js:35`) — a direct property assignment, not `addEventListener`. The LSP seed handshake must use a dedicated `MessagePort` handed to the worker in one message; it must never share `self`'s default channel with ongoing LSP traffic.
 - Every task ends with `pnpm -r build` and `pnpm check` (from `typescript/`) exiting 0, plus a Playwright-verified manual check (this package has no existing unit tests for `Editor.astro`/`editor-mount.ts`/`var-worker.ts` in either site — that's the established testing pattern here, not a gap to fix in this plan).
 
-**Spec:** `docs/superpowers/specs/2026-07-01-editor-multi-file-tabs-design.md`
+**Spec:** `doc/superpowers/specs/2026-07-01-editor-multi-file-tabs-design.md`
 
 ---
 

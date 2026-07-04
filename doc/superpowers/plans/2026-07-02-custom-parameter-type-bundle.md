@@ -6,7 +6,7 @@
 
 **Architecture:** No port currently projects custom parameter types into the registry artifact — every harness emits `parameterTypes: []` unconditionally. Tasks 1–3 add the plumbing per port (Java: track custom types on the `Registry` record so `toRegistryArtifact(registry)` needs no signature change; TS/Python: expose the facade's accumulated custom types via an internal accessor and pass them through the harness). Task 4 lands the bundle itself — `example.md`, four fixtures, four goldens, and the Java/Kotlin fixture registrations — in ONE commit, because the Java and Kotlin conformance tests throw on a bundle directory with no registered fixture. The transformer is load-bearing: the action stores the LOWERCASED airport code and the sensor compares it against a lowercase `{word}` in the Markdown, so an identity transformer fails the trace stage.
 
-**Tech Stack:** TypeScript strict/ESM (pnpm, vitest, tsx), Python ≥3.11 (uv, pytest), Java 21 (Maven, JUnit Jupiter), Kotlin 2.4 facade. Spec: `docs/superpowers/specs/2026-07-02-multi-language-authoring-design.md` (Sub-project B).
+**Tech Stack:** TypeScript strict/ESM (pnpm, vitest, tsx), Python ≥3.11 (uv, pytest), Java 21 (Maven, JUnit Jupiter), Kotlin 2.4 facade. Spec: `doc/superpowers/specs/2026-07-02-multi-language-authoring-design.md` (Sub-project B).
 
 ## Global Constraints
 
@@ -665,13 +665,13 @@ git commit -m "feat(conformance): bundle 13-custom-parameter-type — first cust
 ### Task 5: Spec bookkeeping
 
 **Files:**
-- Modify: `docs/superpowers/specs/2026-07-02-multi-language-authoring-design.md` (Status line)
+- Modify: `doc/superpowers/specs/2026-07-02-multi-language-authoring-design.md` (Status line)
 
 - [ ] **Step 1: Update the spec status and commit**
 
 Change the Status line to `**Status:** Sub-projects A and B implemented; C–D unimplemented`.
 
 ```bash
-git add docs/superpowers/specs/2026-07-02-multi-language-authoring-design.md
+git add doc/superpowers/specs/2026-07-02-multi-language-authoring-design.md
 git commit -m "docs: mark custom-parameter-type bundle (sub-project B) implemented"
 ```

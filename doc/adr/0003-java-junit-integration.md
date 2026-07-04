@@ -143,5 +143,5 @@ examples, the one property that most differentiates `var`'s adapters from a plai
   `org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine`
 - [ADR 0001 — second language (Python)](0001-second-language-python.md) — the
   per-language seam this ADR fills in for Java's runtime/test-runner adapter.
-- `docs/superpowers/specs/2026-07-01-java-junit-engine-design.md` — the concrete
+- `doc/superpowers/specs/2026-07-01-java-junit-engine-design.md` — the concrete
   `var-runner`/`var-junit` design this decision feeds.

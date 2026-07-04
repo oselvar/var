@@ -17,7 +17,7 @@
 - Every task ends green: `pnpm --filter @oselvar/website build` (from `typescript/`) exits 0. Final task additionally requires `pnpm check` (lint + typecheck + test + knip + jscpd) green, matching this repo's standard done-bar.
 - Commit after each task.
 
-**Spec:** `docs/superpowers/specs/2026-07-01-website-scaffold-design.md`
+**Spec:** `doc/superpowers/specs/2026-07-01-website-scaffold-design.md`
 
 ---
 
@@ -33,7 +33,7 @@
 - Font stack used site-wide today (`packages/website/src/styles/global.css:10`): `'Source Sans 3 Variable', 'Source Sans 3', system-ui, sans-serif`.
 - `pnpm check` (root) passed with the scaffolded package present, *after* one `biome` auto-fix pass on the 3 generated files that used double quotes/semicolons/unsorted imports (`astro.config.mjs`, `content.config.ts`) — no `knip.json`/`.jscpd.json` changes were needed; knip's only output was pre-existing configuration hints unrelated to the new package, and jscpd found 0 clones.
 
-## Earthy palette source values (from `docs/superpowers/specs/2026-06-26-earthy-color-scheme-design.md`)
+## Earthy palette source values (from `doc/superpowers/specs/2026-06-26-earthy-color-scheme-design.md`)
 
 | Role | Light | Dark (warm-dark) |
 |---|---|---|
@@ -155,7 +155,7 @@ git commit -m "$(cat <<'EOF'
 feat(website): scaffold Starlight docs site
 
 Sub-project 1 of the strangler-fig migration off the hand-built
-website package (docs/superpowers/specs/2026-07-01-website-scaffold-design.md).
+website package (doc/superpowers/specs/2026-07-01-website-scaffold-design.md).
 Bare Starlight template, no content migrated, coexists unlinked and
 undeployed alongside @oselvar/website.
 EOF
@@ -181,7 +181,7 @@ Create `packages/website/src/styles/custom.css`:
 ```css
 /*
  * Vár earthy palette, ported from
- * docs/superpowers/specs/2026-06-26-earthy-color-scheme-design.md
+ * doc/superpowers/specs/2026-06-26-earthy-color-scheme-design.md
  * onto Starlight's own theming variables. Dark is the default `:root`
  * (Starlight's convention); light overrides live under
  * `:root[data-theme='light']`. accent-low is a derived subtle wash in

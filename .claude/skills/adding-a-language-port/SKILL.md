@@ -16,12 +16,12 @@ byte-for-byte — never by writing fresh tests against a new spec.
 Two docs are the primary source for this skill and are worth reading in full
 before starting a new port, not just skimming this summary:
 
-- `docs/adr/0001-second-language-python.md` — the seams table (shared vs.
+- `doc/adr/0001-second-language-python.md` — the seams table (shared vs.
   per-language), the tree-sitter/LSP direction, the conformance strategy.
-- `docs/superpowers/specs/2026-06-30-python-core-port-design.md` and
-  `docs/superpowers/specs/2026-06-30-var-pytest-plugin-design.md` — the
+- `doc/superpowers/specs/2026-06-30-python-core-port-design.md` and
+  `doc/superpowers/specs/2026-06-30-var-pytest-plugin-design.md` — the
   concrete design the Python port followed, plus their matching plans in
-  `docs/superpowers/plans/` (including `2026-06-30-python-core-split.md`,
+  `doc/superpowers/plans/` (including `2026-06-30-python-core-split.md`,
   which lives in `plans/`, not `specs/`) showing the actual task-by-task
   execution.
 
@@ -55,12 +55,12 @@ split**, don't repeat that refactor.
 
 1. **ADR** only if *which* language is still an open strategic question —
    skip if already decided (Java, then Kotlin, are already chosen).
-2. **Design spec doc(s)** in `docs/superpowers/specs/YYYY-MM-DD-<lang>-*.md`.
+2. **Design spec doc(s)** in `doc/superpowers/specs/YYYY-MM-DD-<lang>-*.md`.
    Split into the same two sub-projects Python used: (a) the pure core +
    facade, (b) the runner + one test-framework adapter. Each doc names the
    exact TS source module it's porting — a port translates the cited
    algorithm, it does not redesign it.
-3. **Task plan doc(s)** in `docs/superpowers/plans/YYYY-MM-DD-<lang>-*.md`,
+3. **Task plan doc(s)** in `doc/superpowers/plans/YYYY-MM-DD-<lang>-*.md`,
    TDD task-by-task (write the translated unit test, watch it fail, port the
    module, gate on conformance, commit). **REQUIRED SUB-SKILL:**
    superpowers:executing-plans or superpowers:subagent-driven-development to
@@ -217,11 +217,11 @@ how many languages exist; a new port does not touch them:
 
 | Question | Read |
 |---|---|
-| What's shared vs. per-language, and why Python? | `docs/adr/0001-second-language-python.md` |
-| How was the pure core scoped/staged? | `docs/superpowers/specs/2026-06-30-python-core-port-design.md` |
-| What does the task-by-task TDD execution look like? | `docs/superpowers/plans/2026-06-30-python-core-port.md` |
-| How is core/facade split, and why? | `docs/superpowers/plans/2026-06-30-python-core-split.md` |
-| How does the runner + test-framework adapter fit together? | `docs/superpowers/specs/2026-06-30-var-pytest-plugin-design.md` |
+| What's shared vs. per-language, and why Python? | `doc/adr/0001-second-language-python.md` |
+| How was the pure core scoped/staged? | `doc/superpowers/specs/2026-06-30-python-core-port-design.md` |
+| What does the task-by-task TDD execution look like? | `doc/superpowers/plans/2026-06-30-python-core-port.md` |
+| How is core/facade split, and why? | `doc/superpowers/plans/2026-06-30-python-core-split.md` |
+| How does the runner + test-framework adapter fit together? | `doc/superpowers/specs/2026-06-30-var-pytest-plugin-design.md` |
 | Reference implementation (engine) | `typescript/packages/var-core/src/*.ts`, completed mirror at `python/packages/var-core/src/var_core/*.py` |
 | Reference implementation (facade) | `typescript/packages/var/src/{index,internal,registry}.ts`, `python/packages/var/src/var/{__init__,internal,registry}.py` |
 | Reference implementation (runner) | `typescript/packages/var-runner/src/*.ts`, `python/packages/var-runner/src/var_runner/*.py` |

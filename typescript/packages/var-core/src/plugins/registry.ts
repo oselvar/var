@@ -5,7 +5,7 @@ import { gherkinDocStrings, gherkinTables } from './gherkin/index.js'
 // shared with the Python/Java/Kotlin ports, which resolve the same names
 // against their own implementations). This is the TypeScript resolution
 // table. Fixed to the built-ins for now; third-party plugins are out of
-// scope (see docs/superpowers/specs/2026-07-02-multi-language-authoring-design.md).
+// scope (see doc/superpowers/specs/2026-07-02-multi-language-authoring-design.md).
 const REGISTRY: Readonly<Record<string, () => ScannerPlugin>> = {
   gherkinTables,
   gherkinDocStrings,

@@ -4,7 +4,7 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
 VERSION="$1"
 
-# Flip to 0 once the marketplace credentials are set up (docs/RELEASING.md §5:
+# Flip to 0 once the marketplace credentials are set up (doc/RELEASING.md §5:
 # publisher + Azure DevOps PAT → 1Password item `vscode-marketplace`).
 DISABLED=1
 if [[ "$DISABLED" == "1" ]]; then

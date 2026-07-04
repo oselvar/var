@@ -15,7 +15,7 @@
   <name>var (Kotlin) — author facade over the Java engine</name>
   <description>
     Idiomatic Kotlin authoring API layered on the Java engine — no second
-    pipeline port (see docs/superpowers/specs/2026-07-01-kotlin-facade-design.md).
+    pipeline port (see doc/superpowers/specs/2026-07-01-kotlin-facade-design.md).
     Author-facing package is com.oselvar.varkt because `var` is a Kotlin hard
     keyword and would force back-ticked imports.
   </description>

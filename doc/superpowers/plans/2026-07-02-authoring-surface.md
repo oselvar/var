@@ -6,7 +6,7 @@
 
 **Architecture:** The `SnippetEmitter` interface grows from one method (`typeNameFor`) to own every language-shaped construct: param rendering (`name: Type` vs `Type name`), the state/ctx first argument (absent in Kotlin, whose lambdas are user-params-only with state as receiver), and the per-language default template. `generateSnippet` and `buildHandlerSync` delegate to the emitter; TypeScript output stays byte-identical (existing snippet tests pass unchanged). The LSP picks the snippet language server-side — languages derived from `config.steps` glob extensions; single → use it; multiple → most indexed step files wins; tie → first appearance in `config.steps` order — and returns it in the `var/generateSnippet` response so the VS Code quick-pick can filter to that language's files. The rename guard flips from ".ts/.tsx only" to "emitter by `languageIdForPath`", with one safety carve-out: a Kotlin sync that would empty the lambda's param list is skipped (it would strand the `->`).
 
-**Tech Stack:** existing var-language/var-lsp/var-vscode packages; no new dependencies. Spec: `docs/superpowers/specs/2026-07-02-multi-language-authoring-design.md` (Sub-project D + the decision log's snippet-selection algorithm).
+**Tech Stack:** existing var-language/var-lsp/var-vscode packages; no new dependencies. Spec: `doc/superpowers/specs/2026-07-02-multi-language-authoring-design.md` (Sub-project D + the decision log's snippet-selection algorithm).
 
 ## Global Constraints
 
@@ -576,7 +576,7 @@ git commit -m "feat(var-lsp): per-language snippet selection and rename signatur
 **Files:**
 - Modify: `typescript/packages/var-vscode/package.json` (activationEvents), `typescript/packages/var-vscode/src/extension.ts` (selectors, rename providers, quick-pick filter, fallback globs)
 - Modify: `typescript/packages/website/src/lib/var-worker.ts`, `typescript/packages/website/src/lib/var-worker.ts` (no functional need — leave `snippets` typescript-only; ONLY update if the `GenerateSnippetResult` type change surfaces in editor-mount typings; verify)
-- Modify: `docs/superpowers/specs/2026-07-02-multi-language-authoring-design.md` (Status; packaging deferral note)
+- Modify: `doc/superpowers/specs/2026-07-02-multi-language-authoring-design.md` (Status; packaging deferral note)
 
 **Interfaces:**
 - Consumes: `GenerateSnippetResult` from `@oselvar/var-lsp/protocol`; `languageIdForPath` from `@oselvar/var-language` (already a dependency of var-vscode).
@@ -640,7 +640,7 @@ Run: `pnpm --filter @oselvar/website build && pnpm --filter @oselvar/website che
 
 - [ ] **Step 4: Spec bookkeeping**
 
-In `docs/superpowers/specs/2026-07-02-multi-language-authoring-design.md`:
+In `doc/superpowers/specs/2026-07-02-multi-language-authoring-design.md`:
 - Status line → `**Status:** Sub-projects A–D implemented`.
 - In the Sub-project D "VS Code" section, replace the "packaged extension bundles all grammar wasm files" bullet with: `The dev install (typescript/scripts/install-vscode.mjs symlink) resolves all five grammar wasm files through the workspace's node_modules; a real packaging pipeline (vsce bundle incl. wasm + built LSP) does not exist yet and is deferred to a future packaging project.`
 
@@ -649,6 +649,6 @@ In `docs/superpowers/specs/2026-07-02-multi-language-authoring-design.md`:
 Run (from `typescript/`): `pnpm check` and `pnpm --filter @oselvar/website build`; then from the repo root: `make check`. Manual smoke (optional but valuable — note result in the report): `pnpm install:vscode` and confirm the extension activates in a scratch workspace with a `var.config.json` whose steps glob only `**/*.steps.py`.
 
 ```bash
-git add typescript docs/superpowers/specs/2026-07-02-multi-language-authoring-design.md
+git add typescript doc/superpowers/specs/2026-07-02-multi-language-authoring-design.md
 git commit -m "feat(var-vscode): activate for python/java/kotlin; language-filtered snippet quick-pick"
 ```

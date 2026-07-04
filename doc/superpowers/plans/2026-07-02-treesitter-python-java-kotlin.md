@@ -6,7 +6,7 @@
 
 **Architecture:** The scanner is refactored around a per-language `LanguageSpec` table (query strings + string decoder + handler-param extractor + regexp resolver), one file per language under `src/tree-sitter-dialects/`. Because `StepDefScanner.discover*` is synchronous, "lazy" grammar loading happens at scanner construction: `createTreeSitterScanner(grammarLoader, languages?)` loads exactly the requested dialects (default: the current TS pair), and the LSP store derives the language set from the configured step files' extensions, rebuilding the scanner only when that set changes — a TS-only workspace never fetches the other wasm files. **Every query and node shape in this plan was verified empirically** on 2026-07-02 against the real grammars (`tree-sitter-python@0.25.0`, `tree-sitter-java@0.23.5`, `@tree-sitter-grammars/tree-sitter-kotlin@1.1.0`, all shipping prebuilt wasm — the spec's vendoring risk is void) by parsing all 13 conformance bundles' fixtures: the six queries below extracted identical `(kind, expression)` sets in all three new languages plus bundle 13's `{airport, [A-Z]{3}}` parameter type.
 
-**Tech Stack:** web-tree-sitter 0.26.10 (existing), the three grammar npm packages above, vitest, TypeScript strict. Spec: `docs/superpowers/specs/2026-07-02-multi-language-authoring-design.md` (Sub-project C).
+**Tech Stack:** web-tree-sitter 0.26.10 (existing), the three grammar npm packages above, vitest, TypeScript strict. Spec: `doc/superpowers/specs/2026-07-02-multi-language-authoring-design.md` (Sub-project C).
 
 ## Global Constraints
 
@@ -1067,7 +1067,7 @@ git commit -m "feat(var-language): kotlin tree-sitter dialect"
 - Create: `typescript/packages/var-language/tests/extraction-conformance.test.ts`
 - Modify: `typescript/packages/var-lsp/src/handlers.ts` (guard `buildHandlerSync` to TS files)
 - Test: `typescript/packages/var-lsp/tests/handlers.test.ts` (one added test)
-- Modify: `docs/superpowers/specs/2026-07-02-multi-language-authoring-design.md` (Status line)
+- Modify: `doc/superpowers/specs/2026-07-02-multi-language-authoring-design.md` (Status line)
 
 **Interfaces:**
 - Consumes: `createTreeSitterScanner(loader, languages)` and `languageIdForPath` (Task 1); the four dialects; the conformance bundle fixtures (`*.steps.ts/.py/.kt`, `*Steps.java` in all 13 bundles).
@@ -1185,9 +1185,9 @@ Run (from `typescript/`): `pnpm check` and `pnpm --filter @oselvar/website build
 
 - [ ] **Step 5: Update the spec status and commit**
 
-In `docs/superpowers/specs/2026-07-02-multi-language-authoring-design.md`: `**Status:** Sub-projects A and B implemented; C–D unimplemented` → `**Status:** Sub-projects A–C implemented; D unimplemented`. Also update the spec's Sub-project C "Risk" paragraph: the Kotlin community grammar concern is resolved — `@tree-sitter-grammars/tree-sitter-kotlin@1.1.0` ships prebuilt wasm from npm (no vendoring).
+In `doc/superpowers/specs/2026-07-02-multi-language-authoring-design.md`: `**Status:** Sub-projects A and B implemented; C–D unimplemented` → `**Status:** Sub-projects A–C implemented; D unimplemented`. Also update the spec's Sub-project C "Risk" paragraph: the Kotlin community grammar concern is resolved — `@tree-sitter-grammars/tree-sitter-kotlin@1.1.0` ships prebuilt wasm from npm (no vendoring).
 
 ```bash
-git add typescript docs/superpowers/specs/2026-07-02-multi-language-authoring-design.md
+git add typescript doc/superpowers/specs/2026-07-02-multi-language-authoring-design.md
 git commit -m "feat(var-language): extraction conformance across four languages; TS-only signature-sync guard"
 ```

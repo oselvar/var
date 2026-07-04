@@ -14,7 +14,7 @@
 - `pnpm -r build` type-checks `src/`; `pnpm typecheck` (part of `pnpm check`) type-checks `tests/`. A green vitest run does not prove either passes — run both before calling a task done.
 - Biome style: single quotes, no semicolons, 2-space indent, trailing commas, `import type` (or inline `type` per-specifier in a mixed import) for type-only imports (`verbatimModuleSyntax`), `node:` protocol for built-ins.
 - No raw-regexp step definitions — Var only has cucumber-expression (string-literal) step definitions. Queries must not grow a `(regex)`/`(template_string)` branch for the step *expression* capture (unlike cucumber/language-service's own query).
-- Reference design doc: `docs/superpowers/specs/2026-07-01-treesitter-lsp-scanner-design.md`. Every query, node shape, and position claim in this plan was verified empirically against the real `tree-sitter-typescript` 0.23.2 grammar before writing — see that doc's "Lessons from cucumber/language-service" section for how.
+- Reference design doc: `doc/superpowers/specs/2026-07-01-treesitter-lsp-scanner-design.md`. Every query, node shape, and position claim in this plan was verified empirically against the real `tree-sitter-typescript` 0.23.2 grammar before writing — see that doc's "Lessons from cucumber/language-service" section for how.
 
 ---
 

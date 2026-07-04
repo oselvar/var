@@ -1,7 +1,7 @@
 # var-kotlin: an idiomatic Kotlin authoring facade over the Java engine
 
 Date: 2026-07-01
-Status: implemented (see docs/superpowers/plans/2026-07-01-kotlin-facade.md; risk
+Status: implemented (see doc/superpowers/plans/2026-07-01-kotlin-facade.md; risk
 resolutions recorded in "Risks" below)
 
 The Kotlin port. Unlike every previous port (Python, Java), Kotlin does **not**

@@ -8,7 +8,7 @@
 
 **Tech Stack:** bash, `op` (1Password CLI), `pnpm publish`, `uv build`/`uv publish`, `mvn deploy` + `central-publishing-maven-plugin` + `maven-gpg-plugin`, `vsce`, `ovsx`, `gh`, `jq`, `curl`.
 
-**Spec:** `docs/superpowers/specs/2026-07-02-release-process-design.md`
+**Spec:** `doc/superpowers/specs/2026-07-02-release-process-design.md`
 
 ## Global Constraints
 
@@ -1077,12 +1077,12 @@ git commit -m "feat(release): VS Code Marketplace and Open VSX publish targets"
 
 ---
 
-### Task 12: `docs/RELEASING.md` — one-time setup + how to release
+### Task 12: `doc/RELEASING.md` — one-time setup + how to release
 
 **Files:**
-- Create: `docs/RELEASING.md`
+- Create: `doc/RELEASING.md`
 
-- [ ] **Step 1: Write `docs/RELEASING.md`**
+- [ ] **Step 1: Write `doc/RELEASING.md`**
 
 ```markdown
 # Releasing
@@ -1164,7 +1164,7 @@ generate an access token.
 - [ ] **Step 2: Commit**
 
 ```bash
-git add docs/RELEASING.md
+git add doc/RELEASING.md
 git commit -m "docs: RELEASING.md — one-time setup and release runbook"
 ```
 
@@ -1205,7 +1205,7 @@ Expected: same summary, minus the `make check` time.
 - [ ] **Step 4: Report readiness**
 
 The real `release/release.sh 0.1.0` is blocked only on the one-time account
-setup in `docs/RELEASING.md` (PyPI, Central, GPG, Marketplace PAT, Open VSX,
+setup in `doc/RELEASING.md` (PyPI, Central, GPG, Marketplace PAT, Open VSX,
 plus the 1Password `Var` items). Tell the user exactly which items to create
 and confirm the expectation that the first Central deploy may need a re-run
 (that is the designed resume path).

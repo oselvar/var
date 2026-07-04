@@ -8,7 +8,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
 VERSION="$1"
 
 # Flip to 1 to park this target (it warns and reports OK). Credentials:
-# docs/RELEASING.md → 1Password item `sonatype-central`.
+# doc/RELEASING.md → 1Password item `sonatype-central`.
 DISABLED=0
 if [[ "$DISABLED" == "1" ]]; then
   warn "maven: target disabled — flip DISABLED=0 in ${BASH_SOURCE[0]} to re-enable"
@@ -28,7 +28,7 @@ central_published() {
     "https://central.sonatype.com/api/v1/publisher/published?namespace=com.oselvar&name=$1&version=$VERSION")"
   status="${body##*$'\n'}"
   case "$status" in
-    401 | 403) die "maven: Central Portal rejected the credentials (HTTP $status) — check the sonatype-central item in 1Password (docs/RELEASING.md §3)" ;;
+    401 | 403) die "maven: Central Portal rejected the credentials (HTTP $status) — check the sonatype-central item in 1Password (doc/RELEASING.md §3)" ;;
     200) ;;
     *) die "maven: unexpected HTTP $status probing $1@$VERSION on Central" ;;
   esac

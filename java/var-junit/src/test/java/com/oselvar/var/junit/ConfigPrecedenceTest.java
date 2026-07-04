@@ -11,7 +11,7 @@ import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 
 /**
  * Empirically confirms {@link ConfigurationParameters}' real precedence order, rather than
- * trusting {@code docs/superpowers/specs/2026-07-01-java-junit-engine-design.md}'s original
+ * trusting {@code doc/superpowers/specs/2026-07-01-java-junit-engine-design.md}'s original
  * stated assumption (system property → environment variable → {@code
  * junit-platform.properties} file).
  *

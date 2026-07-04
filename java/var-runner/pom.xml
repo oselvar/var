@@ -17,7 +17,7 @@
     Config, discovery, step loading, run orchestration, and failure rendering for
     var test-runner adapters. Depends only on var (no JUnit-Platform types — that
     is var-junit's job). See
-    docs/superpowers/specs/2026-07-01-java-junit-engine-design.md.
+    doc/superpowers/specs/2026-07-01-java-junit-engine-design.md.
   </description>
 
   <dependencies>

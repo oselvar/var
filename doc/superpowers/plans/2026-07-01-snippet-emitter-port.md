@@ -14,7 +14,7 @@
 - `pnpm -r build` type-checks `src/`; `pnpm typecheck` (part of `pnpm check`) type-checks `tests/`. A green vitest run does not prove either passes.
 - Biome style: single quotes, no semicolons, 2-space indent, trailing commas, `import type` (or inline `type` per-specifier in a mixed import) for type-only imports (`verbatimModuleSyntax`), `node:` protocol for built-ins.
 - This is a **behavior-preserving refactor plus one feature removal** (the `var stepdef` CLI command) — no other behavior changes. Existing tests are the regression guard; don't rewrite their assertions, only their import paths/fixture strings where a moved/removed symbol forces it.
-- Reference design doc: `docs/superpowers/specs/2026-07-01-snippet-emitter-port-design.md`.
+- Reference design doc: `doc/superpowers/specs/2026-07-01-snippet-emitter-port-design.md`.
 
 ---
 

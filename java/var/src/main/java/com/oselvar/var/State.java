@@ -10,6 +10,6 @@ package com.oselvar.var;
  * handlers return a <em>new, complete</em> state value. This keeps state typed,
  * IDE-navigable, and literally "updates produce a new value" (CLAUDE.md), at the cost
  * of reconstructing all fields when only one changes — deliberate divergence from the
- * other two languages. See docs/superpowers/specs/2026-07-01-java-core-port-design.md.
+ * other two languages. See doc/superpowers/specs/2026-07-01-java-core-port-design.md.
  */
 public interface State {}

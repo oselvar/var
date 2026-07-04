@@ -11,8 +11,8 @@
 
   <name>var (Java port) — parent</name>
   <description>
-    Java port of var (see docs/adr/0001-second-language-python.md and
-    docs/superpowers/specs/2026-07-01-java-core-port-design.md). Sibling of
+    Java port of var (see doc/adr/0001-second-language-python.md and
+    doc/superpowers/specs/2026-07-01-java-core-port-design.md). Sibling of
     typescript/ (reference implementation) and python/ (second port).
   </description>
 

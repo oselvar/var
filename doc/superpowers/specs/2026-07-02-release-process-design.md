@@ -54,7 +54,7 @@ release/
     30-maven-central.sh
     40-vscode-marketplace.sh
     50-open-vsx.sh
-docs/RELEASING.md       # one-time account/credential setup guide
+doc/RELEASING.md       # one-time account/credential setup guide
 Makefile                # gains: make release VERSION=x.y.z
 ```
 
@@ -121,7 +121,7 @@ Idempotency probes:
 | Open VSX | `GET https://open-vsx.org/api/oselvar/oselvar-var/<v>` |
 
 Adding a language port later = adding one new target script (plus its version
-stamping in the stamp step and a section in `docs/RELEASING.md`). E.g. Rust:
+stamping in the stamp step and a section in `doc/RELEASING.md`). E.g. Rust:
 `targets/60-crates-io.sh` probing `crates.io/api/v1/crates/<name>/<v>` and
 publishing with `cargo publish`.
 
@@ -175,7 +175,7 @@ converges toward "fully released" and never repeats a completed step.
 - A hard mismatch (existing tag pointing at a different commit) aborts with
   instructions rather than guessing.
 
-## One-time setup (docs/RELEASING.md)
+## One-time setup (doc/RELEASING.md)
 
 Documented, since today only the npm org exists:
 

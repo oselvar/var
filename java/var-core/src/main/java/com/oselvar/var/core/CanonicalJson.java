@@ -9,7 +9,7 @@ import java.util.TreeMap;
  * Gson, ...): the format is small and fully specified by the four rules below, and a
  * hand-rolled serializer avoids a library's default-formatting quirks (trailing spaces,
  * empty-container rendering, escaping differences) silently drifting from the JS/Python
- * reference output. See {@code docs/superpowers/specs/2026-07-01-java-core-port-design.md},
+ * reference output. See {@code doc/superpowers/specs/2026-07-01-java-core-port-design.md},
  * section "Canonical JSON — no library shortcut".
  *
  * <p>Port (concept only) of {@code canonicalStringify} in {@code var-core/src/conformance.ts}

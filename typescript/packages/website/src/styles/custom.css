@@ -46,7 +46,7 @@ h6 {
 
 /*
  * Vár earthy palette, ported from
- * docs/superpowers/specs/2026-06-26-earthy-color-scheme-design.md
+ * doc/superpowers/specs/2026-06-26-earthy-color-scheme-design.md
  * onto Starlight's own theming variables. Dark is the default `:root`
  * (Starlight's convention); light overrides live under
  * `:root[data-theme='light']`. accent-low is a derived subtle wash in

@@ -4,7 +4,7 @@
 
 **Goal:** Replace the three per-language config formats (`var.config.ts`, `pyproject.toml [tool.var]`, Java `var.vars.*` properties) with one JSON file, `var.config.json`, read by a thin config package in each port and proven identical by shared conformance fixtures.
 
-**Architecture:** A language-neutral contract lives in `conformance/config/` (JSON Schema + fixture cases + canonical-JSON goldens). Each port keeps its public `VarConfig` type but sources it from `var.config.json`: TypeScript rewrites `@oselvar/var-config` (plugin names resolve to functions via a new var-core registry), Python gets a new `var_config` uv package, Java gets a new `var-config` Maven module with a hand-rolled JSON parser (repo has zero JSON deps, by design). Spec: `docs/superpowers/specs/2026-07-02-multi-language-authoring-design.md` (Sub-project A).
+**Architecture:** A language-neutral contract lives in `conformance/config/` (JSON Schema + fixture cases + canonical-JSON goldens). Each port keeps its public `VarConfig` type but sources it from `var.config.json`: TypeScript rewrites `@oselvar/var-config` (plugin names resolve to functions via a new var-core registry), Python gets a new `var_config` uv package, Java gets a new `var-config` Maven module with a hand-rolled JSON parser (repo has zero JSON deps, by design). Spec: `doc/superpowers/specs/2026-07-02-multi-language-authoring-design.md` (Sub-project A).
 
 **Tech Stack:** TypeScript strict/ESM (pnpm, vitest, biome), Python ≥3.11 (uv, pytest, ruff, hatchling), Java 21 (Maven, JUnit Jupiter). No new third-party dependencies in any port.
 
@@ -284,7 +284,7 @@ import { gherkinDocStrings, gherkinTables } from './gherkin/index.js'
 // shared with the Python/Java/Kotlin ports, which resolve the same names
 // against their own implementations). This is the TypeScript resolution
 // table. Fixed to the built-ins for now; third-party plugins are out of
-// scope (see docs/superpowers/specs/2026-07-02-multi-language-authoring-design.md).
+// scope (see doc/superpowers/specs/2026-07-02-multi-language-authoring-design.md).
 const REGISTRY: Readonly<Record<string, () => ScannerPlugin>> = {
   gherkinTables,
   gherkinDocStrings,
@@ -1191,7 +1191,7 @@ git commit -m "feat(python): var_config package reads var.config.json; [tool.var
   <description>
     Reads var.config.json, the shared config file for all var tools (see
     conformance/config/README.md and
-    docs/superpowers/specs/2026-07-02-multi-language-authoring-design.md).
+    doc/superpowers/specs/2026-07-02-multi-language-authoring-design.md).
     Zero runtime dependencies: JSON parsing is hand-rolled, mirroring
     var-core's hand-rolled CanonicalJson writer.
   </description>
@@ -1886,7 +1886,7 @@ git commit -m "feat(java): engine reads var.config.json via var.config.root; pro
 ### Task 9: Full gate + spec bookkeeping
 
 **Files:**
-- Modify: `docs/superpowers/specs/2026-07-02-multi-language-authoring-design.md` (mark Sub-project A implemented)
+- Modify: `doc/superpowers/specs/2026-07-02-multi-language-authoring-design.md` (mark Sub-project A implemented)
 
 **Interfaces:** none — verification only.
 
@@ -1900,18 +1900,18 @@ Expected: exit 0 — all three ports build and test green, including the conform
 Run:
 
 ```bash
-grep -rn "var\.config\.ts" --include="*.ts" --include="*.json" --include="*.md" . | grep -v node_modules | grep -v docs/superpowers
+grep -rn "var\.config\.ts" --include="*.ts" --include="*.json" --include="*.md" . | grep -v node_modules | grep -v doc/superpowers
 grep -rn "tool\.var" python --include="*.py" --include="*.toml" --include="*.md"
 grep -rn "var\.vars\." java --include="*.java" --include="*.properties"
 ```
 
-Expected: no hits outside `docs/superpowers/` history (specs/plans are records; leave them).
+Expected: no hits outside `doc/superpowers/` history (specs/plans are records; leave them).
 
 - [ ] **Step 3: Mark the spec section implemented and commit**
 
-In `docs/superpowers/specs/2026-07-02-multi-language-authoring-design.md`, change the Status line to `**Status:** Sub-project A implemented (this plan); B–D unimplemented` .
+In `doc/superpowers/specs/2026-07-02-multi-language-authoring-design.md`, change the Status line to `**Status:** Sub-project A implemented (this plan); B–D unimplemented` .
 
 ```bash
-git add docs/superpowers/specs/2026-07-02-multi-language-authoring-design.md
+git add doc/superpowers/specs/2026-07-02-multi-language-authoring-design.md
 git commit -m "docs: mark unified var.config.json (sub-project A) implemented"
 ```

@@ -4,7 +4,7 @@ Date: 2026-06-28
 Status: design, pending implementation (TDD)
 
 Sub-project 1 of the multi-language program (see
-[`docs/adr/0001-second-language-python.md`](../../adr/0001-second-language-python.md)
+[`doc/adr/0001-second-language-python.md`](../../adr/0001-second-language-python.md)
 and [`doc/ARCHITECTURE.md`](../../../doc/ARCHITECTURE.md)). It builds nothing
 language-specific: it hardens the TypeScript implementation *and* defines the
 verifiable contract every future port (Python first) is built against.

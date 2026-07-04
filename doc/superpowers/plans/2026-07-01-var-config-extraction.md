@@ -14,7 +14,7 @@
 - `pnpm -r build` type-checks `src/`; `pnpm typecheck` (part of `pnpm check`) type-checks `tests/`. A green vitest run does not prove either passes.
 - Biome style: single quotes, no semicolons, 2-space indent, trailing commas, `import type` (or inline `type` per-specifier in a mixed import) for type-only imports (`verbatimModuleSyntax`), `node:` protocol for built-ins. Named imports from the same module group together and sort alphabetically; among distinct `@oselvar/...` packages, imports sort alphabetically by package name (`@oselvar/var-config` before `@oselvar/var-core`).
 - This is a **behavior-preserving move** — no logic changes anywhere. Existing tests are the regression guard; only import paths change.
-- Reference design doc: `docs/superpowers/specs/2026-07-01-var-config-extraction-design.md`.
+- Reference design doc: `doc/superpowers/specs/2026-07-01-var-config-extraction-design.md`.
 
 ---
 

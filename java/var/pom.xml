@@ -15,7 +15,7 @@
   <name>var (Java) — author facade</name>
   <description>
     Author-facing API over var-core: context/action/sensor registration (see
-    docs/superpowers/specs/2026-07-01-java-core-port-design.md#author-api).
+    doc/superpowers/specs/2026-07-01-java-core-port-design.md#author-api).
   </description>
 
   <dependencies>

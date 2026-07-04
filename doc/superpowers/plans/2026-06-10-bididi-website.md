@@ -4,7 +4,7 @@
 
 **Goal:** Ship a single-page Astro marketing site for `bididi` (`@oselvar/bididi`) deployed to GitHub Pages from `packages/website`.
 
-**Architecture:** Static Astro site, no UI framework integration, plain CSS, Monoton via Google Fonts, thick yellow/orange poster frame. One layout + one page + one global stylesheet. Deployed via GitHub Actions on push to `main`. Spec: `docs/superpowers/specs/2026-06-10-bididi-website-design.md`.
+**Architecture:** Static Astro site, no UI framework integration, plain CSS, Monoton via Google Fonts, thick yellow/orange poster frame. One layout + one page + one global stylesheet. Deployed via GitHub Actions on push to `main`. Spec: `doc/superpowers/specs/2026-06-10-bididi-website-design.md`.
 
 **Tech Stack:** Astro 5.x, TypeScript, plain CSS, pnpm workspace, GitHub Actions, GitHub Pages.
 
