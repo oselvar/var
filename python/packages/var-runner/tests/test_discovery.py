@@ -25,6 +25,19 @@ def test_match_spec(tmp_path: Path) -> None:
     assert match_spec(tmp_path / "README.md", inc, exc, tmp_path) is False
 
 
+def test_symlinked_spec_matches_by_apparent_path(tmp_path: Path) -> None:
+    """A symlinked spec matches by where the link sits, not where it points.
+
+    Mirrors Java's toAbsolutePath().normalize() (no dereference): a project may
+    link its specs from a shared corpus outside the include globs.
+    """
+    _touch(tmp_path, "corpus/a.md")
+    (tmp_path / "project").mkdir()
+    (tmp_path / "project/a.md").symlink_to(tmp_path / "corpus/a.md")
+    root = tmp_path / "project"
+    assert match_spec(root / "a.md", ["*.md"], [], root) is True
+
+
 def test_deeply_nested_spec_matches(tmp_path: Path) -> None:
     """features/**/*.md must match specs nested more than one level deep."""
     inc, exc = ["features/**/*.md"], []

@@ -1,15 +1,23 @@
 from __future__ import annotations
 
+import os
 import re
 from collections.abc import Sequence
 from pathlib import Path
+
+
+def _abs_no_deref(path: Path) -> Path:
+    # os.path.abspath normalizes (cwd-joins, collapses ..) WITHOUT dereferencing
+    # symlinks — a symlinked spec must match the docs globs by its apparent path,
+    # not its target's (mirrors Java's toAbsolutePath().normalize()).
+    return Path(os.path.abspath(path))
 
 
 def _rel_posix(path: Path, root: Path) -> str:
     # walk_up=True (Python 3.12+) yields a ``../`` prefix when *path* is outside
     # *root*, so specs can live outside the config root (e.g. a shared corpus in a
     # sibling directory) and still match a ``../sibling/**`` glob.
-    return path.resolve().relative_to(root.resolve(), walk_up=True).as_posix()
+    return _abs_no_deref(path).relative_to(_abs_no_deref(root), walk_up=True).as_posix()
 
 
 def _glob_to_regex(pattern: str) -> re.Pattern[str]:
