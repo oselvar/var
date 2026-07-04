@@ -1,0 +1,8 @@
+{
+  "$schema": "conformance/config/var.config.schema.json",
+  "docs": {
+    "include": ["doc/examples/**/*.md"],
+    "exclude": ["doc/examples/README.md"]
+  },
+  "steps": ["typescript/examples/**/*.steps.ts"]
+}

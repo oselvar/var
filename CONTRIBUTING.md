@@ -51,8 +51,9 @@ PR passes through all of these:
   packages expose their own API only.
 - **Coverage** — all three ports report test coverage; TypeScript and
   Python enforce ratcheting floors (raise, never lower).
-- **Dogfooding** — the tool's own specs (`packages/var-examples/`) run in
-  the test suite, so regressions in the product break the build.
+- **Dogfooding** — the tool's own specs (`doc/examples/`, run by each
+  language's examples project) run in the test suite, so regressions in
+  the product break the build.
 - **Architecture rules** — immutable data, pure functional core, hexagonal
   ports & adapters. These live in [CLAUDE.md](CLAUDE.md) and are enforced
   in review.

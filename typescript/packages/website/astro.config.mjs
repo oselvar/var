@@ -1,8 +1,14 @@
 // @ts-check
 
+import { fileURLToPath } from 'node:url'
 import starlight from '@astrojs/starlight'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'astro/config'
+
+// The repo root: pages ?raw-import the language-neutral example specs from
+// doc/examples/, which sits above the typescript/ workspace (Vite's default
+// fs.allow boundary), so the dev server must be allowed to read it.
+const repoRoot = fileURLToPath(new URL('../../..', import.meta.url))
 
 // https://astro.build/config
 export default defineConfig({
@@ -61,5 +67,6 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    server: { fs: { allow: [repoRoot] } },
   },
 })

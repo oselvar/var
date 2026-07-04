@@ -1,5 +1,5 @@
 {
-  "name": "@oselvar/var-examples",
+  "name": "@oselvar/examples",
   "version": "0.3.0",
   "private": true,
   "type": "module",
@@ -16,6 +16,6 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/oselvar/var.git",
-    "directory": "typescript/packages/var-examples"
+    "directory": "typescript/examples"
   }
 }

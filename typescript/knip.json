@@ -44,7 +44,7 @@
     "packages/var-vscode": {
       "project": ["src/**/*.ts"]
     },
-    "packages/var-examples": {
+    "examples": {
       "entry": ["**/*.steps.ts"],
       "project": ["**/*.ts"],
       "ignoreDependencies": ["@oselvar/var-core"]
