@@ -36,11 +36,14 @@ find "$DEST" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
 
 # --copy-links dereferences the .md symlinks; local build/venv/cache dirs and
 # the path-source lockfile stay behind (users resolve fresh from the pins).
+# Keep this list in step with the examples/**/.gitignore files — anything a
+# project ignores must not be synced.
 rsync -a --copy-links \
   --exclude 'node_modules/' \
   --exclude '.venv/' \
   --exclude '.gradle/' \
   --exclude 'build/' \
+  --exclude 'target/' \
   --exclude '.var/' \
   --exclude '__pycache__/' \
   --exclude '.pytest_cache/' \
