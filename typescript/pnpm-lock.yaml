@@ -261,6 +261,12 @@ importers:
       '@codemirror/view':
         specifier: ^6.43.4
         version: 6.43.4
+      '@fontsource/atkinson-hyperlegible':
+        specifier: ^5.2.8
+        version: 5.2.8
+      '@fontsource/atkinson-hyperlegible-mono':
+        specifier: ^5.2.10
+        version: 5.2.10
       '@fontsource/jetbrains-mono':
         specifier: ^5.2.8
         version: 5.2.8
@@ -891,6 +897,12 @@ packages:
 
   '@expressive-code/plugin-text-markers@0.44.0':
     resolution: {integrity: sha512-0/m3A5b+lz2upyNq+wzZ1S69HRoJmyFs5LsR42lVZ9pmGRlBiSBYQpvqlji4DBj1+Riamxc0AvcCr5kuzOQeWA==}
+
+  '@fontsource/atkinson-hyperlegible-mono@5.2.10':
+    resolution: {integrity: sha512-BHT+CUi8GmNXuHkqRm+fZgN2K06GpxHBPO2T4xG2OI5yXcvv7L4gBCCtt84xUyawbccHvnkhp6AWBv4DzH+x+Q==}
+
+  '@fontsource/atkinson-hyperlegible@5.2.8':
+    resolution: {integrity: sha512-HciLcJ5DIK/OVOdo71EbEN4NnvDFlp6/SpAxtcbWf2aAdcsOuPqITxj5KNEXb48qSPSdnnZdGGnSJChPKi3/bA==}
 
   '@fontsource/jetbrains-mono@5.2.8':
     resolution: {integrity: sha512-6w8/SG4kqvIMu7xd7wt6x3idn1Qux3p9N62s6G3rfldOUYHpWcc2FKrqf+Vo44jRvqWj2oAtTHrZXEP23oSKwQ==}
@@ -4378,6 +4390,10 @@ snapshots:
   '@expressive-code/plugin-text-markers@0.44.0':
     dependencies:
       '@expressive-code/core': 0.44.0
+
+  '@fontsource/atkinson-hyperlegible-mono@5.2.10': {}
+
+  '@fontsource/atkinson-hyperlegible@5.2.8': {}
 
   '@fontsource/jetbrains-mono@5.2.8': {}
 

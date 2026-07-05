@@ -15,6 +15,20 @@
 @import '@fontsource/jetbrains-mono/600.css';
 @import '@fontsource/jetbrains-mono/700.css';
 
+/* Atkinson Hyperlegible — the alternative prose/code fonts offered by the
+   header font selectors (data-font-prose / data-font-code on <html>). A
+   font-face is only fetched when it's actually the selected family, so
+   default (STIX + JetBrains) visitors download none of these. The classic
+   Atkinson Hyperlegible sans ships 400/700 only; Atkinson Hyperlegible Mono
+   carries 600 for the editor's semibold UI. */
+@import '@fontsource/atkinson-hyperlegible/400.css';
+@import '@fontsource/atkinson-hyperlegible/400-italic.css';
+@import '@fontsource/atkinson-hyperlegible/700.css';
+@import '@fontsource/atkinson-hyperlegible-mono/400.css';
+@import '@fontsource/atkinson-hyperlegible-mono/400-italic.css';
+@import '@fontsource/atkinson-hyperlegible-mono/600.css';
+@import '@fontsource/atkinson-hyperlegible-mono/700.css';
+
 /*
  * "Norse" by Joël Carrouché (https://www.fontspace.com/norse-font-f21080),
  * freeware, free for personal and commercial use, embedding in web pages
@@ -145,8 +159,8 @@ h6 {
 }
 
 :root[data-theme='light'] {
-  --sl-font: 'STIX Two Text', Georgia, serif;
-  --sl-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* Fonts are theme-independent — set once in :root and switched by the header
+     selectors below (data-font-prose / data-font-code), never per light/dark. */
 
   /* Same story as :root — the header/nav uses gray-7 in light mode; give the
      page the identical light cream. */
@@ -206,4 +220,22 @@ h6 {
   --syn-number: #8a5a2b;
   --syn-heading: #3b2e20;
   --syn-meta: #8a7b66;
+}
+
+/*
+ * Header font selectors. The prose font (--sl-font) and code font
+ * (--sl-font-mono) default to STIX Two Text / JetBrains Mono in :root above;
+ * the header selects (src/components/ThemeSelect.astro) set data-font-prose /
+ * data-font-code on <html> to switch either one to Atkinson Hyperlegible. These
+ * selectors are [0,2,0] — matching :root[data-theme='light'] — so fonts stay
+ * out of the light/dark blocks to avoid a specificity tie. Headings keep Norse
+ * regardless (see the h1–h6 rule above). An inline head script in
+ * astro.config.mjs re-applies the stored choice before first paint.
+ */
+:root[data-font-prose='atkinson'] {
+  --sl-font: 'Atkinson Hyperlegible', system-ui, sans-serif;
+}
+:root[data-font-code='atkinson'] {
+  --sl-font-mono: 'Atkinson Hyperlegible Mono', ui-monospace, SFMono-Regular, Menlo, Consolas,
+    monospace;
 }

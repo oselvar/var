@@ -1,11 +1,17 @@
 ---
 /**
- * Starlight `ThemeSelect` override: prepends a palette selector (Jord — the
- * default earthy palette in custom.css — or Fjord, the teal palette in
- * themes/fjord.css) next to the built-in dark/light/auto select. The chosen
- * palette lives in `data-palette` on <html> and persists in localStorage
- * (`var-palette`); an inline head script in astro.config.mjs re-applies it
- * before first paint.
+ * Starlight `ThemeSelect` override: prepends the site's custom header controls
+ * next to the built-in dark/light/auto select.
+ *
+ * - Palette selector (Jord — the default earthy palette in custom.css — or
+ *   Fjord/Ild/Fjeld). The choice lives in `data-palette` on <html>.
+ * - Prose font selector (STIX Two Text or Atkinson Hyperlegible) → `data-font-prose`.
+ * - Code font selector (JetBrains Mono or Atkinson Hyperlegible Mono) → `data-font-code`.
+ *
+ * Each choice persists in localStorage (`var-palette` / `var-font-prose` /
+ * `var-font-code`); an inline head script in astro.config.mjs re-applies all
+ * three before first paint. The font attributes drive --sl-font / --sl-font-mono
+ * via the override rules in custom.css; headings stay on Norse regardless.
  */
 import Select from '@astrojs/starlight/components/Select.astro'
 import Default from '@astrojs/starlight/components/ThemeSelect.astro'
@@ -24,6 +30,28 @@ import Default from '@astrojs/starlight/components/ThemeSelect.astro'
     width="6.25em"
   />
 </var-palette-select>
+<var-font-select data-font-kind="prose">
+  <Select
+    icon="open-book"
+    label="Select prose font"
+    options={[
+      { label: 'STIX', selected: true, value: 'stix' },
+      { label: 'Atkinson', selected: false, value: 'atkinson' },
+    ]}
+    width="7em"
+  />
+</var-font-select>
+<var-font-select data-font-kind="code">
+  <Select
+    icon="code-branch"
+    label="Select code font"
+    options={[
+      { label: 'JetBrains', selected: true, value: 'jetbrains' },
+      { label: 'Atkinson', selected: false, value: 'atkinson' },
+    ]}
+    width="7.5em"
+  />
+</var-font-select>
 <Default><slot /></Default>
 
 <script>
@@ -65,4 +93,63 @@ import Default from '@astrojs/starlight/components/ThemeSelect.astro'
     }
   }
   customElements.define('var-palette-select', VarPaletteSelect)
+
+  // Font selectors — prose (--sl-font) and code (--sl-font-mono). Each swaps
+  // its default family for Atkinson Hyperlegible via a data-* attribute on
+  // <html>; the actual font-family values live in custom.css.
+  type FontKind = 'prose' | 'code'
+
+  interface FontConfig {
+    storageKey: string
+    attr: 'fontProse' | 'fontCode'
+    alt: string
+    fallback: string
+  }
+
+  const FONTS: Record<FontKind, FontConfig> = {
+    prose: { storageKey: 'var-font-prose', attr: 'fontProse', alt: 'atkinson', fallback: 'stix' },
+    code: { storageKey: 'var-font-code', attr: 'fontCode', alt: 'atkinson', fallback: 'jetbrains' },
+  }
+
+  const parseFont = (kind: FontKind, value: unknown): string =>
+    value === FONTS[kind].alt ? FONTS[kind].alt : FONTS[kind].fallback
+
+  const loadFont = (kind: FontKind): string =>
+    parseFont(
+      kind,
+      typeof localStorage !== 'undefined' && localStorage.getItem(FONTS[kind].storageKey),
+    )
+
+  function storeFont(kind: FontKind, value: string): void {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(FONTS[kind].storageKey, value)
+    }
+  }
+
+  /** Update <html>, and keep both matching font selects (header + mobile menu) in sync. */
+  function applyFont(kind: FontKind, value: string): void {
+    document.documentElement.dataset[FONTS[kind].attr] = value
+    document
+      .querySelectorAll<HTMLSelectElement>(`var-font-select[data-font-kind="${kind}"] select`)
+      .forEach((select) => {
+        select.value = value
+      })
+  }
+
+  class VarFontSelect extends HTMLElement {
+    constructor() {
+      super()
+      const kind = this.dataset.fontKind
+      if (kind !== 'prose' && kind !== 'code') return
+      applyFont(kind, loadFont(kind))
+      this.querySelector('select')?.addEventListener('change', (e) => {
+        if (e.currentTarget instanceof HTMLSelectElement) {
+          const value = parseFont(kind, e.currentTarget.value)
+          applyFont(kind, value)
+          storeFont(kind, value)
+        }
+      })
+    }
+  }
+  customElements.define('var-font-select', VarFontSelect)
 </script>
