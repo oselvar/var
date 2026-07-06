@@ -37,13 +37,7 @@ public record CellDiff(String column, Span span, String expected, String actual,
         for (RowCheck check : checks) {
             if (!obj.containsKey(check.column())) continue;
             String actual = String.valueOf(obj.get(check.column()));
-            diffs.add(
-                    new CellDiff(
-                            check.column(),
-                            check.span(),
-                            check.value(),
-                            actual,
-                            actual.equals(check.value())));
+            diffs.add(new CellDiff(check.column(), check.span(), check.value(), actual, actual.equals(check.value())));
         }
         return List.copyOf(diffs);
     }
@@ -106,8 +100,7 @@ public record CellDiff(String column, Span span, String expected, String actual,
     public static List<CellDiff> compareTable(Object returned, Ast.Table input) {
         if (returned == null) return List.of();
         if (!(returned instanceof List<?> rows)) {
-            throw new ReturnShapeException(
-                    "expected a table (array of rows), got " + typeName(returned));
+            throw new ReturnShapeException("expected a table (array of rows), got " + typeName(returned));
         }
         List<String> columns = input.header().cells();
         List<Ast.Row> dataRows = input.rows();

@@ -101,28 +101,27 @@ class ExecuteTest {
     // -----------------------------------------------------------------------------------------
 
     @Test
-    void runningAQueuedExampleThreadsFullReplacementStateAcrossActionStepsAndTheSensorComparesItsReturnAgainstTheLastCapturedArg() {
+    void
+            runningAQueuedExampleThreadsFullReplacementStateAcrossActionStepsAndTheSensorComparesItsReturnAgainstTheLastCapturedArg() {
         List<Object> seen = new ArrayList<>();
         Registry r = Registry.createRegistry();
-        r =
-                Registry.addStep(
-                        r,
-                        "I add {int}",
-                        "s.ts",
-                        1,
-                        (Fn1) (state, n) -> (state == null ? 0 : (Integer) state) + (Integer) n,
-                        StepKind.STIMULUS);
-        r =
-                Registry.addStep(
-                        r,
-                        "the total is {int}",
-                        "s.ts",
-                        2,
-                        (Fn1) (state, expected) -> {
-                            seen.add(expected);
-                            return state;
-                        },
-                        StepKind.SENSOR);
+        r = Registry.addStep(
+                r,
+                "I add {int}",
+                "s.ts",
+                1,
+                (Fn1) (state, n) -> (state == null ? 0 : (Integer) state) + (Integer) n,
+                StepKind.STIMULUS);
+        r = Registry.addStep(
+                r,
+                "the total is {int}",
+                "s.ts",
+                2,
+                (Fn1) (state, expected) -> {
+                    seen.add(expected);
+                    return state;
+                },
+                StepKind.SENSOR);
         Plan.ExecutionPlan p = planOf("# Adding\n\nI add 5. I add 3. the total is 8.", r);
         Execute.ExecutePorts ports = new Execute.ExecutePorts(d -> {}, file -> 0, null);
         List<Execute.QueuedExample> queued = Execute.collectExamples(p, ports);
@@ -135,10 +134,9 @@ class ExecuteTest {
     void anInlineSensorReturnValueMismatchingTheLastCapturedArgThrowsCellMismatchExceptionAtItsParamSpan() {
         Registry r = reg("the answer is {int}", "s.ts", 1, (Fn1) (state, expected) -> 41, StepKind.SENSOR);
         Plan.ExecutionPlan p = planOf("# Q\n\nthe answer is 42.", r);
-        CellDiff.CellMismatchException ex =
-                assertThrows(
-                        CellDiff.CellMismatchException.class,
-                        () -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
+        CellDiff.CellMismatchException ex = assertThrows(
+                CellDiff.CellMismatchException.class,
+                () -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
         assertEquals(1, ex.cells().size());
         assertEquals("42", ex.cells().get(0).expected());
         assertEquals("41", ex.cells().get(0).actual());
@@ -149,26 +147,25 @@ class ExecuteTest {
 
     @Test
     void aSensorWithTwoParametersReturnsAPositionalListComparedAgainstEveryCapture() {
-        Registry r =
-                reg(
-                        "I should have {int} cukes in my {word} belly",
-                        "s.ts",
-                        1,
-                        (Fn2) (state, count, name) -> List.of(count, name),
-                        StepKind.SENSOR);
+        Registry r = reg(
+                "I should have {int} cukes in my {word} belly",
+                "s.ts",
+                1,
+                (Fn2) (state, count, name) -> List.of(count, name),
+                StepKind.SENSOR);
         Plan.ExecutionPlan p = planOf("# X\n\nI should have 3 cukes in my big belly", r);
-        assertDoesNotThrow(() -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
+        assertDoesNotThrow(
+                () -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
     }
 
     @Test
     void aSensorWithTwoParametersReturningANonListThrowsReturnShapeException() {
-        Registry r =
-                reg(
-                        "I should have {int} cukes in my {word} belly",
-                        "s.ts",
-                        1,
-                        (Fn2) (state, count, name) -> 3,
-                        StepKind.SENSOR);
+        Registry r = reg(
+                "I should have {int} cukes in my {word} belly",
+                "s.ts",
+                1,
+                (Fn2) (state, count, name) -> 3,
+                StepKind.SENSOR);
         Plan.ExecutionPlan p = planOf("# X\n\nI should have 3 cukes in my big belly", r);
         assertThrows(
                 CellDiff.ReturnShapeException.class,
@@ -177,13 +174,12 @@ class ExecuteTest {
 
     @Test
     void aSensorWithTwoParametersReturningTheWrongLengthThrowsReturnShapeException() {
-        Registry r =
-                reg(
-                        "I should have {int} cukes in my {word} belly",
-                        "s.ts",
-                        1,
-                        (Fn2) (state, count, name) -> List.of(3),
-                        StepKind.SENSOR);
+        Registry r = reg(
+                "I should have {int} cukes in my {word} belly",
+                "s.ts",
+                1,
+                (Fn2) (state, count, name) -> List.of(3),
+                StepKind.SENSOR);
         Plan.ExecutionPlan p = planOf("# X\n\nI should have 3 cukes in my big belly", r);
         assertThrows(
                 CellDiff.ReturnShapeException.class,
@@ -214,7 +210,8 @@ class ExecuteTest {
     void aZeroSlotSensorReturningNullPasses() {
         Registry r = reg("the alarm fired", "s.ts", 1, (Fn0) state -> null, StepKind.SENSOR);
         Plan.ExecutionPlan p = planOf("# X\n\nthe alarm fired", r);
-        assertDoesNotThrow(() -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
+        assertDoesNotThrow(
+                () -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
     }
 
     // -----------------------------------------------------------------------------------------
@@ -224,26 +221,24 @@ class ExecuteTest {
     @Test
     void createContextIsCalledFreshOncePerExample() {
         List<Object> seen = new ArrayList<>();
-        Registry r =
-                reg(
-                        "I record ctx",
-                        "s.ts",
-                        1,
-                        (Fn0)
-                                state -> {
-                                    seen.add(state);
-                                    return state;
-                                },
-                        StepKind.STIMULUS);
+        Registry r = reg(
+                "I record ctx",
+                "s.ts",
+                1,
+                (Fn0) state -> {
+                    seen.add(state);
+                    return state;
+                },
+                StepKind.STIMULUS);
         Plan.ExecutionPlan p = planOf("# A\n\nI record ctx\n\n# B\n\nI record ctx", r);
         int[] calls = {0};
-        Function<String, Object> createContext =
-                file -> {
-                    calls[0]++;
-                    return "init" + calls[0];
-                };
+        Function<String, Object> createContext = file -> {
+            calls[0]++;
+            return "init" + calls[0];
+        };
         Execute.ExecutePorts ports = new Execute.ExecutePorts(d -> {}, createContext, null);
-        for (Execute.QueuedExample q : Execute.collectExamples(p, ports)) q.run().run();
+        for (Execute.QueuedExample q : Execute.collectExamples(p, ports))
+            q.run().run();
         assertEquals(2, calls[0]);
         assertEquals(List.of("init1", "init2"), seen);
     }
@@ -253,25 +248,22 @@ class ExecuteTest {
         List<Object> seen = new ArrayList<>();
         Registry r = Registry.createRegistry();
         r = Registry.addStep(r, "I seed", "s.ts", 1, (Fn0) state -> "seeded", StepKind.STIMULUS);
-        r =
-                Registry.addStep(
-                        r,
-                        "I record ctx",
-                        "s.ts",
-                        2,
-                        (Fn0)
-                                state -> {
-                                    seen.add(state);
-                                    return state;
-                                },
-                        StepKind.STIMULUS);
+        r = Registry.addStep(
+                r,
+                "I record ctx",
+                "s.ts",
+                2,
+                (Fn0) state -> {
+                    seen.add(state);
+                    return state;
+                },
+                StepKind.STIMULUS);
         Plan.ExecutionPlan p = planOf("# A\n\nI seed\nI record ctx", r);
         int[] calls = {0};
-        Function<String, Object> createContext =
-                file -> {
-                    calls[0]++;
-                    return "unseeded";
-                };
+        Function<String, Object> createContext = file -> {
+            calls[0]++;
+            return "unseeded";
+        };
         Execute.ExecutePorts ports = new Execute.ExecutePorts(d -> {}, createContext, null);
         Execute.collectExamples(p, ports).get(0).run().run();
         assertEquals(1, calls[0]);
@@ -285,19 +277,16 @@ class ExecuteTest {
     @Test
     void aDataTableAttachedToAContextStepIsAppendedAsTheLastHandlerArgument() {
         List<Object> captured = new ArrayList<>();
-        Registry r =
-                reg(
-                        "these books exist:",
-                        "s.ts",
-                        1,
-                        (Fn1)
-                                (state, table) -> {
-                                    captured.add(table);
-                                    return state;
-                                },
-                        StepKind.STIMULUS);
-        String source =
-                """
+        Registry r = reg(
+                "these books exist:",
+                "s.ts",
+                1,
+                (Fn1) (state, table) -> {
+                    captured.add(table);
+                    return state;
+                },
+                StepKind.STIMULUS);
+        String source = """
                 # Library
 
                 these books exist:
@@ -310,29 +299,23 @@ class ExecuteTest {
         Execute.collectExamples(p, silentPorts()).get(0).run().run();
         assertEquals(1, captured.size());
         assertEquals(
-                List.of(
-                        List.of("title", "author"),
-                        List.of("Lolita", "Nabokov"),
-                        List.of("Anna", "Tolstoy")),
+                List.of(List.of("title", "author"), List.of("Lolita", "Nabokov"), List.of("Anna", "Tolstoy")),
                 captured.get(0));
     }
 
     @Test
     void aDocStringAttachedToAContextStepIsAppendedAsTheLastHandlerArgument() {
         List<Object> captured = new ArrayList<>();
-        Registry r =
-                reg(
-                        "the receipt is:",
-                        "s.ts",
-                        1,
-                        (Fn1)
-                                (state, body) -> {
-                                    captured.add(body);
-                                    return state;
-                                },
-                        StepKind.STIMULUS);
-        String source =
-                """
+        Registry r = reg(
+                "the receipt is:",
+                "s.ts",
+                1,
+                (Fn1) (state, body) -> {
+                    captured.add(body);
+                    return state;
+                },
+                StepKind.STIMULUS);
+        String source = """
                 # Library
 
                 the receipt is:
@@ -349,8 +332,7 @@ class ExecuteTest {
     // Header-bound table: one example per row, row map as the trailing sensor arg
     // -----------------------------------------------------------------------------------------
 
-    private static final String YAHTZEE =
-            """
+    private static final String YAHTZEE = """
             # Yahtzee
 
             each row lists the dice, the category and the score:
@@ -363,17 +345,15 @@ class ExecuteTest {
     @Test
     void headerBoundTableRunsOncePerRowNamedByItsCellsPassingTheRowMapAsTheTrailingArg() {
         List<Object> rows = new ArrayList<>();
-        Registry r =
-                reg(
-                        "each row lists the dice, the category and the score",
-                        "s.ts",
-                        1,
-                        (Fn1)
-                                (state, row) -> {
-                                    rows.add(row);
-                                    return row;
-                                },
-                        StepKind.SENSOR);
+        Registry r = reg(
+                "each row lists the dice, the category and the score",
+                "s.ts",
+                1,
+                (Fn1) (state, row) -> {
+                    rows.add(row);
+                    return row;
+                },
+                StepKind.SENSOR);
         Plan.ExecutionPlan p = planOf(YAHTZEE, r);
         List<Execute.QueuedExample> queued = Execute.collectExamples(p, silentPorts());
         assertEquals(
@@ -389,42 +369,40 @@ class ExecuteTest {
 
     @Test
     void aMismatchingHeaderBoundRowThrowsCellMismatchExceptionAtTheCellSpan() {
-        Registry r =
-                reg(
-                        "each row lists the dice, the category and the score",
-                        "s.ts",
-                        1,
-                        (Fn1)
-                                (state, row) -> {
-                                    @SuppressWarnings("unchecked")
-                                    Map<String, String> m = (Map<String, String>) row;
-                                    String score = m.get("score");
-                                    return Map.of(
-                                            "dice", m.get("dice"),
-                                            "category", m.get("category"),
-                                            "score", "50".equals(score) ? "999" : score);
-                                },
-                        StepKind.SENSOR);
+        Registry r = reg(
+                "each row lists the dice, the category and the score",
+                "s.ts",
+                1,
+                (Fn1) (state, row) -> {
+                    @SuppressWarnings("unchecked")
+                    Map<String, String> m = (Map<String, String>) row;
+                    String score = m.get("score");
+                    return Map.of(
+                            "dice", m.get("dice"),
+                            "category", m.get("category"),
+                            "score", "50".equals(score) ? "999" : score);
+                },
+                StepKind.SENSOR);
         Plan.ExecutionPlan p = planOf(YAHTZEE, r);
         List<Execute.QueuedExample> queued = Execute.collectExamples(p, silentPorts());
         assertDoesNotThrow(() -> queued.get(0).run().run()); // 17 -> unchanged -> passes
-        CellDiff.CellMismatchException ex =
-                assertThrows(CellDiff.CellMismatchException.class, () -> queued.get(1).run().run());
+        CellDiff.CellMismatchException ex = assertThrows(
+                CellDiff.CellMismatchException.class, () -> queued.get(1).run().run());
         assertEquals(1, ex.cells().size());
         CellDiff cell = ex.cells().get(0);
         assertEquals("score", cell.column());
         assertEquals("50", cell.expected());
         assertEquals("999", cell.actual());
         String source = p.varDoc().source();
-        assertEquals("50", source.substring(cell.span().startOffset(), cell.span().endOffset()));
+        assertEquals(
+                "50", source.substring(cell.span().startOffset(), cell.span().endOffset()));
     }
 
     // -----------------------------------------------------------------------------------------
     // Whole-table sensor (0 captures, table attached): returned value IS the whole table
     // -----------------------------------------------------------------------------------------
 
-    private static final String UPPERCASE_TABLE =
-            """
+    private static final String UPPERCASE_TABLE = """
             # T
 
             uppercase each one:
@@ -436,18 +414,16 @@ class ExecuteTest {
 
     @Test
     void aWholeTableSensorReturningAMismatchedTableThrowsCellMismatchExceptionAtTheCellSpan() {
-        Registry r =
-                reg(
-                        "uppercase each one",
-                        "s.ts",
-                        1,
-                        (Fn1) (state, table) -> List.of(List.of("var", "WRONG"), List.of("bdd", "BDD")),
-                        StepKind.SENSOR);
+        Registry r = reg(
+                "uppercase each one",
+                "s.ts",
+                1,
+                (Fn1) (state, table) -> List.of(List.of("var", "WRONG"), List.of("bdd", "BDD")),
+                StepKind.SENSOR);
         Plan.ExecutionPlan p = planOf(UPPERCASE_TABLE, r);
-        CellDiff.CellMismatchException ex =
-                assertThrows(
-                        CellDiff.CellMismatchException.class,
-                        () -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
+        CellDiff.CellMismatchException ex = assertThrows(
+                CellDiff.CellMismatchException.class,
+                () -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
         assertEquals(1, ex.cells().size());
         assertEquals("VAR", ex.cells().get(0).expected());
         assertEquals("WRONG", ex.cells().get(0).actual());
@@ -455,19 +431,16 @@ class ExecuteTest {
 
     @Test
     void aWholeTableSensorReturningAMatchingTablePasses() {
-        Registry r =
-                reg(
-                        "uppercase each one",
-                        "s.ts",
-                        1,
-                        (Fn1)
-                                (state, table) ->
-                                        List.of(
-                                                Map.of("before", "var", "after", "VAR"),
-                                                Map.of("before", "bdd", "after", "BDD")),
-                        StepKind.SENSOR);
+        Registry r = reg(
+                "uppercase each one",
+                "s.ts",
+                1,
+                (Fn1) (state, table) ->
+                        List.of(Map.of("before", "var", "after", "VAR"), Map.of("before", "bdd", "after", "BDD")),
+                StepKind.SENSOR);
         Plan.ExecutionPlan p = planOf(UPPERCASE_TABLE, r);
-        assertDoesNotThrow(() -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
+        assertDoesNotThrow(
+                () -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
     }
 
     @Test
@@ -483,8 +456,7 @@ class ExecuteTest {
     // Doc-string sensor (0 captures, doc string attached): returned value IS the doc string
     // -----------------------------------------------------------------------------------------
 
-    private static final String GREETING_DOC =
-            """
+    private static final String GREETING_DOC = """
             # T
 
             the greeting is:
@@ -497,10 +469,9 @@ class ExecuteTest {
     void aDocStringSensorReturningADifferentStringThrowsDocStringMismatchExceptionAtTheBodySpan() {
         Registry r = reg("the greeting is", "s.ts", 1, (Fn1) (state, body) -> "Goodbye!\n", StepKind.SENSOR);
         Plan.ExecutionPlan p = planOf(GREETING_DOC, r);
-        DocStringDiff.DocStringMismatchException ex =
-                assertThrows(
-                        DocStringDiff.DocStringMismatchException.class,
-                        () -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
+        DocStringDiff.DocStringMismatchException ex = assertThrows(
+                DocStringDiff.DocStringMismatchException.class,
+                () -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
         assertEquals("Hello, world!\n", ex.diff().expected());
         assertEquals("Goodbye!\n", ex.diff().actual());
     }
@@ -509,7 +480,8 @@ class ExecuteTest {
     void aDocStringSensorReturningTheExactBodyPasses() {
         Registry r = reg("the greeting is", "s.ts", 1, (Fn1) (state, body) -> body, StepKind.SENSOR);
         Plan.ExecutionPlan p = planOf(GREETING_DOC, r);
-        assertDoesNotThrow(() -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
+        assertDoesNotThrow(
+                () -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
     }
 
     // -----------------------------------------------------------------------------------------
@@ -518,20 +490,19 @@ class ExecuteTest {
 
     @Test
     void errorFenceExampleWhereTheStepThrowsAMatchingMessagePasses() {
-        Registry r =
-                reg(
-                        "I divide {int} by {int}",
-                        "s.ts",
-                        1,
-                        (Fn2)
-                                (state, a, b) -> {
-                                    if (((Integer) b) == 0) throw new RuntimeException("division by zero");
-                                    return state;
-                                },
-                        StepKind.STIMULUS);
+        Registry r = reg(
+                "I divide {int} by {int}",
+                "s.ts",
+                1,
+                (Fn2) (state, a, b) -> {
+                    if (((Integer) b) == 0) throw new RuntimeException("division by zero");
+                    return state;
+                },
+                StepKind.STIMULUS);
         String src = "# D\n\nI divide 1 by 0.\n\n```error\ndivision by zero\n```\n";
         Plan.ExecutionPlan p = planOf(src, r);
-        assertDoesNotThrow(() -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
+        assertDoesNotThrow(
+                () -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
     }
 
     @Test
@@ -546,22 +517,19 @@ class ExecuteTest {
 
     @Test
     void errorFenceExampleWithMismatchingMessageRethrowsTheRealError() {
-        Registry r =
-                reg(
-                        "I divide {int} by {int}",
-                        "s.ts",
-                        1,
-                        (Fn2)
-                                (state, a, b) -> {
-                                    throw new RuntimeException("boom");
-                                },
-                        StepKind.STIMULUS);
+        Registry r = reg(
+                "I divide {int} by {int}",
+                "s.ts",
+                1,
+                (Fn2) (state, a, b) -> {
+                    throw new RuntimeException("boom");
+                },
+                StepKind.STIMULUS);
         String src = "# D\n\nI divide 1 by 0.\n\n```error\ndivision by zero\n```\n";
         Plan.ExecutionPlan p = planOf(src, r);
-        RuntimeException ex =
-                assertThrows(
-                        RuntimeException.class,
-                        () -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
+        RuntimeException ex = assertThrows(
+                RuntimeException.class,
+                () -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
         assertEquals("boom", ex.getMessage());
     }
 
@@ -574,22 +542,19 @@ class ExecuteTest {
 
     @Test
     void aSensorThatThrowsAnAssertionErrorInsteadOfReturningAMismatchGetsAStackInjectedFailure() {
-        Registry r =
-                reg(
-                        "the total should be {int}",
-                        "s.ts",
-                        1,
-                        (Fn1)
-                                (state, expected) -> {
-                                    throw new AssertionError("expected " + expected + " but was 41");
-                                },
-                        StepKind.SENSOR);
+        Registry r = reg(
+                "the total should be {int}",
+                "s.ts",
+                1,
+                (Fn1) (state, expected) -> {
+                    throw new AssertionError("expected " + expected + " but was 41");
+                },
+                StepKind.SENSOR);
         Plan.ExecutionPlan p = planOf("# Q\n\nthe total should be 42.", r);
         Plan.PlannedStep step = p.examples().get(0).steps().get(0);
-        Throwable caught =
-                assertThrows(
-                        AssertionError.class,
-                        () -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
+        Throwable caught = assertThrows(
+                AssertionError.class,
+                () -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
         assertEquals("expected 42 but was 41", caught.getMessage());
         // Stack injection still applies to an Error, not just a RuntimeException.
         Result.ExampleFailure failure = Failure.toFailure(caught, p.varDoc().path(), -1);
@@ -598,37 +563,36 @@ class ExecuteTest {
 
     @Test
     void anErrorFenceExampleWhereTheStepThrowsAnAssertionErrorMatchingTheExpectedMessagePasses() {
-        Registry r =
-                reg(
-                        "the total should be {int}",
-                        "s.ts",
-                        1,
-                        (Fn1)
-                                (state, expected) -> {
-                                    throw new AssertionError("boom");
-                                },
-                        StepKind.SENSOR);
+        Registry r = reg(
+                "the total should be {int}",
+                "s.ts",
+                1,
+                (Fn1) (state, expected) -> {
+                    throw new AssertionError("boom");
+                },
+                StepKind.SENSOR);
         String src = "# Q\n\nthe total should be 42.\n\n```error\nboom\n```\n";
         Plan.ExecutionPlan p = planOf(src, r);
-        assertDoesNotThrow(() -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
+        assertDoesNotThrow(
+                () -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
     }
 
     @Test
     void observerReceivesAFailObservationWhenASensorThrowsAnAssertionErrorNotJustARuntimeException() {
-        Registry r =
-                reg(
-                        "the total should be {int}",
-                        "s.ts",
-                        1,
-                        (Fn1)
-                                (state, expected) -> {
-                                    throw new AssertionError("boom");
-                                },
-                        StepKind.SENSOR);
+        Registry r = reg(
+                "the total should be {int}",
+                "s.ts",
+                1,
+                (Fn1) (state, expected) -> {
+                    throw new AssertionError("boom");
+                },
+                StepKind.SENSOR);
         Plan.ExecutionPlan p = planOf("# Q\n\nthe total should be 42.", r);
         List<Execute.StepObservation> obs = new ArrayList<>();
         Execute.ExecutePorts ports = new Execute.ExecutePorts(d -> {}, null, obs::add);
-        assertThrows(AssertionError.class, () -> Execute.collectExamples(p, ports).get(0).run().run());
+        assertThrows(
+                AssertionError.class,
+                () -> Execute.collectExamples(p, ports).get(0).run().run());
         assertEquals(1, obs.size());
         assertEquals("fail", obs.get(0).outcome());
         assertNotNull(obs.get(0).error());
@@ -650,20 +614,20 @@ class ExecuteTest {
 
     @Test
     void observerReceivesAFailObservationWhenAStepThrows() {
-        Registry r =
-                reg(
-                        "I blow up",
-                        "s.ts",
-                        1,
-                        (Fn0)
-                                state -> {
-                                    throw new RuntimeException("kaboom");
-                                },
-                        StepKind.STIMULUS);
+        Registry r = reg(
+                "I blow up",
+                "s.ts",
+                1,
+                (Fn0) state -> {
+                    throw new RuntimeException("kaboom");
+                },
+                StepKind.STIMULUS);
         Plan.ExecutionPlan p = planOf("# A\n\nI blow up.", r);
         List<Execute.StepObservation> obs = new ArrayList<>();
         Execute.ExecutePorts ports = new Execute.ExecutePorts(d -> {}, null, obs::add);
-        assertThrows(RuntimeException.class, () -> Execute.collectExamples(p, ports).get(0).run().run());
+        assertThrows(
+                RuntimeException.class,
+                () -> Execute.collectExamples(p, ports).get(0).run().run());
         assertEquals(1, obs.size());
         assertEquals(0, obs.get(0).exampleIndex());
         assertEquals(1, obs.get(0).ordinal());
@@ -677,22 +641,19 @@ class ExecuteTest {
 
     @Test
     void aThrownStepGetsAnInjectedStackFrameThatFailureToFailureResolvesToTheMdLine() {
-        Registry r =
-                reg(
-                        "I throw",
-                        "s.ts",
-                        1,
-                        (Fn0)
-                                state -> {
-                                    throw new RuntimeException("boom");
-                                },
-                        StepKind.STIMULUS);
+        Registry r = reg(
+                "I throw",
+                "s.ts",
+                1,
+                (Fn0) state -> {
+                    throw new RuntimeException("boom");
+                },
+                StepKind.STIMULUS);
         Plan.ExecutionPlan p = planOf("# A\n\nI throw", r);
         Plan.PlannedStep step = p.examples().get(0).steps().get(0);
-        RuntimeException caught =
-                assertThrows(
-                        RuntimeException.class,
-                        () -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
+        RuntimeException caught = assertThrows(
+                RuntimeException.class,
+                () -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
         assertEquals("boom", caught.getMessage());
         Result.ExampleFailure failure = Failure.toFailure(caught, p.varDoc().path(), -1);
         assertEquals(step.matchSpan().startLine(), failure.line());
@@ -707,26 +668,23 @@ class ExecuteTest {
     void anActionHandlerReturningACompletableFutureIsAwaitedAndItsResultBecomesTheNewState() {
         List<Object> seen = new ArrayList<>();
         Registry r = Registry.createRegistry();
-        r =
-                Registry.addStep(
-                        r,
-                        "I greet asynchronously",
-                        "s.ts",
-                        1,
-                        (Fn0) state -> CompletableFuture.supplyAsync(() -> "hi"),
-                        StepKind.STIMULUS);
-        r =
-                Registry.addStep(
-                        r,
-                        "observe",
-                        "s.ts",
-                        2,
-                        (Fn0)
-                                state -> {
-                                    seen.add(state);
-                                    return null;
-                                },
-                        StepKind.SENSOR);
+        r = Registry.addStep(
+                r,
+                "I greet asynchronously",
+                "s.ts",
+                1,
+                (Fn0) state -> CompletableFuture.supplyAsync(() -> "hi"),
+                StepKind.STIMULUS);
+        r = Registry.addStep(
+                r,
+                "observe",
+                "s.ts",
+                2,
+                (Fn0) state -> {
+                    seen.add(state);
+                    return null;
+                },
+                StepKind.SENSOR);
         Plan.ExecutionPlan p = planOf("# A\n\nI greet asynchronously\nobserve", r);
         Execute.collectExamples(p, silentPorts()).get(0).run().run();
         assertEquals(List.of("hi"), seen);
@@ -734,23 +692,20 @@ class ExecuteTest {
 
     @Test
     void anAsyncHandlerThatCompletesExceptionallyPropagatesItsCauseNotACompletionExceptionWrapper() {
-        Registry r =
-                reg(
-                        "I fail asynchronously",
-                        "s.ts",
-                        1,
-                        (Fn0)
-                                state -> {
-                                    CompletableFuture<Object> f = new CompletableFuture<>();
-                                    f.completeExceptionally(new RuntimeException("async boom"));
-                                    return f;
-                                },
-                        StepKind.STIMULUS);
+        Registry r = reg(
+                "I fail asynchronously",
+                "s.ts",
+                1,
+                (Fn0) state -> {
+                    CompletableFuture<Object> f = new CompletableFuture<>();
+                    f.completeExceptionally(new RuntimeException("async boom"));
+                    return f;
+                },
+                StepKind.STIMULUS);
         Plan.ExecutionPlan p = planOf("# A\n\nI fail asynchronously", r);
-        RuntimeException ex =
-                assertThrows(
-                        RuntimeException.class,
-                        () -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
+        RuntimeException ex = assertThrows(
+                RuntimeException.class,
+                () -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
         assertEquals("async boom", ex.getMessage());
     }
 
@@ -761,17 +716,15 @@ class ExecuteTest {
     @Test
     void executePlanRunsEveryExampleWhenNoneFail() {
         List<String> ran = new ArrayList<>();
-        Registry r =
-                reg(
-                        "I run",
-                        "s.ts",
-                        1,
-                        (Fn0)
-                                state -> {
-                                    ran.add("ran");
-                                    return state;
-                                },
-                        StepKind.STIMULUS);
+        Registry r = reg(
+                "I run",
+                "s.ts",
+                1,
+                (Fn0) state -> {
+                    ran.add("ran");
+                    return state;
+                },
+                StepKind.STIMULUS);
         Plan.ExecutionPlan p = planOf("# A\n\nI run\n\n# B\n\nI run", r);
         assertDoesNotThrow(() -> Execute.executePlan(p, silentPorts()));
         assertEquals(List.of("ran", "ran"), ran);
@@ -781,29 +734,25 @@ class ExecuteTest {
     void executePlanPropagatesTheFirstFailureAndDoesNotRunSubsequentExamples() {
         boolean[] secondRan = {false};
         Registry r = Registry.createRegistry();
-        r =
-                Registry.addStep(
-                        r,
-                        "I fail",
-                        "s.ts",
-                        1,
-                        (Fn0)
-                                state -> {
-                                    throw new RuntimeException("boom");
-                                },
-                        StepKind.STIMULUS);
-        r =
-                Registry.addStep(
-                        r,
-                        "I succeed",
-                        "s.ts",
-                        2,
-                        (Fn0)
-                                state -> {
-                                    secondRan[0] = true;
-                                    return state;
-                                },
-                        StepKind.STIMULUS);
+        r = Registry.addStep(
+                r,
+                "I fail",
+                "s.ts",
+                1,
+                (Fn0) state -> {
+                    throw new RuntimeException("boom");
+                },
+                StepKind.STIMULUS);
+        r = Registry.addStep(
+                r,
+                "I succeed",
+                "s.ts",
+                2,
+                (Fn0) state -> {
+                    secondRan[0] = true;
+                    return state;
+                },
+                StepKind.STIMULUS);
         Plan.ExecutionPlan p = planOf("# A\n\nI fail\n\n# B\n\nI succeed", r);
         assertThrows(RuntimeException.class, () -> Execute.executePlan(p, silentPorts()));
         assertFalse(secondRan[0]);
@@ -824,14 +773,14 @@ class ExecuteTest {
 
     @Test
     void handlerInvocationWorksForAnyFunctionalInterfaceNotJustTheLocalFnShapes() {
-        Registry r =
-                reg(
-                        "I use a jdk functional interface",
-                        "s.ts",
-                        1,
-                        (Function<Object, Object>) state -> "ok",
-                        StepKind.STIMULUS);
+        Registry r = reg(
+                "I use a jdk functional interface",
+                "s.ts",
+                1,
+                (Function<Object, Object>) state -> "ok",
+                StepKind.STIMULUS);
         Plan.ExecutionPlan p = planOf("# A\n\nI use a jdk functional interface", r);
-        assertDoesNotThrow(() -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
+        assertDoesNotThrow(
+                () -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
     }
 }

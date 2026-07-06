@@ -10,8 +10,7 @@ package com.oselvar.var.core;
  * here: {@code startOffset}/{@code endOffset} are plain {@code String} offsets
  * throughout.
  */
-public record Span(
-        int startOffset, int endOffset, int startLine, int startCol, int endLine, int endCol) {
+public record Span(int startOffset, int endOffset, int startLine, int startCol, int endLine, int endCol) {
 
     /** A line/column position (1-based), as returned by {@link #lineCol}. */
     public record LineCol(int line, int col) {}
@@ -20,8 +19,7 @@ public record Span(
     public static Span spanFromOffsets(String source, int startOffset, int endOffset) {
         LineCol start = lineCol(source, startOffset);
         LineCol end = lineCol(source, endOffset);
-        return new Span(
-                startOffset, endOffset, start.line(), start.col(), end.line(), end.col());
+        return new Span(startOffset, endOffset, start.line(), start.col(), end.line(), end.col());
     }
 
     /** Computes the 1-based (line, col) at {@code offset} (a UTF-16 code-unit index) into {@code source}. */

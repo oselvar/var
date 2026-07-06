@@ -28,10 +28,10 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 
 /**
- * The Kotlin facade's conformance gate — registry stage only, per the design
- * doc's interview-settled scope: parse/plan/trace stay proven by the Java
- * engine's own green corpus; what needs proving here is that the Kotlin DSL
- * registers the exact same expressions and parameter types.
+ * The Kotlin facade's conformance gate — registry stage only, per the design doc's
+ * interview-settled scope: parse/plan/trace stay proven by the Java engine's own green corpus; what
+ * needs proving here is that the Kotlin DSL registers the exact same expressions and parameter
+ * types.
  */
 class ConformanceTest {
 
@@ -42,13 +42,13 @@ class ConformanceTest {
         val registrar = RegistryRegistrar()
         fixture.defineSteps(registrar)
 
-        val actual = CanonicalJson.canonicalStringify(
-            Conformance.toRegistryArtifact(registrar.registry()),
-        )
-        val expected = Files.readString(
-            bundle.resolve("golden").resolve("registry.json"),
-            StandardCharsets.UTF_8,
-        )
+        val actual =
+            CanonicalJson.canonicalStringify(Conformance.toRegistryArtifact(registrar.registry()))
+        val expected =
+            Files.readString(
+                bundle.resolve("golden").resolve("registry.json"),
+                StandardCharsets.UTF_8,
+            )
         assertEquals(expected, actual) { "${bundle.fileName}/registry.json mismatch" }
     }
 
@@ -72,21 +72,25 @@ class ConformanceTest {
             }
         }
 
-        private fun loadFixture(bundleName: String): StepDefinitions = when (bundleName) {
-            "01-roman-numerals" -> bundle01Steps
-            "02-context-isolation" -> bundle02Steps
-            "03-expected-failure" -> bundle03Steps
-            "04-tables-and-docstrings" -> bundle04Steps
-            "05-ambiguous-match" -> bundle05Steps
-            "06-doc-string-mismatch" -> bundle06Steps
-            "07-row-check-mismatch" -> bundle07Steps
-            "08-string-capture" -> bundle08Steps
-            "09-expected-message-mismatch" -> bundle09Steps
-            "10-error-fence-without-step" -> bundle10Steps
-            "11-emoji-offsets" -> bundle11Steps
-            "12-combining-marks" -> bundle12Steps
-            "13-custom-parameter-type" -> bundle13Steps
-            else -> throw IllegalStateException("No Kotlin step fixture registered for bundle $bundleName")
-        }
+        private fun loadFixture(bundleName: String): StepDefinitions =
+            when (bundleName) {
+                "01-roman-numerals" -> bundle01Steps
+                "02-context-isolation" -> bundle02Steps
+                "03-expected-failure" -> bundle03Steps
+                "04-tables-and-docstrings" -> bundle04Steps
+                "05-ambiguous-match" -> bundle05Steps
+                "06-doc-string-mismatch" -> bundle06Steps
+                "07-row-check-mismatch" -> bundle07Steps
+                "08-string-capture" -> bundle08Steps
+                "09-expected-message-mismatch" -> bundle09Steps
+                "10-error-fence-without-step" -> bundle10Steps
+                "11-emoji-offsets" -> bundle11Steps
+                "12-combining-marks" -> bundle12Steps
+                "13-custom-parameter-type" -> bundle13Steps
+                else ->
+                    throw IllegalStateException(
+                        "No Kotlin step fixture registered for bundle $bundleName"
+                    )
+            }
     }
 }

@@ -87,8 +87,7 @@ class StructurerTest {
 
     @Test
     void aTableRightAfterAParagraphAttachesToThatParagraphNotOrphan() {
-        String source =
-                "## Example\n\nGiven these users:\n\n| name | age |\n|------|-----|\n| Bob  | 30  |";
+        String source = "## Example\n\nGiven these users:\n\n| name | age |\n|------|-----|\n| Bob  | 30  |";
         VarDoc varDoc = Structurer.structure("o.md", source, Scanner.scan(source));
         assertEquals(0, varDoc.orphanAttachments().size());
         Example example = varDoc.examples().get(0);

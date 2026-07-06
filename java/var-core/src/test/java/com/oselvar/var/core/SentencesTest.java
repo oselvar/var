@@ -21,8 +21,7 @@ class SentencesTest {
     void keepsOffsetsRelativeToTheInputText() {
         String text = "Alpha. Beta.";
         List<Sentence> result = Sentences.splitSentences(text);
-        assertEquals(
-                List.of(new Sentence("Alpha.", 0, 6), new Sentence("Beta.", 7, 12)), result);
+        assertEquals(List.of(new Sentence("Alpha.", 0, 6), new Sentence("Beta.", 7, 12)), result);
     }
 
     @Test
@@ -71,17 +70,14 @@ class SentencesTest {
     void splitsOnASingleNewlineGherkinStyleLinePerStep() {
         String text = "Given I greet \"world\"\nThen the greeting is \"Hello, world!\"";
         List<Sentence> result = Sentences.splitSentences(text);
-        assertEquals(
-                List.of("Given I greet \"world\"", "Then the greeting is \"Hello, world!\""),
-                texts(result));
+        assertEquals(List.of("Given I greet \"world\"", "Then the greeting is \"Hello, world!\""), texts(result));
     }
 
     @Test
     void splitsBetweenTerminatorsOutsideQuotedStringsIgnoringThoseInside() {
         String text = "Alpha \"with ! inside\". Beta \"and ? inside\"!";
         List<Sentence> result = Sentences.splitSentences(text);
-        assertEquals(
-                List.of("Alpha \"with ! inside\".", "Beta \"and ? inside\"!"), texts(result));
+        assertEquals(List.of("Alpha \"with ! inside\".", "Beta \"and ? inside\"!"), texts(result));
     }
 
     /**

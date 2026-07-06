@@ -51,8 +51,7 @@ class CanonicalJsonTest {
     @Test
     void escapesQuotesBackslashesAndControlCharacters() {
         var value = Map.of("s", "a\"b\\c\nd\te");
-        assertEquals(
-                "{\n  \"s\": \"a\\\"b\\\\c\\nd\\te\"\n}\n", CanonicalJson.canonicalStringify(value));
+        assertEquals("{\n  \"s\": \"a\\\"b\\\\c\\nd\\te\"\n}\n", CanonicalJson.canonicalStringify(value));
     }
 
     @Test
@@ -72,8 +71,7 @@ class CanonicalJsonTest {
     void serializesNestedArraysOfObjects() {
         var value = List.of(Map.of("b", 1), Map.of("a", 2));
         assertEquals(
-                "[\n  {\n    \"b\": 1\n  },\n  {\n    \"a\": 2\n  }\n]\n",
-                CanonicalJson.canonicalStringify(value));
+                "[\n  {\n    \"b\": 1\n  },\n  {\n    \"a\": 2\n  }\n]\n", CanonicalJson.canonicalStringify(value));
     }
 
     @Test

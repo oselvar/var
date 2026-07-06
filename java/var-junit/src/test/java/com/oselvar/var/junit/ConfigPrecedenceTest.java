@@ -77,7 +77,8 @@ class ConfigPrecedenceTest {
      * lowest-level way to observe the real precedence without forking a JVM.
      */
     private static ConfigurationParameters realConfigurationParameters() {
-        LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request().build();
+        LauncherDiscoveryRequest request =
+                LauncherDiscoveryRequestBuilder.request().build();
         return request.getConfigurationParameters();
     }
 }

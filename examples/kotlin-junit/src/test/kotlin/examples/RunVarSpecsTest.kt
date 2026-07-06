@@ -10,7 +10,4 @@ import org.junit.platform.suite.api.Suite
 // files are specs and which classes define the steps. The
 // *Test suffix matters under Maven: Surefire only scans classes matching its
 // naming convention.
-@Suite
-@IncludeEngines("var")
-@SelectDirectories(".")
-class RunVarSpecsTest
+@Suite @IncludeEngines("var") @SelectDirectories(".") class RunVarSpecsTest

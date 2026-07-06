@@ -18,26 +18,28 @@ class DefineStateTest {
     // fails to compile — that is the spec's flagged spike. Do NOT "fix" it by
     // changing this test to `{ -> cukes }`; stop and report instead (the
     // approved API shape would need revisiting with the user).
-    private fun canonicalSteps(): StepDefinitions = defineState(::Ctx) {
-        stimulus("I have {int} cukes") { n: Int ->
-            copy(cukes = n)
+    private fun canonicalSteps(): StepDefinitions =
+        defineState(::Ctx) {
+            stimulus("I have {int} cukes") { n: Int ->
+                copy(cukes = n)
+            }
+            stimulus("I eat {int} cukes") { n: Int ->
+                copy(cukes = cukes - n)
+            }
+            sensor("I should have {int} cukes left") {
+                cukes
+            }
         }
-        stimulus("I eat {int} cukes") { n: Int ->
-            copy(cukes = cukes - n)
-        }
-        sensor("I should have {int} cukes left") {
-            cukes
-        }
-    }
 
     // Invokes a registered handler the way Execute.invokeHandler does: reflect
     // for the public `apply` overload whose parameter count matches, never
     // through the SAM interface. (The adapters expose one overload per call
     // shape — see HandlerAdapter.)
     private fun invoke(handler: Any, vararg args: Any?): Any? {
-        val method = handler.javaClass.methods.first {
-            it.name == "apply" && it.parameterCount == args.size && !it.isBridge
-        }
+        val method =
+            handler.javaClass.methods.first {
+                it.name == "apply" && it.parameterCount == args.size && !it.isBridge
+            }
         return method.invoke(handler, *args)
     }
 
@@ -70,9 +72,9 @@ class DefineStateTest {
         assertTrue(steps.all { it.expressionSourceFile() == "DefineStateTest.kt" }) {
             "expected DefineStateTest.kt, got ${steps.map { it.expressionSourceFile() }}"
         }
-        assertTrue(
-            steps.map { it.expressionSourceLine() }.zipWithNext().all { (a, b) -> a < b },
-        ) { "expected increasing lines, got ${steps.map { it.expressionSourceLine() }}" }
+        assertTrue(steps.map { it.expressionSourceLine() }.zipWithNext().all { (a, b) -> a < b }) {
+            "expected increasing lines, got ${steps.map { it.expressionSourceLine() }}"
+        }
     }
 
     @Test
@@ -101,13 +103,15 @@ class DefineStateTest {
     fun `handler declaring more parameters than the step supplies fails with an authoring error`() {
         val registrar = RegistryRegistrar()
         defineState(::Ctx) {
-            sensor("over-declared") { a: Int, b: Int -> a + b }
-        }.defineSteps(registrar)
+                sensor("over-declared") { a: Int, b: Int -> a + b }
+            }
+            .defineSteps(registrar)
 
         val handler = registrar.registry().steps()[0].handler()
-        val e = assertThrows(Exception::class.java) {
-            invoke(handler, StateBox(Ctx()), 1)
-        }
+        val e =
+            assertThrows(Exception::class.java) {
+                invoke(handler, StateBox(Ctx()), 1)
+            }
         // Reflection wraps in InvocationTargetException; the cause carries the message.
         val cause = generateSequence(e as Throwable) { it.cause }.last()
         assertTrue(cause is IllegalArgumentException, cause.toString())

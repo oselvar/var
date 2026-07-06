@@ -38,8 +38,7 @@ public final class Result {
      * @param doc a doc-string body mismatch (single span); {@code null} when not applicable (TS's
      *     optional {@code doc?}).
      */
-    public record ExampleFailure(
-            int line, String message, String stack, List<CellFailure> cells, CellFailure doc) {
+    public record ExampleFailure(int line, String message, String stack, List<CellFailure> cells, CellFailure doc) {
         public ExampleFailure {
             cells = cells == null ? null : List.copyOf(cells);
         }
@@ -59,8 +58,7 @@ public final class Result {
     }
 
     /** The persisted run result for one spec file. */
-    public record SpecResults(
-            int version, String specPath, String sourceHash, List<ExampleResult> examples) {
+    public record SpecResults(int version, String specPath, String sourceHash, List<ExampleResult> examples) {
         public SpecResults {
             examples = List.copyOf(examples);
         }

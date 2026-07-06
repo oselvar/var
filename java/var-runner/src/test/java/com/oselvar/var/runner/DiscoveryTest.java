@@ -32,8 +32,7 @@ class DiscoveryTest {
         touch(tmp, "features/wip/b.md");
         touch(tmp, "README.md");
 
-        List<Path> found =
-                Discovery.findSpecs(List.of("features/**/*.md"), List.of("**/wip/**"), tmp);
+        List<Path> found = Discovery.findSpecs(List.of("features/**/*.md"), List.of("**/wip/**"), tmp);
 
         assertEquals(List.of(tmp.resolve("features/a.md")), found);
     }

@@ -28,7 +28,9 @@ final class Yahtzee {
                         .filter(e -> e.getValue() >= 2)
                         .map(Map.Entry::getKey)
                         .toList();
-                yield pairs.size() >= 2 ? pairs.stream().mapToInt(face -> 2 * face).sum() : 0;
+                yield pairs.size() >= 2
+                        ? pairs.stream().mapToInt(face -> 2 * face).sum()
+                        : 0;
             }
             case "three of a kind" -> ofAKind(counts, 3);
             case "four of a kind" -> ofAKind(counts, 4);
@@ -50,11 +52,7 @@ final class Yahtzee {
 
     // n-of-a-kind: the highest face appearing at least n times, scored n*face.
     private static int ofAKind(Map<Integer, Integer> counts, int n) {
-        return counts.entrySet().stream()
-                .filter(e -> e.getValue() >= n)
-                .mapToInt(Map.Entry::getKey)
-                .max()
-                .stream()
+        return counts.entrySet().stream().filter(e -> e.getValue() >= n).mapToInt(Map.Entry::getKey).max().stream()
                 .map(face -> n * face)
                 .findFirst()
                 .orElse(0);

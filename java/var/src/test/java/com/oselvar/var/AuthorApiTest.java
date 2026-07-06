@@ -25,9 +25,7 @@ class AuthorApiTest {
         public void defineSteps(Registrar registrar) {
             StateBinder<Ctx> s = registrar.defineState(() -> new Ctx(null));
 
-            s.stimulus(
-                    "I convert {int} to roman numerals",
-                    (Ctx ctx, Integer n) -> new Ctx(ROMAN.get(n)));
+            s.stimulus("I convert {int} to roman numerals", (Ctx ctx, Integer n) -> new Ctx(ROMAN.get(n)));
 
             s.sensor("The result is {word}", (Ctx ctx, String expected) -> ctx.result());
         }
@@ -52,16 +50,12 @@ class AuthorApiTest {
 
         // Full-replacement record state model: the action returns a NEW, complete Ctx.
         @SuppressWarnings("unchecked")
-        var convert =
-                (StateBinder.Stimulus1<RomanNumeralSteps.Ctx, Integer>) action.handler();
-        assertEquals(
-                new RomanNumeralSteps.Ctx("IX"),
-                convert.apply(new RomanNumeralSteps.Ctx(null), 9));
+        var convert = (StateBinder.Stimulus1<RomanNumeralSteps.Ctx, Integer>) action.handler();
+        assertEquals(new RomanNumeralSteps.Ctx("IX"), convert.apply(new RomanNumeralSteps.Ctx(null), 9));
 
         // Sensor observes state and returns the value the pure core will compare.
         @SuppressWarnings("unchecked")
-        var read =
-                (StateBinder.Sensor1<RomanNumeralSteps.Ctx, String, String>) sensor.handler();
+        var read = (StateBinder.Sensor1<RomanNumeralSteps.Ctx, String, String>) sensor.handler();
         assertEquals("IX", read.apply(new RomanNumeralSteps.Ctx("IX"), "IX"));
 
         // Source location captured via StackWalker (analogous to co_filename/co_firstlineno).

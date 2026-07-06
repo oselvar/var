@@ -26,14 +26,12 @@ class DocStringDiffTest {
     @Test
     void compareDocStringDifferentContentReturnsDiffWithSpanExpectedActual() {
         assertEquals(
-                new DocStringDiff(SPAN, "hello\n", "bye\n"),
-                DocStringDiff.compareDocString("bye\n", "hello\n", SPAN));
+                new DocStringDiff(SPAN, "hello\n", "bye\n"), DocStringDiff.compareDocString("bye\n", "hello\n", SPAN));
     }
 
     @Test
     void compareDocStringANonStringReturnThrowsReturnShapeException() {
-        assertThrows(
-                CellDiff.ReturnShapeException.class, () -> DocStringDiff.compareDocString(42, "hello\n", SPAN));
+        assertThrows(CellDiff.ReturnShapeException.class, () -> DocStringDiff.compareDocString(42, "hello\n", SPAN));
     }
 
     @Test

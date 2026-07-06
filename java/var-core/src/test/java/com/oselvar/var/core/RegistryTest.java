@@ -43,16 +43,13 @@ class RegistryTest {
 
         // Compiling an expression that uses {airport} should now succeed without an
         // UndefinedParameterTypeError.
-        assertDoesNotThrow(
-                () -> Registry.addStep(withType, "I fly to {airport}", "steps.ts", 1, NOOP_HANDLER, null));
+        assertDoesNotThrow(() -> Registry.addStep(withType, "I fly to {airport}", "steps.ts", 1, NOOP_HANDLER, null));
     }
 
     @Test
     void defineParameterTypeReturnedStepActuallyMatchesTheRegexAtRuntime() {
         Registry r = Registry.createRegistry();
-        r =
-                Registry.defineParameterType(
-                        r, "airport", Pattern.compile("[A-Z]{3}"), groups -> groups[0].toLowerCase());
+        r = Registry.defineParameterType(r, "airport", Pattern.compile("[A-Z]{3}"), groups -> groups[0].toLowerCase());
         r = Registry.addStep(r, "I fly to {airport}", "steps.ts", 1, NOOP_HANDLER, null);
 
         Optional<List<Argument<?>>> match = r.steps().get(0).compiled().match("I fly to LHR");
@@ -65,33 +62,23 @@ class RegistryTest {
         Registry r = Registry.createRegistry();
         Registry withFirst = Registry.addStep(r, "I have {int} cukes", "a.ts", 3, NOOP_HANDLER, null);
 
-        IllegalArgumentException ex =
-                assertThrows(
-                        IllegalArgumentException.class,
-                        () ->
-                                Registry.addStep(
-                                        withFirst, "I have {int} cukes", "b.ts", 9, NOOP_HANDLER, null));
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> Registry.addStep(withFirst, "I have {int} cukes", "b.ts", 9, NOOP_HANDLER, null));
         assertTrue(ex.getMessage().matches("(?s).*duplicate step definition.*a\\.ts:3.*b\\.ts:9.*"));
     }
 
     @Test
     void addStepCarriesTheStepKindThroughToTheRegistration() {
-        Registry r =
-                Registry.addStep(
-                        Registry.createRegistry(),
-                        "I greet {string}",
-                        "a.steps.ts",
-                        1,
-                        NOOP_HANDLER,
-                        StepKind.SENSOR);
+        Registry r = Registry.addStep(
+                Registry.createRegistry(), "I greet {string}", "a.steps.ts", 1, NOOP_HANDLER, StepKind.SENSOR);
         assertEquals(StepKind.SENSOR, r.steps().get(0).kind());
     }
 
     @Test
     void kindIsOptionalLegacyStepPath() {
         Registry r =
-                Registry.addStep(
-                        Registry.createRegistry(), "I greet {string}", "a.steps.ts", 1, NOOP_HANDLER, null);
+                Registry.addStep(Registry.createRegistry(), "I greet {string}", "a.steps.ts", 1, NOOP_HANDLER, null);
         assertNull(r.steps().get(0).kind());
     }
 
@@ -100,11 +87,8 @@ class RegistryTest {
         Registry r0 = Registry.createRegistry();
         assertEquals(List.of(), r0.customParameterTypes());
         Registry r1 =
-                Registry.defineParameterType(
-                        r0, "airport", java.util.regex.Pattern.compile("[A-Z]{3}"), g -> g[0]);
-        assertEquals(
-                List.of(new Registry.CustomParameterType("airport", "[A-Z]{3}")),
-                r1.customParameterTypes());
+                Registry.defineParameterType(r0, "airport", java.util.regex.Pattern.compile("[A-Z]{3}"), g -> g[0]);
+        assertEquals(List.of(new Registry.CustomParameterType("airport", "[A-Z]{3}")), r1.customParameterTypes());
         // The original registry value is untouched (records are immutable views).
         assertEquals(List.of(), r0.customParameterTypes());
         assertThrows(

@@ -19,17 +19,15 @@ class ParamDiffTest {
 
     @Test
     void allElementsEqualEveryCellOk() {
-        List<CellDiff> diffs =
-                ParamDiff.compareParams(
-                        List.of(3, "big"), List.of(3, "big"), List.of(span(14, 15), span(31, 34)), List.of("3", "big"));
+        List<CellDiff> diffs = ParamDiff.compareParams(
+                List.of(3, "big"), List.of(3, "big"), List.of(span(14, 15), span(31, 34)), List.of("3", "big"));
         assertTrue(diffs.stream().allMatch(CellDiff::ok));
     }
 
     @Test
     void oneMismatchingElementThatCellIsNotOkWithExpectedActual() {
-        List<CellDiff> diffs =
-                ParamDiff.compareParams(
-                        List.of(4, "big"), List.of(3, "big"), List.of(span(14, 15), span(31, 34)), List.of("3", "big"));
+        List<CellDiff> diffs = ParamDiff.compareParams(
+                List.of(4, "big"), List.of(3, "big"), List.of(span(14, 15), span(31, 34)), List.of("3", "big"));
         assertEquals("arg 1", diffs.get(0).column());
         assertEquals("3", diffs.get(0).expected());
         assertEquals("4", diffs.get(0).actual());
@@ -40,9 +38,8 @@ class ParamDiffTest {
 
     @Test
     void objectActualsCompareStructurallyAcrossReferences() {
-        List<CellDiff> diffs =
-                ParamDiff.compareParams(
-                        List.of(Map.of("iso", "NO")), List.of(Map.of("iso", "NO")), List.of(span(0, 2)), List.of("NO"));
+        List<CellDiff> diffs = ParamDiff.compareParams(
+                List.of(Map.of("iso", "NO")), List.of(Map.of("iso", "NO")), List.of(span(0, 2)), List.of("NO"));
         assertTrue(diffs.get(0).ok());
     }
 }

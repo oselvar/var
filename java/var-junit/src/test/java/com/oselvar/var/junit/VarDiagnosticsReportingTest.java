@@ -34,8 +34,7 @@ class VarDiagnosticsReportingTest {
     private static final String AMBIGUOUS_STEPS = AmbiguousSteps.class.getName();
 
     @Test
-    void ambiguousMatchDiagnosticIsPublishedAsAReportEntryOnTheFileContainer(@TempDir Path workspace)
-            throws Exception {
+    void ambiguousMatchDiagnosticIsPublishedAsAReportEntryOnTheFileContainer(@TempDir Path workspace) throws Exception {
         EngineExecutionResults results = executeAmbiguous(workspace);
 
         assertEquals(
@@ -53,11 +52,10 @@ class VarDiagnosticsReportingTest {
                         1,
                         event(
                                 container(),
-                                reportEntry(
-                                        Map.of(
-                                                "code", "AMBIGUOUS_MATCH",
-                                                "severity", "ERROR",
-                                                "line", "3"))));
+                                reportEntry(Map.of(
+                                        "code", "AMBIGUOUS_MATCH",
+                                        "severity", "ERROR",
+                                        "line", "3"))));
     }
 
     @Test
@@ -69,14 +67,12 @@ class VarDiagnosticsReportingTest {
                   "docs": { "include": ["examplefixture/counter.md"], "exclude": [] },
                   "steps": ["%s"]
                 }
-                """
-                        .formatted(CounterSteps.class.getName()),
+                """.formatted(CounterSteps.class.getName()),
                 StandardCharsets.UTF_8);
-        EngineExecutionResults results =
-                EngineTestKit.engine("var")
-                        .selectors(selectClasspathResource("examplefixture/counter.md"))
-                        .configurationParameter(ConfigBridge.CONFIG_ROOT_KEY, workspace.toString())
-                        .execute();
+        EngineExecutionResults results = EngineTestKit.engine("var")
+                .selectors(selectClasspathResource("examplefixture/counter.md"))
+                .configurationParameter(ConfigBridge.CONFIG_ROOT_KEY, workspace.toString())
+                .execute();
 
         assertEquals(
                 0,
@@ -85,16 +81,12 @@ class VarDiagnosticsReportingTest {
     }
 
     private static EngineExecutionResults executeAmbiguous(Path workspace) throws Exception {
-        Files.writeString(
-                workspace.resolve("var.config.json"),
-                """
+        Files.writeString(workspace.resolve("var.config.json"), """
                 {
                   "docs": { "include": ["examplefixture/ambiguous.md"], "exclude": [] },
                   "steps": ["%s"]
                 }
-                """
-                        .formatted(AMBIGUOUS_STEPS),
-                StandardCharsets.UTF_8);
+                """.formatted(AMBIGUOUS_STEPS), StandardCharsets.UTF_8);
         return EngineTestKit.engine("var")
                 .selectors(selectClasspathResource("examplefixture/ambiguous.md"))
                 .configurationParameter(ConfigBridge.CONFIG_ROOT_KEY, workspace.toString())

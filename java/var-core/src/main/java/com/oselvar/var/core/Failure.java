@@ -45,8 +45,8 @@ public final class Failure {
             List<Result.CellFailure> failing = new ArrayList<>();
             for (CellDiff c : ((CellDiff.CellMismatchException) error).cells()) {
                 if (!c.ok()) {
-                    failing.add(
-                            new Result.CellFailure(c.span().startOffset(), c.span().endOffset(), c.actual()));
+                    failing.add(new Result.CellFailure(
+                            c.span().startOffset(), c.span().endOffset(), c.actual()));
                 }
             }
             if (!failing.isEmpty()) cells = List.copyOf(failing);
@@ -55,9 +55,7 @@ public final class Failure {
         Result.CellFailure doc = null;
         if (DocStringDiff.isDocStringMismatchException(error)) {
             DocStringDiff diff = ((DocStringDiff.DocStringMismatchException) error).diff();
-            doc =
-                    new Result.CellFailure(
-                            diff.span().startOffset(), diff.span().endOffset(), diff.actual());
+            doc = new Result.CellFailure(diff.span().startOffset(), diff.span().endOffset(), diff.actual());
         }
 
         Integer line = failingLine(stack, specPath);

@@ -62,17 +62,13 @@ class VarTestEngineTest {
         // action is currently a no-op (see VarEngineDescriptor's Javadoc: no lifecycle work
         // exists yet to skip), so there is nothing further to observe about the guard
         // itself beyond this outcome.
-        Files.writeString(
-                workspace.resolve("var.config.json"),
-                """
+        Files.writeString(workspace.resolve("var.config.json"), """
                 { "docs": { "include": ["nowhere/**/*.md"], "exclude": [] } }
-                """,
-                StandardCharsets.UTF_8);
-        EngineExecutionResults results =
-                EngineTestKit.engine("var")
-                        .selectors(selectPackage("discoveryfixture"))
-                        .configurationParameter(ConfigBridge.CONFIG_ROOT_KEY, workspace.toString())
-                        .execute();
+                """, StandardCharsets.UTF_8);
+        EngineExecutionResults results = EngineTestKit.engine("var")
+                .selectors(selectPackage("discoveryfixture"))
+                .configurationParameter(ConfigBridge.CONFIG_ROOT_KEY, workspace.toString())
+                .execute();
 
         results.containerEvents()
                 .assertThatEvents()

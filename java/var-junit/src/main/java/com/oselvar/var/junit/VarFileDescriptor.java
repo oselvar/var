@@ -125,17 +125,15 @@ final class VarFileDescriptor extends AbstractTestDescriptor implements Node<Var
      * ranges against {@link Plan.PlannedExample#span()} for no clear benefit over just reporting
      * the line — not attempted here, per the task's own "don't over-engineer" guidance.
      */
-    private void publishDiagnostics(
-            VarEngineExecutionContext context, List<Diagnostics.Diagnostic> diagnostics) {
+    private void publishDiagnostics(VarEngineExecutionContext context, List<Diagnostics.Diagnostic> diagnostics) {
         for (Diagnostics.Diagnostic diagnostic : diagnostics) {
             context.listener()
                     .reportingEntryPublished(
                             this,
-                            ReportEntry.from(
-                                    Map.of(
-                                            "code", diagnostic.code().name(),
-                                            "severity", diagnostic.severity().name(),
-                                            "line", String.valueOf(diagnostic.span().startLine()))));
+                            ReportEntry.from(Map.of(
+                                    "code", diagnostic.code().name(),
+                                    "severity", diagnostic.severity().name(),
+                                    "line", String.valueOf(diagnostic.span().startLine()))));
         }
     }
 

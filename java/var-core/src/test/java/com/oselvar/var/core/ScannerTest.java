@@ -49,11 +49,10 @@ class ScannerTest {
     void scanFindsHeadingsAtLevels1Through6() {
         String source = "# a\n## b\n### c\n#### d\n##### e\n###### f";
         List<Block> blocks = Scanner.scan(source);
-        List<Integer> levels =
-                blocks.stream()
-                        .filter(Heading.class::isInstance)
-                        .map(b -> ((Heading) b).level())
-                        .collect(Collectors.toList());
+        List<Integer> levels = blocks.stream()
+                .filter(Heading.class::isInstance)
+                .map(b -> ((Heading) b).level())
+                .collect(Collectors.toList());
         assertEquals(List.of(1, 2, 3, 4, 5, 6), levels);
     }
 
@@ -76,11 +75,10 @@ class ScannerTest {
     void scanGroupsConsecutiveNonBlankLinesIntoASingleParagraph() {
         String source = "first line\nsecond line\n\nthird line";
         List<Block> blocks = Scanner.scan(source);
-        List<Paragraph> paragraphs =
-                blocks.stream()
-                        .filter(Paragraph.class::isInstance)
-                        .map(Paragraph.class::cast)
-                        .collect(Collectors.toList());
+        List<Paragraph> paragraphs = blocks.stream()
+                .filter(Paragraph.class::isInstance)
+                .map(Paragraph.class::cast)
+                .collect(Collectors.toList());
         assertEquals(2, paragraphs.size());
         assertEquals("first line\nsecond line", paragraphs.get(0).text());
         assertEquals("third line", paragraphs.get(1).text());
@@ -90,12 +88,11 @@ class ScannerTest {
     void paragraphSpanCoversTheFullMultiLineRange() {
         String source = "first line\nsecond line\n\nthird line";
         List<Block> blocks = Scanner.scan(source);
-        Paragraph p1 =
-                blocks.stream()
-                        .filter(Paragraph.class::isInstance)
-                        .map(Paragraph.class::cast)
-                        .findFirst()
-                        .orElseThrow();
+        Paragraph p1 = blocks.stream()
+                .filter(Paragraph.class::isInstance)
+                .map(Paragraph.class::cast)
+                .findFirst()
+                .orElseThrow();
         assertEquals(0, p1.span().startOffset());
         assertEquals("first line\nsecond line".length(), p1.span().endOffset());
         assertEquals(1, p1.span().startLine());
@@ -106,12 +103,11 @@ class ScannerTest {
     void paragraphInlineMapMapsTextOffsetsToSourceOffsets() {
         String source = "# Heading\n\nhello world";
         List<Block> blocks = Scanner.scan(source);
-        Paragraph paragraph =
-                blocks.stream()
-                        .filter(Paragraph.class::isInstance)
-                        .map(Paragraph.class::cast)
-                        .findFirst()
-                        .orElseThrow();
+        Paragraph paragraph = blocks.stream()
+                .filter(Paragraph.class::isInstance)
+                .map(Paragraph.class::cast)
+                .findFirst()
+                .orElseThrow();
         // 'hello world' lives at source offset 11 (after '# Heading\n\n')
         assertEquals(new InlineOffset(0, 11), paragraph.inlineMap().get(0));
     }
@@ -139,12 +135,11 @@ class ScannerTest {
     void scanRecognizesAFencedCodeBlockWithInfoString() {
         String source = "# Title\n\n```json\n{ \"a\": 1 }\n```\n";
         List<Block> blocks = Scanner.scan(source);
-        Fence fence =
-                blocks.stream()
-                        .filter(Fence.class::isInstance)
-                        .map(Fence.class::cast)
-                        .findFirst()
-                        .orElseThrow();
+        Fence fence = blocks.stream()
+                .filter(Fence.class::isInstance)
+                .map(Fence.class::cast)
+                .findFirst()
+                .orElseThrow();
         assertEquals("json", fence.info());
         assertEquals("{ \"a\": 1 }\n", fence.body());
     }
@@ -152,12 +147,11 @@ class ScannerTest {
     @Test
     void scanToleratesAFenceWithNoInfoString() {
         List<Block> blocks = Scanner.scan("```\nplain body\n```");
-        Fence fence =
-                blocks.stream()
-                        .filter(Fence.class::isInstance)
-                        .map(Fence.class::cast)
-                        .findFirst()
-                        .orElseThrow();
+        Fence fence = blocks.stream()
+                .filter(Fence.class::isInstance)
+                .map(Fence.class::cast)
+                .findFirst()
+                .orElseThrow();
         assertEquals("", fence.info());
         assertEquals("plain body\n", fence.body());
     }
@@ -176,12 +170,11 @@ class ScannerTest {
     void scanRecognizesAGfmTableWithHeaderDelimiterRows() {
         String source = "| name | age |\n|------|-----|\n| Bob  | 30  |\n| Eve  | 25  |\n";
         List<Block> blocks = Scanner.scan(source);
-        Table table =
-                blocks.stream()
-                        .filter(Table.class::isInstance)
-                        .map(Table.class::cast)
-                        .findFirst()
-                        .orElseThrow();
+        Table table = blocks.stream()
+                .filter(Table.class::isInstance)
+                .map(Table.class::cast)
+                .findFirst()
+                .orElseThrow();
         assertEquals(List.of("name", "age"), table.header().cells());
         assertEquals(2, table.rows().size());
         assertEquals(List.of("Bob", "30"), table.rows().get(0).cells());
@@ -196,8 +189,7 @@ class ScannerTest {
 
     @Test
     void tableRowsExposeASourceSpanPerCellThatSlicesBackToTheTrimmedCellText() {
-        String source =
-                """
+        String source = """
                 # T
 
                 these rows:
@@ -206,12 +198,11 @@ class ScannerTest {
                 | - | --- |
                 | 1 | 222 |""";
         List<Block> blocks = Scanner.scan(source);
-        Table table =
-                blocks.stream()
-                        .filter(Table.class::isInstance)
-                        .map(Table.class::cast)
-                        .findFirst()
-                        .orElseThrow();
+        Table table = blocks.stream()
+                .filter(Table.class::isInstance)
+                .map(Table.class::cast)
+                .findFirst()
+                .orElseThrow();
         Ast.Row row = table.rows().get(0);
         assertEquals(2, row.cellSpans().size());
         assertEquals("1", slice(source, row.cellSpans().get(0)));
@@ -222,8 +213,7 @@ class ScannerTest {
 
     @Test
     void aSingleColumnGfmTableParsesAsATableNotParagraphs() {
-        String source =
-                """
+        String source = """
                 # T
 
                 these:
@@ -233,12 +223,11 @@ class ScannerTest {
                 | 7 |
                 | 8 |""";
         List<Block> blocks = Scanner.scan(source);
-        Table table =
-                blocks.stream()
-                        .filter(Table.class::isInstance)
-                        .map(Table.class::cast)
-                        .findFirst()
-                        .orElseThrow();
+        Table table = blocks.stream()
+                .filter(Table.class::isInstance)
+                .map(Table.class::cast)
+                .findFirst()
+                .orElseThrow();
         assertEquals(List.of("n"), table.header().cells());
         assertEquals(
                 List.of(List.of("7"), List.of("8")),
@@ -261,8 +250,7 @@ class ScannerTest {
 
     @Test
     void scanRecognizesUnorderedListItems() {
-        List<Block> blocks =
-                Scanner.scan("- Given I have 100\n- When I withdraw 40\n- Then I should have 60");
+        List<Block> blocks = Scanner.scan("- Given I have 100\n- When I withdraw 40\n- Then I should have 60");
         List<String> kinds = blocks.stream().map(ScannerTest::kindOf).collect(Collectors.toList());
         assertEquals(List.of("list_item", "list_item", "list_item"), kinds);
         ListItem first = assertInstanceOf(ListItem.class, blocks.get(0));

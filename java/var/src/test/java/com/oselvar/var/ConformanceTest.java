@@ -69,8 +69,7 @@ class ConformanceTest {
 
     static Stream<Named<Path>> bundleDirs() throws IOException {
         assertTrue(
-                Files.isDirectory(BUNDLES_DIR),
-                () -> "Expected conformance corpus at " + BUNDLES_DIR.toAbsolutePath());
+                Files.isDirectory(BUNDLES_DIR), () -> "Expected conformance corpus at " + BUNDLES_DIR.toAbsolutePath());
         try (Stream<Path> entries = Files.list(BUNDLES_DIR)) {
             return entries
                     .filter(Files::isDirectory)
@@ -97,17 +96,12 @@ class ConformanceTest {
             case "06-doc-string-mismatch" -> new com.oselvar.var.conformance.bundle06.EchoSteps();
             case "07-row-check-mismatch" -> new com.oselvar.var.conformance.bundle07.ReportSteps();
             case "08-string-capture" -> new com.oselvar.var.conformance.bundle08.GreetSteps();
-            case "09-expected-message-mismatch" ->
-                    new com.oselvar.var.conformance.bundle09.BoomSteps();
-            case "10-error-fence-without-step" ->
-                    new com.oselvar.var.conformance.bundle10.CukesSteps();
+            case "09-expected-message-mismatch" -> new com.oselvar.var.conformance.bundle09.BoomSteps();
+            case "10-error-fence-without-step" -> new com.oselvar.var.conformance.bundle10.CukesSteps();
             case "11-emoji-offsets" -> new com.oselvar.var.conformance.bundle11.GreetSteps();
             case "12-combining-marks" -> new com.oselvar.var.conformance.bundle12.GreetSteps();
-            case "13-custom-parameter-type" ->
-                    new com.oselvar.var.conformance.bundle13.AirportsSteps();
-            default ->
-                    throw new IllegalStateException(
-                            "No Java step fixture registered for bundle " + bundleName);
+            case "13-custom-parameter-type" -> new com.oselvar.var.conformance.bundle13.AirportsSteps();
+            default -> throw new IllegalStateException("No Java step fixture registered for bundle " + bundleName);
         };
     }
 
@@ -123,8 +117,7 @@ class ConformanceTest {
 
         var artifact = Conformance.toRegistryArtifact(registry);
         String actual = CanonicalJson.canonicalStringify(artifact);
-        String expected =
-                Files.readString(bundle.resolve("golden").resolve("registry.json"), StandardCharsets.UTF_8);
+        String expected = Files.readString(bundle.resolve("golden").resolve("registry.json"), StandardCharsets.UTF_8);
         assertEquals(expected, actual, () -> bundle.getFileName() + "/registry.json mismatch");
     }
 
@@ -153,8 +146,7 @@ class ConformanceTest {
 
         var artifact = Conformance.toPlanArtifact(plan);
         String actual = CanonicalJson.canonicalStringify(artifact);
-        String expected =
-                Files.readString(bundle.resolve("golden").resolve("plan.json"), StandardCharsets.UTF_8);
+        String expected = Files.readString(bundle.resolve("golden").resolve("plan.json"), StandardCharsets.UTF_8);
         assertEquals(expected, actual, () -> bundle.getFileName() + "/plan.json mismatch");
     }
 
@@ -191,8 +183,7 @@ class ConformanceTest {
         Conformance.BundleArtifacts artifacts = Conformance.runConformance(doc, registry, contextFactory);
 
         String actual = CanonicalJson.canonicalStringify(artifacts.trace());
-        String expected =
-                Files.readString(bundle.resolve("golden").resolve("trace.json"), StandardCharsets.UTF_8);
+        String expected = Files.readString(bundle.resolve("golden").resolve("trace.json"), StandardCharsets.UTF_8);
         assertEquals(expected, actual, () -> bundle.getFileName() + "/trace.json mismatch");
     }
 }

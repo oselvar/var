@@ -51,8 +51,7 @@ class ConformanceTest {
     // per-bundle assertion message below names the bundle either way).
     static Stream<Named<Path>> bundleDirs() throws IOException {
         assertTrue(
-                Files.isDirectory(BUNDLES_DIR),
-                () -> "Expected conformance corpus at " + BUNDLES_DIR.toAbsolutePath());
+                Files.isDirectory(BUNDLES_DIR), () -> "Expected conformance corpus at " + BUNDLES_DIR.toAbsolutePath());
         try (Stream<Path> entries = Files.list(BUNDLES_DIR)) {
             return entries
                     .filter(Files::isDirectory)
@@ -70,8 +69,7 @@ class ConformanceTest {
         Ast.VarDoc doc = Parse.parse("example.md", source);
         var artifact = Conformance.toVarDocArtifact(doc);
         String actual = CanonicalJson.canonicalStringify(artifact);
-        String expected =
-                Files.readString(bundle.resolve("golden").resolve("var-doc.json"), StandardCharsets.UTF_8);
+        String expected = Files.readString(bundle.resolve("golden").resolve("var-doc.json"), StandardCharsets.UTF_8);
         assertEquals(expected, actual, () -> bundle.getFileName() + "/var-doc.json mismatch");
     }
 
@@ -83,9 +81,7 @@ class ConformanceTest {
 
     @Test
     void toRegistryArtifactListsExpressionsAndParsedParameterTypeNames() {
-        Registry r =
-                Registry.addStep(
-                        Registry.createRegistry(), "I have {int} cukes", "s.ts", 1, NOOP_HANDLER, null);
+        Registry r = Registry.addStep(Registry.createRegistry(), "I have {int} cukes", "s.ts", 1, NOOP_HANDLER, null);
 
         var artifact = Conformance.toRegistryArtifact(r);
         assertEquals(List.of(), artifact.get("parameterTypes"));
@@ -102,33 +98,22 @@ class ConformanceTest {
     void toRegistryArtifactReadsParameterNamesFromTheAstIgnoringEscapedBraces() {
         // A naive `{...}` regex would wrongly count the escaped `\{a, b\}` as a
         // parameter and yield ["a, b", "int"]; the AST sees only the real {int}.
-        Registry r =
-                Registry.addStep(
-                        Registry.createRegistry(),
-                        "the set \\{a, b\\} has {int} elements",
-                        "s.ts",
-                        1,
-                        NOOP_HANDLER,
-                        null);
+        Registry r = Registry.addStep(
+                Registry.createRegistry(), "the set \\{a, b\\} has {int} elements", "s.ts", 1, NOOP_HANDLER, null);
 
-        assertEquals(List.of("int"), Conformance.parameterTypeNames(r.steps().get(0).expression()));
+        assertEquals(
+                List.of("int"), Conformance.parameterTypeNames(r.steps().get(0).expression()));
     }
 
     @Test
     void registryArtifactProjectsCustomParameterTypes() {
         Registry r = Registry.createRegistry();
-        r =
-                Registry.defineParameterType(
-                        r, "airport", java.util.regex.Pattern.compile("[A-Z]{3}"), groups -> groups[0]);
-        r =
-                Registry.addStep(
-                        r, "I fly to {airport}", "airports.steps", 1, NOOP_HANDLER, StepKind.STIMULUS);
+        r = Registry.defineParameterType(
+                r, "airport", java.util.regex.Pattern.compile("[A-Z]{3}"), groups -> groups[0]);
+        r = Registry.addStep(r, "I fly to {airport}", "airports.steps", 1, NOOP_HANDLER, StepKind.STIMULUS);
         Map<String, Object> artifact = Conformance.toRegistryArtifact(r);
+        assertEquals(List.of(Map.of("name", "airport", "regexp", "[A-Z]{3}")), artifact.get("parameterTypes"));
         assertEquals(
-                List.of(Map.of("name", "airport", "regexp", "[A-Z]{3}")),
-                artifact.get("parameterTypes"));
-        assertEquals(
-                List.of("airport"),
-                ((Map<?, ?>) ((List<?>) artifact.get("steps")).get(0)).get("parameterTypeNames"));
+                List.of("airport"), ((Map<?, ?>) ((List<?>) artifact.get("steps")).get(0)).get("parameterTypeNames"));
     }
 }

@@ -14,8 +14,10 @@ public final class RomanNumeralsSteps implements StepDefinitions {
     public void defineSteps(Registrar registrar) {
         StateBinder<Ctx> s = registrar.defineState(Ctx::new);
 
-        s.sensor("a decimal and a roman number", (Ctx ctx, Map<String, String> row) -> Map.of(
-                "decimal", row.get("decimal"),
-                "roman", RomanNumerals.toRoman(Integer.parseInt(row.get("decimal")))));
+        s.sensor(
+                "a decimal and a roman number",
+                (Ctx ctx, Map<String, String> row) -> Map.of(
+                        "decimal", row.get("decimal"),
+                        "roman", RomanNumerals.toRoman(Integer.parseInt(row.get("decimal")))));
     }
 }

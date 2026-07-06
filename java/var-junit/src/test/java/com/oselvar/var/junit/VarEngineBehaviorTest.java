@@ -107,11 +107,10 @@ class VarEngineBehaviorTest {
 
         UniqueId failingExampleId = examples.get(1).getUniqueId(); // line 7, the one that fails
 
-        EngineExecutionResults results =
-                EngineTestKit.engine("var")
-                        .selectors(selectUniqueId(failingExampleId))
-                        .configurationParameter(ConfigBridge.CONFIG_ROOT_KEY, workspace.toString())
-                        .execute();
+        EngineExecutionResults results = EngineTestKit.engine("var")
+                .selectors(selectUniqueId(failingExampleId))
+                .configurationParameter(ConfigBridge.CONFIG_ROOT_KEY, workspace.toString())
+                .execute();
 
         results.testEvents().assertThatEvents().hasSize(2); // started + finished, for that one example only
         assertEquals(1, results.testEvents().failed().count(), "the selected example must be the only one that runs");
@@ -138,11 +137,10 @@ class VarEngineBehaviorTest {
     void varStepsOnlyLoadsTheNamedClassesNotEveryStepDefinitionOnTheClasspath(
             @TempDir Path onlyCounterStepsWorkspace, @TempDir Path bothStepsWorkspace) throws Exception {
         writeConfig(onlyCounterStepsWorkspace, "examplefixture/**/*.md", COUNTER_STEPS);
-        EngineDiscoveryResults onlyCounterSteps =
-                EngineTestKit.engine("var")
-                        .selectors(selectClasspathResource("examplefixture/widgets.md"))
-                        .configurationParameter(ConfigBridge.CONFIG_ROOT_KEY, onlyCounterStepsWorkspace.toString())
-                        .discover();
+        EngineDiscoveryResults onlyCounterSteps = EngineTestKit.engine("var")
+                .selectors(selectClasspathResource("examplefixture/widgets.md"))
+                .configurationParameter(ConfigBridge.CONFIG_ROOT_KEY, onlyCounterStepsWorkspace.toString())
+                .discover();
         assertTrue(
                 onlyCounterSteps.getEngineDescriptor().getChildren().isEmpty(),
                 "CounterSteps' expressions don't match widgets.md's sentences -- steps must be"
@@ -150,11 +148,10 @@ class VarEngineBehaviorTest {
                         + " resulting childless container is itself pruned)");
 
         writeConfig(bothStepsWorkspace, "examplefixture/**/*.md", COUNTER_STEPS + "," + WIDGET_STEPS);
-        EngineDiscoveryResults bothSteps =
-                EngineTestKit.engine("var")
-                        .selectors(selectClasspathResource("examplefixture/widgets.md"))
-                        .configurationParameter(ConfigBridge.CONFIG_ROOT_KEY, bothStepsWorkspace.toString())
-                        .discover();
+        EngineDiscoveryResults bothSteps = EngineTestKit.engine("var")
+                .selectors(selectClasspathResource("examplefixture/widgets.md"))
+                .configurationParameter(ConfigBridge.CONFIG_ROOT_KEY, bothStepsWorkspace.toString())
+                .discover();
         TestDescriptor fileDescriptor = onlySpecDescriptor(bothSteps.getEngineDescriptor());
         assertEquals(
                 2,
@@ -214,11 +211,10 @@ class VarEngineBehaviorTest {
      * ported into a JSON array here.
      */
     private static void writeConfig(Path workspace, String docsInclude, String stepClassNames) throws Exception {
-        String stepsJson =
-                Arrays.stream(stepClassNames.split(","))
-                        .map(name -> "\"" + name + "\"")
-                        .reduce((a, b) -> a + ", " + b)
-                        .orElse("");
+        String stepsJson = Arrays.stream(stepClassNames.split(","))
+                .map(name -> "\"" + name + "\"")
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("");
         Files.writeString(
                 workspace.resolve("var.config.json"),
                 "{ \"docs\": { \"include\": [\"" + docsInclude + "\"], \"exclude\": [] }, \"steps\": ["

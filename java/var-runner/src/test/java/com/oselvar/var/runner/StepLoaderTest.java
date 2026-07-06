@@ -32,12 +32,12 @@ class StepLoaderTest {
     @Test
     void mergesStepsFromMultipleClassesIntoOneRegistry() {
         LoadedSteps loaded =
-                StepLoader.loadSteps(
-                        List.of(AlphaSteps.class.getName(), BetaSteps.class.getName()), LOADER);
+                StepLoader.loadSteps(List.of(AlphaSteps.class.getName(), BetaSteps.class.getName()), LOADER);
 
         assertEquals(4, loaded.registry().steps().size(), "2 steps/file x 2 files");
-        List<String> expressions =
-                loaded.registry().steps().stream().map(Registry.StepRegistration::expression).toList();
+        List<String> expressions = loaded.registry().steps().stream()
+                .map(Registry.StepRegistration::expression)
+                .toList();
         assertTrue(expressions.contains("alpha increments to {int}"));
         assertTrue(expressions.contains("alpha count is {int}"));
         assertTrue(expressions.contains("beta sets label to {word}"));
@@ -47,22 +47,19 @@ class StepLoaderTest {
     @Test
     void expressionSourceFilesAreGenuinelyDistinctPerClass() {
         LoadedSteps loaded =
-                StepLoader.loadSteps(
-                        List.of(AlphaSteps.class.getName(), BetaSteps.class.getName()), LOADER);
+                StepLoader.loadSteps(List.of(AlphaSteps.class.getName(), BetaSteps.class.getName()), LOADER);
 
-        List<String> files =
-                loaded.registry().steps().stream()
-                        .map(Registry.StepRegistration::expressionSourceFile)
-                        .distinct()
-                        .toList();
+        List<String> files = loaded.registry().steps().stream()
+                .map(Registry.StepRegistration::expressionSourceFile)
+                .distinct()
+                .toList();
         assertEquals(List.of("AlphaSteps.java", "BetaSteps.java"), files);
     }
 
     @Test
     void createContextResolvesEachFilesOwnStateFactoryWithoutCrossWiring() {
         LoadedSteps loaded =
-                StepLoader.loadSteps(
-                        List.of(AlphaSteps.class.getName(), BetaSteps.class.getName()), LOADER);
+                StepLoader.loadSteps(List.of(AlphaSteps.class.getName(), BetaSteps.class.getName()), LOADER);
 
         Object alphaState = loaded.createContext().apply("AlphaSteps.java");
         Object betaState = loaded.createContext().apply("BetaSteps.java");
@@ -74,16 +71,12 @@ class StepLoaderTest {
 
         // Cross-wiring check: neither file's key ever produces the OTHER file's state
         // type, in either direction.
-        assertThrows(
-                ClassCastException.class,
-                () -> {
-                    AlphaSteps.Ctx wrong = (AlphaSteps.Ctx) betaState;
-                });
-        assertThrows(
-                ClassCastException.class,
-                () -> {
-                    BetaSteps.Ctx wrong = (BetaSteps.Ctx) alphaState;
-                });
+        assertThrows(ClassCastException.class, () -> {
+            AlphaSteps.Ctx wrong = (AlphaSteps.Ctx) betaState;
+        });
+        assertThrows(ClassCastException.class, () -> {
+            BetaSteps.Ctx wrong = (BetaSteps.Ctx) alphaState;
+        });
     }
 
     @Test
@@ -99,18 +92,15 @@ class StepLoaderTest {
     @Test
     void unknownFileThrowsClearly() {
         LoadedSteps loaded = StepLoader.loadSteps(List.of(AlphaSteps.class.getName()), LOADER);
-        IllegalStateException e =
-                assertThrows(
-                        IllegalStateException.class, () -> loaded.createContext().apply("NoSuchFile.java"));
+        IllegalStateException e = assertThrows(
+                IllegalStateException.class, () -> loaded.createContext().apply("NoSuchFile.java"));
         assertTrue(e.getMessage().contains("NoSuchFile.java"));
     }
 
     @Test
     void classNotImplementingStepDefinitionsThrowsClearly() {
-        IllegalArgumentException e =
-                assertThrows(
-                        IllegalArgumentException.class,
-                        () -> StepLoader.loadSteps(List.of("java.lang.String"), LOADER));
+        IllegalArgumentException e = assertThrows(
+                IllegalArgumentException.class, () -> StepLoader.loadSteps(List.of("java.lang.String"), LOADER));
         assertTrue(e.getMessage().contains("java.lang.String"));
     }
 
@@ -124,8 +114,7 @@ class StepLoaderTest {
     @Test
     void aClassThatDefinesStateButRegistersZeroStepsIsSkippedNotCrashed() {
         LoadedSteps loaded =
-                StepLoader.loadSteps(
-                        List.of(AlphaSteps.class.getName(), ContextOnlySteps.class.getName()), LOADER);
+                StepLoader.loadSteps(List.of(AlphaSteps.class.getName(), ContextOnlySteps.class.getName()), LOADER);
 
         // Only Alpha's steps are in the merged registry; the context-only class
         // contributes nothing to key by (and nothing needs it, since no step ever runs
@@ -139,20 +128,16 @@ class StepLoaderTest {
         // twice (as if two step-definition files accidentally declared the same
         // expression) must surface addStep's existing duplicate-detection, not silently
         // merge over it.
-        IllegalArgumentException e =
-                assertThrows(
-                        IllegalArgumentException.class,
-                        () ->
-                                StepLoader.loadSteps(
-                                        List.of(AlphaSteps.class.getName(), AlphaSteps.class.getName()), LOADER));
+        IllegalArgumentException e = assertThrows(
+                IllegalArgumentException.class,
+                () -> StepLoader.loadSteps(List.of(AlphaSteps.class.getName(), AlphaSteps.class.getName()), LOADER));
         assertTrue(e.getMessage().contains("duplicate step definition"));
     }
 
     @Test
     void mergesCustomParameterTypesFromMultipleClassesWithDifferentNames() {
         LoadedSteps loaded =
-                StepLoader.loadSteps(
-                        List.of(GammaSteps.class.getName(), DeltaSteps.class.getName()), LOADER);
+                StepLoader.loadSteps(List.of(GammaSteps.class.getName(), DeltaSteps.class.getName()), LOADER);
 
         assertEquals(2, loaded.registry().customParameterTypes().size());
         var customTypes = loaded.registry().customParameterTypes();
@@ -165,13 +150,9 @@ class StepLoaderTest {
         // GammaSteps and EpsilonSteps both register a "color" parameter type; loading
         // both (as if two step-definition files accidentally declared the same custom
         // parameter-type name) must reject it.
-        IllegalArgumentException e =
-                assertThrows(
-                        IllegalArgumentException.class,
-                        () ->
-                                StepLoader.loadSteps(
-                                        List.of(GammaSteps.class.getName(), EpsilonSteps.class.getName()),
-                                        LOADER));
+        IllegalArgumentException e = assertThrows(
+                IllegalArgumentException.class,
+                () -> StepLoader.loadSteps(List.of(GammaSteps.class.getName(), EpsilonSteps.class.getName()), LOADER));
         assertTrue(e.getMessage().contains("duplicate custom parameter-type name \"color\""));
     }
 }

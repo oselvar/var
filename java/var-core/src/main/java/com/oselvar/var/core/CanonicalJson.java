@@ -61,8 +61,7 @@ public final class CanonicalJson {
         } else if (value instanceof Number n) {
             writeNumber(sb, n);
         } else {
-            throw new IllegalArgumentException(
-                    "Unsupported value type for canonical JSON: " + value.getClass());
+            throw new IllegalArgumentException("Unsupported value type for canonical JSON: " + value.getClass());
         }
     }
 

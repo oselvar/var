@@ -38,8 +38,7 @@ public final class Ast {
      * matching over {@code Block} replaces TS's {@code kind}-discriminated union
      * narrowing, with the compiler enforcing exhaustiveness.
      */
-    public sealed interface Block
-            permits Heading, Paragraph, ListItem, Blockquote, Table, Fence, ThematicBreak {}
+    public sealed interface Block permits Heading, Paragraph, ListItem, Blockquote, Table, Fence, ThematicBreak {}
 
     /** A markdown heading ({@code #}..{@code ######}); {@code level} is 1-6. */
     public record Heading(int level, String text, Span span) implements Block {}
@@ -52,8 +51,7 @@ public final class Ast {
     }
 
     /** A single list item ({@code -}/{@code *} or numbered). */
-    public record ListItem(
-            String text, Span span, List<InlineOffset> inlineMap, boolean ordered, Span markerSpan)
+    public record ListItem(String text, Span span, List<InlineOffset> inlineMap, boolean ordered, Span markerSpan)
             implements Block {
         public ListItem {
             inlineMap = List.copyOf(inlineMap);
@@ -114,8 +112,7 @@ public final class Ast {
     }
 
     /** A parsed source file: its matched examples plus any table/fence blocks not attached to one. */
-    public record VarDoc(
-            String path, String source, List<Example> examples, List<TableOrFence> orphanAttachments) {
+    public record VarDoc(String path, String source, List<Example> examples, List<TableOrFence> orphanAttachments) {
         public VarDoc {
             examples = List.copyOf(examples);
             orphanAttachments = List.copyOf(orphanAttachments);

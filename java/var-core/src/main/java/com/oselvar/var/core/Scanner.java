@@ -42,8 +42,7 @@ public final class Scanner {
     private static final Pattern BQ_RE = Pattern.compile("^>\\s?(.*)$");
     private static final Pattern FENCE_RE = Pattern.compile("^(`{3,})\\s*(\\S*)\\s*$");
     private static final Pattern ROW_RE = Pattern.compile("^\\|(.+)\\|\\s*$");
-    private static final Pattern DELIM_RE =
-            Pattern.compile("^\\|\\s*:?-+:?\\s*(\\|\\s*:?-+:?\\s*)*\\|\\s*$");
+    private static final Pattern DELIM_RE = Pattern.compile("^\\|\\s*:?-+:?\\s*(\\|\\s*:?-+:?\\s*)*\\|\\s*$");
     private static final Pattern HEADING_RE = Pattern.compile("^(#{1,6})\\s+(.*?)(?:\\s+#+)?\\s*$");
     private static final Pattern HEADING_PREFIX_RE = Pattern.compile("^#{1,6}\\s+");
 
@@ -201,11 +200,10 @@ public final class Scanner {
             endOffset = ln.endOffset();
             i++;
         }
-        Ast.Blockquote quote =
-                new Ast.Blockquote(
-                        String.join("\n", strippedSegments),
-                        Span.spanFromOffsets(source, first.startOffset(), endOffset),
-                        inlineMap);
+        Ast.Blockquote quote = new Ast.Blockquote(
+                String.join("\n", strippedSegments),
+                Span.spanFromOffsets(source, first.startOffset(), endOffset),
+                inlineMap);
         return new BlockquoteResult(quote, i);
     }
 
@@ -232,9 +230,8 @@ public final class Scanner {
         int endOffset = last.endOffset();
         String rawText = source.substring(startOffset, endOffset);
         InlineResult stripped = Inline.stripInline(rawText, startOffset);
-        Ast.Paragraph paragraph =
-                new Ast.Paragraph(
-                        stripped.text(), Span.spanFromOffsets(source, startOffset, endOffset), stripped.map());
+        Ast.Paragraph paragraph = new Ast.Paragraph(
+                stripped.text(), Span.spanFromOffsets(source, startOffset, endOffset), stripped.map());
         return new ParagraphResult(paragraph, endIdx + 1);
     }
 
@@ -277,14 +274,12 @@ public final class Scanner {
         int clampedBodyEnd = bodyEnd == null ? 0 : Math.min(bodyEnd, source.length());
         String body = (bodyStart != null && bodyEnd != null) ? source.substring(bodyStart, clampedBodyEnd) : "";
         int fallbackOffset = start.endOffset();
-        Span bodySpan =
-                Span.spanFromOffsets(
-                        source,
-                        bodyStart != null ? bodyStart : fallbackOffset,
-                        bodyEnd != null ? clampedBodyEnd : fallbackOffset);
+        Span bodySpan = Span.spanFromOffsets(
+                source,
+                bodyStart != null ? bodyStart : fallbackOffset,
+                bodyEnd != null ? clampedBodyEnd : fallbackOffset);
         Ast.Fence fenceBlock =
-                new Ast.Fence(
-                        Span.spanFromOffsets(source, start.startOffset(), endOffset), info, body, bodySpan);
+                new Ast.Fence(Span.spanFromOffsets(source, start.startOffset(), endOffset), info, body, bodySpan);
         return new FenceResult(fenceBlock, i + 1);
     }
 
@@ -297,13 +292,11 @@ public final class Scanner {
         if (!ROW_RE.matcher(headerLine.text()).find()) return null;
         if (!DELIM_RE.matcher(delimLine.text()).find()) return null;
 
-        RowCells headerParsed =
-                TableCells.parseRowCells(headerLine.text(), headerLine.startOffset(), source);
-        Row header =
-                new Row(
-                        headerParsed.cells(),
-                        headerParsed.cellSpans(),
-                        Span.spanFromOffsets(source, headerLine.startOffset(), headerLine.endOffset()));
+        RowCells headerParsed = TableCells.parseRowCells(headerLine.text(), headerLine.startOffset(), source);
+        Row header = new Row(
+                headerParsed.cells(),
+                headerParsed.cellSpans(),
+                Span.spanFromOffsets(source, headerLine.startOffset(), headerLine.endOffset()));
 
         List<Row> rows = new ArrayList<>();
         int i = startIdx + 2;
@@ -311,18 +304,16 @@ public final class Scanner {
             RawLine ln = lines.get(i);
             if (!ROW_RE.matcher(ln.text()).find()) break;
             RowCells parsed = TableCells.parseRowCells(ln.text(), ln.startOffset(), source);
-            rows.add(
-                    new Row(
-                            parsed.cells(),
-                            parsed.cellSpans(),
-                            Span.spanFromOffsets(source, ln.startOffset(), ln.endOffset())));
+            rows.add(new Row(
+                    parsed.cells(),
+                    parsed.cellSpans(),
+                    Span.spanFromOffsets(source, ln.startOffset(), ln.endOffset())));
             i++;
         }
         Row lastRow = rows.isEmpty() ? null : rows.get(rows.size() - 1);
         int endOffset = lastRow != null ? lastRow.span().endOffset() : delimLine.endOffset();
         Ast.Table table =
-                new Ast.Table(
-                        Span.spanFromOffsets(source, headerLine.startOffset(), endOffset), header, rows);
+                new Ast.Table(Span.spanFromOffsets(source, headerLine.startOffset(), endOffset), header, rows);
         return new TableResult(table, i);
     }
 }

@@ -282,7 +282,9 @@ public final class Execute {
         if (thrown == null && ex.rowChecks() != null && !ex.rowChecks().isEmpty()) {
             @SuppressWarnings("unchecked")
             List<CellDiff.RowCheck> checks = (List<CellDiff.RowCheck>) ex.rowChecks();
-            List<CellDiff> bad = CellDiff.compareRow(lastReturn, checks).stream().filter(d -> !d.ok()).toList();
+            List<CellDiff> bad = CellDiff.compareRow(lastReturn, checks).stream()
+                    .filter(d -> !d.ok())
+                    .toList();
             if (!bad.isEmpty()) {
                 Plan.PlannedStep lastStep = steps.get(steps.size() - 1);
                 Throwable augmented = augmentStack(new CellDiff.CellMismatchException(bad), lastStep, path);
@@ -364,8 +366,7 @@ public final class Execute {
                     .map(s -> source.substring(s.startOffset(), s.endOffset()))
                     .toList();
             List<CellDiff> diffs =
-                    ParamDiff.compareParams(
-                            slots.subList(0, argCount), step.args(), step.paramSpans(), sourceTexts);
+                    ParamDiff.compareParams(slots.subList(0, argCount), step.args(), step.paramSpans(), sourceTexts);
             List<CellDiff> bad = diffs.stream().filter(d -> !d.ok()).toList();
             if (!bad.isEmpty()) throw new CellDiff.CellMismatchException(bad);
         }
@@ -377,7 +378,9 @@ public final class Execute {
             if (!bad.isEmpty()) throw new CellDiff.CellMismatchException(bad);
         } else if (step.docString() != null) {
             DocStringDiff diff = DocStringDiff.compareDocString(
-                    slots.get(argCount), step.docString().body(), step.docString().bodySpan());
+                    slots.get(argCount),
+                    step.docString().body(),
+                    step.docString().bodySpan());
             if (diff != null) throw new DocStringDiff.DocStringMismatchException(diff);
         }
     }

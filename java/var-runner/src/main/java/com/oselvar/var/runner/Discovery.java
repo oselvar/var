@@ -96,8 +96,7 @@ public final class Discovery {
     }
 
     /** Returns {@code true} iff {@code path} matches an include glob and no exclude glob. */
-    public static boolean matchSpec(
-            Path path, List<String> include, List<String> exclude, Path root) {
+    public static boolean matchSpec(Path path, List<String> include, List<String> exclude, Path root) {
         String rel = relPosix(path, root);
         return matchesAny(rel, include) && !matchesAny(rel, exclude);
     }
@@ -141,14 +140,12 @@ public final class Discovery {
             Path base = literalPrefixDir(glob, root);
             if (!Files.exists(base)) continue;
             try (Stream<Path> walk = Files.walk(base)) {
-                walk.filter(Files::isRegularFile)
-                        .forEach(
-                                p -> {
-                                    String rel = relPosix(p, root);
-                                    if (matchesAny(rel, include) && !matchesAny(rel, exclude)) {
-                                        out.add(p);
-                                    }
-                                });
+                walk.filter(Files::isRegularFile).forEach(p -> {
+                    String rel = relPosix(p, root);
+                    if (matchesAny(rel, include) && !matchesAny(rel, exclude)) {
+                        out.add(p);
+                    }
+                });
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }

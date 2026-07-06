@@ -31,15 +31,9 @@ public final class ParamDiff {
         List<CellDiff> diffs = new ArrayList<>();
         for (int i = 0; i < expected.size(); i++) {
             boolean ok = Objects.equals(returned.get(i), expected.get(i));
-            String expectedText =
-                    i < sourceTexts.size() ? sourceTexts.get(i) : String.valueOf(expected.get(i));
-            diffs.add(
-                    new CellDiff(
-                            "arg " + (i + 1),
-                            paramSpans.get(i),
-                            expectedText,
-                            String.valueOf(returned.get(i)),
-                            ok));
+            String expectedText = i < sourceTexts.size() ? sourceTexts.get(i) : String.valueOf(expected.get(i));
+            diffs.add(new CellDiff(
+                    "arg " + (i + 1), paramSpans.get(i), expectedText, String.valueOf(returned.get(i)), ok));
         }
         return List.copyOf(diffs);
     }

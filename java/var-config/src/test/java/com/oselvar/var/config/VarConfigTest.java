@@ -17,16 +17,14 @@ class VarConfigTest {
 
     @Test
     void parsesAllKeys() {
-        VarConfig config = VarConfig.parse(
-                """
+        VarConfig config = VarConfig.parse("""
                 {
                   "docs": { "include": ["specs/**/*.md"], "exclude": ["specs/wip/**"] },
                   "steps": ["**/*Steps.java"],
                   "snippets": { "java": "J" },
                   "scannerPlugins": ["gherkinTables"]
                 }
-                """,
-                "var.config.json");
+                """, "var.config.json");
         assertEquals(List.of("specs/**/*.md"), config.docsInclude());
         assertEquals(List.of("specs/wip/**"), config.docsExclude());
         assertEquals(List.of("**/*Steps.java"), config.steps());
@@ -42,17 +40,14 @@ class VarConfigTest {
     @Test
     void unknownKeyIsRejected() {
         IllegalArgumentException e = assertThrows(
-                IllegalArgumentException.class,
-                () -> VarConfig.parse("{ \"vars\": {} }", "var.config.json"));
+                IllegalArgumentException.class, () -> VarConfig.parse("{ \"vars\": {} }", "var.config.json"));
         assertTrue(e.getMessage().contains("unknown key"), e.getMessage());
         assertTrue(e.getMessage().startsWith("var.config.json"), e.getMessage());
     }
 
     @Test
     void wrongTypeIsRejected() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> VarConfig.parse("{ \"steps\": \"x\" }", "var.config.json"));
+        assertThrows(IllegalArgumentException.class, () -> VarConfig.parse("{ \"steps\": \"x\" }", "var.config.json"));
         assertThrows(
                 IllegalArgumentException.class,
                 () -> VarConfig.parse("{ \"snippets\": { \"java\": 1 } }", "var.config.json"));
@@ -62,9 +57,7 @@ class VarConfigTest {
     void loadReadsFileAndMissingFileIsEmpty(@TempDir Path dir) throws IOException {
         assertEquals(VarConfig.empty(), VarConfig.load(dir));
         Files.writeString(
-                dir.resolve("var.config.json"),
-                "{ \"docs\": { \"include\": [\"**/*.md\"] } }",
-                StandardCharsets.UTF_8);
+                dir.resolve("var.config.json"), "{ \"docs\": { \"include\": [\"**/*.md\"] } }", StandardCharsets.UTF_8);
         assertEquals(List.of("**/*.md"), VarConfig.load(dir).docsInclude());
     }
 

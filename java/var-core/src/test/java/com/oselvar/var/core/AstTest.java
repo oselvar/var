@@ -45,7 +45,8 @@ class AstTest {
         assertEquals(1, paragraph.inlineMap().size());
 
         // The record's own list must be unmodifiable.
-        assertThrows(UnsupportedOperationException.class, () -> paragraph.inlineMap().add(new Ast.InlineOffset(2, 2)));
+        assertThrows(
+                UnsupportedOperationException.class, () -> paragraph.inlineMap().add(new Ast.InlineOffset(2, 2)));
         assertTrue(paragraph instanceof Ast.Block);
     }
 
@@ -59,7 +60,8 @@ class AstTest {
         assertEquals(SPAN, listItem.span());
         assertTrue(listItem.ordered());
         assertEquals(markerSpan, listItem.markerSpan());
-        assertThrows(UnsupportedOperationException.class, () -> listItem.inlineMap().add(new Ast.InlineOffset(1, 1)));
+        assertThrows(
+                UnsupportedOperationException.class, () -> listItem.inlineMap().add(new Ast.InlineOffset(1, 1)));
         assertTrue(listItem instanceof Ast.Block);
     }
 
@@ -71,7 +73,8 @@ class AstTest {
         assertEquals("Quoted", blockquote.text());
         assertEquals(SPAN, blockquote.span());
         assertThrows(
-                UnsupportedOperationException.class, () -> blockquote.inlineMap().add(new Ast.InlineOffset(1, 1)));
+                UnsupportedOperationException.class,
+                () -> blockquote.inlineMap().add(new Ast.InlineOffset(1, 1)));
         assertTrue(blockquote instanceof Ast.Block);
     }
 
@@ -130,7 +133,8 @@ class AstTest {
         assertEquals(List.of("Feature", "Scenario"), example.scopeStack());
         assertEquals(SPAN, example.span());
         assertEquals(1, example.body().size());
-        assertThrows(UnsupportedOperationException.class, () -> example.scopeStack().add("Nope"));
+        assertThrows(
+                UnsupportedOperationException.class, () -> example.scopeStack().add("Nope"));
         assertThrows(UnsupportedOperationException.class, () -> example.body().add(new Ast.ThematicBreak(SPAN)));
     }
 

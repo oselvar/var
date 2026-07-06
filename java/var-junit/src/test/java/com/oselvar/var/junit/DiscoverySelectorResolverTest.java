@@ -49,17 +49,13 @@ class DiscoverySelectorResolverTest {
 
     @Test
     void resolvesOneContainerPerMatchingSpecResource(@TempDir Path workspace) throws Exception {
-        Files.writeString(
-                workspace.resolve("var.config.json"),
-                """
+        Files.writeString(workspace.resolve("var.config.json"), """
                 { "docs": { "include": ["discoveryfixture/**/*.md"], "exclude": ["**/excluded.md"] } }
-                """,
-                StandardCharsets.UTF_8);
-        LauncherDiscoveryRequest request =
-                LauncherDiscoveryRequestBuilder.request()
-                        .selectors(selectPackage("discoveryfixture"))
-                        .configurationParameter(ConfigBridge.CONFIG_ROOT_KEY, workspace.toString())
-                        .build();
+                """, StandardCharsets.UTF_8);
+        LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
+                .selectors(selectPackage("discoveryfixture"))
+                .configurationParameter(ConfigBridge.CONFIG_ROOT_KEY, workspace.toString())
+                .build();
 
         TestDescriptor engineDescriptor = new VarTestEngine().discover(request, UniqueId.forEngine("var"));
         List<? extends TestDescriptor> children = List.copyOf(engineDescriptor.getChildren());
@@ -79,8 +75,9 @@ class DiscoverySelectorResolverTest {
 
     @Test
     void noSelectorsMatchWhenIncludeIsEmpty() {
-        LauncherDiscoveryRequest request =
-                LauncherDiscoveryRequestBuilder.request().selectors(selectPackage("discoveryfixture")).build();
+        LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
+                .selectors(selectPackage("discoveryfixture"))
+                .build();
 
         TestDescriptor engineDescriptor = new VarTestEngine().discover(request, UniqueId.forEngine("var"));
 

@@ -90,25 +90,21 @@ public record Registry(
             StepKind kind) {
         for (StepRegistration existing : registry.steps()) {
             if (existing.expression().equals(expression)) {
-                throw new IllegalArgumentException(
-                        "duplicate step definition for \""
-                                + expression
-                                + "\" at "
-                                + existing.expressionSourceFile()
-                                + ":"
-                                + existing.expressionSourceLine()
-                                + " and "
-                                + expressionSourceFile
-                                + ":"
-                                + expressionSourceLine);
+                throw new IllegalArgumentException("duplicate step definition for \""
+                        + expression
+                        + "\" at "
+                        + existing.expressionSourceFile()
+                        + ":"
+                        + existing.expressionSourceLine()
+                        + " and "
+                        + expressionSourceFile
+                        + ":"
+                        + expressionSourceLine);
             }
         }
-        Expression compiled =
-                new ExpressionFactory(registry.parameterTypes()).createExpression(expression);
+        Expression compiled = new ExpressionFactory(registry.parameterTypes()).createExpression(expression);
         List<StepRegistration> next = new ArrayList<>(registry.steps());
-        next.add(
-                new StepRegistration(
-                        expression, expressionSourceFile, expressionSourceLine, handler, compiled, kind));
+        next.add(new StepRegistration(expression, expressionSourceFile, expressionSourceLine, handler, compiled, kind));
         return new Registry(next, registry.parameterTypes(), registry.customParameterTypes());
     }
 
@@ -131,15 +127,14 @@ public record Registry(
         // later); this library's constructor `Objects.requireNonNull`s it (confirmed via
         // decompiled bytecode) — `Object.class` is the same stand-in the library's own
         // `createAnonymousParameterType` passes when no concrete type is known.
-        ParameterType<T> parameterType =
-                new ParameterType<>(
-                        name,
-                        List.of(regexp.pattern()),
-                        (Type) Object.class,
-                        adapted,
-                        /* useForSnippets= */ true,
-                        /* preferForRegexpMatch= */ false,
-                        /* useRegexpMatchAsStrongTypeHint= */ false);
+        ParameterType<T> parameterType = new ParameterType<>(
+                name,
+                List.of(regexp.pattern()),
+                (Type) Object.class,
+                adapted,
+                /* useForSnippets= */ true,
+                /* preferForRegexpMatch= */ false,
+                /* useRegexpMatchAsStrongTypeHint= */ false);
         registry.parameterTypes().defineParameterType(parameterType);
         List<CustomParameterType> recorded = new ArrayList<>(registry.customParameterTypes());
         recorded.add(new CustomParameterType(name, regexp.pattern()));

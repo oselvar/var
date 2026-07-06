@@ -26,8 +26,7 @@ class JsonTest {
 
     @Test
     void decodesStringEscapes() {
-        assertEquals("a\"b\\c/\b\f\n\r\té", Json.parse(
-                "\"a\\\"b\\\\c\\/\\b\\f\\n\\r\\t\\u00e9\""));
+        assertEquals("a\"b\\c/\b\f\n\r\té", Json.parse("\"a\\\"b\\\\c\\/\\b\\f\\n\\r\\t\\u00e9\""));
     }
 
     @Test
@@ -35,8 +34,7 @@ class JsonTest {
         assertThrows(IllegalArgumentException.class, () -> Json.parse("{} x"));
         assertThrows(IllegalArgumentException.class, () -> Json.parse("{ \"a\": "));
         assertThrows(IllegalArgumentException.class, () -> Json.parse(""));
-        IllegalArgumentException e =
-                assertThrows(IllegalArgumentException.class, () -> Json.parse("{ nope"));
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> Json.parse("{ nope"));
         assertTrue(e.getMessage().contains("offset"), e.getMessage());
     }
 

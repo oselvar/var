@@ -15,8 +15,7 @@ import java.util.regex.Pattern;
  */
 final class RecordingRegistrar implements Registrar {
 
-    record Registration(
-            String expression, StepKind kind, Object handler, String sourceFile, int sourceLine) {}
+    record Registration(String expression, StepKind kind, Object handler, String sourceFile, int sourceLine) {}
 
     record ParamTypeRegistration(String name, Pattern regexp, Function<String[], ?> transformer) {}
 
@@ -50,25 +49,18 @@ final class RecordingRegistrar implements Registrar {
     private void record(String expression, StepKind kind, Object handler) {
         String thisClass = RecordingRegistrar.class.getName();
         String nestedPrefix = thisClass + "$";
-        StackWalker.StackFrame caller =
-                StackWalker.getInstance()
-                        .walk(
-                                frames ->
-                                        frames.filter(
-                                                        f -> {
-                                                            String cn = f.getClassName();
-                                                            // Exact match (this class) or a nested class of
-                                                            // it (e.g. Binder) — NOT mere string-prefix, which
-                                                            // would wrongly also skip an unrelated class whose
-                                                            // name happens to start with the same characters.
-                                                            return !cn.equals(thisClass)
-                                                                    && !cn.startsWith(nestedPrefix);
-                                                        })
-                                                .findFirst()
-                                                .orElseThrow());
-        steps.add(
-                new Registration(
-                        expression, kind, handler, caller.getFileName(), caller.getLineNumber()));
+        StackWalker.StackFrame caller = StackWalker.getInstance()
+                .walk(frames -> frames.filter(f -> {
+                            String cn = f.getClassName();
+                            // Exact match (this class) or a nested class of
+                            // it (e.g. Binder) — NOT mere string-prefix, which
+                            // would wrongly also skip an unrelated class whose
+                            // name happens to start with the same characters.
+                            return !cn.equals(thisClass) && !cn.startsWith(nestedPrefix);
+                        })
+                        .findFirst()
+                        .orElseThrow());
+        steps.add(new Registration(expression, kind, handler, caller.getFileName(), caller.getLineNumber()));
     }
 
     private final class Binder<C extends State> implements StateBinder<C> {

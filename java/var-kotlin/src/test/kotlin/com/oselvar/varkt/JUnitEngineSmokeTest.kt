@@ -9,10 +9,9 @@ import org.junit.platform.engine.discovery.DiscoverySelectors.selectFile
 import org.junit.platform.testkit.engine.EngineTestKit
 
 /**
- * End-to-end smoke: the UNMODIFIED var-junit TestEngine discovers a real .md
- * spec and executes Kotlin-authored steps (Task 6's top-level-val fixture,
- * loaded through Task 5's StepLoader generalization). Same EngineTestKit +
- * selectFile pattern as var-junit's ConformanceDogfoodTest.
+ * End-to-end smoke: the UNMODIFIED var-junit TestEngine discovers a real .md spec and executes
+ * Kotlin-authored steps (Task 6's top-level-val fixture, loaded through Task 5's StepLoader
+ * generalization). Same EngineTestKit + selectFile pattern as var-junit's ConformanceDogfoodTest.
  */
 class JUnitEngineSmokeTest {
 
@@ -31,7 +30,8 @@ class JUnitEngineSmokeTest {
                   "docs": { "include": ["cukes.md"], "exclude": [] },
                   "steps": ["com.oselvar.varkt.fixtures.CukeSteps"]
                 }
-                """.trimIndent(),
+                """
+                    .trimIndent(),
             )
             // "var.config.root" is var-junit's ConfigBridge.CONFIG_ROOT_KEY, package-private
             // to com.oselvar.var.junit -- this module is a separate JAR, so the literal must be
@@ -44,14 +44,22 @@ class JUnitEngineSmokeTest {
 
     @Test
     fun `a passing example authored against Kotlin steps succeeds`(@TempDir dir: Path) {
-        val results = runSpec(dir, "# Cukes\n\n## Eating\n\nI have 8 cukes. I eat 3 cukes. I should have 5 cukes left.\n")
+        val results =
+            runSpec(
+                dir,
+                "# Cukes\n\n## Eating\n\nI have 8 cukes. I eat 3 cukes. I should have 5 cukes left.\n",
+            )
         assertEquals(1, results.testEvents().succeeded().count())
         assertEquals(0, results.testEvents().failed().count())
     }
 
     @Test
     fun `a mismatching sensor fails the example through the engine`(@TempDir dir: Path) {
-        val results = runSpec(dir, "# Cukes\n\n## Eating\n\nI have 8 cukes. I eat 3 cukes. I should have 99 cukes left.\n")
+        val results =
+            runSpec(
+                dir,
+                "# Cukes\n\n## Eating\n\nI have 8 cukes. I eat 3 cukes. I should have 99 cukes left.\n",
+            )
         assertEquals(0, results.testEvents().succeeded().count())
         assertEquals(1, results.testEvents().failed().count())
     }

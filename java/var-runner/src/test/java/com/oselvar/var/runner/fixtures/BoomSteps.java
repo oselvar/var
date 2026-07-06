@@ -18,10 +18,8 @@ public final class BoomSteps implements StepDefinitions {
     @Override
     public void defineSteps(Registrar registrar) {
         var s = registrar.defineState(Ctx::new);
-        s.stimulus(
-                "something explodes",
-                (Ctx ctx) -> {
-                    throw new RuntimeException("boom");
-                });
+        s.stimulus("something explodes", (Ctx ctx) -> {
+            throw new RuntimeException("boom");
+        });
     }
 }

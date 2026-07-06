@@ -44,9 +44,8 @@ class RunTest {
     @Test
     void examplesWithRunsPreservesDocumentOrderAndPassingRunDoesNotThrow() {
         LoadedSteps loaded = loadWidgetSteps();
-        String source =
-                "# Widgets\n\nI have 3 widgets. I should have 3 widgets.\n\n"
-                        + "# More widgets\n\nI have 9 widgets. I should have 9 widgets.";
+        String source = "# Widgets\n\nI have 3 widgets. I should have 3 widgets.\n\n"
+                + "# More widgets\n\nI have 9 widgets. I should have 9 widgets.";
         Plan.ExecutionPlan plan = Run.planSpec("widgets.md", source, loaded.registry());
 
         Run.RecordingReporter reporter = new Run.RecordingReporter();
@@ -70,12 +69,11 @@ class RunTest {
         String source = "# Widgets\n\nI have 3 widgets. I should have 4 widgets.";
         Plan.ExecutionPlan plan = Run.planSpec("widgets.md", source, loaded.registry());
 
-        List<Run.ExampleRun> runs =
-                Run.examplesWithRuns(plan, loaded.createContext(), new Run.RecordingReporter());
+        List<Run.ExampleRun> runs = Run.examplesWithRuns(plan, loaded.createContext(), new Run.RecordingReporter());
         assertEquals(1, runs.size());
 
-        CellDiff.CellMismatchException e =
-                assertThrows(CellDiff.CellMismatchException.class, () -> runs.get(0).run().run());
+        CellDiff.CellMismatchException e = assertThrows(
+                CellDiff.CellMismatchException.class, () -> runs.get(0).run().run());
         assertEquals(1, e.cells().size());
         assertEquals("3", e.cells().get(0).actual());
         assertEquals("4", e.cells().get(0).expected());
@@ -88,16 +86,18 @@ class RunTest {
         // via Reporter when examplesWithRuns drives Execute.collectExamples.
         LoadedSteps loaded = loadWidgetSteps();
         Registry ambiguousRegistry =
-                Registry.addStep(
-                        loaded.registry(), "I have 3 widgets", "extra.ts", 1, NOOP_HANDLER, StepKind.STIMULUS);
-        Plan.ExecutionPlan plan =
-                Run.planSpec("widgets.md", "# Widgets\n\nI have 3 widgets.", ambiguousRegistry);
+                Registry.addStep(loaded.registry(), "I have 3 widgets", "extra.ts", 1, NOOP_HANDLER, StepKind.STIMULUS);
+        Plan.ExecutionPlan plan = Run.planSpec("widgets.md", "# Widgets\n\nI have 3 widgets.", ambiguousRegistry);
         assertEquals(1, plan.diagnostics().size());
-        assertEquals(Diagnostics.DiagnosticCode.AMBIGUOUS_MATCH, plan.diagnostics().get(0).code());
+        assertEquals(
+                Diagnostics.DiagnosticCode.AMBIGUOUS_MATCH,
+                plan.diagnostics().get(0).code());
 
         Run.RecordingReporter reporter = new Run.RecordingReporter();
         Run.examplesWithRuns(plan, loaded.createContext(), reporter);
         assertEquals(1, reporter.diagnostics().size());
-        assertEquals(Diagnostics.DiagnosticCode.AMBIGUOUS_MATCH, reporter.diagnostics().get(0).code());
+        assertEquals(
+                Diagnostics.DiagnosticCode.AMBIGUOUS_MATCH,
+                reporter.diagnostics().get(0).code());
     }
 }

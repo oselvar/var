@@ -38,15 +38,12 @@ class VarExampleDescriptorExecutionTest {
     private static EngineExecutionResults execute(Path workspace, String classpathResource, Class<?> stepsClass)
             throws Exception {
         Files.writeString(
-                workspace.resolve("var.config.json"),
-                """
+                workspace.resolve("var.config.json"), """
                 {
                   "docs": { "include": ["examplefixture/**/*.md"], "exclude": [] },
                   "steps": ["%s"]
                 }
-                """
-                        .formatted(stepsClass.getName()),
-                StandardCharsets.UTF_8);
+                """.formatted(stepsClass.getName()), StandardCharsets.UTF_8);
         return EngineTestKit.engine("var")
                 .selectors(selectClasspathResource(classpathResource))
                 .configurationParameter(ConfigBridge.CONFIG_ROOT_KEY, workspace.toString())
@@ -57,14 +54,11 @@ class VarExampleDescriptorExecutionTest {
     void aPassingExampleReportsSuccessful(@TempDir Path workspace) throws Exception {
         EngineExecutionResults results = execute(workspace, "examplefixture/widgets.md", WidgetSteps.class);
 
-        results.testEvents()
-                .assertThatEvents()
-                .haveExactly(2, event(test(), finishedSuccessfully()));
+        results.testEvents().assertThatEvents().haveExactly(2, event(test(), finishedSuccessfully()));
     }
 
     @Test
-    void aFailingExampleReportsFailedWithTheRenderedMarkdownAnchoredMessage(@TempDir Path workspace)
-            throws Exception {
+    void aFailingExampleReportsFailedWithTheRenderedMarkdownAnchoredMessage(@TempDir Path workspace) throws Exception {
         EngineExecutionResults results = execute(workspace, "examplefixture/failing.md", WidgetSteps.class);
 
         List<Event> failed = results.testEvents().failed().list();
@@ -83,11 +77,10 @@ class VarExampleDescriptorExecutionTest {
                                         message(m -> m.contains("got \"3\"")))));
 
         // The original CellDiff.CellMismatchException must not be lost -- it's the cause.
-        Throwable failure =
-                failed.get(0)
-                        .getPayload(TestExecutionResult.class)
-                        .flatMap(TestExecutionResult::getThrowable)
-                        .orElseThrow();
+        Throwable failure = failed.get(0)
+                .getPayload(TestExecutionResult.class)
+                .flatMap(TestExecutionResult::getThrowable)
+                .orElseThrow();
         assertInstanceOf(VarExampleDescriptor.RenderedFailure.class, failure);
         assertTrue(
                 failure.getCause().getClass().getName().contains("CellMismatchException"),
@@ -103,9 +96,7 @@ class VarExampleDescriptorExecutionTest {
         // SUCCESSFUL is a genuine proof of state isolation, not an assumption.
         EngineExecutionResults results = execute(workspace, "examplefixture/counter.md", CounterSteps.class);
 
-        results.testEvents()
-                .assertThatEvents()
-                .haveExactly(2, event(test(), finishedSuccessfully()));
+        results.testEvents().assertThatEvents().haveExactly(2, event(test(), finishedSuccessfully()));
         assertEquals(0, results.testEvents().failed().count(), "state leakage would fail the second example");
     }
 }

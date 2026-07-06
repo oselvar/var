@@ -23,9 +23,7 @@ class ConfigBridgeTest {
 
     @Test
     void configRootKeyPointsAtTheWorkspaceHoldingVarConfigJson(@TempDir Path workspace) throws Exception {
-        Files.writeString(
-                workspace.resolve("var.config.json"),
-                """
+        Files.writeString(workspace.resolve("var.config.json"), """
                 {
                   "docs": {
                     "include": ["features/**/*.md", "more/**/*.md"],
@@ -33,8 +31,7 @@ class ConfigBridgeTest {
                   },
                   "steps": ["steps/**/*.steps.ts"]
                 }
-                """,
-                StandardCharsets.UTF_8);
+                """, StandardCharsets.UTF_8);
         ConfigurationParameters params =
                 new FakeConfigurationParameters(Map.of("var.config.root", workspace.toString()));
 
@@ -67,8 +64,7 @@ class ConfigBridgeTest {
      * {@code junit-platform-engine} nor {@code junit-platform-testkit} 6.1.1 ships one (verified
      * by decompiling both jars).
      */
-    private record FakeConfigurationParameters(Map<String, String> values)
-            implements ConfigurationParameters {
+    private record FakeConfigurationParameters(Map<String, String> values) implements ConfigurationParameters {
 
         @Override
         public Optional<String> get(String key) {

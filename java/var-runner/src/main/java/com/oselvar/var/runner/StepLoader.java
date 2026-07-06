@@ -154,25 +154,24 @@ public final class StepLoader {
             }
         }
 
-        Registry merged =
-                new Registry(
-                        mergedSteps,
-                        parameterTypes != null ? parameterTypes : Registry.createRegistry().parameterTypes(),
-                        mergedCustomParameterTypes);
+        Registry merged = new Registry(
+                mergedSteps,
+                parameterTypes != null
+                        ? parameterTypes
+                        : Registry.createRegistry().parameterTypes(),
+                mergedCustomParameterTypes);
         Map<String, Supplier<? extends State>> resolvedFactories = Map.copyOf(factoriesByFile);
-        Function<String, Object> createContext =
-                file -> {
-                    Supplier<? extends State> factory = resolvedFactories.get(file);
-                    if (factory == null) {
-                        throw new IllegalStateException(
-                                "no state factory registered for step-definition file \""
-                                        + file
-                                        + "\" (loaded classes: "
-                                        + stepClassNames
-                                        + ")");
-                    }
-                    return factory.get();
-                };
+        Function<String, Object> createContext = file -> {
+            Supplier<? extends State> factory = resolvedFactories.get(file);
+            if (factory == null) {
+                throw new IllegalStateException("no state factory registered for step-definition file \""
+                        + file
+                        + "\" (loaded classes: "
+                        + stepClassNames
+                        + ")");
+            }
+            return factory.get();
+        };
         return new LoadedSteps(merged, createContext);
     }
 
@@ -180,17 +179,16 @@ public final class StepLoader {
             List<Registry.StepRegistration> mergedSteps, Registry.StepRegistration incoming) {
         for (Registry.StepRegistration existing : mergedSteps) {
             if (existing.expression().equals(incoming.expression())) {
-                throw new IllegalArgumentException(
-                        "duplicate step definition for \""
-                                + incoming.expression()
-                                + "\" at "
-                                + existing.expressionSourceFile()
-                                + ":"
-                                + existing.expressionSourceLine()
-                                + " and "
-                                + incoming.expressionSourceFile()
-                                + ":"
-                                + incoming.expressionSourceLine());
+                throw new IllegalArgumentException("duplicate step definition for \""
+                        + incoming.expression()
+                        + "\" at "
+                        + existing.expressionSourceFile()
+                        + ":"
+                        + existing.expressionSourceLine()
+                        + " and "
+                        + incoming.expressionSourceFile()
+                        + ":"
+                        + incoming.expressionSourceLine());
             }
         }
     }
@@ -199,8 +197,7 @@ public final class StepLoader {
             List<Registry.CustomParameterType> mergedTypes, Registry.CustomParameterType incoming) {
         for (Registry.CustomParameterType existing : mergedTypes) {
             if (existing.name().equals(incoming.name())) {
-                throw new IllegalArgumentException(
-                        "duplicate custom parameter-type name \"" + incoming.name() + "\"");
+                throw new IllegalArgumentException("duplicate custom parameter-type name \"" + incoming.name() + "\"");
             }
         }
     }
@@ -239,16 +236,14 @@ public final class StepLoader {
             try {
                 units.add((StepDefinitions) factory.invoke(null));
             } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new IllegalStateException(
-                        "cannot invoke static step-definition factory " + factory, e);
+                throw new IllegalStateException("cannot invoke static step-definition factory " + factory, e);
             }
         }
         if (units.isEmpty()) {
-            throw new IllegalArgumentException(
-                    className
-                            + " neither implements "
-                            + StepDefinitions.class.getName()
-                            + " nor exposes a public static no-arg method returning it");
+            throw new IllegalArgumentException(className
+                    + " neither implements "
+                    + StepDefinitions.class.getName()
+                    + " nor exposes a public static no-arg method returning it");
         }
         return units;
     }

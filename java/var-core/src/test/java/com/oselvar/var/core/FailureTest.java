@@ -17,9 +17,8 @@ class FailureTest {
     @Test
     void toFailureExtractsCellsFromACellMismatchException() {
         String source = "a | 5 |";
-        CellDiff.CellMismatchException err =
-                new CellDiff.CellMismatchException(
-                        List.of(new CellDiff("n", Span.spanFromOffsets(source, 4, 5), "5", "4", false)));
+        CellDiff.CellMismatchException err = new CellDiff.CellMismatchException(
+                List.of(new CellDiff("n", Span.spanFromOffsets(source, 4, 5), "5", "4", false)));
         Result.ExampleFailure f = Failure.toFailure(err, "spec.md", 3);
         assertEquals(List.of(new Result.CellFailure(4, 5, "4")), f.cells());
         assertNull(f.doc());
@@ -30,9 +29,8 @@ class FailureTest {
     @Test
     void toFailureExtractsDocFromADocStringMismatchException() {
         String source = "Hello!\n";
-        DocStringDiff.DocStringMismatchException err =
-                new DocStringDiff.DocStringMismatchException(
-                        new DocStringDiff(Span.spanFromOffsets(source, 0, 7), "Hello!\n", "Goodbye!\n"));
+        DocStringDiff.DocStringMismatchException err = new DocStringDiff.DocStringMismatchException(
+                new DocStringDiff(Span.spanFromOffsets(source, 0, 7), "Hello!\n", "Goodbye!\n"));
         Result.ExampleFailure f = Failure.toFailure(err, "spec.md", 3);
         assertEquals(new Result.CellFailure(0, 7, "Goodbye!\n"), f.doc());
         assertNull(f.cells());
@@ -42,22 +40,21 @@ class FailureTest {
     void toFailureLeavesCellsDocNullForAPlainExceptionOrReturnShapeException() {
         assertNull(Failure.toFailure(new RuntimeException("nope"), "spec.md", 3).cells());
         assertNull(Failure.toFailure(new RuntimeException("nope"), "spec.md", 3).doc());
-        assertNull(Failure.toFailure(new CellDiff.ReturnShapeException("bad"), "spec.md", 3).cells());
+        assertNull(Failure.toFailure(new CellDiff.ReturnShapeException("bad"), "spec.md", 3)
+                .cells());
     }
 
     @Test
     void toFailureReadsTheFailingLineFromAnInjectedStackFrameElseFallsBack() {
         RuntimeException err = new RuntimeException("boom");
-        err.setStackTrace(
-                new StackTraceElement[] {
-                    new StackTraceElement("Handler", "handle", "steps.java", 1),
-                    new StackTraceElement("Step", "run", "docs/a.md", 12)
-                });
+        err.setStackTrace(new StackTraceElement[] {
+            new StackTraceElement("Handler", "handle", "steps.java", 1),
+            new StackTraceElement("Step", "run", "docs/a.md", 12)
+        });
         assertEquals(12, Failure.toFailure(err, "docs/a.md", 99).line());
 
         RuntimeException noFrame = new RuntimeException("boom");
-        noFrame.setStackTrace(
-                new StackTraceElement[] {new StackTraceElement("Handler", "handle", "steps.java", 1)});
+        noFrame.setStackTrace(new StackTraceElement[] {new StackTraceElement("Handler", "handle", "steps.java", 1)});
         assertEquals(99, Failure.toFailure(noFrame, "docs/a.md", 99).line());
     }
 

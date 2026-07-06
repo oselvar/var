@@ -89,8 +89,7 @@ final class VarFileSelectorResolver implements SelectorResolver {
 
     /** Whether a classpath resource name (already relative, POSIX-separated) is a spec. */
     boolean matchesSpec(String resourceName) {
-        return Discovery.matchSpec(
-                Path.of(resourceName), config.docsInclude(), config.docsExclude(), Path.of(""));
+        return Discovery.matchSpec(Path.of(resourceName), config.docsInclude(), config.docsExclude(), Path.of(""));
     }
 
     @Override
@@ -131,7 +130,8 @@ final class VarFileSelectorResolver implements SelectorResolver {
         if (!Discovery.matchSpec(path, config.docsInclude(), config.docsExclude(), root)) {
             return Resolution.unresolved();
         }
-        String relPath = root.relativize(path.toAbsolutePath().normalize()).toString().replace('\\', '/');
+        String relPath =
+                root.relativize(path.toAbsolutePath().normalize()).toString().replace('\\', '/');
         return toResolution(context, relPath, FileSource.from(path.toFile()));
     }
 
@@ -234,7 +234,8 @@ final class VarFileSelectorResolver implements SelectorResolver {
     private static Optional<? extends TestDescriptor> childForLine(VarFileDescriptor fileDescriptor, int line) {
         String value = String.valueOf(line);
         return fileDescriptor.getChildren().stream()
-                .filter(child -> value.equals(child.getUniqueId().getLastSegment().getValue()))
+                .filter(child ->
+                        value.equals(child.getUniqueId().getLastSegment().getValue()))
                 .findFirst();
     }
 
@@ -316,7 +317,8 @@ final class VarFileSelectorResolver implements SelectorResolver {
         UniqueId uniqueId = parent.getUniqueId().append(VarFileDescriptor.SEGMENT_TYPE, specPath);
         String content = readContent(source);
         Plan.ExecutionPlan plan = Run.planSpec(specPath, content, loadedSteps.registry());
-        VarFileDescriptor fileDescriptor = new VarFileDescriptor(uniqueId, specPath, source, content, loadedSteps, plan);
+        VarFileDescriptor fileDescriptor =
+                new VarFileDescriptor(uniqueId, specPath, source, content, loadedSteps, plan);
         mergeChildren(fileDescriptor, source, onlyLine);
         fileDescriptors.put(specPath, fileDescriptor);
         return fileDescriptor;

@@ -30,8 +30,7 @@ public record VarConfig(
         Map<String, String> snippets,
         List<String> scannerPlugins) {
 
-    private static final Set<String> KNOWN_KEYS =
-            Set.of("$schema", "docs", "steps", "snippets", "scannerPlugins");
+    private static final Set<String> KNOWN_KEYS = Set.of("$schema", "docs", "steps", "snippets", "scannerPlugins");
     private static final Set<String> KNOWN_DOCS_KEYS = Set.of("include", "exclude");
 
     public VarConfig {
@@ -75,8 +74,7 @@ public record VarConfig(
             if (!KNOWN_KEYS.contains((String) key)) unknown.add((String) key);
         }
         if (!unknown.isEmpty()) {
-            throw new IllegalArgumentException(
-                    sourceName + ": unknown key(s): " + String.join(", ", unknown));
+            throw new IllegalArgumentException(sourceName + ": unknown key(s): " + String.join(", ", unknown));
         }
         List<String> docsInclude = List.of();
         List<String> docsExclude = List.of();
@@ -100,13 +98,11 @@ public record VarConfig(
         Object rawSnippets = map.get("snippets");
         if (rawSnippets != null) {
             if (!(rawSnippets instanceof Map<?, ?> snippetsMap)) {
-                throw new IllegalArgumentException(
-                        sourceName + ": 'snippets' must be an object of strings");
+                throw new IllegalArgumentException(sourceName + ": 'snippets' must be an object of strings");
             }
             for (Map.Entry<?, ?> entry : snippetsMap.entrySet()) {
                 if (!(entry.getValue() instanceof String value)) {
-                    throw new IllegalArgumentException(
-                            sourceName + ": 'snippets' must be an object of strings");
+                    throw new IllegalArgumentException(sourceName + ": 'snippets' must be an object of strings");
                 }
                 snippets.put((String) entry.getKey(), value);
             }
@@ -122,14 +118,12 @@ public record VarConfig(
     private static List<String> stringList(Object value, String key, String sourceName) {
         if (value == null) return List.of();
         if (!(value instanceof List<?> list)) {
-            throw new IllegalArgumentException(
-                    sourceName + ": '" + key + "' must be an array of strings");
+            throw new IllegalArgumentException(sourceName + ": '" + key + "' must be an array of strings");
         }
         List<String> out = new ArrayList<>(list.size());
         for (Object item : list) {
             if (!(item instanceof String s)) {
-                throw new IllegalArgumentException(
-                        sourceName + ": '" + key + "' must be an array of strings");
+                throw new IllegalArgumentException(sourceName + ": '" + key + "' must be an array of strings");
             }
             out.add(s);
         }

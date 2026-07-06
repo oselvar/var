@@ -112,6 +112,55 @@
       </plugins>
     </pluginManagement>
     <plugins>
+      <!-- Formatting (Java + Kotlin): `mvn spotless:apply` prettifies (make java
+           runs it before install); the bound spotless:check makes any full build
+           — including CI's `mvn install` — fail on unformatted code. One plugin
+           covers both languages: palantir-java-format for Java and ktfmt
+           (kotlinlang style) for Kotlin, both 4-space, matching the existing
+           style. Versions confirmed on repo1.maven.org maven-metadata.xml
+           2026-07-06: spotless-maven-plugin 3.8.0, palantir-java-format 2.94.0,
+           ktfmt 0.64.
+           The JVM sample projects in ../examples are covered too, via the
+           examples -> ../examples symlink next to this pom: spotless can't scan
+           outside a module's basedir, and the samples' own builds must stay
+           formatter-free (they sync 1:1 to the public var-examples repo). The
+           examples/*/src includes only match here in the parent — the modules
+           inherit them but have no examples/ dir, so they're a no-op there. -->
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>3.8.0</version>
+        <configuration>
+          <java>
+            <includes>
+              <include>src/main/java/**/*.java</include>
+              <include>src/test/java/**/*.java</include>
+              <include>examples/*/src/**/*.java</include>
+            </includes>
+            <palantirJavaFormat>
+              <version>2.94.0</version>
+            </palantirJavaFormat>
+          </java>
+          <kotlin>
+            <includes>
+              <include>src/main/kotlin/**/*.kt</include>
+              <include>src/test/kotlin/**/*.kt</include>
+              <include>examples/*/src/**/*.kt</include>
+            </includes>
+            <ktfmt>
+              <version>0.64</version>
+              <style>KOTLINLANG</style>
+            </ktfmt>
+          </kotlin>
+        </configuration>
+        <executions>
+          <execution>
+            <id>check</id>
+            <phase>compile</phase>
+            <goals><goal>check</goal></goals>
+          </execution>
+        </executions>
+      </plugin>
       <!-- Coverage: every module's `mvn verify` writes target/site/jacoco/
            (HTML + XML). Mirrors typescript's `pnpm test:coverage` and
            python's `pytest` coverage run. Confirmed on repo1.maven.org

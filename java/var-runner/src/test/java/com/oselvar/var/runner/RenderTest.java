@@ -31,10 +31,9 @@ class RenderTest {
         String path = "widgets.md";
         Plan.ExecutionPlan plan = Run.planSpec(path, source, loaded.registry());
 
-        List<Run.ExampleRun> runs =
-                Run.examplesWithRuns(plan, loaded.createContext(), new Run.RecordingReporter());
-        CellDiff.CellMismatchException error =
-                assertThrows(CellDiff.CellMismatchException.class, () -> runs.get(0).run().run());
+        List<Run.ExampleRun> runs = Run.examplesWithRuns(plan, loaded.createContext(), new Run.RecordingReporter());
+        CellDiff.CellMismatchException error = assertThrows(
+                CellDiff.CellMismatchException.class, () -> runs.get(0).run().run());
 
         String rendered = Render.renderFailure(error, source, path);
 
@@ -50,8 +49,7 @@ class RenderTest {
     @Test
     void rendersADocStringMismatchWithTheSourceSlicedExpectedValueTheActualValueAndTheLine() {
         LoadedSteps loaded = StepLoader.loadSteps(List.of(GreetingSteps.class.getName()), LOADER);
-        String source =
-                """
+        String source = """
                 # T
 
                 the greeting is:
@@ -62,11 +60,10 @@ class RenderTest {
         String path = "greeting.md";
         Plan.ExecutionPlan plan = Run.planSpec(path, source, loaded.registry());
 
-        List<Run.ExampleRun> runs =
-                Run.examplesWithRuns(plan, loaded.createContext(), new Run.RecordingReporter());
-        DocStringDiff.DocStringMismatchException error =
-                assertThrows(
-                        DocStringDiff.DocStringMismatchException.class, () -> runs.get(0).run().run());
+        List<Run.ExampleRun> runs = Run.examplesWithRuns(plan, loaded.createContext(), new Run.RecordingReporter());
+        DocStringDiff.DocStringMismatchException error = assertThrows(
+                DocStringDiff.DocStringMismatchException.class,
+                () -> runs.get(0).run().run());
 
         String rendered = Render.renderFailure(error, source, path);
 
@@ -84,8 +81,7 @@ class RenderTest {
         String path = "boom.md";
         Plan.ExecutionPlan plan = Run.planSpec(path, source, loaded.registry());
 
-        List<Run.ExampleRun> runs =
-                Run.examplesWithRuns(plan, loaded.createContext(), new Run.RecordingReporter());
+        List<Run.ExampleRun> runs = Run.examplesWithRuns(plan, loaded.createContext(), new Run.RecordingReporter());
         RuntimeException error =
                 assertThrows(RuntimeException.class, () -> runs.get(0).run().run());
 

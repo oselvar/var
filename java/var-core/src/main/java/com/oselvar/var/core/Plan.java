@@ -68,8 +68,7 @@ public final class Plan {
      * Describes the binding paragraph shared by every row of a header-bound table: the matched
      * step's span in that paragraph, plus one span per header cell located where it appears there.
      */
-    public record HeaderBinding(
-            Span matchSpan, List<Span> paramSpans, Registry.StepRegistration stepDef) {
+    public record HeaderBinding(Span matchSpan, List<Span> paramSpans, Registry.StepRegistration stepDef) {
         public HeaderBinding {
             paramSpans = List.copyOf(paramSpans);
         }
@@ -116,21 +115,21 @@ public final class Plan {
                     hadAmbiguous = true;
                 }
                 if (!hadAmbiguous && !result.steps().isEmpty()) {
-                    List<PlannedStep> blockSteps = new ArrayList<>(result.steps().size());
+                    List<PlannedStep> blockSteps =
+                            new ArrayList<>(result.steps().size());
                     for (Matcher.Hit hit : result.steps()) {
                         List<Span> paramSpans = new ArrayList<>(hit.paramSpans().size());
                         for (Matcher.ParamSpan p : hit.paramSpans()) {
                             paramSpans.add(liftSpan(doc.source(), block, p.start(), p.end()));
                         }
-                        blockSteps.add(
-                                new PlannedStep(
-                                        text.substring(hit.matchStart(), hit.matchEnd()),
-                                        liftSpan(doc.source(), block, hit.matchStart(), hit.matchEnd()),
-                                        paramSpans,
-                                        hit.stepDef(),
-                                        hit.args(),
-                                        null,
-                                        null));
+                        blockSteps.add(new PlannedStep(
+                                text.substring(hit.matchStart(), hit.matchEnd()),
+                                liftSpan(doc.source(), block, hit.matchStart(), hit.matchEnd()),
+                                paramSpans,
+                                hit.stepDef(),
+                                hit.args(),
+                                null,
+                                null));
                     }
                     stepsByBlock.put(idx, blockSteps);
                 }
@@ -140,12 +139,12 @@ public final class Plan {
             // case-sensitive) in the matched paragraph above it iterates row by row. The matched
             // step runs once per data row, receiving the row as an object keyed by header cell,
             // and each row becomes its own example.
-            HeaderBoundResult bound =
-                    hadAmbiguous ? null : detectHeaderBound(body, stepsByBlock, doc.source());
+            HeaderBoundResult bound = hadAmbiguous ? null : detectHeaderBound(body, stepsByBlock, doc.source());
             if (bound != null) {
-                HeaderBinding headerBinding =
-                        new HeaderBinding(
-                                bound.step().matchSpan(), bound.headerSpans(), bound.step().stepDef());
+                HeaderBinding headerBinding = new HeaderBinding(
+                        bound.step().matchSpan(),
+                        bound.headerSpans(),
+                        bound.step().stepDef());
                 List<String> headerCells = bound.table().header().cells();
                 for (Ast.Row row : bound.table().rows()) {
                     Map<String, String> rowObject = new LinkedHashMap<>();
@@ -154,32 +153,29 @@ public final class Plan {
                     }
                     List<Object> rowArgs = new ArrayList<>(bound.step().args());
                     rowArgs.add(rowObject);
-                    PlannedStep rowStep =
-                            new PlannedStep(
-                                    bound.step().text(),
-                                    row.span(),
-                                    bound.step().paramSpans(),
-                                    bound.step().stepDef(),
-                                    rowArgs,
-                                    null,
-                                    null);
+                    PlannedStep rowStep = new PlannedStep(
+                            bound.step().text(),
+                            row.span(),
+                            bound.step().paramSpans(),
+                            bound.step().stepDef(),
+                            rowArgs,
+                            null,
+                            null);
                     List<CellDiff.RowCheck> rowChecks = new ArrayList<>(headerCells.size());
                     for (int i = 0; i < headerCells.size(); i++) {
-                        rowChecks.add(
-                                new CellDiff.RowCheck(headerCells.get(i), cellAt(row, i), cellSpanAt(row, i)));
+                        rowChecks.add(new CellDiff.RowCheck(headerCells.get(i), cellAt(row, i), cellSpanAt(row, i)));
                     }
                     List<String> nestedScope = new ArrayList<>(ex.scopeStack());
                     nestedScope.add(bound.step().text());
-                    examples.add(
-                            new PlannedExample(
-                                    String.join(" / ", row.cells()),
-                                    nestedScope,
-                                    row.span(),
-                                    List.of(rowStep),
-                                    headerBinding,
-                                    rowChecks,
-                                    null,
-                                    null));
+                    examples.add(new PlannedExample(
+                            String.join(" / ", row.cells()),
+                            nestedScope,
+                            row.span(),
+                            List.of(rowStep),
+                            headerBinding,
+                            rowChecks,
+                            null,
+                            null));
                 }
                 continue;
             }
@@ -217,15 +213,14 @@ public final class Plan {
                 for (int s = 0; s < stepsAtIdx.size(); s++) {
                     PlannedStep step = stepsAtIdx.get(s);
                     if (s == stepsAtIdx.size() - 1 && attachAt != null) {
-                        finalSteps.add(
-                                new PlannedStep(
-                                        step.text(),
-                                        step.matchSpan(),
-                                        step.paramSpans(),
-                                        step.stepDef(),
-                                        step.args(),
-                                        attachAt.dataTable(),
-                                        attachAt.docString()));
+                        finalSteps.add(new PlannedStep(
+                                step.text(),
+                                step.matchSpan(),
+                                step.paramSpans(),
+                                step.stepDef(),
+                                step.args(),
+                                attachAt.dataTable(),
+                                attachAt.docString()));
                     } else {
                         finalSteps.add(step);
                     }
@@ -255,16 +250,15 @@ public final class Plan {
                 if (!trimmed.isEmpty()) expectedErrorMessage = trimmed;
             }
 
-            examples.add(
-                    new PlannedExample(
-                            deriveExampleName(body),
-                            ex.scopeStack(),
-                            ex.span(),
-                            runnableSteps,
-                            null,
-                            null,
-                            expectedOutcome,
-                            expectedErrorMessage));
+            examples.add(new PlannedExample(
+                    deriveExampleName(body),
+                    ex.scopeStack(),
+                    ex.span(),
+                    runnableSteps,
+                    null,
+                    null,
+                    expectedOutcome,
+                    expectedErrorMessage));
         }
 
         // A table or fence that doesn't attach to a step is just Markdown content, not a mistake
@@ -288,20 +282,19 @@ public final class Plan {
             List<Matcher.Hit> hits = Matcher.findHits(sentence.text(), registry);
             List<Matcher.Hit> adjusted = new ArrayList<>(hits.size());
             for (Matcher.Hit h : hits) {
-                List<Matcher.ParamSpan> paramSpans = new ArrayList<>(h.paramSpans().size());
+                List<Matcher.ParamSpan> paramSpans =
+                        new ArrayList<>(h.paramSpans().size());
                 for (Matcher.ParamSpan p : h.paramSpans()) {
-                    paramSpans.add(
-                            new Matcher.ParamSpan(
-                                    p.start() + sentence.startOffset(), p.end() + sentence.startOffset()));
+                    paramSpans.add(new Matcher.ParamSpan(
+                            p.start() + sentence.startOffset(), p.end() + sentence.startOffset()));
                 }
-                adjusted.add(
-                        new Matcher.Hit(
-                                h.expression(),
-                                h.stepDef(),
-                                h.matchStart() + sentence.startOffset(),
-                                h.matchEnd() + sentence.startOffset(),
-                                h.args(),
-                                paramSpans));
+                adjusted.add(new Matcher.Hit(
+                        h.expression(),
+                        h.stepDef(),
+                        h.matchStart() + sentence.startOffset(),
+                        h.matchEnd() + sentence.startOffset(),
+                        h.args(),
+                        paramSpans));
             }
             Matcher.ResolvedSteps resolved = Matcher.resolveHits(adjusted);
             if (resolved instanceof Matcher.Ambiguous ambiguous) {
@@ -349,8 +342,11 @@ public final class Plan {
             if (anyMissing) continue;
             List<Span> headerSpans = new ArrayList<>(headerCells.size());
             for (int i = 0; i < headerCells.size(); i++) {
-                headerSpans.add(
-                        liftSpan(source, above, offsets[i], offsets[i] + headerCells.get(i).length()));
+                headerSpans.add(liftSpan(
+                        source,
+                        above,
+                        offsets[i],
+                        offsets[i] + headerCells.get(i).length()));
             }
             return new HeaderBoundResult(table, steps.get(steps.size() - 1), List.copyOf(headerSpans));
         }

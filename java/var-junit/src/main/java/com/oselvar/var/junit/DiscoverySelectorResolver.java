@@ -65,12 +65,11 @@ final class DiscoverySelectorResolver {
 
     DiscoverySelectorResolver(VarConfig config, Path root, StepLoader.LoadedSteps loadedSteps) {
         VarFileSelectorResolver fileSelectorResolver = new VarFileSelectorResolver(config, root, loadedSteps);
-        this.resolver =
-                EngineDiscoveryRequestResolver.<VarEngineDescriptor>builder()
-                        .addResourceContainerSelectorResolver(
-                                ResourceFilter.of(resource -> fileSelectorResolver.matchesSpec(resource.getName())))
-                        .addSelectorResolver(fileSelectorResolver)
-                        .build();
+        this.resolver = EngineDiscoveryRequestResolver.<VarEngineDescriptor>builder()
+                .addResourceContainerSelectorResolver(
+                        ResourceFilter.of(resource -> fileSelectorResolver.matchesSpec(resource.getName())))
+                .addSelectorResolver(fileSelectorResolver)
+                .build();
     }
 
     void resolveSelectors(

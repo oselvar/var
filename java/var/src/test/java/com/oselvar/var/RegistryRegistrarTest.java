@@ -29,9 +29,7 @@ class RegistryRegistrarTest {
         @Override
         public void defineSteps(Registrar registrar) {
             StateBinder<Ctx> s = registrar.defineState(() -> new Ctx(null));
-            s.stimulus(
-                    "I convert {int} to roman numerals",
-                    (Ctx ctx, Integer n) -> new Ctx(ROMAN.get(n)));
+            s.stimulus("I convert {int} to roman numerals", (Ctx ctx, Integer n) -> new Ctx(ROMAN.get(n)));
             s.sensor("The result is {word}", (Ctx ctx, String expected) -> ctx.result());
         }
     }
@@ -71,9 +69,7 @@ class RegistryRegistrarTest {
         s.stimulus("I do a thing", (Empty state) -> state);
 
         IllegalArgumentException ex =
-                assertThrows(
-                        IllegalArgumentException.class,
-                        () -> s.sensor("I do a thing", (Empty state) -> "x"));
+                assertThrows(IllegalArgumentException.class, () -> s.sensor("I do a thing", (Empty state) -> "x"));
         assertTrue(ex.getMessage().contains("duplicate step definition"));
     }
 
@@ -81,8 +77,7 @@ class RegistryRegistrarTest {
     void defineParameterTypeWiresARealCustomTypeThroughToTheRegistry() {
         record Empty() implements State {}
         RegistryRegistrar registrar = new RegistryRegistrar();
-        registrar.defineParameterType(
-                "airport", Pattern.compile("[A-Z]{3}"), groups -> groups[0].toLowerCase());
+        registrar.defineParameterType("airport", Pattern.compile("[A-Z]{3}"), groups -> groups[0].toLowerCase());
         StateBinder<Empty> s = registrar.defineState(Empty::new);
         s.sensor("I fly to {airport}", (Empty state, String code) -> code);
 

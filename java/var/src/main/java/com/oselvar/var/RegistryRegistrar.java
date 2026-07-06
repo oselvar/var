@@ -52,36 +52,27 @@ public final class RegistryRegistrar implements Registrar {
     }
 
     @Override
-    public <T> void defineParameterType(
-            String name, Pattern regexp, Function<String[], T> transformer) {
+    public <T> void defineParameterType(String name, Pattern regexp, Function<String[], T> transformer) {
         registry = Registry.defineParameterType(registry, name, regexp, transformer);
     }
 
     private void register(String expression, StepKind kind, Object handler) {
         String thisClass = RegistryRegistrar.class.getName();
         String nestedPrefix = thisClass + "$";
-        StackWalker.StackFrame caller =
-                StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE)
-                        .walk(
-                                frames ->
-                                        frames.filter(
-                                                        f -> {
-                                                            Class<?> declaring = f.getDeclaringClass();
-                                                            String cn = declaring.getName();
-                                                            // Exact match (this class) or a nested class of
-                                                            // it (e.g. Binder) — NOT mere string-prefix, which
-                                                            // would wrongly also skip an unrelated class whose
-                                                            // name happens to start with the same characters
-                                                            // (e.g. a caller named "RegistryRegistrarTest").
-                                                            return !cn.equals(thisClass)
-                                                                    && !cn.startsWith(nestedPrefix)
-                                                                    && !isRegistrarGlue(declaring);
-                                                        })
-                                                .findFirst()
-                                                .orElseThrow());
-        registry =
-                Registry.addStep(
-                        registry, expression, caller.getFileName(), caller.getLineNumber(), handler, kind);
+        StackWalker.StackFrame caller = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE)
+                .walk(frames -> frames.filter(f -> {
+                            Class<?> declaring = f.getDeclaringClass();
+                            String cn = declaring.getName();
+                            // Exact match (this class) or a nested class of
+                            // it (e.g. Binder) — NOT mere string-prefix, which
+                            // would wrongly also skip an unrelated class whose
+                            // name happens to start with the same characters
+                            // (e.g. a caller named "RegistryRegistrarTest").
+                            return !cn.equals(thisClass) && !cn.startsWith(nestedPrefix) && !isRegistrarGlue(declaring);
+                        })
+                        .findFirst()
+                        .orElseThrow());
+        registry = Registry.addStep(registry, expression, caller.getFileName(), caller.getLineNumber(), handler, kind);
     }
 
     /**

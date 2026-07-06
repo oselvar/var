@@ -63,13 +63,12 @@ public final class Conformance {
         out.put(
                 "parameterTypes",
                 registry.customParameterTypes().stream()
-                        .map(
-                                p -> {
-                                    Map<String, Object> pt = new LinkedHashMap<String, Object>();
-                                    pt.put("name", p.name());
-                                    pt.put("regexp", p.regexp());
-                                    return (Object) pt;
-                                })
+                        .map(p -> {
+                            Map<String, Object> pt = new LinkedHashMap<String, Object>();
+                            pt.put("name", p.name());
+                            pt.put("regexp", p.regexp());
+                            return (Object) pt;
+                        })
                         .toList());
         return out;
     }
@@ -102,7 +101,9 @@ public final class Conformance {
         out.put(
                 "examples",
                 plan.examples().stream().map(ex -> plannedExample(source, ex)).toList());
-        out.put("diagnostics", plan.diagnostics().stream().map(Conformance::diagnostic).toList());
+        out.put(
+                "diagnostics",
+                plan.diagnostics().stream().map(Conformance::diagnostic).toList());
         return out;
     }
 
@@ -225,14 +226,11 @@ public final class Conformance {
         Plan.ExecutionPlan execution = Plan.plan(doc, registry);
 
         Map<Integer, List<Execute.StepObservation>> observed = new HashMap<>();
-        Execute.ExecutePorts ports =
-                new Execute.ExecutePorts(
-                        diagnostic -> {}, // diagnostics are already captured in the plan artifact
-                        file -> contextFactory.get(),
-                        observation ->
-                                observed
-                                        .computeIfAbsent(observation.exampleIndex(), k -> new ArrayList<>())
-                                        .add(observation));
+        Execute.ExecutePorts ports = new Execute.ExecutePorts(
+                diagnostic -> {}, // diagnostics are already captured in the plan artifact
+                file -> contextFactory.get(),
+                observation -> observed.computeIfAbsent(observation.exampleIndex(), k -> new ArrayList<>())
+                        .add(observation));
 
         List<Execute.QueuedExample> queue = Execute.collectExamples(execution, ports);
 
@@ -277,9 +275,7 @@ public final class Conformance {
                 stepTrace.put("outcome", stepOutcome);
                 if ("fail".equals(stepOutcome)) {
                     stepTrace.put(
-                            "failure",
-                            toFailureArtifact(
-                                    chosen != null ? chosen.error() : null, step.matchSpan()));
+                            "failure", toFailureArtifact(chosen != null ? chosen.error() : null, step.matchSpan()));
                 }
                 steps.add(stepTrace);
             }

@@ -120,14 +120,8 @@ public final class Matcher {
                     }
                 }
 
-                hits.add(
-                        new Hit(
-                                step.expression(),
-                                step,
-                                scan.start(),
-                                scan.start() + matchedText.length(),
-                                args,
-                                paramSpans));
+                hits.add(new Hit(
+                        step.expression(), step, scan.start(), scan.start() + matchedText.length(), args, paramSpans));
             }
         }
         return List.copyOf(hits);
@@ -157,11 +151,10 @@ public final class Matcher {
         if (hits.isEmpty()) return new Ok(List.of());
 
         List<Hit> sorted = new ArrayList<>(hits);
-        sorted.sort(
-                (a, b) -> {
-                    if (a.matchStart() != b.matchStart()) return a.matchStart() - b.matchStart();
-                    return (b.matchEnd() - b.matchStart()) - (a.matchEnd() - a.matchStart());
-                });
+        sorted.sort((a, b) -> {
+            if (a.matchStart() != b.matchStart()) return a.matchStart() - b.matchStart();
+            return (b.matchEnd() - b.matchStart()) - (a.matchEnd() - a.matchStart());
+        });
 
         List<AmbiguityCollision> collisions = new ArrayList<>();
         int i = 0;
