@@ -1,0 +1,371 @@
+---
+title: Sensors
+description: The sensor return-value contract — slots, bare values, positional arrays, and every error a sensor can raise.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+A sensor is a read-only observation. It reads state, returns what the software
+actually produced, and Vár compares that against what the Markdown claims. A
+sensor never changes state, and you never write an assertion — the document is
+the assertion. It is one of Vár's two step kinds — the other is the
+[stimulus](/reference/stimulus/), which drives the software.
+
+The word comes from Martin Fowler's
+[Harness Engineering](https://martinfowler.com/articles/harness-engineering.html):
+a test harness surrounds the system with instruments the way a hardware rig
+does — you drive the system with stimuli and read its behaviour back through
+sensors, rather than reaching inside it.
+
+<Tabs syncKey="lang">
+  <TabItem label="TypeScript">
+    ```ts
+    const { stimulus, sensor } = defineState(() => ({ total: 0 }))
+
+    stimulus('I add {int}', (state, n) => ({ total: state.total + n }))
+    sensor('the total is {int}', (state) => state.total)
+    ```
+  </TabItem>
+  <TabItem label="Java">
+    ```java
+    // inside defineSteps(Registrar registrar)
+    record Ctx(int total) implements State {}
+
+    StateBinder<Ctx> s = registrar.defineState(() -> new Ctx(0));
+
+    s.stimulus("I add {int}", (Ctx ctx, Integer n) -> new Ctx(ctx.total() + n));
+    s.sensor("the total is {int}", (Ctx ctx, Integer expected) -> ctx.total());
+    ```
+  </TabItem>
+  <TabItem label="Kotlin">
+    ```kotlin
+    data class Ctx(val total: Int = 0)
+
+    val steps = defineState(::Ctx) {
+        stimulus("I add {int}") { n: Int -> copy(total = total + n) }
+        sensor("the total is {int}") { _: Int -> total }
+    }
+    ```
+  </TabItem>
+  <TabItem label="Python">
+    ```python
+    stimulus, sensor = define_state(lambda: {"total": 0})
+
+
+    @stimulus("I add {int}")
+    def _(state, n):
+        return {"total": state["total"] + n}
+
+
+    @sensor("the total is {int}")
+    def _(state, expected):
+        return state["total"]
+    ```
+  </TabItem>
+</Tabs>
+
+In your prose the sensor is the *then* — the expected outcome; see
+[Given, When, Then are narration](/reference/stimulus/#given-when-then-are-narration)
+for how the concepts map onto the two step kinds.
+
+This page is the reference for what a sensor may return and how each return
+value is compared. The rules are identical in every port (TypeScript, Java,
+Kotlin, Python).
+
+## Slots
+
+A sensor's **slots** are the values Vár will compare, in order:
+
+1. each parameter captured by the expression (`{int}`, `{word}`, `{string}`,
+   custom types), left to right;
+2. the trailing data table or doc string, if the step has one (always last, at
+   most one).
+
+The return value maps onto the slots by count:
+
+| Slots | Return                                        | Example                          |
+| ----- | --------------------------------------------- | -------------------------------- |
+| 0     | nothing (`undefined` / `None` / `null`)       | `() => { assertSomething() }`    |
+| 1     | the slot's value, bare                        | `(state) => state.total`         |
+| 2+    | an array/list, one element per slot, in order | `(state) => [state.n, state.s]`  |
+
+### Zero slots — nothing to compare
+
+A sensor with no parameters, no table and no doc string has nothing to compare
+a return value against. Throw to fail, return nothing to pass:
+
+<Tabs syncKey="lang">
+  <TabItem label="TypeScript">
+    ```ts
+    sensor('the alarm fired', (state) => {
+      if (!state.alarm) throw new Error('no alarm')
+    })
+    ```
+  </TabItem>
+  <TabItem label="Java">
+    ```java
+    s.sensor("the alarm fired", (Ctx ctx) -> {
+        if (!ctx.alarm()) throw new AssertionError("no alarm");
+        return null;
+    });
+    ```
+  </TabItem>
+  <TabItem label="Kotlin">
+    ```kotlin
+    sensor("the alarm fired") {
+        if (!alarm) throw AssertionError("no alarm")
+        null
+    }
+    ```
+  </TabItem>
+  <TabItem label="Python">
+    ```python
+    @sensor("the alarm fired")
+    def _(state):
+        if not state["alarm"]:
+            raise AssertionError("no alarm")
+    ```
+  </TabItem>
+</Tabs>
+
+Returning any other value is a `ReturnShapeError`. This is deliberate: a
+returned value here would silently assert nothing, and the author almost
+certainly believed it was being checked.
+
+### One slot — return the value bare
+
+<Tabs syncKey="lang">
+  <TabItem label="TypeScript">
+    ```ts
+    sensor('the total is {int}', (state) => state.total)
+    ```
+  </TabItem>
+  <TabItem label="Java">
+    ```java
+    s.sensor("the total is {int}", (Ctx ctx, Integer expected) -> ctx.total());
+    ```
+  </TabItem>
+  <TabItem label="Kotlin">
+    ```kotlin
+    sensor("the total is {int}") { _: Int -> total }
+    ```
+  </TabItem>
+  <TabItem label="Python">
+    ```python
+    @sensor("the total is {int}")
+    def _(state, expected):
+        return state["total"]
+    ```
+  </TabItem>
+</Tabs>
+
+The return **is** the slot's value. It is never interpreted as a positional
+array — so wrapping it (`return [state.total]`) fails the comparison, because
+`[42]` is not `42`.
+
+This also resolves what would otherwise be an ambiguity with custom parameter
+types whose transformer produces an array:
+
+<Tabs syncKey="lang">
+  <TabItem label="TypeScript">
+    ```ts
+    const { sensor } = defineState(() => ({ dice: [5, 6] }), {
+      numbers: { regexp: /\d+(?:, \d+)*/, transformer: (raw) => raw.split(', ').map(Number) },
+    })
+
+    // "The dice show 5, 6" — {numbers} transforms to [5, 6]
+    sensor('The dice show {numbers}', (state) => state.dice) // deep-equal [5, 6] vs [5, 6] ✓
+    ```
+  </TabItem>
+  <TabItem label="Java">
+    ```java
+    registrar.defineParameterType(
+            "numbers",
+            Pattern.compile("\\d+(?:, \\d+)*"),
+            groups -> Arrays.stream(groups[0].split(", ")).map(Integer::parseInt).toList());
+    StateBinder<Ctx> s = registrar.defineState(() -> new Ctx(List.of(5, 6)));
+
+    // "The dice show 5, 6" — {numbers} transforms to [5, 6]
+    s.sensor("The dice show {numbers}", (Ctx ctx, List<Integer> dice) -> ctx.dice());
+    ```
+  </TabItem>
+  <TabItem label="Kotlin">
+    ```kotlin
+    data class DiceCtx(val dice: List<Int> = listOf(5, 6))
+
+    val diceSteps = defineState(::DiceCtx) {
+        parameterType("numbers", Regex("""\d+(?:, \d+)*""")) { groups ->
+            groups[0].split(", ").map(String::toInt)
+        }
+
+        // "The dice show 5, 6" — {numbers} transforms to [5, 6]
+        sensor("The dice show {numbers}") { _: List<Int> -> dice }
+    }
+    ```
+  </TabItem>
+  <TabItem label="Python">
+    ```python
+    stimulus, sensor = define_state(
+        lambda: {"dice": [5, 6]},
+        {
+            "numbers": {
+                "regexp": r"\d+(?:, \d+)*",
+                "transformer": lambda raw: [int(n) for n in raw.split(", ")],
+            }
+        },
+    )
+
+
+    # "The dice show 5, 6" — {numbers} transforms to [5, 6]
+    @sensor("The dice show {numbers}")
+    def _(state, dice):
+        return state["dice"]
+    ```
+  </TabItem>
+</Tabs>
+
+Because a single-slot return is always the bare value, `[5, 6]` here is
+unambiguously *the value*, deep-compared against the transformed parameter —
+never mistaken for a two-slot positional array.
+
+### Two or more slots — return a positional array
+
+<Tabs syncKey="lang">
+  <TabItem label="TypeScript">
+    ```ts
+    sensor('I should have {int} cukes in my {word} belly', (state) => [
+      state.count,
+      state.bellyName,
+    ])
+    ```
+  </TabItem>
+  <TabItem label="Java">
+    ```java
+    s.sensor("I should have {int} cukes in my {word} belly",
+            (Ctx ctx, Integer count, String belly) -> List.of(ctx.count(), ctx.bellyName()));
+    ```
+  </TabItem>
+  <TabItem label="Kotlin">
+    ```kotlin
+    sensor("I should have {int} cukes in my {word} belly") { _: Int, _: String ->
+        listOf(count, bellyName)
+    }
+    ```
+  </TabItem>
+  <TabItem label="Python">
+    ```python
+    @sensor("I should have {int} cukes in my {word} belly")
+    def _(state, count, belly):
+        return [state["count"], state["belly_name"]]
+    ```
+  </TabItem>
+</Tabs>
+
+The array must have exactly one element per slot; a different length or a
+non-array return is a `ReturnShapeError`. Each element is compared against its
+slot. When the step also has a trailing table or doc string, it occupies the
+last element:
+
+<Tabs syncKey="lang">
+  <TabItem label="TypeScript">
+    ```ts
+    sensor('Greet {word}:', (state, name, _body: string) => [name, `Hello, ${name}!\n`])
+    ```
+  </TabItem>
+  <TabItem label="Java">
+    ```java
+    s.sensor("Greet {word}:", (Ctx ctx, String name, String doc) -> List.of(name, "Hello, " + name + "!\n"));
+    ```
+  </TabItem>
+  <TabItem label="Kotlin">
+    ```kotlin
+    sensor("Greet {word}:") { name: String, _: String ->
+        listOf(name, "Hello, $name!\n")
+    }
+    ```
+  </TabItem>
+  <TabItem label="Python">
+    ```python
+    @sensor("Greet {word}:")
+    def _(state, name, doc):
+        return [name, f"Hello, {name}!\n"]
+    ```
+  </TabItem>
+</Tabs>
+
+## What each slot kind compares
+
+- **Inline parameter** — deep equality against the transformed captured value
+  (so `{int}` compares numbers, a custom type compares whatever its transformer
+  produced). A mismatch is a `CellMismatchError` anchored to the parameter's
+  span in the Markdown.
+- **Whole table** — the returned table (array of row-arrays or row-objects) is
+  compared cell by cell as exact strings → `CellMismatchError` anchored to the
+  failing cell. See [Check tables and doc strings](/how-to/tables-and-doc-strings/).
+- **Doc string** — exact string equality, including the trailing newline →
+  `DocStringMismatchError` anchored to the block's body.
+
+## Header-bound table rows
+
+A sensor bound to a sentence that names a table's columns runs once per row and
+returns a **row object** keyed by the header — not slots:
+
+<Tabs syncKey="lang">
+  <TabItem label="TypeScript">
+    ```ts
+    sensor('a decimal and a roman number', (_state, row: { decimal: string; roman: string }) => {
+      return { decimal: row.decimal, roman: toRoman(Number(row.decimal)) }
+    })
+    ```
+  </TabItem>
+  <TabItem label="Java">
+    ```java
+    s.sensor("a decimal and a roman number", (Ctx ctx, Map<String, String> row) -> Map.of(
+            "decimal", row.get("decimal"),
+            "roman", RomanNumerals.toRoman(Integer.parseInt(row.get("decimal")))));
+    ```
+  </TabItem>
+  <TabItem label="Kotlin">
+    ```kotlin
+    sensor("a decimal and a roman number") { row: Map<String, String> ->
+        mapOf("decimal" to row.getValue("decimal"), "roman" to toRoman(row.getValue("decimal").toInt()))
+    }
+    ```
+  </TabItem>
+  <TabItem label="Python">
+    ```python
+    @sensor("a decimal and a roman number")
+    def _(state, row):
+        return {"decimal": row["decimal"], "roman": to_roman(int(row["decimal"]))}
+    ```
+  </TabItem>
+</Tabs>
+
+Each returned column is compared cell by cell against that row. This is the one
+sensor shape that bypasses the slot contract.
+
+## Returning nothing
+
+Returning `undefined` (TypeScript), `None` (Python) or `null` (Java, Kotlin)
+always means "no assertion" — the step passes unless it throws. Use this when
+the sensor asserts by throwing (plain `throw`, or your test framework's own
+assertions), which is always allowed regardless of slot count.
+
+## Errors
+
+| Error                    | Raised when                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------- |
+| `CellMismatchError`      | a parameter or table cell differs; carries one span-anchored diff per cell      |
+| `DocStringMismatchError` | the returned text differs from the doc string                                   |
+| `ReturnShapeError`       | the return doesn't fit the slots: a value from a zero-slot sensor, a non-array or wrong-length array for 2+ slots, or a malformed table |
+
+Because every diff is anchored to a source span, editors highlight exactly the
+failing characters in the Markdown and show the actual value in place.
+
+## Why an array at all?
+
+A sensor with several slots has several independent claims to check, and Vár
+needs to know which returned value belongs to which claim. Positional mapping —
+same order as the sentence — does that without naming ceremony. When there is
+only one claim, the position is unambiguous, so the wrapper would be pure
+noise; that's why one slot takes the bare value.

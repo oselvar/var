@@ -3,20 +3,38 @@
  * Starlight `ThemeSelect` override: prepends the site's custom header controls
  * next to the built-in dark/light/auto select.
  *
+ * - Language selector (TypeScript/Java/Kotlin/Python) → `data-lang` on <html>.
+ *   Every code example on the site follows it: the interactive editors swap
+ *   their step-definition tabs, and static code samples in `<Tabs
+ *   syncKey="lang">` groups switch to the matching TabItem.
  * - Palette selector (Jord — the default earthy palette in custom.css — or
  *   Fjord/Ild/Fjeld). The choice lives in `data-palette` on <html>.
  * - Prose font selector (STIX Two Text or Atkinson Hyperlegible) → `data-font-prose`.
  * - Code font selector (JetBrains Mono or Atkinson Hyperlegible Mono) → `data-font-code`.
  *
- * Each choice persists in localStorage (`var-palette` / `var-font-prose` /
- * `var-font-code`); an inline head script in astro.config.mjs re-applies all
- * three before first paint. The font attributes drive --sl-font / --sl-font-mono
- * via the override rules in custom.css; headings stay on Norse regardless.
+ * Each choice persists in localStorage (`var-lang` / `var-palette` /
+ * `var-font-prose` / `var-font-code`); an inline head script in
+ * astro.config.mjs re-applies them before first paint. The font attributes
+ * drive --sl-font / --sl-font-mono via the override rules in custom.css;
+ * headings stay on Norse regardless.
  */
 import Select from '@astrojs/starlight/components/Select.astro'
 import Default from '@astrojs/starlight/components/ThemeSelect.astro'
 ---
 
+<var-lang-select>
+  <Select
+    icon="translate"
+    label="Select programming language"
+    options={[
+      { label: 'TypeScript', selected: true, value: 'ts' },
+      { label: 'Java', selected: false, value: 'java' },
+      { label: 'Kotlin', selected: false, value: 'kotlin' },
+      { label: 'Python', selected: false, value: 'python' },
+    ]}
+    width="8.5em"
+  />
+</var-lang-select>
 <var-palette-select>
   <Select
     icon="pencil"
@@ -55,6 +73,89 @@ import Default from '@astrojs/starlight/components/ThemeSelect.astro'
 <Default><slot /></Default>
 
 <script>
+  import {
+    currentLang,
+    LANG_LABELS,
+    langOfLabel,
+    onLangChange,
+    parseLang,
+    setLang,
+    type SiteLang,
+  } from '../lib/site-lang.ts'
+
+  const LANG_TAB_GROUP = 'starlight-tabs[data-sync-key="lang"]'
+
+  // Flip one Starlight tab group to the tab whose label matches — the same
+  // DOM surgery Starlight's own inline restore script performs, so it neither
+  // steals focus nor scrolls the page the way a synthetic tab.click() would.
+  function switchLangTabGroup(group: Element, label: string): void {
+    const tabs = [...group.querySelectorAll('[role="tab"]')]
+    const panels = [...group.querySelectorAll(':scope > [role="tabpanel"]')]
+    const index = tabs.findIndex((tab) => tab.textContent?.trim() === label)
+    if (index < 0) return
+    tabs.forEach((tab, i) => {
+      tab.setAttribute('aria-selected', String(i === index))
+      if (i === index) tab.removeAttribute('tabindex')
+      else tab.setAttribute('tabindex', '-1')
+    })
+    panels.forEach((panel, i) => {
+      if (i === index) panel.removeAttribute('hidden')
+      else panel.setAttribute('hidden', 'true')
+    })
+  }
+
+  /** Keep every language select and every synced lang tab group showing `lang`. */
+  function syncLangUi(lang: SiteLang): void {
+    document.querySelectorAll<HTMLSelectElement>('var-lang-select select').forEach((select) => {
+      select.value = lang
+    })
+    for (const group of document.querySelectorAll(LANG_TAB_GROUP)) {
+      switchLangTabGroup(group, LANG_LABELS[lang])
+    }
+  }
+
+  onLangChange((lang) => {
+    syncLangUi(lang)
+    // Feed Starlight's own persistence too, so its inline restore script
+    // selects the right tab before first paint on the next page — even when
+    // this page had no lang tab group to click.
+    try {
+      localStorage.setItem('starlight-synced-tabs__lang', LANG_LABELS[lang])
+    } catch {
+      /* private mode */
+    }
+  })
+
+  // The reverse direction: choosing a language by clicking a synced code tab
+  // moves the dropdown (and the editors) too. Keyboard tab switching
+  // (arrow keys) bypasses click, so watch both and read the group's selected
+  // tab after Starlight's own handler has run.
+  function bridgeTabToDropdown(target: EventTarget | null): void {
+    if (!(target instanceof Element)) return
+    const group = target.closest(LANG_TAB_GROUP)
+    if (!group) return
+    queueMicrotask(() => {
+      const selected = group.querySelector('[role="tab"][aria-selected="true"]')
+      const lang = langOfLabel(selected?.textContent?.trim() ?? '')
+      if (lang) setLang(lang)
+    })
+  }
+  document.addEventListener('click', (e) => bridgeTabToDropdown(e.target))
+  document.addEventListener('keydown', (e) => bridgeTabToDropdown(e.target))
+
+  class VarLangSelect extends HTMLElement {
+    constructor() {
+      super()
+      syncLangUi(currentLang())
+      this.querySelector('select')?.addEventListener('change', (e) => {
+        if (e.currentTarget instanceof HTMLSelectElement) {
+          setLang(parseLang(e.currentTarget.value))
+        }
+      })
+    }
+  }
+  customElements.define('var-lang-select', VarLangSelect)
+
   type Palette = 'jord' | 'fjord' | 'ild' | 'fjeld'
 
   const storageKey = 'var-palette'

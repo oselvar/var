@@ -28,12 +28,13 @@ export default defineConfig({
       },
       head: [
         {
-          // Apply the stored palette and font choices before first paint (the
-          // defaults — Jord palette, STIX prose, JetBrains code — are
-          // attribute-less; only a non-default choice needs marking).
+          // Apply the stored language, palette and font choices before first
+          // paint (the defaults — TypeScript, Jord palette, STIX prose,
+          // JetBrains code — are attribute-less; only a non-default choice
+          // needs marking).
           tag: 'script',
           content:
-            "try{var d=document.documentElement.dataset;var p=localStorage.getItem('var-palette');if(p==='fjord'||p==='ild'||p==='fjeld')d.palette=p;if(localStorage.getItem('var-font-prose')==='atkinson')d.fontProse='atkinson';if(localStorage.getItem('var-font-code')==='atkinson')d.fontCode='atkinson'}catch(e){}",
+            "try{var d=document.documentElement.dataset;var l=localStorage.getItem('var-lang');if(l==='java'||l==='kotlin'||l==='python')d.lang=l;var p=localStorage.getItem('var-palette');if(p==='fjord'||p==='ild'||p==='fjeld')d.palette=p;if(localStorage.getItem('var-font-prose')==='atkinson')d.fontProse='atkinson';if(localStorage.getItem('var-font-code')==='atkinson')d.fontCode='atkinson'}catch(e){}",
         },
       ],
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/oselvar/var' }],

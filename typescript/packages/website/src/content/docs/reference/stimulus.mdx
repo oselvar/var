@@ -1,0 +1,208 @@
+---
+title: Stimulus
+description: The stimulus step kind — how state is arranged, evolved, and threaded through an example.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+A stimulus drives the software: it arranges the state an example starts from
+and acts on it. It is one of Vár's two step kinds — the other is the
+[sensor](/reference/sensors/), the read-only observation. The names are a
+hardware analogy: you put a stimulus into the system, and you read its response
+with sensors.
+
+<Tabs syncKey="lang">
+  <TabItem label="TypeScript">
+    ```ts
+    const { stimulus, sensor } = defineState(() => ({ total: 0 }))
+
+    stimulus('I add {int}', (state, n) => ({ total: state.total + n }))
+    sensor('the total is {int}', (state) => state.total)
+    ```
+  </TabItem>
+  <TabItem label="Java">
+    ```java
+    // inside defineSteps(Registrar registrar)
+    record Ctx(int total) implements State {}
+
+    StateBinder<Ctx> s = registrar.defineState(() -> new Ctx(0));
+
+    s.stimulus("I add {int}", (Ctx ctx, Integer n) -> new Ctx(ctx.total() + n));
+    s.sensor("the total is {int}", (Ctx ctx, Integer expected) -> ctx.total());
+    ```
+  </TabItem>
+  <TabItem label="Kotlin">
+    ```kotlin
+    data class Ctx(val total: Int = 0)
+
+    val steps = defineState(::Ctx) {
+        stimulus("I add {int}") { n: Int -> copy(total = total + n) }
+        sensor("the total is {int}") { _: Int -> total }
+    }
+    ```
+  </TabItem>
+  <TabItem label="Python">
+    ```python
+    stimulus, sensor = define_state(lambda: {"total": 0})
+
+
+    @stimulus("I add {int}")
+    def _(state, n):
+        return {"total": state["total"] + n}
+
+
+    @sensor("the total is {int}")
+    def _(state, expected):
+        return state["total"]
+    ```
+  </TabItem>
+</Tabs>
+
+## Given, When, Then are narration
+
+The concepts arrange–act–assert (given–when–then, context–action–outcome) are
+still how you *write* a good example: name the state the software rests in, the
+one thing you do to it, and the outcome you expect. But in Vár the concepts and
+the mechanism are decoupled:
+
+| Concept (in your prose)   | Mechanism  |
+| ------------------------- | ---------- |
+| arrange / context / given | `stimulus` |
+| act / action / when       | `stimulus` |
+| assert / outcome / then   | `sensor`   |
+
+Arranging state and acting on it are the same mechanism — both evolve state —
+so they share one step kind. Vár never matches keywords: a step is a stimulus
+or a sensor by what it does, not by how the sentence begins. Write `Given`,
+`When`, `Then` in your Markdown if it reads well; they are narration for the
+human, never load-bearing.
+
+## Evolving state
+
+A stimulus receives the current state as its first argument (deeply readonly)
+followed by the values the expression captured. In TypeScript and Python it
+evolves state by **returning a partial state object**, which Vár shallow-merges
+onto the current state and re-freezes. In Java and Kotlin, where state is an
+immutable record/data class, it returns the **complete new state value** —
+full replacement, same principle: new value out, never mutation.
+
+<Tabs syncKey="lang">
+  <TabItem label="TypeScript">
+    ```ts
+    const { stimulus } = defineState(() => ({ greeting: '', count: 0 }))
+
+    stimulus('I greet {string}', (state, name) => ({ greeting: `Hello, ${name}!` }))
+    stimulus('I add {int}', (state, n) => ({ count: state.count + n }))
+    ```
+  </TabItem>
+  <TabItem label="Java">
+    ```java
+    record Ctx(String greeting, int count) implements State {}
+
+    StateBinder<Ctx> s = registrar.defineState(() -> new Ctx("", 0));
+
+    s.stimulus("I greet {string}", (Ctx ctx, String name) -> new Ctx("Hello, " + name + "!", ctx.count()));
+    s.stimulus("I add {int}", (Ctx ctx, Integer n) -> new Ctx(ctx.greeting(), ctx.count() + n));
+    ```
+  </TabItem>
+  <TabItem label="Kotlin">
+    ```kotlin
+    data class Ctx(val greeting: String = "", val count: Int = 0)
+
+    val steps = defineState(::Ctx) {
+        stimulus("I greet {string}") { name: String -> copy(greeting = "Hello, $name!") }
+        stimulus("I add {int}") { n: Int -> copy(count = count + n) }
+    }
+    ```
+  </TabItem>
+  <TabItem label="Python">
+    ```python
+    stimulus, sensor = define_state(lambda: {"greeting": "", "count": 0})
+
+
+    @stimulus("I greet {string}")
+    def _(state, name):
+        return {"greeting": f"Hello, {name}!"}
+
+
+    @stimulus("I add {int}")
+    def _(state, n):
+        return {"count": state["count"] + n}
+    ```
+  </TabItem>
+</Tabs>
+
+- **Returning nothing** leaves state unchanged — right for a stimulus whose
+  side effects live entirely in the system under test. (In Java and Kotlin,
+  return the received state unchanged instead.)
+- **In TypeScript and Python, returning anything that isn't an object** (or
+  nothing) is a `ReturnShapeError`. A stimulus never returns values for
+  comparison — that's the sensor's job.
+- **Mutating `state` is impossible**: it is deep-frozen at runtime (TypeScript,
+  Python) or an immutable record/data class (Java, Kotlin). Evolution happens
+  only by returning.
+- The TypeScript/Python merge is **shallow**: a returned key replaces the
+  previous top-level value wholesale; nested objects are not deep-merged.
+
+## State is per step file, per example
+
+`defineState` declares the state its step file's examples start from. Every
+example gets a fresh state from the factory, so examples never leak into each
+other; steps defined in different step files never see each other's state.
+
+## Tables and doc strings
+
+A trailing data table or fenced code block arrives as the last handler
+argument, after the captured parameters — a table as a list of rows (header row
+first), a doc string as its exact text:
+
+<Tabs syncKey="lang">
+  <TabItem label="TypeScript">
+    ```ts
+    stimulus('these books exist:', (state, rows: ReadonlyArray<ReadonlyArray<string>>) => ({
+      books: rows.slice(1).map(([title, author]) => ({ title, author })),
+    }))
+    ```
+  </TabItem>
+  <TabItem label="Java">
+    ```java
+    s.stimulus("these books exist:", (Ctx ctx, List<List<String>> rows) -> new Ctx(
+            rows.subList(1, rows.size()).stream()
+                    .map(row -> new Book(row.get(0), row.get(1)))
+                    .toList()));
+    ```
+  </TabItem>
+  <TabItem label="Kotlin">
+    ```kotlin
+    stimulus("these books exist:") { rows: List<List<String>> ->
+        copy(books = rows.drop(1).map { (title, author) -> Book(title, author) })
+    }
+    ```
+  </TabItem>
+  <TabItem label="Python">
+    ```python
+    @stimulus("these books exist:")
+    def _(state, rows):
+        return {"books": [{"title": title, "author": author} for title, author in rows[1:]]}
+    ```
+  </TabItem>
+</Tabs>
+
+A stimulus *consumes* these as input. To *check* a table or doc string against
+what the software produced, use a sensor — see
+[Check tables and doc strings](/how-to/tables-and-doc-strings/).
+
+## Async
+
+A stimulus handler may be async (`async` function in TypeScript, `async def`
+in Python, `suspend` in Kotlin); the runtime awaits it before the next step
+runs.
+
+## Errors
+
+| Error              | Raised when                                                        |
+| ------------------ | ------------------------------------------------------------------ |
+| `ReturnShapeError` | the handler returns something that isn't a partial state object or nothing |
+
+Any exception the handler itself throws fails the example, anchored to the
+step's line in the Markdown.

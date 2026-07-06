@@ -1,0 +1,210 @@
+---
+title: Check tables and doc strings
+description: Return computed values from a step and let Vár compare them against the Markdown, cell by cell.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+This guide shows you how to check tabular and multi-line expectations. In Vár a
+step may `return` a value; Vár compares it against what the Markdown claims and
+anchors any mismatch to the exact cell or character span. There are three
+shapes.
+
+## Check a table row by row
+
+Use this when each row of a table is an independent example. Write the table
+under a sentence that names its columns:
+
+```markdown
+Each row gives an example of a decimal and a roman number:
+
+| decimal | roman |
+| ------: | :---- |
+|       3 | III   |
+|       9 | IX    |
+|      40 | XL    |
+```
+
+Bind a sensor to that sentence. It receives one row at a time as an object
+keyed by the header, and returns the computed columns:
+
+<Tabs syncKey="lang">
+  <TabItem label="TypeScript">
+    ```ts
+    import { toRoman } from './roman-numerals'
+
+    sensor('a decimal and a roman number', (_state, row: { decimal: string; roman: string }) => {
+      return { decimal: row.decimal, roman: toRoman(Number(row.decimal)) }
+    })
+    ```
+  </TabItem>
+  <TabItem label="Java">
+    ```java
+    s.sensor("a decimal and a roman number", (Ctx ctx, Map<String, String> row) -> Map.of(
+            "decimal", row.get("decimal"),
+            "roman", RomanNumerals.toRoman(Integer.parseInt(row.get("decimal")))));
+    ```
+  </TabItem>
+  <TabItem label="Kotlin">
+    ```kotlin
+    sensor("a decimal and a roman number") { row: Map<String, String> ->
+        mapOf("decimal" to row.getValue("decimal"), "roman" to toRoman(row.getValue("decimal").toInt()))
+    }
+    ```
+  </TabItem>
+  <TabItem label="Python">
+    ```python
+    from roman_numerals_example import to_roman
+
+
+    @sensor("a decimal and a roman number")
+    def _(state, row):
+        return {"decimal": row["decimal"], "roman": to_roman(int(row["decimal"]))}
+    ```
+  </TabItem>
+</Tabs>
+
+Each row runs as its own check. If `toRoman(9)` returned `"VIIII"`, only the
+`IX` cell fails — with expected and actual, anchored to that cell.
+
+## Check a whole table at once
+
+Use this when the table is one expectation, not a list of independent rows. The
+sensor receives the full table as a list of rows (header row first) and returns
+the reproduced table:
+
+```markdown
+Uppercase each one:
+
+| before | after |
+| ------ | ----- |
+| vár    | VÁR   |
+| bdd    | BDD   |
+```
+
+<Tabs syncKey="lang">
+  <TabItem label="TypeScript">
+    ```ts
+    sensor('Uppercase each one:', (_state, rows: ReadonlyArray<ReadonlyArray<string>>) => {
+      return rows.slice(1).map(([before]) => ({ before, after: (before ?? '').toUpperCase() }))
+    })
+    ```
+  </TabItem>
+  <TabItem label="Java">
+    ```java
+    s.sensor("Uppercase each one:", (Ctx ctx, List<List<String>> rows) -> {
+        List<Map<String, String>> out = new ArrayList<>();
+        for (List<String> row : rows.subList(1, rows.size())) {
+            out.add(Map.of("before", row.get(0), "after", row.get(0).toUpperCase(Locale.ROOT)));
+        }
+        return out;
+    });
+    ```
+  </TabItem>
+  <TabItem label="Kotlin">
+    ```kotlin
+    sensor("Uppercase each one:") { rows: List<List<String>> ->
+        rows.drop(1).map { row -> mapOf("before" to row[0], "after" to row[0].uppercase()) }
+    }
+    ```
+  </TabItem>
+  <TabItem label="Python">
+    ```python
+    @sensor("Uppercase each one:")
+    def _(state, rows):
+        return [{"before": before, "after": before.upper()} for before, *_ in rows[1:]]
+    ```
+  </TabItem>
+</Tabs>
+
+The table is this sensor's only comparable value, so it is returned bare. Vár
+compares every cell of the returned table against the source, as exact strings.
+
+## Check a doc string
+
+Use this for multi-line text: rendered output, error messages, generated files.
+Write the expected text as a fenced code block:
+
+````markdown
+Greet Bob:
+
+```text
+Hello, Bob!
+```
+````
+
+The step receives the block's text as a trailing string argument, and returns
+the text the software actually produces:
+
+<Tabs syncKey="lang">
+  <TabItem label="TypeScript">
+    ```ts
+    sensor('Greet {word}:', (_state, name, _body: string) => {
+      return [name, `Hello, ${name}!\n`]
+    })
+    ```
+  </TabItem>
+  <TabItem label="Java">
+    ```java
+    s.sensor("Greet {word}:", (Ctx ctx, String name, String doc) -> List.of(name, "Hello, " + name + "!\n"));
+    ```
+  </TabItem>
+  <TabItem label="Kotlin">
+    ```kotlin
+    sensor("Greet {word}:") { name: String, _: String ->
+        listOf(name, "Hello, $name!\n")
+    }
+    ```
+  </TabItem>
+  <TabItem label="Python">
+    ```python
+    @sensor("Greet {word}:")
+    def _(state, name, doc):
+        return [name, f"Hello, {name}!\n"]
+    ```
+  </TabItem>
+</Tabs>
+
+The comparison is exact equality, **including the trailing newline**. This step
+has two comparable values — the captured `{word}` and the doc string — so it
+returns an array with one element per value, in order: `[name, text]`. A step
+whose doc string is its only comparable value returns the text bare:
+
+<Tabs syncKey="lang">
+  <TabItem label="TypeScript">
+    ```ts
+    sensor('Greet Bob:', (_state, _body: string) => {
+      return 'Hello, Bob!\n'
+    })
+    ```
+  </TabItem>
+  <TabItem label="Java">
+    ```java
+    s.sensor("Greet Bob:", (Ctx ctx, String doc) -> "Hello, Bob!\n");
+    ```
+  </TabItem>
+  <TabItem label="Kotlin">
+    ```kotlin
+    sensor("Greet Bob:") { _: String -> "Hello, Bob!\n" }
+    ```
+  </TabItem>
+  <TabItem label="Python">
+    ```python
+    @sensor("Greet Bob:")
+    def _(state, doc):
+        return "Hello, Bob!\n"
+    ```
+  </TabItem>
+</Tabs>
+
+See the [sensors reference](/reference/sensors/) for the full return-value
+rules.
+
+## How failures are reported
+
+- A differing table cell fails with a `CellMismatchError`: each wrong cell gets
+  its own `expected` / `actual`, anchored to the cell's source span — editors
+  redden exactly the failing characters.
+- A differing doc string fails with a `DocStringMismatchError`.
+- Returning a value of the wrong shape is a `ReturnShapeError`.
+- Returning `undefined` (`None` / `null`) means "no assertion" — the step passes.

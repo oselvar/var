@@ -1,8 +1,11 @@
+import { java } from '@codemirror/lang-java'
 import { javascript } from '@codemirror/lang-javascript'
 import { markdown } from '@codemirror/lang-markdown'
-import { foldGutter } from '@codemirror/language'
+import { python } from '@codemirror/lang-python'
+import { foldGutter, StreamLanguage } from '@codemirror/language'
+import { kotlin } from '@codemirror/legacy-modes/mode/clike'
 import { LSPClient, languageServerExtensions } from '@codemirror/lsp-client'
-import { Annotation, EditorSelection, type Extension } from '@codemirror/state'
+import { Annotation, EditorSelection, EditorState, type Extension } from '@codemirror/state'
 import { lineNumbers } from '@codemirror/view'
 import { hashSource } from '@oselvar/var-core'
 import { basicSetup, EditorView, minimalSetup } from 'codemirror'
@@ -13,6 +16,7 @@ import { varEditorThemeExt } from '../lib/cm-var-theme.ts'
 import { planReplay, type ReplayOp } from '../lib/replay-plan.ts'
 import { runSpec } from '../lib/run-client.ts'
 import { groupRunInputs } from '../lib/run-grouping.ts'
+import { currentLang, langOfPath, onLangChange, type SiteLang } from '../lib/site-lang.ts'
 import { joinStepParamTokens } from '../lib/var-capsule-tokens.ts'
 import { varTokenTheme } from '../lib/var-token-theme.ts'
 import { workerTransport } from '../lib/worker-transport.ts'
@@ -30,6 +34,10 @@ function collectPageSeed(): Record<string, string> {
   for (const fileEl of document.querySelectorAll<HTMLElement>('[data-var-file]')) {
     const uri = fileEl.dataset.uri
     if (!uri) continue
+    // Only the executable world goes to the language server: specs (.md) and
+    // TypeScript. Java/Kotlin/Python tabs are display-only.
+    const fileLang = langOfPath(uri)
+    if (fileLang !== undefined && fileLang !== 'ts') continue
     const path = uri.replace(/^file:\/\/\//, '/')
     // A versioned <File> keeps its document on the first <Version> child.
     const firstVersion = fileEl.querySelector<HTMLElement>('[data-var-version]')
@@ -218,6 +226,22 @@ function mountEditor(editorEl: HTMLElement): void {
   const tabButtons = new Map<string, HTMLButtonElement>()
   let activeUri: string = files[0] ? files[0].uri : ''
 
+  // The site-wide language choice decides which code tabs this editor shows.
+  // Language-neutral files (the .md spec) are always visible; code files show
+  // only when theirs is the effective language. TypeScript is special: it is
+  // what actually executes, so its views stay mounted (hidden) in every mode,
+  // and an editor with no files in the chosen language falls back to showing
+  // its TypeScript ones rather than an empty tab row.
+  const langsPresent = new Set(files.map((f) => langOfPath(f.uri)).filter((l) => l !== undefined))
+  const effectiveLang = (): SiteLang => {
+    const site = currentLang()
+    return langsPresent.has(site) ? site : 'ts'
+  }
+  const fileVisible = (uri: string): boolean => {
+    const lang = langOfPath(uri)
+    return lang === undefined || lang === effectiveLang()
+  }
+
   // Debounced run across this editor's own files — each <Editor> instance is
   // now its own run unit; no global group-id lookup.
   let runTimer: ReturnType<typeof setTimeout> | undefined
@@ -318,12 +342,34 @@ function mountEditor(editorEl: HTMLElement): void {
     })
   })
 
-  function showFile(uri: string): void {
+  function showFile(uri: string, focus = true): void {
     activeUri = uri
     for (const [u, pane] of panes) pane.style.display = u === uri ? '' : 'none'
     for (const [u, btn] of tabButtons) btn.setAttribute('aria-selected', String(u === uri))
     renderVersionBtn()
-    views.get(uri)?.focus()
+    if (focus) views.get(uri)?.focus()
+  }
+
+  // Applies the current site language: hide/show code tabs, and if the active
+  // tab just vanished, jump to the same-position file of the new language
+  // (steps file → steps file, library → library), falling back to the spec.
+  function applySiteLang(): void {
+    const eff = effectiveLang()
+    for (const file of files) {
+      const btn = tabButtons.get(file.uri)
+      if (btn) btn.style.display = fileVisible(file.uri) ? '' : 'none'
+    }
+    const activeLang = langOfPath(activeUri)
+    if (activeLang !== undefined && activeLang !== eff) {
+      const oldGroup = files.filter((f) => langOfPath(f.uri) === activeLang)
+      const newGroup = files.filter((f) => langOfPath(f.uri) === eff)
+      const index = Math.max(
+        0,
+        oldGroup.findIndex((f) => f.uri === activeUri),
+      )
+      const next = newGroup[Math.min(index, newGroup.length - 1)] ?? files[0]
+      if (next) showFile(next.uri, false)
+    }
   }
 
   // Re-run (debounced) on every edit — shared across every file in this
@@ -337,9 +383,24 @@ function mountEditor(editorEl: HTMLElement): void {
     scheduleRun()
   })
 
+  const languageExt = (uri: string): Extension => {
+    switch (langOfPath(uri)) {
+      case 'ts':
+        return javascript({ typescript: true })
+      case 'java':
+        return java()
+      case 'kotlin':
+        return StreamLanguage.define(kotlin)
+      case 'python':
+        return python()
+      default:
+        return markdown()
+    }
+  }
+
   for (const file of files) {
-    const lang = file.uri.endsWith('.ts') ? 'typescript' : 'markdown'
-    const language = lang === 'typescript' ? javascript({ typescript: true }) : markdown()
+    const fileLang = langOfPath(file.uri)
+    const language = languageExt(file.uri)
     // basicSetup bundles the line-number and fold gutters. When either is
     // turned off we can't subtract from it, so drop to minimalSetup and add
     // back only the gutters that are wanted.
@@ -347,16 +408,16 @@ function mountEditor(editorEl: HTMLElement): void {
       wantLineNumbers && wantFolding
         ? basicSetup
         : [minimalSetup, wantLineNumbers ? lineNumbers() : [], wantFolding ? foldGutter() : []]
-    const ext = [
-      setup,
-      language,
-      varEditorThemeExt(),
-      varTokenTheme,
-      client.plugin(file.uri),
-      autoRun,
-      flashExtension(),
-    ]
-    if (lang === 'markdown') {
+    const ext = [setup, language, varEditorThemeExt(), varTokenTheme, autoRun, flashExtension()]
+    if (fileLang === undefined || fileLang === 'ts') {
+      // Specs and TypeScript get the language server (diagnostics, semantic
+      // tokens). The other languages are read-only showcases of the same
+      // steps — the TypeScript files keep executing underneath.
+      ext.push(client.plugin(file.uri))
+    } else {
+      ext.push(EditorState.readOnly.of(true), EditorView.editable.of(false))
+    }
+    if (fileLang === undefined) {
       ext.push(varRunExtension())
       if (wantDefine) {
         const generate: GenerateSnippet = (text, position) =>
@@ -364,8 +425,12 @@ function mountEditor(editorEl: HTMLElement): void {
             fullCode: string
             expression: string
           }>
+        // Generated snippets are TypeScript, so the affordance only makes
+        // sense while the TypeScript tabs are the ones on display.
         const stepsView = () =>
-          [...views.entries()].find(([u]) => u.endsWith('.steps.ts'))?.[1] ?? null
+          effectiveLang() === 'ts'
+            ? ([...views.entries()].find(([u]) => u.endsWith('.steps.ts'))?.[1] ?? null)
+            : null
         ext.push(stepGenAffordance({ generate, stepsView }))
       }
     }
@@ -394,6 +459,8 @@ function mountEditor(editorEl: HTMLElement): void {
 
   mount.appendChild(versionBtn)
   renderVersionBtn()
+  applySiteLang()
+  onLangChange(applySiteLang)
   scheduleRun()
 }
 

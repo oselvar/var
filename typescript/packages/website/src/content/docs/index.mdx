@@ -22,12 +22,27 @@ import File from '../../components/File.astro';
 import Version from '../../components/Version.astro';
 import deepThoughtSource from '../../../../../../examples/typescript-vitest/deep-thought.md?raw';
 import deepThoughtSteps from '../../../../../../examples/typescript-vitest/steps/deep-thought.steps.ts?raw';
+import deepThoughtStepsJava from '../../../../../../examples/java-junit-maven/src/test/java/examples/DeepThoughtSteps.java?raw';
+import deepThoughtStepsKotlin from '../../../../../../examples/kotlin-junit/src/test/kotlin/examples/deep-thought.steps.kt?raw';
+import deepThoughtStepsPython from '../../../../../../examples/python-pytest/steps/deep_thought.steps.py?raw';
 import yahtzeeSource from '../../../../../../examples/typescript-vitest/yahtzee.md?raw';
 import yahtzeeSteps from '../../../../../../examples/typescript-vitest/steps/yahtzee.steps.ts?raw';
 import yahtzeeLogic from '../../../../../../examples/typescript-vitest/steps/yahtzee.ts?raw';
+import yahtzeeStepsJava from '../../../../../../examples/java-junit-maven/src/test/java/examples/YahtzeeSteps.java?raw';
+import yahtzeeLogicJava from '../../../../../../examples/java-junit-maven/src/test/java/examples/Yahtzee.java?raw';
+import yahtzeeStepsKotlin from '../../../../../../examples/kotlin-junit/src/test/kotlin/examples/yahtzee.steps.kt?raw';
+import yahtzeeLogicKotlin from '../../../../../../examples/kotlin-junit/src/test/kotlin/examples/Yahtzee.kt?raw';
+import yahtzeeStepsPython from '../../../../../../examples/python-pytest/steps/yahtzee.steps.py?raw';
+import yahtzeeLogicPython from '../../../../../../examples/python-pytest/src/yahtzee_example/__init__.py?raw';
 import romanNumeralsSource from '../../../../../../examples/typescript-vitest/roman-numerals.md?raw';
 import romanNumeralsSteps from '../../../../../../examples/typescript-vitest/steps/roman-numerals.steps.ts?raw';
 import romanNumeralsLogic from '../../../../../../examples/typescript-vitest/steps/roman-numerals.ts?raw';
+import romanNumeralsStepsJava from '../../../../../../examples/java-junit-maven/src/test/java/examples/RomanNumeralsSteps.java?raw';
+import romanNumeralsLogicJava from '../../../../../../examples/java-junit-maven/src/test/java/examples/RomanNumerals.java?raw';
+import romanNumeralsStepsKotlin from '../../../../../../examples/kotlin-junit/src/test/kotlin/examples/roman-numerals.steps.kt?raw';
+import romanNumeralsLogicKotlin from '../../../../../../examples/kotlin-junit/src/test/kotlin/examples/RomanNumerals.kt?raw';
+import romanNumeralsStepsPython from '../../../../../../examples/python-pytest/steps/roman_numerals.steps.py?raw';
+import romanNumeralsLogicPython from '../../../../../../examples/python-pytest/src/roman_numerals_example/__init__.py?raw';
 
 ## Examples
 
@@ -44,6 +59,9 @@ The examples below give a taste of how Vár works. If the markdown disagrees wit
         <Version label="Fix it">{deepThoughtSteps}</Version>
         <Version label="Break it">{deepThoughtSteps.replace('42', '43')}</Version>
       </File>
+      <File uri="file:///DeepThoughtSteps.java">{deepThoughtStepsJava}</File>
+      <File uri="file:///deep-thought.steps.kt">{deepThoughtStepsKotlin}</File>
+      <File uri="file:///deep_thought.steps.py">{deepThoughtStepsPython}</File>
     </Editor>
     New to this? [Take the guided tour of this example](/tutorials/try-in-browser/).
   </TabItem>
@@ -55,6 +73,12 @@ The examples below give a taste of how Vár works. If the markdown disagrees wit
       </File>
       <File uri="file:///yahtzee.steps.ts">{yahtzeeSteps}</File>
       <File uri="file:///yahtzee.ts">{yahtzeeLogic}</File>
+      <File uri="file:///YahtzeeSteps.java">{yahtzeeStepsJava}</File>
+      <File uri="file:///Yahtzee.java">{yahtzeeLogicJava}</File>
+      <File uri="file:///yahtzee.steps.kt">{yahtzeeStepsKotlin}</File>
+      <File uri="file:///Yahtzee.kt">{yahtzeeLogicKotlin}</File>
+      <File uri="file:///yahtzee.steps.py">{yahtzeeStepsPython}</File>
+      <File uri="file:///yahtzee_example.py">{yahtzeeLogicPython}</File>
     </Editor>
     Every cell in these tables is checked against the code — see [Check tables and doc strings](/how-to/tables-and-doc-strings/).
   </TabItem>
@@ -69,6 +93,12 @@ The examples below give a taste of how Vár works. If the markdown disagrees wit
         <Version label="Subtractive notation">{romanNumeralsLogic}</Version>
         <Version label="Additive notation">{romanNumeralsLogic.replace('IX', 'VIIII')}</Version>
       </File>
+      <File uri="file:///RomanNumeralsSteps.java">{romanNumeralsStepsJava}</File>
+      <File uri="file:///RomanNumerals.java">{romanNumeralsLogicJava}</File>
+      <File uri="file:///roman-numerals.steps.kt">{romanNumeralsStepsKotlin}</File>
+      <File uri="file:///RomanNumerals.kt">{romanNumeralsLogicKotlin}</File>
+      <File uri="file:///roman_numerals.steps.py">{romanNumeralsStepsPython}</File>
+      <File uri="file:///roman_numerals_example.py">{romanNumeralsLogicPython}</File>
     </Editor>
     Each table row runs as its own example — see [Check tables and doc strings](/how-to/tables-and-doc-strings/).
   </TabItem>
