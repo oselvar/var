@@ -25,6 +25,15 @@ import deepThoughtSteps from '../../../../../../examples/typescript-vitest/steps
 import deepThoughtStepsJava from '../../../../../../examples/java-junit-maven/src/test/java/examples/DeepThoughtSteps.java?raw';
 import deepThoughtStepsKotlin from '../../../../../../examples/kotlin-junit/src/test/kotlin/examples/deep-thought.steps.kt?raw';
 import deepThoughtStepsPython from '../../../../../../examples/python-pytest/steps/deep_thought.steps.py?raw';
+import librarySource from '../../../../../../examples/typescript-vitest/library.md?raw';
+import librarySteps from '../../../../../../examples/typescript-vitest/steps/library.steps.ts?raw';
+import libraryLogic from '../../../../../../examples/typescript-vitest/steps/library.ts?raw';
+import libraryStepsJava from '../../../../../../examples/java-junit-maven/src/test/java/examples/LibrarySteps.java?raw';
+import libraryLogicJava from '../../../../../../examples/java-junit-maven/src/test/java/examples/Library.java?raw';
+import libraryStepsKotlin from '../../../../../../examples/kotlin-junit/src/test/kotlin/examples/library.steps.kt?raw';
+import libraryLogicKotlin from '../../../../../../examples/kotlin-junit/src/test/kotlin/examples/Library.kt?raw';
+import libraryStepsPython from '../../../../../../examples/python-pytest/steps/library.steps.py?raw';
+import libraryLogicPython from '../../../../../../examples/python-pytest/src/library_example/__init__.py?raw';
 import romanNumeralsSource from '../../../../../../examples/typescript-vitest/roman-numerals.md?raw';
 import romanNumeralsSteps from '../../../../../../examples/typescript-vitest/steps/roman-numerals.steps.ts?raw';
 import romanNumeralsLogic from '../../../../../../examples/typescript-vitest/steps/roman-numerals.ts?raw';
@@ -55,6 +64,23 @@ The examples below give a taste of how Vár works. If the markdown disagrees wit
       <File uri="file:///deep_thought.steps.py">{deepThoughtStepsPython}</File>
     </Editor>
     New to this? [Take the guided tour of this example](/tutorials/try-in-browser/).
+  </TabItem>
+  <TabItem label="Library">
+    <Editor>
+      <File uri="file:///library.md">
+        <Version label="Fix it">{librarySource}</Version>
+        <Version label="Break it">{librarySource.replace('£2.50', '£3.00').replace('the library agrees', 'the library refuses')}</Version>
+      </File>
+      <File uri="file:///library.steps.ts">{librarySteps}</File>
+      <File uri="file:///library.ts">{libraryLogic}</File>
+      <File uri="file:///LibrarySteps.java">{libraryStepsJava}</File>
+      <File uri="file:///Library.java">{libraryLogicJava}</File>
+      <File uri="file:///library.steps.kt">{libraryStepsKotlin}</File>
+      <File uri="file:///Library.kt">{libraryLogicKotlin}</File>
+      <File uri="file:///library.steps.py">{libraryStepsPython}</File>
+      <File uri="file:///library_example.py">{libraryLogicPython}</File>
+    </Editor>
+    Each paragraph runs as its own example with fresh state — arrange, act and assert in plain prose. See [Stimulus](/reference/stimulus/) for how state evolves.
   </TabItem>
   <TabItem label="Roman numerals">
     <Editor>

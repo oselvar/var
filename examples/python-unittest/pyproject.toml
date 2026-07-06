@@ -23,4 +23,4 @@ oselvar-var-config = { path = "../../python/packages/var-config", editable = tru
 oselvar-var-runner = { path = "../../python/packages/var-runner", editable = true }
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/roman_numerals_example", "src/yahtzee_example"]
+packages = ["src/library_example", "src/roman_numerals_example", "src/yahtzee_example"]

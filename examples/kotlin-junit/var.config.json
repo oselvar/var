@@ -11,6 +11,7 @@
   "steps": [
     "examples.DeepThoughtSteps",
     "examples.HelloVarSteps",
+    "examples.LibrarySteps",
     "examples.RomanNumeralsSteps",
     "examples.TablesAndDocStringsSteps",
     "examples.YahtzeeSteps"
