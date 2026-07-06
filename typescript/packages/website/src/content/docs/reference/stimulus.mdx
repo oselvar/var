@@ -58,24 +58,10 @@ with sensors.
   </TabItem>
 </Tabs>
 
-## Given, When, Then are narration
-
-The concepts arrange–act–assert (given–when–then, context–action–outcome) are
-still how you *write* a good example: name the state the software rests in, the
-one thing you do to it, and the outcome you expect. But in Vár the concepts and
-the mechanism are decoupled:
-
-| Concept (in your prose)   | Mechanism  |
-| ------------------------- | ---------- |
-| arrange / context / given | `stimulus` |
-| act / action / when       | `stimulus` |
-| assert / outcome / then   | `sensor`   |
-
-Arranging state and acting on it are the same mechanism — both evolve state —
-so they share one step kind. Vár never matches keywords: a step is a stimulus
-or a sensor by what it does, not by how the sentence begins. Write `Given`,
-`When`, `Then` in your Markdown if it reads well; they are narration for the
-human, never load-bearing.
+In your prose the stimulus covers both the *given* (arrange) and the *when*
+(act) — Vár never matches keywords; see
+[Given, When, Then are narration](/explanation/given-when-then/) for why the
+concepts and the mechanism are decoupled.
 
 ## Evolving state
 

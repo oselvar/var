@@ -58,7 +58,11 @@ export default defineConfig({
         },
         {
           label: 'Understanding Vár',
-          items: ['explanation/thin-steps', 'explanation/var-for-cucumber-users'],
+          items: [
+            'explanation/given-when-then',
+            'explanation/thin-steps',
+            'explanation/var-for-cucumber-users',
+          ],
         },
       ],
       editLink: {
