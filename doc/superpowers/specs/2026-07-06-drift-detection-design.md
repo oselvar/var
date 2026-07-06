@@ -146,6 +146,47 @@ run `detectDrift`. Then:
   the worker has source + plan), reading its spec's baseline entry from
   `var.lock.json`.
 
+## Reporting — one rail, every surface
+
+Drift is emitted as a `Diagnostic` (`code: 'drift'`, `severity: 'error'`, span
+= the drifted paragraph), the same type `ambiguous-match` and
+`error-fence-without-step` already use (`driftDetected` / `driftDiagnostics` in
+`var-core`). Riding that rail means no bespoke reporting per surface:
+
+- **`var run`** already exits non-zero on any error-severity diagnostic.
+- **vitest / pytest** register a failing test per diagnostic (the default
+  `Reporter`) — the runner gate.
+- **LSP** already publishes `Diagnostic`s (it plans each open spec); it
+  additionally reads `var.lock.json`, runs `detectDrift`, and publishes the
+  drift diagnostic — a squiggle on the drifted paragraph in VS Code and the
+  website editor. This is the authoring-time surface the ADR calls
+  *complementary* to the runner gate (not a replacement — the editor alone
+  never gates CI).
+- **browser demo** consumes the same diagnostics for its inline drift marker.
+
+The **acknowledge** affordance is symmetric: update mode in the runner, and an
+LSP **code action** ("Accept as prose") / a button in the browser — both write
+the baseline through the `BaselineStore` port.
+
+## Persistence — the `BaselineStore` port
+
+`var.lock.json` I/O is a side effect, so the core defines a port and adapters
+implement it (hexagonal). The core owns the format (`parseVarLock` /
+`stringifyVarLock`); the port moves only raw text:
+
+```ts
+export interface BaselineStore {
+  read(): string | null | Promise<string | null> // whole var.lock.json, or null
+  write(contents: string): void | Promise<void>
+}
+```
+
+Adapters: a filesystem store on Node (CLI, vitest — one writer at session end),
+an **in-memory** store in the browser (a closure over one string, optionally
+mirrored to `localStorage`). The read→plan→`detectDrift`→gate→write
+orchestration is one core function taking a `BaselineStore`, so browser and
+Node share identical drift logic.
+
 ## Acknowledgment — one mode, many surfaces
 
 Blanket, snapshot-style: an **update-mode** run re-records the baseline
