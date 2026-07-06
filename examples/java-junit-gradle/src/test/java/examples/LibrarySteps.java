@@ -5,6 +5,7 @@ import com.oselvar.var.State;
 import com.oselvar.var.StateBinder;
 import com.oselvar.var.StepDefinitions;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -14,26 +15,8 @@ public final class LibrarySteps implements StepDefinitions {
 
     record Ctx(List<Library.Loan> loans, Library.Money fee, boolean granted) implements State {}
 
-    private static final List<String> MONTHS = List.of(
-            "January",
-            "February",
-            "March",
-            "April",
-            "May",
-            "June",
-            "July",
-            "August",
-            "September",
-            "October",
-            "November",
-            "December");
-
-    /** June 6th → LocalDate 2026-06-06 (the spec's year is 2026). */
-    private static LocalDate toDate(String raw) {
-        String[] parts = raw.split(" ");
-        int day = Integer.parseInt(parts[1].substring(0, parts[1].length() - 2));
-        return LocalDate.of(2026, MONTHS.indexOf(parts[0]) + 1, day);
-    }
+    /** June 6, 2026 → LocalDate 2026-06-06. */
+    private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH);
 
     /** £2.50 and 50p, both as GBP Money. */
     private static Library.Money toMoney(String raw) {
@@ -53,10 +36,8 @@ public final class LibrarySteps implements StepDefinitions {
     public void defineSteps(Registrar registrar) {
         registrar.defineParameterType(
                 "date",
-                Pattern.compile("(?:January|February|March|April|May|June"
-                        + "|July|August|September|October|November|December)"
-                        + " \\d{1,2}(?:st|nd|rd|th)"),
-                groups -> toDate(groups[0]));
+                Pattern.compile("[A-Z][a-z]+ \\d{1,2}, \\d{4}"),
+                groups -> LocalDate.parse(groups[0], DATE));
         // £2.50 and 50p, both as GBP Money. The amount is cucumber-expressions'
         // float regexp, minus the scientific notation.
         registrar.defineParameterType(

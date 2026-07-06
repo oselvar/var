@@ -6,6 +6,7 @@ import com.oselvar.varkt.defineState
 import com.oselvar.varkt.sensor
 import com.oselvar.varkt.stimulus
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -15,27 +16,8 @@ data class LibraryCtx(
     val granted: Boolean = false,
 )
 
-private val MONTHS =
-    listOf(
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-    )
-
-/** June 6th → LocalDate 2026-06-06 (the spec's year is 2026). */
-private fun toDate(raw: String): LocalDate {
-    val (month, day) = raw.split(" ")
-    return LocalDate.of(2026, MONTHS.indexOf(month) + 1, day.dropLast(2).toInt())
-}
+/** June 6, 2026 → LocalDate 2026-06-06. */
+private val DATE_FORMAT = DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH)
 
 /** £2.50 and 50p, both as GBP Money. */
 private fun toMoney(raw: String): Money =
@@ -49,15 +31,8 @@ private fun formatMoney(m: Money): String =
 
 val librarySteps =
     defineState(::LibraryCtx) {
-        parameterType(
-            "date",
-            Regex(
-                "(?:January|February|March|April|May|June" +
-                    "|July|August|September|October|November|December)" +
-                    " \\d{1,2}(?:st|nd|rd|th)"
-            ),
-        ) { groups ->
-            toDate(groups[0])
+        parameterType("date", Regex("""[A-Z][a-z]+ \d{1,2}, \d{4}""")) { groups ->
+            LocalDate.parse(groups[0], DATE_FORMAT)
         }
         // £2.50 and 50p, both as GBP Money. The amount is cucumber-expressions'
         // float regexp, minus the scientific notation.

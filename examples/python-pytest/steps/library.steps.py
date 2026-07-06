@@ -1,28 +1,12 @@
-from datetime import date
+from datetime import datetime
 
 from library_example import FEE_PER_DAY, add_money, gbp, late_fee, may_borrow
 from var import define_state
 
-MONTHS = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-]
-
 
 def to_date(raw):
-    """June 6th → date(2026, 6, 6) (the spec's year is 2026)."""
-    month, day = raw.split(" ")
-    return date(2026, MONTHS.index(month) + 1, int(day[:-2]))
+    """June 6, 2026 → date(2026, 6, 6)."""
+    return datetime.strptime(raw, "%B %d, %Y").date()
 
 
 def to_money(raw):
@@ -39,11 +23,7 @@ stimulus, sensor = define_state(
     lambda: {"loans": (), "fee": gbp(0), "granted": False},
     {
         "date": {
-            "regexp": (
-                r"(?:January|February|March|April|May|June"
-                r"|July|August|September|October|November|December)"
-                r" \d{1,2}(?:st|nd|rd|th)"
-            ),
+            "regexp": r"[A-Z][a-z]+ \d{1,2}, \d{4}",
             "parse": to_date,
         },
         "money": {

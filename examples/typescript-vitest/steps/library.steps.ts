@@ -1,21 +1,6 @@
 import { defineState } from '@oselvar/var'
 import { addMoney, FEE_PER_DAY, GBP, type Loan, lateFee, type Money, mayBorrow } from './library'
 
-const MONTHS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-] as const
-
 // Custom parameter types are declared inline so their parse return types
 // flow into the steps: {date} → Date, {money} → Money, {title} → string. The
 // step handlers below need no argument annotations as a result.
@@ -23,15 +8,9 @@ const { stimulus, sensor } = defineState(
   () => ({ loans: [] as ReadonlyArray<Loan>, fee: GBP(0), granted: false }),
   {
     date: {
-      // June 6th → the ISO date 2026-06-06 (the spec's year is 2026)
-      regexp:
-        /(?:January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}(?:st|nd|rd|th)/,
-      parse: (raw: string) => {
-        const [month = '', day = ''] = raw.split(' ')
-        const mm = String(MONTHS.indexOf(month as (typeof MONTHS)[number]) + 1).padStart(2, '0')
-        const dd = String(Number.parseInt(day, 10)).padStart(2, '0')
-        return `2026-${mm}-${dd}`
-      },
+      // June 6, 2026 → the ISO date 2026-06-06 (en-CA formats as YYYY-MM-DD)
+      regexp: /[A-Z][a-z]+ \d{1,2}, \d{4}/,
+      parse: (raw: string) => new Date(raw).toLocaleDateString('en-CA'),
     },
     money: {
       // £2.50 and 50p, both as GBP Money. The amount is cucumber-expressions'
