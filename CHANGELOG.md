@@ -11,6 +11,13 @@ hand. The `[Unreleased]` section is refreshed by CI on every push to `main`.
 
 ## [Unreleased]
 
+### TypeScript (npm)
+
+- Added: **var-core:** Detect spec drift — a paragraph that was an example and now matches zero steps
+- Added: **var-core:** Drift re-identifies examples by text similarity, so moving and rewording never false-alarm
+- Added: **var-core:** Report drift as a Diagnostic and add a BaselineStore port
+- Added: **var-core:** ReconcileDrift orchestrates baseline read → detect → write through the BaselineStore port
+
 ### VS Code extension (Marketplace & Open VSX)
 
 - Fixed: Kotlin parameter types declared with raw-string regexes are now discovered
@@ -21,6 +28,11 @@ hand. The `[Unreleased]` section is refreshed by CI on every push to `main`.
   declare a custom parameter type's transform function as
 parse (was transformer) in defineState (TypeScript), define_state (Python),
 Registrar.defineParameterType (Java) and parameterType (Kotlin).
+- ⚠️ **Breaking:** Step matching runs against raw inline text — markup is never stripped
+  expressions that relied on emphasis stripping must move
+the markers into a parameter type (e.g. regexp /\*[^*]+\*/ with parse
+raw.slice(1, -1)); the var-doc artifact's inlineMap field is now
+segmentMap.
 - Added: The state factory argument to defineState/define_state is now optional — step files with pure steps can omit it
 
 ## [0.3.1] - 2026-07-06
