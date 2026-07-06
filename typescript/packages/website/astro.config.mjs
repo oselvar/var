@@ -66,6 +66,7 @@ export default defineConfig({
         {
           label: 'Reference',
           items: [
+            'reference/examples',
             'reference/stimulus',
             'reference/sensors',
             'reference/custom-parameters',

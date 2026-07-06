@@ -1,0 +1,265 @@
+---
+title: Examples
+description: How Vár identifies an example in a Markdown spec — where one begins and ends, how tables, doc strings, headings, and prose fit in, and how drift is detected when an example stops being one.
+---
+
+In Vár the Markdown *is* the test. A spec file is ordinary Markdown — prose,
+headings, lists, tables, code blocks — and Vár runs the parts of it that match
+your step definitions. This page is the reference for the unit it runs: the
+**example**. It covers exactly what becomes an example, where one begins and
+ends, how tables and doc strings attach, what role headings play, and how Vár
+notices when something that used to be an example no longer is.
+
+## What is a spec
+
+A file is a spec if — and only if — its path matches the `docs` globs in
+`var.config.json`. That config is the single source of truth, consulted by the
+runner, the LSP, and the vitest plugin alike:
+
+```json
+{
+  "docs": {
+    "include": ["**/*.md"],
+    "exclude": ["README.md", "not-implemented/**"]
+  }
+}
+```
+
+Both `include` and `exclude` are plain globs (no `!` prefix). `include` has no
+default — an empty list discovers nothing; `exclude` removes matches from it.
+There is no special file extension: a plain `.md` file is a spec purely because
+the globs select it. Any Markdown file the globs don't select is invisible to
+Vár.
+
+## What is an example
+
+Within a spec, the candidate unit is a **paragraph** — or a list item, or a
+blockquote. Vár splits each candidate into sentences and matches those sentences
+against your registered [stimulus](/reference/stimulus/) and
+[sensor](/reference/sensors/) step definitions.
+
+- **At least one sentence matches a step** → the paragraph is an **example**. Its
+  matching sentences run as steps, in order.
+- **No sentence matches** → the paragraph is **prose**. Vár reads past it: no
+  test, no failure.
+
+This is what lets a single file interleave narrative explanation with executable
+examples. A heading, an introductory paragraph, an aside — all sit happily
+beside the paragraphs that actually drive the system. Only the matching ones
+run.
+
+A paragraph that matches at least one step but not every sentence is still one
+example. The unmatched sentences are narration that travels *with* the test —
+they even become part of its name (see [Naming](#naming)). Vár never guesses
+that an unmatched sentence "should have" been a step; there is no keyword
+sniffing, no "missing step" inference from sentence shape.
+
+## Where an example begins and ends
+
+An example begins at its paragraph (the *primary block*) and, by default, ends
+where that paragraph ends. Because Markdown separates paragraphs with blank
+lines, **each blank-line-separated paragraph is its own example**:
+
+```markdown
+I deposit 100.
+
+The balance is 100.
+```
+
+That is two examples, each a single step. To make several sentences run as one
+example — sharing state across the steps — keep them in one paragraph:
+
+```markdown
+I deposit 100. I withdraw 30. The balance is 70.
+```
+
+Three sentences, three steps, one example, one accumulating state.
+
+Two things hard-close an example, so whatever follows starts fresh:
+
+- a **heading** (`#`, `##`, …), and
+- a **thematic break** (`---`, a horizontal rule).
+
+## Tables and doc strings
+
+A table or a fenced code block (a **doc string**) is not an example on its own.
+It **attaches** to the example immediately above it and is handed to that
+example's last matched step:
+
+````markdown
+Greet Bob:
+
+```text
+Hello, Bob!
+```
+````
+
+The paragraph `Greet Bob:` is the example; the fenced block is the doc string
+its sensor compares against. A table attaches the same way:
+
+```markdown
+These are the accounts:
+
+| owner | balance |
+| ----- | ------: |
+| Alice |     100 |
+| Bob   |      50 |
+```
+
+Attachment is positional and adjacency-based:
+
+- The table/fence must **directly follow** the step-bearing block — no
+  intervening heading or thematic break.
+- It attaches to the **last matched step** of the block above it (so a paragraph
+  with several steps hands the table to the final one).
+- A table or fence that has no step-bearing block above it is just Markdown
+  content — not an error, not a test.
+
+A single example can carry a whole Given → table → When → doc string flow. When
+a following step paragraph hugs a table or fence with no blank line between them,
+it merges into the same example rather than starting a new one — so an
+arrange-with-a-table, act-with-a-doc-string sequence stays one test.
+
+For the return-value rules — how a step reproduces a table cell-by-cell, or a
+doc string including its trailing newline — see
+[Check tables and doc strings](/how-to/tables-and-doc-strings/) and the
+[sensors reference](/reference/sensors/).
+
+## Header-bound tables
+
+There is one case where a table produces examples *by itself*: when the
+paragraph above it names **every** column of the table (each header cell appears
+as a whole word in the sentence). Then the table is **header-bound** — it
+iterates row by row, and **each data row becomes its own example**:
+
+```markdown
+Each row gives a decimal and a roman number:
+
+| decimal | roman |
+| ------: | :---- |
+|       3 | III   |
+|       9 | IX    |
+|      40 | XL    |
+```
+
+The bound step runs once per data row, receiving the row as an object keyed by
+the header, and each row is named after its cells (`3 / III`, `9 / IX`, …). This
+is the data-driven shape covered in
+[Check tables and doc strings](/how-to/tables-and-doc-strings/#check-a-table-row-by-row).
+
+## Headings
+
+Headings never delimit an example and never name one. They are **scope
+markers**. The chain of headings above an example — outer to inner — becomes a
+stack of `describe(...)` groups around the test at runtime:
+
+```markdown
+# Account
+
+## Withdrawals
+
+I deposit 100. I withdraw 30. The balance is 70.
+```
+
+runs the example nested under `Account → Withdrawals`. Deeper or equal-level
+headings pop the stack the way document outlines do. A heading also closes any
+open example, so an example never spans a heading.
+
+## Naming
+
+An example's name is its **entire primary paragraph**, not a heading and not
+just the matched sentence:
+
+```markdown
+I deposit 100. I withdraw 30. The balance is 70.
+```
+
+is named `I deposit 100. I withdraw 30. The balance is 70` — the whole
+paragraph, because the narration around the matched sentences is part of what
+the example is *about*. Hard line breaks inside the paragraph collapse to single
+spaces (a name is one line), and a single trailing `.`, `!`, or `?` is stripped;
+terminators inside the sentence (a quoted string, `i.e.`) are left alone.
+
+## Sentences, emphasis, and formatting
+
+Vár splits a paragraph into sentences on `.`, `!`, `?`, and hard line breaks,
+with a few guards so real prose doesn't fragment:
+
+- Terminators **inside backtick code spans or double-quoted strings** don't
+  split — `The message is "Hello, world!"` stays one sentence, so a `{string}`
+  parameter captures it whole.
+- A `.` inside a number (`3.14`), a known abbreviation (`e.g.`, `i.e.`, `etc.`,
+  `cf.`, `vs.`), or before a lowercase letter is not a boundary.
+
+Matching runs against **formatting-stripped** text: emphasis (`*`, `_`) is
+removed and links `[text](url)` reduce to `text`, so `I withdraw *30*` matches
+the same step as `I withdraw 30`. Inline code spans are kept literally. Vár maps
+every stripped position back to the original source, so a mismatch still
+highlights the exact characters in your Markdown.
+
+## Expected-to-fail examples
+
+A fenced block tagged `error` marks its example as **expected to fail** — the
+runner inverts the outcome, so the example passes only if a step actually fails.
+The block's text, if any, is a substring the failure message must contain:
+
+````markdown
+I withdraw 200 from my empty account.
+
+```error
+insufficient funds
+```
+````
+
+An `error` fence is consumed by this rule — it is never treated as a doc string.
+If an example has an `error` fence but no runnable step to produce the failure,
+that is flagged as an authoring mistake.
+
+## Drift detection
+
+"No match means prose" has a dangerous edge. A paragraph that **was** an example
+can stop matching — you rename a step, delete a step definition, or a typo
+creeps into the Markdown — and it silently reverts to prose. The suite stays
+green while testing *less* than it did: coverage decaying without a single
+failing test.
+
+Vár treats this transition — **was an example, now matches nothing** — as
+**drift**, and refuses to let it pass unnoticed.
+
+To recognise it, Vár records a fingerprint of each spec's source alongside its
+run results: an
+[FNV-1a](https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function)
+hash written as `fnv1a:…`. It is a tiny, dependency-free change-detector,
+computed identically in every Vár runtime, so drift is recognised the same way
+whatever language you run in. When a spec changes such that a previously matching
+paragraph no longer matches any step, Vár compares the new source against the
+recorded baseline and reports the drifted example by name and line.
+
+Drift is never resolved silently. Vár will not drop the example for you (losing
+coverage), and it will not let the run pass as if nothing happened. The run
+**fails** until you **explicitly acknowledge** the drift — confirming that yes,
+this paragraph is *intentionally* no longer an example — much as you accept an
+updated snapshot. Acknowledging records the new baseline and the run goes green.
+
+The distinction is deliberate:
+
+- A paragraph that **never** matched is **prose** — ignored, no ceremony.
+- A paragraph that **stops** matching is **drift** — surfaced, and held until you
+  explicitly accept it.
+
+### Why it's important
+
+The whole promise of Vár is that the Markdown is the test. If an example could
+quietly stop being a test, that promise leaks: a document that reads like a
+passing specification would actually be verifying nothing, and no one would
+know. Silent coverage loss is the worst failure mode a test system has, because
+it looks exactly like success — a green suite testing less than it claims.
+
+A plain "missing step" warning in an editor doesn't close the gap: a developer
+who never opens the editor never sees it, and CI never gates on it. Drift
+detection lives in the runner, so the same `vitest` / `pytest` / `var run` that
+proves your examples pass also proves that your examples are *still examples*.
+Distinguishing intentional prose (never matched) from a regression (stopped
+matching) needs history, which is exactly what the fingerprinted baseline
+provides — and requiring an explicit acknowledgment makes the change visible in
+review rather than swallowed.
