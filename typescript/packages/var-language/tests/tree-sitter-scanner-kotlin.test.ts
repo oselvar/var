@@ -59,6 +59,20 @@ describe('kotlin dialect', () => {
     expect(types.map((t) => [t.name, t.regexp])).toEqual([['airport', '[A-Z]{3}']])
   })
 
+  test('discovers parameterType with a raw-string Regex and a format argument', async () => {
+    const scanner = await kotlinScanner()
+    const source = `val steps = defineState {
+    parameterType(
+        "money",
+        Regex("""£\\d+\\.\\d{2}"""),
+        format = { m: Map<String, Any> -> "x" },
+    ) { groups -> groups[0] }
+}
+`
+    const types = scanner.discoverParameterTypes('x.steps.kt', source)
+    expect(types.map((t) => [t.name, t.regexp])).toEqual([['money', '£\\d+\\.\\d{2}']])
+  })
+
   test('ignores non-step trailing-lambda calls', async () => {
     const scanner = await kotlinScanner()
     expect(

@@ -30,7 +30,10 @@ const PARAMETER_TYPE_QUERY = `
       (value_argument
         (call_expression
           (identifier) @regex-fn
-          (value_arguments . (value_argument (string_literal) @regexp-value))))))
+          (value_arguments . (value_argument [
+            (string_literal)
+            (multiline_string_literal)
+          ] @regexp-value))))))
   (#eq? @function-name "parameterType")
   (#eq? @regex-fn "Regex")
 ) @root
@@ -62,6 +65,11 @@ function decodeEscape(text: string): string {
 // escape_sequence nodes; they appear split: `\u` as one string_content, `XXXX`
 // as the next. We must process the full node list to reconstruct them.
 function decodeString(node: Node): string {
+  // A raw string — Regex("""£\d+\.\d{2}""") — parses as its own node type
+  // and has no escape processing: the value is the text between the """s.
+  if (node.type === 'multiline_string_literal') {
+    return node.text.slice(3, -3)
+  }
   const children = node.children
   let out = ''
   let skipNext = false
