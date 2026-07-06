@@ -11,8 +11,16 @@ hand. The `[Unreleased]` section is refreshed by CI on every push to `main`.
 
 ## [Unreleased]
 
+### VS Code extension (Marketplace & Open VSX)
+
+- Fixed: Kotlin parameter types declared with raw-string regexes are now discovered
+
 ### Specification (all ports)
 
+- ⚠️ **Breaking:** Custom parameter types pair parse with a format function — mismatches render in the document's notation
+  declare a custom parameter type's transform function as
+parse (was transformer) in defineState (TypeScript), define_state (Python),
+Registrar.defineParameterType (Java) and parameterType (Kotlin).
 - Added: The state factory argument to defineState/define_state is now optional — step files with pure steps can omit it
 
 ## [0.3.1] - 2026-07-06
