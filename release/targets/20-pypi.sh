@@ -4,10 +4,9 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
 VERSION="$1"
 
-# Flip to 0 when we start releasing the Python port again. (Parked 2026-07-02:
-# only npm + Open VSX release for now. Four packages already exist at 0.1.0 on
-# PyPI from the first attempt; re-enabling skips them via the registry probe.)
-DISABLED=1
+# Live since v0.3.1 (2026-07-06): every workspace package publishes on each
+# release. Flip to 1 to park the target (it then warns and reports OK).
+DISABLED=0
 if [[ "$DISABLED" == "1" ]]; then
   warn "pypi: target disabled — flip DISABLED=0 in ${BASH_SOURCE[0]} to re-enable"
   exit 0

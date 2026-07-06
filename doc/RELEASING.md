@@ -30,8 +30,8 @@ Run releases from an interactive shell, not CI: npm keeps 2FA on publishes
 `npmjs.com/auth/cli/...` challenge answered with 1Password/passkey.
 
 A target can be parked with the `DISABLED=1` variable at the top of its
-`release/targets/*.sh` (it warns and reports OK). Currently parked: PyPI,
-VS Code Marketplace — **npm, Maven Central and Open VSX publish**.
+`release/targets/*.sh` (it warns and reports OK). Currently parked:
+VS Code Marketplace — **npm, PyPI, Maven Central and Open VSX publish**.
 
 ## Credentials
 
@@ -49,9 +49,8 @@ and `npm install -g @vscode/vsce ovsx`. Sign in: `op signin`, `gh auth login`.
 - **PyPI** — **account-scoped** API token (account `aslakoselvar`). PyPI
   tokens are either account-scoped or single-project — there is no
   multi-project scope, and only an account-scoped token can *create* a
-  project, which every release that adds a package needs (2026-07-06:
-  oselvar-var and oselvar-var-unittest don't exist yet; the other four are
-  at 0.1.0 from the first attempt). → `pypi-oselvar`,
+  project, which every release that adds a package needs (all six packages
+  live since v0.3.1, 2026-07-06). → `pypi-oselvar`,
   field `token`. Publishing *new* projects is rate-limited per account: a
   `429 Too many new projects created` mid-run is PyPI, not credentials —
   wait (hours) and re-run; published packages are skipped.
