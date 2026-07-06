@@ -187,10 +187,18 @@ version = "0.3.0"
 source = { editable = "packages/var-unittest" }
 dependencies = [
     { name = "oselvar-var" },
+    { name = "oselvar-var-config" },
+    { name = "oselvar-var-core" },
+    { name = "oselvar-var-runner" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "oselvar-var", editable = "packages/var" }]
+requires-dist = [
+    { name = "oselvar-var", editable = "packages/var" },
+    { name = "oselvar-var-config", editable = "packages/var-config" },
+    { name = "oselvar-var-core", editable = "packages/var-core" },
+    { name = "oselvar-var-runner", editable = "packages/var-runner" },
+]
 
 [[package]]
 name = "packaging"
