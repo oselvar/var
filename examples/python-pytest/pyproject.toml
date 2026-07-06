@@ -23,7 +23,7 @@ oselvar-var-config = { path = "../../python/packages/var-config", editable = tru
 oselvar-var-runner = { path = "../../python/packages/var-runner", editable = true }
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/yahtzee_example"]
+packages = ["src/roman_numerals_example", "src/yahtzee_example"]
 
 [tool.pytest.ini_options]
 addopts = "--rootdir=."

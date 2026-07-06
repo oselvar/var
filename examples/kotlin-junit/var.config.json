@@ -9,7 +9,9 @@
     ]
   },
   "steps": [
+    "examples.DeepThoughtSteps",
     "examples.HelloVarSteps",
+    "examples.RomanNumeralsSteps",
     "examples.TablesAndDocStringsSteps",
     "examples.YahtzeeSteps"
   ]
