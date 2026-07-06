@@ -13,56 +13,32 @@ for (const [p, text] of Object.entries(libModules)) {
   if (base) LIB.set(base, text)
 }
 
-// Ambient types for the browser step-definition runtime, so imports resolve and
-// ctx/args typecheck without real module resolution.
-const AMBIENT_FILE = 'var.d.ts'
-const AMBIENT = `declare module '@oselvar/var' {
-  type AnyArg = any
-  interface BuiltInParameterTypes {
-    int: number; float: number; double: number; byte: number; short: number; long: number
-    biginteger: bigint; bigdecimal: string; word: string; string: string; '': string
-  }
-  type ParameterNames<S extends string, InParameter extends boolean = false, Current extends string = '', Names extends string[] = []> =
-    S extends \`\\\\\${infer _Escaped}\${infer Rest}\` ? ParameterNames<Rest, InParameter, Current, Names>
-    : S extends \`{\${infer Rest}\` ? ParameterNames<Rest, true, '', Names>
-    : S extends \`}\${infer Rest}\` ? (InParameter extends true ? ParameterNames<Rest, false, '', [...Names, Current]> : ParameterNames<Rest, false, '', Names>)
-    : S extends \`\${infer Char}\${infer Rest}\` ? (InParameter extends true ? ParameterNames<Rest, true, \`\${Current}\${Char}\`, Names> : ParameterNames<Rest, false, Current, Names>)
-    : Names
-  type ResolveArg<Name extends string, Custom> = Name extends keyof Custom ? Custom[Name] : Name extends keyof BuiltInParameterTypes ? BuiltInParameterTypes[Name] : AnyArg
-  type MapArgs<Names extends readonly string[], Custom> = { [Index in keyof Names]: ResolveArg<Names[Index] & string, Custom> }
-  type HandlerArgs<E extends string, Custom> = [...MapArgs<ParameterNames<E>, Custom>, ...AnyArg[]]
-  type DeepReadonly<T> = T extends (...args: never[]) => unknown
-    ? T
-    : T extends ReadonlyArray<infer U>
-      ? ReadonlyArray<DeepReadonly<U>>
-      : T extends object
-        ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
-        : T
-  export type RoleFn<C = unknown, Custom = Record<never, never>> = <E extends string>(
-    expression: E,
-    handler: (
-      state: DeepReadonly<C>,
-      ...args: HandlerArgs<E, Custom>
-    ) => Partial<C> | void | Promise<Partial<C> | void>,
-  ) => void
-  export type SensorFn<C = unknown, Custom = Record<never, never>> = <E extends string, R>(
-    expression: E,
-    handler: (state: DeepReadonly<C>, ...args: HandlerArgs<E, Custom>) => R | Promise<R>,
-  ) => void
-  type ParamTypeDefOf<D> = { regexp: RegExp | readonly RegExp[]; parse?: (...captures: string[]) => unknown; format?: (value: D extends { parse: (...captures: string[]) => infer T } ? T : string) => string }
-  type CustomRegistry<P> = { [K in keyof P]: P[K] extends { parse: (...captures: string[]) => infer T } ? T : string }
-  export function defineState<C = Record<string, never>, P extends { [K in keyof P]: ParamTypeDefOf<P[K]> } = Record<never, never>>(
-    factory?: () => C | Promise<C>,
-    paramTypes?: P,
-  ): {
-    readonly context: RoleFn<C, CustomRegistry<P>>; readonly action: RoleFn<C, CustomRegistry<P>>; readonly sensor: SensorFn<C, CustomRegistry<P>>
-  }
-}`
+// The REAL `@oselvar/var` typings: the package's exports point at its
+// TypeScript source (`./src/index.ts`), so the editor type-checks against the
+// same files authors install — no hand-maintained ambient copy to drift when
+// the API changes. `internal.ts`'s own imports from @oselvar/var-core stay
+// unresolved in here; that only degrades types INSIDE internal.ts (whose
+// diagnostics are never requested) — defineState's public type closure is
+// self-contained.
+import varIndexSource from '../../../var/src/index.ts?raw'
+import varInternalSource from '../../../var/src/internal.ts?raw'
+
+const VAR_PACKAGE_DIR = '/oselvar-var'
+const VAR_ENTRY = `${VAR_PACKAGE_DIR}/index.ts`
+const VAR_SOURCES: ReadonlyArray<readonly [string, string]> = [
+  [VAR_ENTRY, varIndexSource],
+  [`${VAR_PACKAGE_DIR}/internal.ts`, varInternalSource],
+]
 
 const OPTIONS: ts.CompilerOptions = {
   target: ts.ScriptTarget.ES2020,
   module: ts.ModuleKind.ESNext,
   moduleResolution: ts.ModuleResolutionKind.Bundler,
+  // index.ts imports './internal.ts' with its extension, as the whole
+  // workspace does (Node runs the sources natively).
+  allowImportingTsExtensions: true,
+  baseUrl: '/',
+  paths: { '@oselvar/var': [VAR_ENTRY] },
   noEmit: true,
   strict: false,
   skipLibCheck: true,
@@ -76,7 +52,7 @@ export type LspDiagnostic = {
 
 export function createTsDiagnostics() {
   const docs = new Map<string, { text: string; version: number }>()
-  docs.set(AMBIENT_FILE, { text: AMBIENT, version: 0 })
+  for (const [path, text] of VAR_SOURCES) docs.set(path, { text, version: 0 })
 
   const base = (f: string) => f.split('/').pop() ?? f
 
