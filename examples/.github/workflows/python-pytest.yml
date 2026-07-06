@@ -1,0 +1,30 @@
+# Runs in the oselvar/var-examples repo, where examples/ is synced on every
+# release of oselvar/var. In the monorepo this file is inert (GitHub only
+# reads workflows from the repo root); the monorepo runs the projects against
+# the local build via .github/workflows/*.yml instead.
+name: python-pytest
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Weekly, to catch bit-rot against the pinned git+tag sources.
+    - cron: '0 6 * * 1'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: python-pytest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v8
+        with:
+          enable-cache: true
+
+      # No lockfile is synced — uv resolves fresh from the git+tag pins.
+      - run: uv run pytest

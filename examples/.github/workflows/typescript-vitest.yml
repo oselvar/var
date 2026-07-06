@@ -1,0 +1,38 @@
+# Runs in the oselvar/var-examples repo, where examples/ is synced on every
+# release of oselvar/var. In the monorepo this file is inert (GitHub only
+# reads workflows from the repo root); the monorepo runs the projects against
+# the local build via .github/workflows/*.yml instead.
+name: typescript-vitest
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Weekly, to catch bit-rot against the released npm packages.
+    - cron: '0 6 * * 1'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: typescript-vitest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      # No lockfile is synced — resolve fresh from the released pins.
+      - run: pnpm install --no-frozen-lockfile
+
+      - run: pnpm build
+
+      - run: pnpm test

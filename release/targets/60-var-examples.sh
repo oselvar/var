@@ -5,7 +5,8 @@
 # target wipes the destination (everything but .git), copies examples/ over
 # with symlinks dereferenced (the subset projects' .md specs are symlinks to
 # the typescript-vitest originals here, plain files there), rewrites the
-# local/SNAPSHOT references to the released coordinates, and pushes.
+# local/SNAPSHOT references to the released coordinates, pushes, and tags the
+# var-examples repo with the same v<version> tag as the release.
 #
 # Override the checkout location with VAR_EXAMPLES_DIR (default: a sibling
 # clone at ../var-examples; cloned via gh if missing).
@@ -18,7 +19,7 @@ cd "$REPO_ROOT"
 DEST="${VAR_EXAMPLES_DIR:-$REPO_ROOT/../var-examples}"
 
 if [[ "${DRY_RUN:-0}" == "1" ]]; then
-  log "var-examples: dry-run — would sync examples/ -> $DEST pinned to $TAG and push"
+  log "var-examples: dry-run — would sync examples/ -> $DEST pinned to $TAG, push, and tag $TAG"
   exit 0
 fi
 
@@ -79,3 +80,11 @@ else
   git -C "$DEST" push --quiet origin "$default_branch"
   log "var-examples: pushed sync for $TAG"
 fi
+
+# Tag the synced state with the release version (outside the commit branch so
+# a rerun after a failed tag push still tags).
+if ! git -C "$DEST" rev-parse --quiet --verify "refs/tags/$TAG" >/dev/null; then
+  git -C "$DEST" tag "$TAG"
+fi
+git -C "$DEST" push --quiet origin "refs/tags/$TAG"
+log "var-examples: tagged $TAG"
