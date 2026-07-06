@@ -38,9 +38,12 @@ find "$DEST" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
 # --copy-links dereferences the .md symlinks; local build/venv/cache dirs and
 # the path-source lockfile stay behind (users resolve fresh from the pins).
 # Keep this list in step with the examples/**/.gitignore files — anything a
-# project ignores must not be synced.
+# project ignores must not be synced. pnpm-workspace.yaml is monorepo-only
+# plumbing (lets `pnpm test` run inside typescript-vitest, see the comment
+# there); in var-examples the deps are real versions and pnpm's defaults work.
 rsync -a --copy-links \
   --exclude 'node_modules/' \
+  --exclude 'pnpm-workspace.yaml' \
   --exclude '.venv/' \
   --exclude '.gradle/' \
   --exclude 'build/' \
