@@ -23,11 +23,13 @@ CC_RE="^($TYPES)(\\(([^)]+)\\))?(!)?: .+$"
 # to a consumer (website, CI, tooling) is a chore/docs/build commit instead.
 CONSUMER_SCOPE='^(ts|py|java|vscode|spec)(/[a-z0-9._-]+)?$'
 
-# Commits from between v0.1.0 and the adoption of this convention.
+# Non-conventional commits already on main (pre-convention, or slipped in via
+# a merged PR) — exempted because pushed history can't be reworded.
 EXEMPT=(
   ff15b430dd3aad211e40f456407561ddd8066fae # Retire old website
   812cf1a8e2b16e9fcf07ea26e1c9b62bbff73e32 # Update lockfile
   970798caee2f4e3d85ff73dd0adc37ad6560e83f # Upgrade, edit links
+  d7585cf409b0f9e7076ad0f27e22a3d07d2222ed # format (merged via PR #13)
 )
 
 fail=0
