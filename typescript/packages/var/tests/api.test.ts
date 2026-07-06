@@ -167,3 +167,31 @@ test('a second defineState in the SAME file throws', () => {
   defineState(() => ({ balance: 0 }))
   expect(() => defineState(() => ({ other: 1 }))).toThrow(/called more than once/)
 })
+
+test('defineState() without a factory registers steps against an empty state', () => {
+  const { stimulus, sensor } = defineState()
+  stimulus('I warm up my mental math', () => {})
+  sensor('the square of {int} is {int}', (_state, n) => [n, n * n])
+  const r = buildRegistry()
+  expect(r.steps).toHaveLength(2)
+  const here = new URL(import.meta.url).pathname
+  expect(contextFactory()(here)).toEqual({})
+})
+
+test('defineState() without a factory still enforces once-per-file', () => {
+  defineState()
+  expect(() => defineState()).toThrow(/called more than once/)
+})
+
+test('factory-less state is empty at the type level too', () => {
+  // TYPE-LEVEL assertions (fire via tsconfig.tests.json under `pnpm typecheck`).
+  const { stimulus: act, sensor: sense } = defineState()
+  // returning nothing is fine; there are no fields to evolve
+  act('a', () => {})
+  sense('b', (state) => {
+    // every field of the empty state is `never` — nothing real can be read
+    expectTypeOf(state).toEqualTypeOf<{ readonly [key: string]: never }>()
+  })
+  const r = buildRegistry()
+  expect(r.steps).toHaveLength(2)
+})

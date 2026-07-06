@@ -1,0 +1,77 @@
+{
+  "diagnostics": [],
+  "examples": [
+    {
+      "expectedOutcome": "pass",
+      "name": "I warm up my mental math. The square of 7 is 49",
+      "scopeStack": [
+        "Stateless steps",
+        "Squaring in my head"
+      ],
+      "span": {
+        "endCol": 49,
+        "endLine": 5,
+        "endOffset": 91,
+        "startCol": 1,
+        "startLine": 5,
+        "startOffset": 43
+      },
+      "steps": [
+        {
+          "args": [],
+          "matchSpan": {
+            "endCol": 25,
+            "endLine": 5,
+            "endOffset": 67,
+            "startCol": 1,
+            "startLine": 5,
+            "startOffset": 43
+          },
+          "matchedExpression": "I warm up my mental math",
+          "paramSpans": [],
+          "text": "I warm up my mental math"
+        },
+        {
+          "args": [
+            {
+              "parameterType": "int",
+              "value": "7"
+            },
+            {
+              "parameterType": "int",
+              "value": "49"
+            }
+          ],
+          "matchSpan": {
+            "endCol": 49,
+            "endLine": 5,
+            "endOffset": 91,
+            "startCol": 27,
+            "startLine": 5,
+            "startOffset": 69
+          },
+          "matchedExpression": "The square of {int} is {int}.",
+          "paramSpans": [
+            {
+              "endCol": 42,
+              "endLine": 5,
+              "endOffset": 84,
+              "startCol": 41,
+              "startLine": 5,
+              "startOffset": 83
+            },
+            {
+              "endCol": 48,
+              "endLine": 5,
+              "endOffset": 90,
+              "startCol": 46,
+              "startLine": 5,
+              "startOffset": 88
+            }
+          ],
+          "text": "The square of 7 is 49."
+        }
+      ]
+    }
+  ]
+}

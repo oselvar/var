@@ -1,0 +1,16 @@
+{
+  "parameterTypes": [],
+  "steps": [
+    {
+      "expression": "I warm up my mental math",
+      "parameterTypeNames": []
+    },
+    {
+      "expression": "The square of {int} is {int}.",
+      "parameterTypeNames": [
+        "int",
+        "int"
+      ]
+    }
+  ]
+}

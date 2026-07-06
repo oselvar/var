@@ -1,0 +1,32 @@
+{
+  "examples": [
+    {
+      "name": "I warm up my mental math. The square of 7 is 49",
+      "outcome": "pass",
+      "steps": [
+        {
+          "contextKey": {
+            "exampleName": "I warm up my mental math. The square of 7 is 49",
+            "stepFile": "squares.steps"
+          },
+          "exampleName": "I warm up my mental math. The square of 7 is 49",
+          "matchedExpression": "I warm up my mental math",
+          "ordinal": 1,
+          "outcome": "pass",
+          "stepText": "I warm up my mental math"
+        },
+        {
+          "contextKey": {
+            "exampleName": "I warm up my mental math. The square of 7 is 49",
+            "stepFile": "squares.steps"
+          },
+          "exampleName": "I warm up my mental math. The square of 7 is 49",
+          "matchedExpression": "The square of {int} is {int}.",
+          "ordinal": 2,
+          "outcome": "pass",
+          "stepText": "The square of 7 is 49."
+        }
+      ]
+    }
+  ]
+}

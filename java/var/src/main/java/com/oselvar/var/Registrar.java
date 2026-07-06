@@ -46,6 +46,15 @@ public interface Registrar {
     <C extends State> StateBinder<C> defineState(Supplier<C> factory);
 
     /**
+     * Factory-less variant for a step-definition class whose steps are pure — nothing
+     * to arrange, nothing to evolve. Handlers are bound to {@link State.Empty}.
+     * Equivalent to {@code defineState(() -> State.Empty.INSTANCE)}.
+     */
+    default StateBinder<State.Empty> defineState() {
+        return defineState(() -> State.Empty.INSTANCE);
+    }
+
+    /**
      * Registers a custom cucumber-expression parameter type, available to every step
      * subsequently compiled through this registrar — the facade-level equivalent of
      * {@code com.oselvar.var.core.Registry#defineParameterType}.

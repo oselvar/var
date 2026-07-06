@@ -136,6 +136,47 @@ full replacement, same principle: new value out, never mutation.
 example gets a fresh state from the factory, so examples never leak into each
 other; steps defined in different step files never see each other's state.
 
+### No state? Omit the factory
+
+The factory is optional. A step file whose steps are pure — nothing to
+arrange, nothing to evolve — calls `defineState` bare; handlers receive an
+empty state they can ignore:
+
+<Tabs syncKey="lang">
+  <TabItem label="TypeScript">
+    ```ts
+    const { stimulus, sensor } = defineState()
+
+    sensor('the square of {int} is {int}', (_state, n) => [n, n * n])
+    ```
+  </TabItem>
+  <TabItem label="Java">
+    ```java
+    StateBinder<State.Empty> s = registrar.defineState();
+
+    s.sensor("the square of {int} is {int}",
+            (State.Empty state, Integer n, Integer expected) -> List.of(n, n * n));
+    ```
+  </TabItem>
+  <TabItem label="Kotlin">
+    ```kotlin
+    val steps = defineState {
+        sensor("the square of {int} is {int}") { n: Int -> listOf(n, n * n) }
+    }
+    ```
+  </TabItem>
+  <TabItem label="Python">
+    ```python
+    stimulus, sensor = define_state()
+
+
+    @sensor("the square of {int} is {int}")
+    def _(state, n, expected):
+        return [n, n * n]
+    ```
+  </TabItem>
+</Tabs>
+
 ## Tables and doc strings
 
 A trailing data table or fenced code block arrives as the last handler

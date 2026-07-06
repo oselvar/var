@@ -12,4 +12,14 @@ package com.oselvar.var;
  * of reconstructing all fields when only one changes — deliberate divergence from the
  * other two languages. See doc/superpowers/specs/2026-07-01-java-core-port-design.md.
  */
-public interface State {}
+public interface State {
+
+    /**
+     * The state of a step-definition class that declares none: what the factory-less
+     * {@link Registrar#defineState()} binds handlers to. A stimulus that has nothing to
+     * evolve returns the instance it received; a sensor has no fields to read.
+     */
+    record Empty() implements State {
+        public static final Empty INSTANCE = new Empty();
+    }
+}

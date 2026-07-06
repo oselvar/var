@@ -119,6 +119,30 @@ class DefineStateTest {
     }
 
     @Test
+    fun `factory-less defineState registers pure steps against Unit state`() {
+        val registrar = RegistryRegistrar()
+        defineState {
+                stimulus("I warm up my mental math") {}
+                sensor("the square of {int} is {int}") { n: Int -> listOf(n, n * n) }
+            }
+            .defineSteps(registrar)
+
+        val steps = registrar.registry().steps()
+        assertEquals(
+            listOf("I warm up my mental math", "the square of {int} is {int}"),
+            steps.map { it.expression() },
+        )
+        assertEquals(listOf(StepKind.STIMULUS, StepKind.SENSOR), steps.map { it.kind() })
+
+        val initial = registrar.stateFactory()!!.get()
+        // The stimulus's implicit Unit return is the unchanged (empty) state.
+        val evolved = invoke(steps[0].handler(), initial) as StateBox<*>
+        assertEquals(Unit, evolved.value)
+        // The sensor ignores the state and computes from its captures alone.
+        assertEquals(listOf(7, 49), invoke(steps[1].handler(), initial, 7, 49))
+    }
+
+    @Test
     fun `each replay gets a fresh state factory producing fresh boxes`() {
         val registrar = RegistryRegistrar()
         canonicalSteps().defineSteps(registrar)

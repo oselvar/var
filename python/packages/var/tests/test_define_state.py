@@ -117,3 +117,33 @@ def test_context_factory_returns_empty_dict_for_unknown_file() -> None:
     cf = context_factory()
     result = cf("nonexistent_file.py")
     assert result == {}
+
+
+def test_define_state_without_factory_registers_steps_against_empty_state() -> None:
+    _reset_builder()
+
+    stimulus, sensor = define_state()
+
+    @stimulus("I warm up my mental math")
+    def warm_up(state):
+        pass
+
+    @sensor("the square of {int} is {int}")
+    def square(state, n, expected):
+        return [n, n * n]
+
+    r = build_registry()
+    assert len(r.steps) == 2
+    # The factory is keyed by THIS file (the caller), and produces a fresh {}.
+    cf = context_factory()
+    state = cf(r.steps[0].expression_source_file)
+    assert state == {}
+    assert cf(r.steps[0].expression_source_file) is not state
+
+
+def test_define_state_without_factory_still_enforces_once_per_file() -> None:
+    _reset_builder()
+
+    define_state()
+    with pytest.raises(Exception, match=r"defineState.*called more than once"):
+        define_state()

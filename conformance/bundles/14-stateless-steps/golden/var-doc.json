@@ -1,0 +1,228 @@
+{
+  "examples": [
+    {
+      "body": [
+        {
+          "inlineMap": [
+            {
+              "sourceOffset": 43,
+              "textOffset": 0
+            },
+            {
+              "sourceOffset": 44,
+              "textOffset": 1
+            },
+            {
+              "sourceOffset": 45,
+              "textOffset": 2
+            },
+            {
+              "sourceOffset": 46,
+              "textOffset": 3
+            },
+            {
+              "sourceOffset": 47,
+              "textOffset": 4
+            },
+            {
+              "sourceOffset": 48,
+              "textOffset": 5
+            },
+            {
+              "sourceOffset": 49,
+              "textOffset": 6
+            },
+            {
+              "sourceOffset": 50,
+              "textOffset": 7
+            },
+            {
+              "sourceOffset": 51,
+              "textOffset": 8
+            },
+            {
+              "sourceOffset": 52,
+              "textOffset": 9
+            },
+            {
+              "sourceOffset": 53,
+              "textOffset": 10
+            },
+            {
+              "sourceOffset": 54,
+              "textOffset": 11
+            },
+            {
+              "sourceOffset": 55,
+              "textOffset": 12
+            },
+            {
+              "sourceOffset": 56,
+              "textOffset": 13
+            },
+            {
+              "sourceOffset": 57,
+              "textOffset": 14
+            },
+            {
+              "sourceOffset": 58,
+              "textOffset": 15
+            },
+            {
+              "sourceOffset": 59,
+              "textOffset": 16
+            },
+            {
+              "sourceOffset": 60,
+              "textOffset": 17
+            },
+            {
+              "sourceOffset": 61,
+              "textOffset": 18
+            },
+            {
+              "sourceOffset": 62,
+              "textOffset": 19
+            },
+            {
+              "sourceOffset": 63,
+              "textOffset": 20
+            },
+            {
+              "sourceOffset": 64,
+              "textOffset": 21
+            },
+            {
+              "sourceOffset": 65,
+              "textOffset": 22
+            },
+            {
+              "sourceOffset": 66,
+              "textOffset": 23
+            },
+            {
+              "sourceOffset": 67,
+              "textOffset": 24
+            },
+            {
+              "sourceOffset": 68,
+              "textOffset": 25
+            },
+            {
+              "sourceOffset": 69,
+              "textOffset": 26
+            },
+            {
+              "sourceOffset": 70,
+              "textOffset": 27
+            },
+            {
+              "sourceOffset": 71,
+              "textOffset": 28
+            },
+            {
+              "sourceOffset": 72,
+              "textOffset": 29
+            },
+            {
+              "sourceOffset": 73,
+              "textOffset": 30
+            },
+            {
+              "sourceOffset": 74,
+              "textOffset": 31
+            },
+            {
+              "sourceOffset": 75,
+              "textOffset": 32
+            },
+            {
+              "sourceOffset": 76,
+              "textOffset": 33
+            },
+            {
+              "sourceOffset": 77,
+              "textOffset": 34
+            },
+            {
+              "sourceOffset": 78,
+              "textOffset": 35
+            },
+            {
+              "sourceOffset": 79,
+              "textOffset": 36
+            },
+            {
+              "sourceOffset": 80,
+              "textOffset": 37
+            },
+            {
+              "sourceOffset": 81,
+              "textOffset": 38
+            },
+            {
+              "sourceOffset": 82,
+              "textOffset": 39
+            },
+            {
+              "sourceOffset": 83,
+              "textOffset": 40
+            },
+            {
+              "sourceOffset": 84,
+              "textOffset": 41
+            },
+            {
+              "sourceOffset": 85,
+              "textOffset": 42
+            },
+            {
+              "sourceOffset": 86,
+              "textOffset": 43
+            },
+            {
+              "sourceOffset": 87,
+              "textOffset": 44
+            },
+            {
+              "sourceOffset": 88,
+              "textOffset": 45
+            },
+            {
+              "sourceOffset": 89,
+              "textOffset": 46
+            },
+            {
+              "sourceOffset": 90,
+              "textOffset": 47
+            }
+          ],
+          "kind": "paragraph",
+          "span": {
+            "endCol": 49,
+            "endLine": 5,
+            "endOffset": 91,
+            "startCol": 1,
+            "startLine": 5,
+            "startOffset": 43
+          },
+          "text": "I warm up my mental math. The square of 7 is 49."
+        }
+      ],
+      "scopeStack": [
+        "Stateless steps",
+        "Squaring in my head"
+      ],
+      "span": {
+        "endCol": 49,
+        "endLine": 5,
+        "endOffset": 91,
+        "startCol": 1,
+        "startLine": 5,
+        "startOffset": 43
+      }
+    }
+  ],
+  "orphanAttachments": [],
+  "path": "example.md"
+}

@@ -150,11 +150,15 @@ type ParamTypeDef<T> = {
 // registry that drives `{name}` → type inference for this stepfile's steps.
 type CustomRegistry<P> = { [K in keyof P]: P[K] extends ParamTypeDef<infer T> ? T : never }
 
+// The factory is OPTIONAL: a step file whose steps are pure (nothing to
+// arrange, nothing to evolve) calls `defineState()` bare and its handlers
+// receive an empty state. `C` then defaults to `Record<string, never>`, so a
+// stimulus can only return `{}`/nothing and a sensor can't read phantom fields.
 export function defineState<
-  C,
+  C = Record<string, never>,
   P extends Record<string, ParamTypeDef<unknown>> = Record<never, never>,
 >(
-  factory: () => C | Promise<C>,
+  factory?: () => C | Promise<C>,
   paramTypes?: P,
 ): {
   readonly stimulus: StimulusFn<C, CustomRegistry<P>>
@@ -164,7 +168,7 @@ export function defineState<
   if (contextFactoriesByFile.has(sourceFile)) {
     throw new Error(`defineState() called more than once in ${sourceFile}`)
   }
-  contextFactoriesByFile.set(sourceFile, factory as () => unknown)
+  contextFactoriesByFile.set(sourceFile, (factory ?? (() => ({}))) as () => unknown)
   if (paramTypes) {
     for (const [name, def] of Object.entries(paramTypes)) {
       customTypes.push({ name, regexp: def.regexp, transformer: def.transformer })

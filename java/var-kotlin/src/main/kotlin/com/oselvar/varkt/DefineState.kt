@@ -40,6 +40,13 @@ fun <C : Any> defineState(
 }
 
 /**
+ * Factory-less variant for a step file whose steps are pure — nothing to arrange, nothing to
+ * evolve. Handlers run against [Unit]: a stimulus body simply performs its effect (its implicit
+ * `Unit` return IS the unchanged state), a sensor returns the value the core compares.
+ */
+fun defineState(block: StepsScope<Unit>.() -> Unit): StepDefinitions = defineState({}, block)
+
+/**
  * The receiver of a [defineState] block: bare `stimulus`/`sensor` calls, one overload per handler
  * arity. Handlers are `suspend` with the state as receiver; they run on the Java engine's
  * synchronous executor via [runBlocking].

@@ -62,4 +62,38 @@ class AuthorApiTest {
         assertEquals("AuthorApiTest.java", action.sourceFile());
         assertTrue(action.sourceLine() > 0);
     }
+
+    /** Pure steps need no evolving state: the factory-less {@code defineState()}. */
+    static final class SquareSteps implements StepDefinitions {
+        @Override
+        public void defineSteps(Registrar registrar) {
+            StateBinder<State.Empty> s = registrar.defineState();
+
+            s.stimulus("I warm up my mental math", (State.Empty state) -> state);
+
+            s.sensor(
+                    "the square of {int} is {int}",
+                    (State.Empty state, Integer n, Integer expected) -> java.util.List.of(n, n * n));
+        }
+    }
+
+    @Test
+    void factoryLessDefineStateBindsHandlersToEmptyState() {
+        RecordingRegistrar registrar = new RecordingRegistrar();
+        new SquareSteps().defineSteps(registrar);
+
+        var steps = registrar.steps();
+        assertEquals(2, steps.size(), "one stimulus + one sensor");
+        assertEquals(1, registrar.factories().size(), "the default factory still registers");
+        assertEquals(State.Empty.INSTANCE, registrar.factories().get(0).get());
+
+        @SuppressWarnings("unchecked")
+        var warmUp = (StateBinder.Stimulus0<State.Empty>) steps.get(0).handler();
+        assertEquals(State.Empty.INSTANCE, warmUp.apply(State.Empty.INSTANCE));
+
+        @SuppressWarnings("unchecked")
+        var square = (StateBinder.Sensor2<State.Empty, Integer, Integer, java.util.List<Integer>>)
+                steps.get(1).handler();
+        assertEquals(java.util.List.of(7, 49), square.apply(State.Empty.INSTANCE, 7, 49));
+    }
 }

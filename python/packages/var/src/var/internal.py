@@ -1,6 +1,7 @@
 """Author-facing API for declaring step state — port of var/src/internal.ts (defineState)."""
 from __future__ import annotations
 
+import sys
 from re import Pattern
 from typing import Any, Callable, Optional
 
@@ -23,13 +24,17 @@ _custom_types: list[dict[str, Any]] = []
 
 
 def define_state(
-    factory: Callable[[], Any],
+    factory: Optional[Callable[[], Any]] = None,
     param_types: Optional[dict[str, dict[str, Any]]] = None,
 ) -> tuple[
     Callable[[str], Callable[[Callable], Callable]],
     Callable[[str], Callable[[Callable], Callable]],
 ]:
     """Register *factory* as the context-state constructor for its step file.
+
+    *factory* is optional: a step file whose steps are pure (nothing to
+    arrange, nothing to evolve) calls ``define_state()`` bare and its handlers
+    receive an empty ``dict`` as state.
 
     Returns ``(stimulus, sensor)`` — each is a decorator factory:
     ``@stimulus("expression")`` registers the decorated function as a step.
@@ -38,9 +43,16 @@ def define_state(
     attributes (``co_filename`` / ``co_firstlineno``).
 
     Raises ``RuntimeError`` if called more than once for the same source file
-    (keyed by *factory*'s ``co_filename``), mirroring ``internal.ts``.
+    (keyed by *factory*'s ``co_filename``, or the caller's file when *factory*
+    is omitted), mirroring ``internal.ts``.
     """
-    source_file: str = factory.__code__.co_filename
+    if factory is None:
+        # No factory code object to key by — use the calling step file itself,
+        # which is where an inline factory would have been defined anyway.
+        source_file: str = sys._getframe(1).f_code.co_filename
+        factory = dict
+    else:
+        source_file = factory.__code__.co_filename
     if source_file in _context_factories_by_file:
         raise RuntimeError(
             f"defineState() called more than once in {source_file}"

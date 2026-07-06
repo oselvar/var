@@ -17,6 +17,7 @@ import com.oselvar.varkt.conformance.bundle10.steps as bundle10Steps
 import com.oselvar.varkt.conformance.bundle11.steps as bundle11Steps
 import com.oselvar.varkt.conformance.bundle12.steps as bundle12Steps
 import com.oselvar.varkt.conformance.bundle13.steps as bundle13Steps
+import com.oselvar.varkt.conformance.bundle14.steps as bundle14Steps
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
@@ -87,6 +88,7 @@ class ConformanceTest {
                 "11-emoji-offsets" -> bundle11Steps
                 "12-combining-marks" -> bundle12Steps
                 "13-custom-parameter-type" -> bundle13Steps
+                "14-stateless-steps" -> bundle14Steps
                 else ->
                     throw IllegalStateException(
                         "No Kotlin step fixture registered for bundle $bundleName"
