@@ -1,7 +1,9 @@
 package com.oselvar.var.junit;
 
 import com.oselvar.var.config.VarConfig;
+import com.oselvar.var.core.Drift;
 import com.oselvar.var.core.Plan;
+import com.oselvar.var.runner.BaselineStores;
 import com.oselvar.var.runner.Discovery;
 import com.oselvar.var.runner.Run;
 import com.oselvar.var.runner.StepLoader;
@@ -13,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -81,10 +84,17 @@ final class VarFileSelectorResolver implements SelectorResolver {
      */
     private final Map<String, VarFileDescriptor> fileDescriptors = new HashMap<>();
 
+    private final Drift.BaselineStore baselineStore;
+    private final boolean update;
+
     VarFileSelectorResolver(VarConfig config, Path root, StepLoader.LoadedSteps loadedSteps) {
         this.config = config;
         this.root = root.toAbsolutePath().normalize();
         this.loadedSteps = loadedSteps;
+        this.baselineStore = BaselineStores.file(this.root);
+        this.update = "true".equals(System.getProperty("var.update"))
+                || "1".equals(System.getenv("VAR_UPDATE"))
+                || "true".equals(System.getenv("VAR_UPDATE"));
     }
 
     /** Whether a classpath resource name (already relative, POSIX-separated) is a spec. */
@@ -320,6 +330,12 @@ final class VarFileSelectorResolver implements SelectorResolver {
         VarFileDescriptor fileDescriptor =
                 new VarFileDescriptor(uniqueId, specPath, source, content, loadedSteps, plan);
         mergeChildren(fileDescriptor, source, onlyLine);
+        // Reconcile drift once per spec (only on a full-file discovery — never a single-example
+        // re-run, where onlyLine is set): a clean run records/updates var.lock.json; a paragraph
+        // that was an example and no longer matches becomes a failing drift leaf.
+        if (onlyLine == null) {
+            addDriftChildren(fileDescriptor, source, content, plan);
+        }
         fileDescriptors.put(specPath, fileDescriptor);
         return fileDescriptor;
     }
@@ -346,6 +362,24 @@ final class VarFileSelectorResolver implements SelectorResolver {
                 continue;
             }
             fileDescriptor.addChild(createExampleDescriptor(fileDescriptor, source, example));
+        }
+    }
+
+    /**
+     * Reconciles {@code fileDescriptor}'s spec against {@code var.lock.json} and adds one failing
+     * {@link VarDriftDescriptor} per drift. The spec path used as the baseline key is {@link
+     * VarFileDescriptor#specPath()} — the same relative, POSIX-separated path {@code var run} and
+     * the other ports key by.
+     */
+    private void addDriftChildren(
+            VarFileDescriptor fileDescriptor, TestSource fileSource, String content, Plan.ExecutionPlan plan) {
+        List<Drift.Drifted> drifts =
+                Drift.reconcileDrift(baselineStore, fileDescriptor.specPath(), content, plan.varDoc(), plan, update);
+        for (Drift.Drifted drift : drifts) {
+            UniqueId uniqueId =
+                    fileDescriptor.getUniqueId().append(VarDriftDescriptor.SEGMENT_TYPE, "drift-" + drift.line());
+            fileDescriptor.addChild(new VarDriftDescriptor(
+                    uniqueId, "drift: " + drift.name(), withLine(fileSource, drift.line()), Drift.message(drift)));
         }
     }
 
