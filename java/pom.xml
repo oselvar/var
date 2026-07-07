@@ -6,7 +6,7 @@
 
   <groupId>com.oselvar</groupId>
   <artifactId>var-parent</artifactId>
-  <version>0.3.2-SNAPSHOT</version>
+  <version>0.4.0</version>
   <packaging>pom</packaging>
 
   <name>var (Java port) — parent</name>

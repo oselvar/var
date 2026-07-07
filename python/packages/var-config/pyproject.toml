@@ -1,6 +1,6 @@
 [project]
 name = "oselvar-var-config"
-version = "0.3.1"
+version = "0.4.0"
 description = "Reads var.config.json — the shared config file for all var tools"
 license = "MIT"
 requires-python = ">=3.11"
