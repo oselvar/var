@@ -58,10 +58,10 @@ with sensors.
   </TabItem>
   <TabItem label="Ruby">
     ```ruby
-    param, stimulus, sensor = steps { { total: 0 } }
-
-    stimulus.call('I add {int}') { |state, n| { total: state[:total] + n } }
-    sensor.call('the total is {int}') { |state, _expected| state[:total] }
+    steps(total: 0) do
+      stimulus('I add {int}') { |state, n| { total: state[:total] + n } }
+      sensor('the total is {int}') { |state, _expected| state[:total] }
+    end
     ```
   </TabItem>
 </Tabs>
@@ -126,10 +126,10 @@ full replacement, same principle: new value out, never mutation.
   </TabItem>
   <TabItem label="Ruby">
     ```ruby
-    param, stimulus, sensor = steps { { greeting: '', count: 0 } }
-
-    stimulus.call('I greet {string}') { |_state, name| { greeting: "Hello, #{name}!" } }
-    stimulus.call('I add {int}') { |state, n| { count: state[:count] + n } }
+    steps(greeting: '', count: 0) do
+      stimulus('I greet {string}') { |_state, name| { greeting: "Hello, #{name}!" } }
+      stimulus('I add {int}') { |state, n| { count: state[:count] + n } }
+    end
     ```
   </TabItem>
 </Tabs>
@@ -193,9 +193,9 @@ empty state they can ignore:
   </TabItem>
   <TabItem label="Ruby">
     ```ruby
-    param, stimulus, sensor = steps
-
-    sensor.call('the square of {int} is {int}') { |_state, n| [n, n * n] }
+    steps do
+      sensor('the square of {int} is {int}') { |_state, n| [n, n * n] }
+    end
     ```
   </TabItem>
 </Tabs>
@@ -238,7 +238,7 @@ first), a doc string as its exact text:
   </TabItem>
   <TabItem label="Ruby">
     ```ruby
-    stimulus.call('these books exist:') do |_state, rows|
+    stimulus('these books exist:') do |_state, rows|
       { books: rows.drop(1).map { |title, author| { title: title, author: author } } }
     end
     ```

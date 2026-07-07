@@ -64,7 +64,7 @@ keyed by the header, and returns the computed columns:
   </TabItem>
   <TabItem label="Ruby">
     ```ruby
-    sensor.call('a decimal and a roman number') do |_state, row|
+    sensor('a decimal and a roman number') do |_state, row|
       { 'decimal' => row['decimal'], 'roman' => RomanNumerals.to_roman(row['decimal'].to_i) }
     end
     ```
@@ -124,7 +124,7 @@ Uppercase each one:
   </TabItem>
   <TabItem label="Ruby">
     ```ruby
-    sensor.call('Uppercase each one:') do |_state, rows|
+    sensor('Uppercase each one:') do |_state, rows|
       rows[1..].map { |before, *| { 'before' => before, 'after' => before.upcase } }
     end
     ```
@@ -179,7 +179,7 @@ the text the software actually produces:
   </TabItem>
   <TabItem label="Ruby">
     ```ruby
-    sensor.call('Greet {word}:') { |_state, name, _doc| [name, "Hello, #{name}!\n"] }
+    sensor('Greet {word}:') { |_state, name, _doc| [name, "Hello, #{name}!\n"] }
     ```
   </TabItem>
 </Tabs>
@@ -216,7 +216,7 @@ whose doc string is its only comparable value returns the text bare:
   </TabItem>
   <TabItem label="Ruby">
     ```ruby
-    sensor.call('Greet Bob:') { |_state, _doc| "Hello, Bob!\n" }
+    sensor('Greet Bob:') { |_state, _doc| "Hello, Bob!\n" }
     ```
   </TabItem>
 </Tabs>

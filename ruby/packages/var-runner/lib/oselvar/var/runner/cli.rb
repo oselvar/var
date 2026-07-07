@@ -35,11 +35,10 @@ module Oselvar
 
           require 'oselvar/var'
 
-          _, stimulus, sensor = steps { { greeting: '' } }
-
-          stimulus.call('I greet {string}') { |_state, name| { greeting: "Hello, \#{name}!" } }
-
-          sensor.call('the greeting is {string}') { |state, _expected| state[:greeting] }
+          steps(greeting: '') do
+            stimulus('I greet {string}') { |_state, name| { greeting: "Hello, \#{name}!" } }
+            sensor('the greeting is {string}') { |state, _expected| state[:greeting] }
+          end
         RUBY
 
         RSPEC_BRIDGE = <<~RUBY

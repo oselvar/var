@@ -64,10 +64,10 @@ sensors, rather than reaching inside it.
   </TabItem>
   <TabItem label="Ruby">
     ```ruby
-    param, stimulus, sensor = steps { { total: 0 } }
-
-    stimulus.call('I add {int}') { |state, n| { total: state[:total] + n } }
-    sensor.call('the total is {int}') { |state, _expected| state[:total] }
+    steps(total: 0) do
+      stimulus('I add {int}') { |state, n| { total: state[:total] + n } }
+      sensor('the total is {int}') { |state, _expected| state[:total] }
+    end
     ```
   </TabItem>
 </Tabs>
@@ -136,7 +136,7 @@ a return value against. Throw to fail, return nothing to pass:
   </TabItem>
   <TabItem label="Ruby">
     ```ruby
-    sensor.call('the alarm fired') { |state| raise 'no alarm' unless state[:alarm] }
+    sensor('the alarm fired') { |state| raise 'no alarm' unless state[:alarm] }
     ```
   </TabItem>
 </Tabs>
@@ -172,7 +172,7 @@ certainly believed it was being checked.
   </TabItem>
   <TabItem label="Ruby">
     ```ruby
-    sensor.call('the total is {int}') { |state, _expected| state[:total] }
+    sensor('the total is {int}') { |state, _expected| state[:total] }
     ```
   </TabItem>
 </Tabs>
@@ -237,11 +237,12 @@ types whose `parse` produces an array:
   </TabItem>
   <TabItem label="Ruby">
     ```ruby
-    param, stimulus, sensor = steps { { dice: [5, 6] } }
-    param.call('numbers', '\d+(?:, \d+)*', parse: ->(raw) { raw.split(', ').map(&:to_i) })
+    steps(dice: [5, 6]) do
+      param('numbers', '\d+(?:, \d+)*', parse: ->(raw) { raw.split(', ').map(&:to_i) })
 
-    # "The dice show 5, 6" — {numbers} transforms to [5, 6]
-    sensor.call('The dice show {numbers}') { |state, _dice| state[:dice] }
+      # "The dice show 5, 6" — {numbers} transforms to [5, 6]
+      sensor('The dice show {numbers}') { |state, _dice| state[:dice] }
+    end
     ```
   </TabItem>
 </Tabs>
@@ -283,7 +284,7 @@ never mistaken for a two-slot positional array.
   </TabItem>
   <TabItem label="Ruby">
     ```ruby
-    sensor.call('I should have {int} cukes in my {word} belly') do |state, _count, _belly|
+    sensor('I should have {int} cukes in my {word} belly') do |state, _count, _belly|
       [state[:count], state[:belly_name]]
     end
     ```
@@ -322,7 +323,7 @@ last element:
   </TabItem>
   <TabItem label="Ruby">
     ```ruby
-    sensor.call('Greet {word}:') { |_state, name, _doc| [name, "Hello, #{name}!\n"] }
+    sensor('Greet {word}:') { |_state, name, _doc| [name, "Hello, #{name}!\n"] }
     ```
   </TabItem>
 </Tabs>
@@ -375,7 +376,7 @@ returns a **row object** keyed by the header — not slots:
   </TabItem>
   <TabItem label="Ruby">
     ```ruby
-    sensor.call('a decimal and a roman number') do |_state, row|
+    sensor('a decimal and a roman number') do |_state, row|
       { 'decimal' => row['decimal'], 'roman' => RomanNumerals.to_roman(row['decimal'].to_i) }
     end
     ```

@@ -2,12 +2,10 @@
 
 require 'oselvar/var'
 
-_, stimulus, sensor = steps { { greeting: '', result: 0 } }
+steps(greeting: '', result: 0) do
+  stimulus('I greet {string}') { |_state, name| { greeting: "Hello, #{name}!" } }
+  sensor('the greeting should be {string}') { |state, _expected| state[:greeting] }
 
-stimulus.call('I greet {string}') { |_state, name| { greeting: "Hello, #{name}!" } }
-
-sensor.call('the greeting should be {string}') { |state, _expected| state[:greeting] }
-
-stimulus.call('expression `{int}+{int}`') { |_state, a, b| { result: a + b } }
-
-sensor.call('evaluate to `{int}`') { |state, _expected| state[:result] }
+  stimulus('expression `{int}+{int}`') { |_state, a, b| { result: a + b } }
+  sensor('evaluate to `{int}`') { |state, _expected| state[:result] }
+end

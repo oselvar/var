@@ -134,10 +134,10 @@ software actually produced, for Vár to compare against the Markdown:
     ```ruby
     require 'oselvar/var'
 
-    _, stimulus, sensor = steps { { greeting: '' } }
-
-    stimulus.call('I greet {string}') { |_state, name| { greeting: "Hello, #{name}!" } }
-    sensor.call('the greeting is {string}') { |state, _expected| state[:greeting] }
+    steps(greeting: '') do
+      stimulus('I greet {string}') { |_state, name| { greeting: "Hello, #{name}!" } }
+      sensor('the greeting is {string}') { |state, _expected| state[:greeting] }
+    end
     ```
   </TabItem>
 </Tabs>
@@ -206,7 +206,7 @@ greeting the stimulus produces from `Hello` to `Hi`:
   </TabItem>
   <TabItem label="Ruby">
     ```ruby
-    stimulus.call('I greet {string}') { |_state, name| { greeting: "Hi, #{name}!" } }
+    stimulus('I greet {string}') { |_state, name| { greeting: "Hi, #{name}!" } }
     ```
   </TabItem>
 </Tabs>

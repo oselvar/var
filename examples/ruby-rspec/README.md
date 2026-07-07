@@ -4,9 +4,10 @@ A standalone sample project that runs Markdown specs as RSpec examples with
 [Vár](https://var.oselvar.com).
 
 The `*.md` files at the project root are the specs — plain Markdown prose that
-runs as tests. `steps/*.steps.rb` bind the sentences to Ruby with `steps` →
-`param, stimulus, sensor`. `var.config.json` says which files are specs
-(`docs`) and where the step definitions live (`steps`).
+runs as tests. `steps/*.steps.rb` bind the sentences to Ruby inside a
+`steps(...) do … end` block with `stimulus`/`sensor` (and `param` for custom
+types). `var.config.json` says which files are specs (`docs`) and where the
+step definitions live (`steps`).
 
 ## Run
 

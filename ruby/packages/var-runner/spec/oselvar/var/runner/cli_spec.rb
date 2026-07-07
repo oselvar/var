@@ -19,7 +19,7 @@ module Oselvar
               expect(File.exist?(File.join(dir, 'var.config.json'))).to be(true)
               expect(File.exist?(File.join(dir, 'var-examples/01-hello.md'))).to be(true)
               steps = File.read(File.join(dir, 'var-examples/steps/01-hello.steps.rb'))
-              expect(steps).to include('stimulus.call', 'sensor.call')
+              expect(steps).to include('steps(greeting: \'\') do', 'stimulus(', 'sensor(')
               expect(File.read(File.join(dir, 'spec/var_spec.rb'))).to include('Oselvar::Var::RSpec.generate')
               expect(out.string).to include('created var.config.json')
             end

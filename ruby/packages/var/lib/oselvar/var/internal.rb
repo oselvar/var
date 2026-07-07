@@ -4,24 +4,43 @@ require 'oselvar/var/core'
 
 module Oselvar
   module Var
-    # The module-scope step-registration accumulator behind steps() → [param,
-    # stimulus, sensor]. Mirrors @oselvar/var's internal.ts. A step file, when
-    # loaded, calls steps() once and registers into the accumulators here; the
-    # runner/harness then reads them via build_registry / context_factory.
+    # The module-scope step-registration accumulator behind the block DSL
+    # `steps(...) do stimulus(...); sensor(...) end`. Mirrors @oselvar/var's
+    # internal.ts. A step file, when loaded, calls steps() once; the Builder its
+    # block registers into these accumulators. The runner/harness then reads
+    # them via build_registry / context_factory.
     module Internal
       @steps = []
       @context_factories_by_file = {}
       @custom_types = []
 
       class << self
-        # Register a file's state factory and return [param, stimulus, sensor].
-        # +factory+ is a callable (or nil for empty state); +source_file+ keys
-        # the per-file context factory. Raises if called twice for one file.
+        # Register a file's state factory and return a Builder whose
+        # stimulus/sensor/param methods accumulate that file's steps. +factory+
+        # is a callable (or nil for empty state); +source_file+ keys the
+        # per-file context factory. Raises if called twice for one file.
         def register(factory, source_file)
           raise "steps() called more than once in #{source_file}" if @context_factories_by_file.key?(source_file)
 
           @context_factories_by_file[source_file] = factory || -> { {} }
-          [param_registrar, registrar('stimulus'), registrar('sensor')]
+          Builder.new
+        end
+
+        # Accumulate one step. The handler's source_location anchors it to the
+        # line the block is written on.
+        def add_step(expression, handler, kind)
+          file, line = handler.source_location
+          @steps << {
+            expression: expression, source_file: file, source_line: line,
+            handler: handler, kind: kind
+          }
+          nil
+        end
+
+        # Accumulate one custom parameter type.
+        def add_custom_type(name, regexp, parse, format)
+          @custom_types << { name: name, regexp: regexp, parse: parse, format: format }
+          nil
         end
 
         # (step_file) -> state: invoke the file's factory, or {} if none.
@@ -76,25 +95,22 @@ module Oselvar
             { 'name' => type[:name], 'regexp' => regexp }
           end
         end
+      end
 
-        private
-
-        def param_registrar
-          lambda do |name, regexp, parse: nil, format: nil|
-            @custom_types << { name: name, regexp: regexp, parse: parse, format: format }
-            nil
-          end
+      # The block-scoped authoring DSL. A Builder is `instance_eval`-ed with the
+      # `steps` block, so authors write bare `stimulus`/`sensor`/`param` calls;
+      # each delegates to the accumulator above.
+      class Builder
+        def stimulus(expression, &handler)
+          Internal.add_step(expression, handler, 'stimulus')
         end
 
-        def registrar(kind)
-          lambda do |expression, &handler|
-            file, line = handler.source_location
-            @steps << {
-              expression: expression, source_file: file, source_line: line,
-              handler: handler, kind: kind
-            }
-            nil
-          end
+        def sensor(expression, &handler)
+          Internal.add_step(expression, handler, 'sensor')
+        end
+
+        def param(name, regexp, parse: nil, format: nil)
+          Internal.add_custom_type(name, regexp, parse, format)
         end
       end
     end
