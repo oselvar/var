@@ -8,10 +8,13 @@ description: Use when starting or reviewing a new var language port (Java, Kotli
 ## Overview
 
 var is hexagonal + multi-language (ADR 0001). TypeScript is the reference
-implementation; **Python, Java, and Kotlin are complete ports**. Python is the
-closest precedent for a *full pipeline* port (no runtime sharing, like Ruby or
-Go would be); Kotlin is the precedent for a *facade over an existing engine*
-(it shares the JVM with Java — see the last section). Every port follows the
+implementation; **Python, Java, Kotlin, and Ruby are complete ports**. Python
+and Ruby are the closest precedents for a *full pipeline* port (no runtime
+sharing, like Go would be); Kotlin is the precedent for a *facade over an
+existing engine* (it shares the JVM with Java — see the last section). Ruby is
+also the precedent for a **block-based author DSL** (`steps(...) do stimulus …
+sensor … end`) and, unlike the older ports, shipped with its tree-sitter
+dialect wired from the start (see the repo-integration checklist). Every port follows the
 same package shape and is proven correct by reproducing the shared
 `conformance/bundles/*/golden/*.json` byte-for-byte — never by writing fresh
 tests against a new spec (the one carve-out is **drift**, which is unit-gated —
@@ -299,8 +302,44 @@ suite:
   sync dereferences them). Add rows to `examples/README.md`.
 - **`release/targets/NN-<registry>.sh`** publishing the port's packages to its
   registry (npm / PyPI / Maven Central / RubyGems), plus adding the port to the
-  release channels; the `oselvar/var-examples` sync (`60-var-examples.sh`)
-  already picks up new `examples/<lang>-*` projects.
+  release channels. The `oselvar/var-examples` sync (`60-var-examples.sh`) picks
+  up new `examples/<lang>-*` projects, but its **version-pinning rewrite is
+  per-ecosystem** — add a pin block (and any lockfile exclusion) for a new
+  registry, mirroring the npm/PyPI/Maven/RubyGems ones. Also extend the
+  `release/lint-commits.sh` consumer-scope regex + message and `cliff.toml`'s
+  section map with the new scope.
+- **Repo-root `languages.json`** (the single source of truth for the display /
+  scaffold axis): add an entry with the language's `label`, seti `icon`, step
+  file `ext`, `stepsGlob`, `hasCli`, and install/scaffold/run command blocks.
+  The website (`site-lang.ts`), the pre-paint restore script in
+  `astro.config.mjs`, and the get-started install tabs (`LangCommand.astro`) all
+  derive from it. Add the id to the `SiteLang` union in `site-lang.ts` too.
+- **Website docs code tabs**: add a `<TabItem label="<Language>">` to every
+  `<Tabs syncKey="lang">` group across `reference/*` and `how-to/*` (and the
+  get-started steps tabs), sourcing correct snippets from the new port's example
+  and conformance step files. The label must match `languages.json` exactly.
+- **Tree-sitter dialect** (the LSP/editor authoring surface — a *required*
+  deliverable now, not deferred): create
+  `typescript/packages/var-language/src/tree-sitter-dialects/<lang>.ts`
+  (a `LanguageSpec`: step-def + parameter-type queries, `decodeString`,
+  `extractHandlerParams`, `resolveRegexp`) with queries **verified empirically**
+  against the real grammar's node shapes, then wire it into
+  `tree-sitter-scanner.ts` (`SPECS` + `EXTENSIONS` + the `LanguageId` union in
+  `tree-sitter-dialects/types.ts`), **both** grammar loaders
+  (`var-lsp/src/node-grammar-loader.ts`, `var-language/tests/test-grammar-loader.ts`),
+  and the VS Code bundler's copy list (`var-vscode/esbuild.mjs`); add the grammar
+  package to `var-language` (devDep) + `var-lsp` (dep) + both `knip.json`
+  `ignoreDependencies` blocks. Prove it with a matcher in
+  `extraction-conformance.test.ts` (the dialect must yield the identical
+  `(kind, expression)`/`(name, regexp)` sets as TypeScript on every bundle's
+  `*.steps.<ext>`) plus a `tree-sitter-scanner-<lang>.test.ts`. **Precedent:
+  Ruby** (`tree-sitter-dialects/ruby.ts`) — the cleanest full example, including
+  a block-DSL query and single/double-quote string decoding.
+
+The **`language-coverage.test.ts` drift gate** (var-language) enforces the last
+three bullets: it fails until the new language's extension maps to a wired
+tree-sitter dialect, the grammar loaders/bundler agree, and every lang tab group
+lists the language. Run it (or `make typescript`) to find what you still owe.
 
 ## Config conformance corpus (a distinct byte-for-byte gate)
 
@@ -321,13 +360,16 @@ how many languages exist; a new port does not touch them:
 |---|---|
 | Markdown example parser → AST | Shared (each language's *core* still runs its own parse — "shared" means shared *algorithm*/spec, proven via conformance, not shared code across runtimes) |
 | Cucumber-expression matching semantics | Shared **library** — depend on the official cucumber-expressions package pinned to the same version (20.0.0) every port uses; do not hand-port the grammar |
-| Step-definition **extraction** from host source for the LSP | Per-language, but **not yet built for any language beyond TS** — out of scope for a v1 runtime port |
-| LSP feature functions, editor integration | TS/shared-layer only today; a tree-sitter adoption ADR is a placeholder, not yet implemented |
+| Step-definition **extraction** from host source for the LSP | **Per-language tree-sitter dialect** — built for TS, Python, Java, Kotlin, and Ruby; a new port adds one (see the repo-integration checklist, enforced by `language-coverage.test.ts`). The scanner core, the `LanguageSpec` seam, and the grammar loaders are shared |
+| LSP feature functions, editor integration | Shared TS layer; the only per-language piece is the tree-sitter dialect above |
 | Snippet / step-def generation | Per-language port, but deferred unless trivially available — don't block the runtime port on it |
 
 ## Out of scope for a v1 port
 
-- LSP / VS Code / website integration (TS-only today).
+- LSP feature functions / VS Code / website integration **beyond the
+  tree-sitter dialect** — the dialect itself is now a standard port deliverable
+  (see the repo-integration checklist), but the rest of the LSP/editor layer
+  stays shared TS.
 - Snippet/step-def generation.
 - Full per-example fixture-lifecycle teardown in the adapter — Python's
   pytest plugin explicitly deferred this (fixtures resolve via
@@ -350,7 +392,7 @@ how many languages exist; a new port does not touch them:
 | Reference implementation (runner) | `typescript/packages/var-runner/src/*.ts`, `python/packages/var-runner/src/var_runner/*.py` |
 | Reference implementation (test-framework adapter) | `typescript/packages/var-vitest/src/*.ts`, `python/packages/var-pytest/src/var_pytest/*.py` |
 | Reference implementation (drift, unit-gated) | `typescript/packages/var-core/src/{drift,hash}.ts` + `tests/{drift,hash}.test.ts`; mirror at `python/packages/var-core/src/var_core/{drift,hash}.py`; `java/var-core/.../{Drift,Hash}.java` |
-| The conformance corpus + goldens | `conformance/bundles/*/{example.md, *.steps.{ts,py,kt}, *Steps.java, golden/*.json}` — 15 bundles, four artifacts each; **plus** the config corpus `conformance/config/cases/*/{var.config.json, golden.json|expect-error.txt}` |
+| The conformance corpus + goldens | `conformance/bundles/*/{example.md, *.steps.{ts,py,kt,rb}, *Steps.java, golden/*.json}` — 15 bundles, four artifacts each; **plus** the config corpus `conformance/config/cases/*/{var.config.json, golden.json|expect-error.txt}` |
 
 ## Common mistakes
 
