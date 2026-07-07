@@ -6,6 +6,9 @@ requires-python = ">=3.11"
 license = "MIT"
 dependencies = ["oselvar-var==0.3.1", "oselvar-var-config==0.3.1"]
 
+[project.scripts]
+var = "var_runner.cli:main"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
