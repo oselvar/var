@@ -236,8 +236,11 @@ Implementation order (each increment green on its own):
    `BaselineStore` in var-runner.
 3. ✅ **Editors:** in-browser interactive demo (in-memory store, amber marker,
    Accept button) and the LSP (drift warning + "Accept as prose" quick fix).
-4. ⬜ **Python:** port `hash.py` + the run-result/baseline read-write + the same
-   `detect_drift`; wire the pytest and unittest adapters.
+4. ✅ **Python:** `hash.py` (matching the pinned TS vectors), the byte-identical
+   `var.lock.json` format, `detect_drift` / `reconcile_drift`, and the
+   `BaselineStore`. Since Python has no `var run`, the **test runner is the
+   writer** (syrupy-style): the pytest and unittest adapters record on a clean
+   run and gate on drift; `--var-update` / `VAR_UPDATE=1` accepts.
 5. ⬜ **JVM:** port to `var-core` (Java) + wire JUnit engine and Kotest, with the
    `-Dvar.update` surface.
 
