@@ -110,6 +110,26 @@ module Oselvar
             "orphanAttachments" => doc.orphan_attachments.map { |b| block_hash(b) }
           }
         end
+
+        # Parameter-type names in source order from a compiled CucumberExpression.
+        # The Ruby gem populates @parameter_types in source order during
+        # construction (it has no public reader), mirroring the TS AST walk.
+        def parameter_type_names(compiled)
+          compiled.instance_variable_get(:@parameter_types).map(&:name)
+        end
+
+        # Project a Registry to the wire dict for the registry artifact.
+        # +parameter_types+ is the custom-type list ({"name","regexp"}).
+        def to_registry_artifact(registry, parameter_types = [])
+          {
+            "steps" => registry.steps.map do |s|
+              { "expression" => s.expression, "parameterTypeNames" => parameter_type_names(s.compiled) }
+            end,
+            "parameterTypes" => parameter_types.map do |p|
+              { "name" => p["name"], "regexp" => p["regexp"] }
+            end
+          }
+        end
       end
     end
   end
