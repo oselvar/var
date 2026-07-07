@@ -6,7 +6,7 @@ require "oselvar/var/core"
 module Oselvar
   module Var
     module Core
-      RSpec.describe CanonicalJson do
+      ::RSpec.describe CanonicalJson do
         subject(:stringify) { described_class.method(:canonical_stringify) }
 
         it "sorts object keys recursively" do

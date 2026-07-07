@@ -9,7 +9,7 @@ module Oselvar
     # Reproduces the shared conformance corpus' registry.json goldens
     # byte-for-byte (registration stage). Loads each bundle's *.steps.rb via the
     # facade, then projects the built registry. Mirrors var/tests/conformance.
-    RSpec.describe "registry conformance" do
+    ::RSpec.describe "registry conformance" do
       def self.corpus_dir
         dir = __dir__
         dir = File.dirname(dir) until File.directory?(File.join(dir, "conformance", "bundles")) || dir == "/"

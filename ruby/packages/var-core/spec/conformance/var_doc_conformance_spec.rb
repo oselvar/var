@@ -8,7 +8,7 @@ module Oselvar
     module Core
       # Reproduces the shared conformance corpus' var-doc.json goldens
       # byte-for-byte (parse stage). Mirrors var/tests/conformance.test.ts.
-      RSpec.describe "var-doc conformance" do
+      ::RSpec.describe "var-doc conformance" do
         def self.corpus_dir
           dir = __dir__
           dir = File.dirname(dir) until File.directory?(File.join(dir, "conformance", "bundles")) || dir == "/"

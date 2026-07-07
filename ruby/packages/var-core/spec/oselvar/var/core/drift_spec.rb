@@ -8,7 +8,7 @@ module Oselvar
     module Core
       # Translated from drift.test.ts / test_drift.py. Drift has no conformance
       # golden (bundles carry no baseline), so it is proven by these unit tests.
-      RSpec.describe Drifts do
+      ::RSpec.describe Drifts do
         NOOP = ->(*_args) {}
 
         def reg(with_step: true)

@@ -8,7 +8,7 @@ module Oselvar
   module Var
     # Reproduces the shared conformance corpus' plan.json goldens byte-for-byte
     # (match + plan stage).
-    RSpec.describe "plan conformance" do
+    ::RSpec.describe "plan conformance" do
       def self.corpus_dir
         dir = __dir__
         dir = File.dirname(dir) until File.directory?(File.join(dir, "conformance", "bundles")) || dir == "/"

@@ -7,7 +7,7 @@ module Oselvar
   module Var
     module Core
       # Translated from hash.test.ts / test_hash.py.
-      RSpec.describe Hash32 do
+      ::RSpec.describe Hash32 do
         def hash_source(source) = described_class.hash_source(source)
 
         it "is deterministic" do

@@ -9,7 +9,7 @@ module Oselvar
     # Reproduces the shared config corpus byte-for-byte: each case parses to its
     # golden.json, or (with an expect-error.txt marker) must fail to load. See
     # conformance/config/README.md.
-    RSpec.describe "config conformance" do
+    ::RSpec.describe "config conformance" do
       def self.cases_dir
         dir = __dir__
         dir = File.dirname(dir) until File.directory?(File.join(dir, "conformance", "config", "cases")) || dir == "/"

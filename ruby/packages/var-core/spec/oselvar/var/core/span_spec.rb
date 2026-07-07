@@ -8,7 +8,7 @@ module Oselvar
     module Core
       # Translated from typescript/packages/var-core/tests/span.test.ts and
       # python/packages/var-core/tests/test_span.py.
-      RSpec.describe Offsets do
+      ::RSpec.describe Offsets do
         describe ".utf16_len" do
           it "counts ASCII, BMP, and astral characters in UTF-16 units" do
             expect(described_class.utf16_len("abc")).to eq(3)
