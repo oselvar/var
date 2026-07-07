@@ -12,7 +12,7 @@ from typing import Literal
 from var_core.span import Span
 
 Severity = Literal["error", "warning"]
-DiagnosticCode = Literal["ambiguous-match", "error-fence-without-step"]
+DiagnosticCode = Literal["ambiguous-match", "error-fence-without-step", "drift"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -48,6 +48,24 @@ def ambiguous_match(input: AmbiguousInput) -> Diagnostic:
         code="ambiguous-match",
         message=f'Ambiguous step: "{input.text}"\nMatched by:\n{lines}',
         span=input.span,
+    )
+
+
+def drift_detected(name: str, span: Span) -> Diagnostic:
+    """Mirror driftDetected() from diagnostics.ts.
+
+    A paragraph the baseline recorded as an example no longer matches any step:
+    drift. Rides the shared Diagnostic rail so every surface reports it the same
+    way. ``span`` points at the drifted paragraph.
+    """
+    return Diagnostic(
+        severity="error",
+        code="drift",
+        message=(
+            f'This paragraph was an example and no longer matches any step (drift): "{name}".\n'
+            "Fix the step so it matches again, or accept it as prose (run in update mode)."
+        ),
+        span=span,
     )
 
 

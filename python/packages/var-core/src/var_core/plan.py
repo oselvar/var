@@ -255,7 +255,7 @@ def _detect_header_bound(
 # ---------------------------------------------------------------------------
 
 
-def _derive_example_name(body: tuple[Block, ...]) -> str:
+def derive_example_name(body: tuple[Block, ...]) -> str:
     """Mirror deriveExampleName from plan.ts."""
     primary = next(
         (b for b in body if b.kind in ("paragraph", "list_item", "blockquote")),
@@ -480,7 +480,7 @@ def plan(var_doc: VarDoc, registry: Registry) -> ExecutionPlan:
 
         examples.append(
             PlannedExample(
-                name=_derive_example_name(ex.body),
+                name=derive_example_name(ex.body),
                 scope_stack=ex.scope_stack,
                 span=ex.span,  # type: ignore[arg-type]
                 steps=runnable_steps,
