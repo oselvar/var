@@ -11,3 +11,10 @@ module Oselvar
 end
 
 require "oselvar/var/core/span"
+require "oselvar/var/core/ast"
+require "oselvar/var/core/table_cells"
+require "oselvar/var/core/scanner"
+require "oselvar/var/core/structurer"
+require "oselvar/var/core/parse"
+require "oselvar/var/core/canonical_json"
+require "oselvar/var/core/conformance"
