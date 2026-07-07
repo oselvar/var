@@ -396,7 +396,7 @@ public final class Plan {
     // Internal: example naming
     // -----------------------------------------------------------------------------------------
 
-    private static String deriveExampleName(List<Ast.Block> body) {
+    static String deriveExampleName(List<Ast.Block> body) {
         Ast.Block primary = null;
         for (Ast.Block b : body) {
             if (isTextBearing(b)) {

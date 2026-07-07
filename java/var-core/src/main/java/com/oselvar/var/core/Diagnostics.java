@@ -34,7 +34,8 @@ public final class Diagnostics {
      */
     public enum DiagnosticCode {
         AMBIGUOUS_MATCH,
-        ERROR_FENCE_WITHOUT_STEP
+        ERROR_FENCE_WITHOUT_STEP,
+        DRIFT
     }
 
     /** One diagnostic: its code, severity, and the source span it points at. */

@@ -387,6 +387,7 @@ public final class Conformance {
         return switch (code) {
             case AMBIGUOUS_MATCH -> "ambiguous-match";
             case ERROR_FENCE_WITHOUT_STEP -> "error-fence-without-step";
+            case DRIFT -> "drift";
         };
     }
 
