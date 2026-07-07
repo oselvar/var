@@ -17,7 +17,7 @@ drift feature proven by translating its TS unit tests.
 ## Architecture
 
 `Oselvar::Var::Core` — pure functions over immutable (frozen) values, no I/O.
-`Oselvar::Var` facade — module-scope accumulator + `define_state`.
+`Oselvar::Var` facade — module-scope accumulator + `steps()` (→ param, stimulus, sensor).
 `Oselvar::Var::Config` — strict `var.config.json` reader.
 
 ## Tech stack
@@ -97,10 +97,11 @@ conformance gate once the harness exists, commit.
 ## MILESTONE 2 — `registry.json`
 
 - [ ] **Task 9. `step_role.rb`, `registry.rb`, facade `internal.rb` +
-  `define_state`.** Port `step-role.ts`, `registry.ts`, and `@oselvar/var`
-  `internal.ts` (module-scope accumulator, per-file context factory,
-  `build_registry`, `context_factory`, `custom_parameter_types`, `reset_builder`,
-  `define_parameter_type`; wrap `cucumber-cucumber-expressions`). Translate the
+  `steps()`.** Port `step-role.ts`, `registry.ts`, and `@oselvar/var`
+  `internal.ts` — the unified `steps() -> [param, stimulus, sensor]` (module-scope
+  accumulator, per-file context factory, `build_registry`, `context_factory`,
+  `custom_parameter_types`, `reset_builder`; `param` defines custom types with
+  `parse`/`format`; wrap `cucumber-cucumber-expressions`). Translate the
   registry/facade tests.
 - [ ] **Task 10. registry projection + `*.steps.rb` fixtures + gate.** Port
   `toRegistryArtifact` (names from the compiled AST, `regexp` as bare source);

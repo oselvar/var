@@ -41,32 +41,38 @@ non-negotiables (CLAUDE.md) translate to Ruby idiom as:
 - **Functional core / imperative shell** → `Oselvar::Var::Core` is pure. Module
   loading, the test-runner binding, and file I/O stay out of scope (they are the
   runner/adapter sub-project).
-- **Evolving step state** → mirrors `defineState`'s *return-merge* model (below).
+- **Evolving step state** → mirrors `steps()`'s *return-merge* model (below).
 
 Namespace: `Oselvar::Var::Core::*` (core), `Oselvar::Var::*` (facade). Files live
 under `ruby/packages/var-core/lib/oselvar/var/core/*.rb`.
 
-## Author API — mirror `define_state` (module-scope accumulator, partial-merge)
+## Author API — mirror `steps()` → `param, stimulus, sensor`
 
-Ruby follows the **TS/Python** author-API shape, not the JVM's injected-Registrar
-divergence — Ruby is dynamic, so importing a step file for its registration side
-effect is idiomatic. `require`-ing a `*.steps.rb` calls `define_state` once and
-registers steps into a module-scope accumulator the runner reads.
+The author API was unified on `main` (`ba02041 refactor(spec)!: unify step
+authoring on steps() → param, stimulus, sensor`): a single `steps(factory)` call
+returns **three** things — `param` (custom parameter-type definer), `stimulus`,
+and `sensor` — replacing the old `define_state` + separate `define_parameter_type`.
+Ruby follows the **TS/Python** shape (module-scope accumulator, not the JVM's
+injected-Registrar), since importing a step file for its registration side effect
+is idiomatic. `require`-ing a `*.steps.rb` calls `steps` once and registers into
+a module-scope accumulator the runner reads.
 
 ```ruby
 require "oselvar/var"
-include Oselvar::Var::DSL   # brings in define_state
+include Oselvar::Var::DSL   # brings in steps
 
-stimulus, sensor = define_state { { count: 0 } }
+param, stimulus, sensor = steps { { count: 0 } }
 
 stimulus.("I increment") { |state| { count: state[:count] + 1 } }
 sensor.("the count is {int}") { |state, n| state[:count] }
 ```
 
-- `define_state(param_types = []) { factory } -> [stimulus, sensor]`. Each
-  returned callable takes a cucumber expression + a block (the handler). (Block
-  form is the Ruby equivalent of TS's `stimulus('expr', handler)`; the block body
-  is the handler. The block/method name is never matched.)
+- `steps { factory } -> [param, stimulus, sensor]`. Called **bare**
+  (`steps` / `steps {}`) the state is an empty `Hash`; with a factory block the
+  factory produces the per-example state. `stimulus`/`sensor` each take a
+  cucumber expression + a block (the handler). (Block form is the Ruby
+  equivalent of TS's `stimulus('expr', handler)`; the block body is the handler —
+  the block/method name is never matched.)
 - **Evolving state is a `Hash`**: the factory returns a `Hash`; a `stimulus`
   returns a partial `Hash` the runtime shallow-merges into a new state and
   **deep-freezes** (port `deep-freeze.ts` → recursively `freeze` plain
@@ -75,15 +81,15 @@ sensor.("the count is {int}") { |state, n| state[:count] }
   merge.) A `stimulus` returning `nil` means no change.
 - A **`sensor`** returns a value the core compares against the Markdown slots
   (the return-based comparison contract in CLAUDE.md), never mutating.
-- **One `define_state` per step file**, owning that file's context factory — a
-  fresh context per example, contexts never bleed across files (mirrors
-  `contextFactoriesByFile`; raise if called twice in one file; bare
-  `define_state {}`/`define_state` → empty state).
+- **One `steps` per step file**, owning that file's context factory — a fresh
+  context per example, contexts never bleed across files (mirrors
+  `contextFactoriesByFile`; raise if called twice in one file).
 - **Source location** from `Kernel#caller_locations` at registration, skipping
   frames inside the facade (the Ruby analogue of TS's `callerLocation()`).
-- **`define_parameter_type(name, regexp) { |*| transform }`** mirrors the core
-  `defineParameterType`; a paired `format` block mirrors bundle 15's custom
-  parameter *format*.
+- **`param.(name, regexp, parse:, format: nil)`** defines a custom parameter
+  type: `parse` is the transform (raw capture → value), `format` the optional
+  inverse rendering a value back in the document's notation (bundle 15). Mirrors
+  the core `defineParameterType` + its `formats` map.
 
 ## Dependencies
 
@@ -221,7 +227,7 @@ the plan's spine — followed by the unit-gated drift stage:
 1. **`var-doc.json` — parse only.** Scanner/structurer/inline → AST with UTF-16
    spans. The riskiest byte-for-byte surface; where the offset work lands. No
    step fixtures needed yet. Gate on `11`/`12`.
-2. **`registry.json` — registration.** `define_state` + cucumber-expression
+2. **`registry.json` — registration.** `steps()` + cucumber-expression
    compilation → ordered `{expression, parameterTypeNames}` + custom
    `{name, regexp}`. Needs `*.steps.rb` fixtures from here on.
 3. **`plan.json` — match + plan.** Matcher (UTF-16 conversion of cucumber
