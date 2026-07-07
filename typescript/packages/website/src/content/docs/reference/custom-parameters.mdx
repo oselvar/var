@@ -65,11 +65,24 @@ can use it as a `{name}` placeholder.
         return state["fee"]
     ```
   </TabItem>
+  <TabItem label="Ruby">
+    ```ruby
+    param, stimulus, sensor = steps { { fee: gbp(0) } }
+    param.call(
+      'money',
+      '£\d+\.\d{2}',
+      parse: ->(raw) { gbp(raw[1..].to_f) },
+      format: ->(m) { format('£%.2f', m.value) },
+    )
+
+    sensor.call('owes a {money} late fee') { |state, _expected| state[:fee] }
+    ```
+  </TabItem>
 </Tabs>
 
 This page is the reference for the three fields of a custom parameter type and
 for how a parameter mismatch is rendered. The rules are identical in every port
-(TypeScript, Java, Kotlin, Python).
+(TypeScript, Java, Kotlin, Python, Ruby).
 
 ## The three fields
 
@@ -176,6 +189,6 @@ so mismatch rendering never needs a `format` for them.
 
 Custom parameter types are declared per step file with `param`, alongside
 `steps` — a chained `.param()` (TypeScript), the returned `param` function
-(Python), or the binder's `param` (Java and Kotlin). A type declared in one
+(Python and Ruby), or the binder's `param` (Java and Kotlin). A type declared in one
 step file is not visible to another file's expressions — like state, parameter
 types are a per-file concern.

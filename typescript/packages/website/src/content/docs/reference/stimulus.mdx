@@ -56,6 +56,14 @@ with sensors.
         return state["total"]
     ```
   </TabItem>
+  <TabItem label="Ruby">
+    ```ruby
+    param, stimulus, sensor = steps { { total: 0 } }
+
+    stimulus.call('I add {int}') { |state, n| { total: state[:total] + n } }
+    sensor.call('the total is {int}') { |state, _expected| state[:total] }
+    ```
+  </TabItem>
 </Tabs>
 
 In your prose the stimulus covers both the *given* (arrange) and the *when*
@@ -114,6 +122,14 @@ full replacement, same principle: new value out, never mutation.
     @stimulus("I add {int}")
     def _(state, n):
         return {"count": state["count"] + n}
+    ```
+  </TabItem>
+  <TabItem label="Ruby">
+    ```ruby
+    param, stimulus, sensor = steps { { greeting: '', count: 0 } }
+
+    stimulus.call('I greet {string}') { |_state, name| { greeting: "Hello, #{name}!" } }
+    stimulus.call('I add {int}') { |state, n| { count: state[:count] + n } }
     ```
   </TabItem>
 </Tabs>
@@ -175,6 +191,13 @@ empty state they can ignore:
         return [n, n * n]
     ```
   </TabItem>
+  <TabItem label="Ruby">
+    ```ruby
+    param, stimulus, sensor = steps
+
+    sensor.call('the square of {int} is {int}') { |_state, n| [n, n * n] }
+    ```
+  </TabItem>
 </Tabs>
 
 ## Tables and doc strings
@@ -211,6 +234,13 @@ first), a doc string as its exact text:
     @stimulus("these books exist:")
     def _(state, rows):
         return {"books": [{"title": title, "author": author} for title, author in rows[1:]]}
+    ```
+  </TabItem>
+  <TabItem label="Ruby">
+    ```ruby
+    stimulus.call('these books exist:') do |_state, rows|
+      { books: rows.drop(1).map { |title, author| { title: title, author: author } } }
+    end
     ```
   </TabItem>
 </Tabs>

@@ -62,6 +62,13 @@ keyed by the header, and returns the computed columns:
         return {"decimal": row["decimal"], "roman": to_roman(int(row["decimal"]))}
     ```
   </TabItem>
+  <TabItem label="Ruby">
+    ```ruby
+    sensor.call('a decimal and a roman number') do |_state, row|
+      { 'decimal' => row['decimal'], 'roman' => RomanNumerals.to_roman(row['decimal'].to_i) }
+    end
+    ```
+  </TabItem>
 </Tabs>
 
 Each row runs as its own check. If `toRoman(9)` returned `"VIIII"`, only the
@@ -115,6 +122,13 @@ Uppercase each one:
         return [{"before": before, "after": before.upper()} for before, *_ in rows[1:]]
     ```
   </TabItem>
+  <TabItem label="Ruby">
+    ```ruby
+    sensor.call('Uppercase each one:') do |_state, rows|
+      rows[1..].map { |before, *| { 'before' => before, 'after' => before.upcase } }
+    end
+    ```
+  </TabItem>
 </Tabs>
 
 The table is this sensor's only comparable value, so it is returned bare. Vár
@@ -163,6 +177,11 @@ the text the software actually produces:
         return [name, f"Hello, {name}!\n"]
     ```
   </TabItem>
+  <TabItem label="Ruby">
+    ```ruby
+    sensor.call('Greet {word}:') { |_state, name, _doc| [name, "Hello, #{name}!\n"] }
+    ```
+  </TabItem>
 </Tabs>
 
 The comparison is exact equality, **including the trailing newline**. This step
@@ -195,6 +214,11 @@ whose doc string is its only comparable value returns the text bare:
         return "Hello, Bob!\n"
     ```
   </TabItem>
+  <TabItem label="Ruby">
+    ```ruby
+    sensor.call('Greet Bob:') { |_state, _doc| "Hello, Bob!\n" }
+    ```
+  </TabItem>
 </Tabs>
 
 See the [sensors reference](/reference/sensors/) for the full return-value
@@ -207,4 +231,4 @@ rules.
   redden exactly the failing characters.
 - A differing doc string fails with a `DocStringMismatchError`.
 - Returning a value of the wrong shape is a `ReturnShapeError`.
-- Returning `undefined` (`None` / `null`) means "no assertion" — the step passes.
+- Returning `undefined` (`None` / `null` / `nil`) means "no assertion" — the step passes.

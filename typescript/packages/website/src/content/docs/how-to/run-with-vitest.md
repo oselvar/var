@@ -34,23 +34,24 @@ export default defineConfig({
 })
 ```
 
-## 3. Let var.config.ts decide what is a spec
+## 3. Let var.config.json decide what is a spec
 
-The plugin reads `var.config.ts` and drives vitest's own `include`/`exclude`
+The plugin reads `var.config.json` and drives vitest's own `include`/`exclude`
 from it — you don't repeat the globs in the vitest config:
 
-```ts
-export default {
-  vars: {
-    include: ['var-examples/**/*.md'],
-    exclude: ['var-examples/drafts/**'],
+```json
+{
+  "docs": {
+    "include": ["var-examples/**/*.md"],
+    "exclude": ["var-examples/drafts/**"]
   },
-  steps: ['var-examples/**/*.steps.ts'],
+  "steps": ["var-examples/**/*.steps.ts"]
 }
 ```
 
-A file is a spec iff it matches the `vars` globs. The same config is consulted
-by the `var` CLI and the language server, so all three always agree.
+A file is a spec iff it matches the `docs.include` globs (minus `docs.exclude`).
+The same config is consulted by the `var` CLI and the language server, so all
+three always agree.
 
 ## 4. Run
 

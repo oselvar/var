@@ -1,0 +1,226 @@
+---
+title: Get started on your computer
+description: Install Vár, scaffold a first spec, run it — and watch it fail on purpose. In TypeScript, Python, Java, Kotlin or Ruby.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+import LangCommand from '../../../components/LangCommand.astro';
+
+In this tutorial we install Vár into a project, scaffold a working example, run
+it, and then deliberately break it. By the end you will have seen a Markdown
+file pass and fail as a test on your own machine.
+
+Vár runs in five languages. **Pick yours in the language selector at the top of
+the page** — every command and code sample below follows that choice. You need
+the toolchain for that language: Node.js ≥ 22 and pnpm, Python ≥ 3.12 and uv,
+JDK 21 and Maven, JDK 21 and Gradle, or Ruby ≥ 3.2 and Bundler. An existing
+project or an empty directory both work.
+
+## 1. Install
+
+<LangCommand kind="install" />
+
+This adds Vár's author API (the package your step definitions import) and the
+adapter that runs specs in your test framework.
+
+## 2. Scaffold a first spec
+
+<LangCommand kind="scaffold" />
+
+```
+created var.config.json
+created var-examples/01-hello.md
+created var-examples/steps/01-hello.steps.<ext>
+```
+
+(`<ext>` is your language's step-file extension — `ts`, `py`, `rb`, and so on.)
+
+`var.config.json` is the single source of truth for which files are specs and
+which files bind their steps:
+
+```json
+{
+  "docs": { "include": ["var-examples/**/*.md"], "exclude": [] },
+  "steps": ["var-examples/**/*.steps.<ext>"]
+}
+```
+
+The spec itself is plain Markdown with one concrete example:
+
+```markdown
+# Hello, BDD
+
+Given I greet "world"
+Then the greeting is "Hello, world!"
+```
+
+Notice that `Given` and `Then` are just narration for the reader — Vár matches
+the phrases, never the keywords. You could write the same example as ordinary
+prose and it would still run.
+
+The steps file binds those phrases to code. A **stimulus** drives the software
+and returns the next state; a **sensor** reads the state and returns what the
+software actually produced, for Vár to compare against the Markdown:
+
+<Tabs syncKey="lang">
+  <TabItem label="TypeScript">
+    ```ts
+    import { steps } from '@oselvar/var'
+
+    const { stimulus, sensor } = steps(() => ({ greeting: '' }))
+
+    stimulus('I greet {string}', (_state, name: string) => ({ greeting: `Hello, ${name}!` }))
+    sensor('the greeting is {string}', (state, _expected: string) => state.greeting)
+    ```
+  </TabItem>
+  <TabItem label="Java">
+    ```java
+    package examples;
+
+    import com.oselvar.var.Registrar;
+    import com.oselvar.var.State;
+    import com.oselvar.var.StateBinder;
+    import com.oselvar.var.StepDefinitions;
+
+    public final class HelloSteps implements StepDefinitions {
+        record Ctx(String greeting) implements State {}
+
+        @Override
+        public void defineSteps(Registrar registrar) {
+            StateBinder<Ctx> s = registrar.steps(() -> new Ctx(""));
+            s.stimulus("I greet {string}", (Ctx ctx, String name) -> new Ctx("Hello, " + name + "!"));
+            s.sensor("the greeting is {string}", (Ctx ctx, String expected) -> ctx.greeting());
+        }
+    }
+    ```
+  </TabItem>
+  <TabItem label="Kotlin">
+    ```kotlin
+    @file:JvmName("HelloSteps")
+
+    package examples
+
+    import com.oselvar.varkt.sensor
+    import com.oselvar.varkt.steps
+    import com.oselvar.varkt.stimulus
+
+    data class HelloCtx(val greeting: String = "")
+
+    val helloSteps =
+        steps(::HelloCtx) {
+            stimulus("I greet {string}") { name: String -> copy(greeting = "Hello, $name!") }
+            sensor("the greeting is {string}") { _: String -> greeting }
+        }
+    ```
+  </TabItem>
+  <TabItem label="Python">
+    ```python
+    from var import steps
+
+    param, stimulus, sensor = steps(lambda: {"greeting": ""})
+
+
+    @stimulus("I greet {string}")
+    def _(state, name):
+        return {"greeting": f"Hello, {name}!"}
+
+
+    @sensor("the greeting is {string}")
+    def _(state, expected):
+        return state["greeting"]
+    ```
+  </TabItem>
+  <TabItem label="Ruby">
+    ```ruby
+    require 'oselvar/var'
+
+    _, stimulus, sensor = steps { { greeting: '' } }
+
+    stimulus.call('I greet {string}') { |_state, name| { greeting: "Hello, #{name}!" } }
+    sensor.call('the greeting is {string}') { |state, _expected| state[:greeting] }
+    ```
+  </TabItem>
+</Tabs>
+
+<Aside type="note" title="Java & Kotlin: two extra steps">
+The JVM ports have no `var init` yet, so create `var.config.json`, the spec, and
+the steps file by hand. Two JVM-specific details:
+
+- `var.config.json` lists step classes by fully-qualified name instead of a glob:
+  ```json
+  { "docs": { "include": ["*.md"], "exclude": [] }, "steps": ["examples.HelloSteps"] }
+  ```
+- add a one-line JUnit suite so Maven or Gradle discovers the specs — `RunVarSpecsTest.java` / `.kt`:
+  ```java
+  @Suite @IncludeEngines("var") @SelectDirectories(".") class RunVarSpecsTest {}
+  ```
+
+The [Java](https://github.com/oselvar/var-examples/tree/main/java-junit-maven) and
+[Kotlin](https://github.com/oselvar/var-examples/tree/main/kotlin-junit) sample
+projects are complete, runnable copies you can start from.
+</Aside>
+
+## 3. Run it
+
+<LangCommand kind="run" />
+
+Vár reports one example passing:
+
+```
+var-examples/01-hello.md
+  ✓ Hello, BDD
+
+1 example, 1 passed, 0 failed
+```
+
+pytest, RSpec and JUnit each report the same example passing in their own
+format. The Markdown file just ran as a test, and the software kept its word.
+
+## 4. Watch it fail on purpose
+
+Never trust a test you haven't seen fail. Open the steps file and change the
+greeting the stimulus produces from `Hello` to `Hi`:
+
+<Tabs syncKey="lang">
+  <TabItem label="TypeScript">
+    ```ts
+    stimulus('I greet {string}', (_state, name: string) => ({ greeting: `Hi, ${name}!` }))
+    ```
+  </TabItem>
+  <TabItem label="Java">
+    ```java
+    s.stimulus("I greet {string}", (Ctx ctx, String name) -> new Ctx("Hi, " + name + "!"));
+    ```
+  </TabItem>
+  <TabItem label="Kotlin">
+    ```kotlin
+    stimulus("I greet {string}") { name: String -> copy(greeting = "Hi, $name!") }
+    ```
+  </TabItem>
+  <TabItem label="Python">
+    ```python
+    @stimulus("I greet {string}")
+    def _(state, name):
+        return {"greeting": f"Hi, {name}!"}
+    ```
+  </TabItem>
+  <TabItem label="Ruby">
+    ```ruby
+    stimulus.call('I greet {string}') { |_state, name| { greeting: "Hi, #{name}!" } }
+    ```
+  </TabItem>
+</Tabs>
+
+Run Vár again. The example now fails: the spec still says `"Hello, world!"`, but
+the sensor observed `"Hi, world!"`. The output shows both values and points at
+the exact place in the Markdown where the promise broke.
+
+Revert the change and run once more — one example, one passed. You have seen
+both sides of the contract.
+
+## Next
+
+- [Your first spec from scratch](/tutorials/first-spec/) — write your own spec
+  in a blank Markdown file and bind its steps.
+- Already have a vitest suite?
+  [Run specs through vitest](/how-to/run-with-vitest/) instead of the CLI.

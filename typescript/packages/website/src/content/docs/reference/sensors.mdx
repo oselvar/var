@@ -62,6 +62,14 @@ sensors, rather than reaching inside it.
         return state["total"]
     ```
   </TabItem>
+  <TabItem label="Ruby">
+    ```ruby
+    param, stimulus, sensor = steps { { total: 0 } }
+
+    stimulus.call('I add {int}') { |state, n| { total: state[:total] + n } }
+    sensor.call('the total is {int}') { |state, _expected| state[:total] }
+    ```
+  </TabItem>
 </Tabs>
 
 In your prose the sensor is the *then* — the expected outcome; see
@@ -70,7 +78,7 @@ for how the concepts map onto the two step kinds.
 
 This page is the reference for what a sensor may return and how each return
 value is compared. The rules are identical in every port (TypeScript, Java,
-Kotlin, Python).
+Kotlin, Python, Ruby).
 
 ## Slots
 
@@ -126,6 +134,11 @@ a return value against. Throw to fail, return nothing to pass:
             raise AssertionError("no alarm")
     ```
   </TabItem>
+  <TabItem label="Ruby">
+    ```ruby
+    sensor.call('the alarm fired') { |state| raise 'no alarm' unless state[:alarm] }
+    ```
+  </TabItem>
 </Tabs>
 
 Returning any other value is a `ReturnShapeError`. This is deliberate: a
@@ -155,6 +168,11 @@ certainly believed it was being checked.
     @sensor("the total is {int}")
     def _(state, expected):
         return state["total"]
+    ```
+  </TabItem>
+  <TabItem label="Ruby">
+    ```ruby
+    sensor.call('the total is {int}') { |state, _expected| state[:total] }
     ```
   </TabItem>
 </Tabs>
@@ -217,6 +235,15 @@ types whose `parse` produces an array:
         return state["dice"]
     ```
   </TabItem>
+  <TabItem label="Ruby">
+    ```ruby
+    param, stimulus, sensor = steps { { dice: [5, 6] } }
+    param.call('numbers', '\d+(?:, \d+)*', parse: ->(raw) { raw.split(', ').map(&:to_i) })
+
+    # "The dice show 5, 6" — {numbers} transforms to [5, 6]
+    sensor.call('The dice show {numbers}') { |state, _dice| state[:dice] }
+    ```
+  </TabItem>
 </Tabs>
 
 Because a single-slot return is always the bare value, `[5, 6]` here is
@@ -254,6 +281,13 @@ never mistaken for a two-slot positional array.
         return [state["count"], state["belly_name"]]
     ```
   </TabItem>
+  <TabItem label="Ruby">
+    ```ruby
+    sensor.call('I should have {int} cukes in my {word} belly') do |state, _count, _belly|
+      [state[:count], state[:belly_name]]
+    end
+    ```
+  </TabItem>
 </Tabs>
 
 The array must have exactly one element per slot; a different length or a
@@ -284,6 +318,11 @@ last element:
     @sensor("Greet {word}:")
     def _(state, name, doc):
         return [name, f"Hello, {name}!\n"]
+    ```
+  </TabItem>
+  <TabItem label="Ruby">
+    ```ruby
+    sensor.call('Greet {word}:') { |_state, name, _doc| [name, "Hello, #{name}!\n"] }
     ```
   </TabItem>
 </Tabs>
@@ -334,6 +373,13 @@ returns a **row object** keyed by the header — not slots:
         return {"decimal": row["decimal"], "roman": to_roman(int(row["decimal"]))}
     ```
   </TabItem>
+  <TabItem label="Ruby">
+    ```ruby
+    sensor.call('a decimal and a roman number') do |_state, row|
+      { 'decimal' => row['decimal'], 'roman' => RomanNumerals.to_roman(row['decimal'].to_i) }
+    end
+    ```
+  </TabItem>
 </Tabs>
 
 Each returned column is compared cell by cell against that row. This is the one
@@ -341,8 +387,8 @@ sensor shape that bypasses the slot contract.
 
 ## Returning nothing
 
-Returning `undefined` (TypeScript), `None` (Python) or `null` (Java, Kotlin)
-always means "no assertion" — the step passes unless it throws. Use this when
+Returning `undefined` (TypeScript), `None` (Python), `null` (Java, Kotlin) or
+`nil` (Ruby) always means "no assertion" — the step passes unless it throws. Use this when
 the sensor asserts by throwing (plain `throw`, or your test framework's own
 assertions), which is always allowed regardless of slot count.
 
