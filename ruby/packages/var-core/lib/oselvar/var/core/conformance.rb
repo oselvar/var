@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 require "oselvar/var/core/ast"
+require "oselvar/var/core/plan"
+require "oselvar/var/core/execute"
+require "oselvar/var/core/failure_anchor"
 
 module Oselvar
   module Var
@@ -179,6 +182,83 @@ module Oselvar
           result["dataTable"] = block_hash(step.data_table) if step.data_table
           result["docString"] = doc_string_hash(step.doc_string) if step.doc_string
           result
+        end
+
+        # Return the file stem: "path/to/foo.steps.rb" -> "foo.steps".
+        def file_stem(path)
+          File.basename(path, ".*")
+        end
+
+        # Project an execution error to a FailureArtifact dict. line and anchor
+        # are deterministic source positions (never scraped from a backtrace).
+        def to_failure_artifact(error, match_span)
+          line = match_span.start_line
+          anchor = span_hash(FailureAnchor.failure_anchor(error, match_span))
+          case error
+          when CellMismatchError
+            {
+              "kind" => "cell-mismatch", "line" => line, "anchor" => anchor,
+              "cells" => error.cells.reject(&:ok).map do |c|
+                { "column" => c.column, "expected" => c.expected, "actual" => c.actual, "span" => span_hash(c.span) }
+              end
+            }
+          when DocStringMismatchError
+            {
+              "kind" => "doc-string-mismatch", "line" => line, "anchor" => anchor,
+              "diff" => { "expected" => error.diff.expected, "actual" => error.diff.actual, "span" => span_hash(error.diff.span) }
+            }
+          when ReturnShapeError
+            { "kind" => "return-shape", "line" => line, "anchor" => anchor }
+          when UnexpectedPassError
+            { "kind" => "unexpected-pass", "line" => line, "anchor" => anchor }
+          else
+            { "kind" => "thrown", "line" => line, "anchor" => anchor }
+          end
+        end
+
+        # Run all examples and return the four-artifact bundle. Port of runConformance.
+        def run_conformance(var_doc, registry, create_context, parameter_types = [])
+          execution = Plan.plan(var_doc, registry)
+          observed = Hash.new { |h, k| h[k] = [] }
+          observer = ->(o) { observed[o.example_index] << o }
+          queue = Execute.collect_examples(execution, create_context: create_context, observer: observer)
+
+          trace_examples = queue.each_with_index.map do |queued, k|
+            outcome = "pass"
+            begin
+              queued.run.call
+            rescue StandardError
+              outcome = "fail"
+            end
+
+            planned = execution.examples[k]
+            obs_list = observed[k]
+            steps = planned.steps.each_with_index.map do |step, i|
+              ordinal = i + 1
+              matches = obs_list.select { |x| x.ordinal == ordinal }
+              observation = matches.find { |m| m.outcome == "fail" } || matches.last
+              step_outcome = observation ? observation.outcome : "skipped"
+              step_dict = {
+                "exampleName" => queued.name,
+                "ordinal" => ordinal,
+                "stepText" => step.text,
+                "matchedExpression" => step.step_def.expression,
+                "contextKey" => { "exampleName" => queued.name, "stepFile" => file_stem(step.step_def.expression_source_file) },
+                "outcome" => step_outcome
+              }
+              step_dict["failure"] = to_failure_artifact(observation&.error, step.match_span) if step_outcome == "fail"
+              step_dict
+            end
+
+            { "name" => queued.name, "outcome" => outcome, "steps" => steps }
+          end
+
+          {
+            var_doc: to_var_doc_artifact(var_doc),
+            registry: to_registry_artifact(registry, parameter_types),
+            plan: to_plan_artifact(execution),
+            trace: { "examples" => trace_examples }
+          }
         end
       end
     end
