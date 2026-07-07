@@ -17,9 +17,35 @@ hand. The `[Unreleased]` section is refreshed by CI on every push to `main`.
 - Added: **var-core:** Drift re-identifies examples by text similarity, so moving and rewording never false-alarm
 - Added: **var-core:** Report drift as a Diagnostic and add a BaselineStore port
 - Added: **var-core:** ReconcileDrift orchestrates baseline read → detect → write through the BaselineStore port
+- Added: **var-cli:** Var run detects spec drift and gates on it
+- Added: **var-vitest:** Read-only drift gate — a spec whose example stopped matching fails the suite
+- Fixed: **var:** Resolve a step's source file from bundled, minified stack traces
+
+### Python (PyPI)
+
+- Added: **var-core:** Detect spec drift with a byte-identical var.lock.json baseline
+- Added: **var-pytest:** Pytest and unittest gate on spec drift, writing var.lock.json
+
+### Java & Kotlin (Maven Central)
+
+- Added: **var-core:** Detect spec drift with a byte-identical var.lock.json baseline
+- Added: **var-junit:** The JUnit engine gates on spec drift
+- Added: **var-kotest:** Kotest VarSpec gates on spec drift
+
+### Ruby (RubyGems)
+
+- Added: **var-core:** Scaffold the ruby workspace and port the UTF-16 span layer
+- Added: **var-core:** Parse Markdown specs to a var-doc AST with UTF-16 spans
+- Added: **var-core:** Register step definitions via cucumber-expressions
+- Added: **var-core:** Match steps and build execution plans
+- Added: **var-core:** Execute plans and compare returns against the document
+- Added: **var-core:** Detect spec drift with a byte-identical var.lock.json baseline
+- Added: **var-config:** Read var.config.json
+- Added: **var-rspec:** Run Markdown specs as RSpec examples
 
 ### VS Code extension (Marketplace & Open VSX)
 
+- Added: Drift shows as an editor warning with an "Accept as prose" quick fix
 - Fixed: Kotlin parameter types declared with raw-string regexes are now discovered
 
 ### Specification (all ports)
@@ -33,6 +59,23 @@ Registrar.defineParameterType (Java) and parameterType (Kotlin).
 the markers into a parameter type (e.g. regexp /\*[^*]+\*/ with parse
 raw.slice(1, -1)); the var-doc artifact's inlineMap field is now
 segmentMap.
+- ⚠️ **Breaking:** Unify step authoring on steps() → param, stimulus, sensor
+  the step-authoring API is renamed and restructured in every
+port; `parse` is now a varargs function over the capture groups.
+
+- TypeScript: `const { stimulus, sensor } = defineState(factory, paramTypes)`
+  becomes `const { stimulus, sensor } = steps(factory).param(name, regexp, parse?, format?)`.
+  Chain `.param()` before destructuring to keep custom-param handler-arg
+  inference.
+- Python: `stimulus, sensor = define_state(factory, param_types=...)` becomes
+  `param, stimulus, sensor = steps(factory)`, then
+  `param(name, regexp, parse=None, format=None)`.
+- Java: `registrar.defineState(factory)` becomes `registrar.steps(factory)`,
+  and `registrar.defineParameterType(...)` becomes `s.param(name, Pattern, parse?, format?)`
+  on the returned binder (`parse` is a `String...` varargs SAM; a
+  two-argument `param(name, Pattern)` gives identity parse).
+- Kotlin: top-level `defineState { ... }` becomes `steps { ... }`, and
+  `parameterType(...)` becomes `param(...)`.
 - Added: The state factory argument to defineState/define_state is now optional — step files with pure steps can omit it
 
 ## [0.3.1] - 2026-07-06
