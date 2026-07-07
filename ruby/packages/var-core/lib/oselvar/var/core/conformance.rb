@@ -130,6 +130,56 @@ module Oselvar
             end
           }
         end
+
+        def doc_string_hash(doc_string)
+          {
+            "content" => doc_string.content,
+            "contentType" => doc_string.content_type,
+            "span" => span_hash(doc_string.span)
+          }
+        end
+
+        # Project an ExecutionPlan to the wire dict for the plan artifact.
+        def to_plan_artifact(plan)
+          source = plan.var_doc.source
+          {
+            "examples" => plan.examples.map { |ex| planned_example_hash(ex, source) },
+            "diagnostics" => plan.diagnostics.map do |d|
+              { "code" => d.code, "severity" => d.severity, "span" => span_hash(d.span) }
+            end
+          }
+        end
+
+        def planned_example_hash(example, source)
+          result = {
+            "name" => example.name,
+            "scopeStack" => example.scope_stack,
+            "span" => span_hash(example.span),
+            "expectedOutcome" => example.expected_outcome || "pass"
+          }
+          result["expectedErrorMessage"] = example.expected_error_message if example.expected_error_message
+          result["steps"] = example.steps.map { |s| planned_step_hash(s, source) }
+          result
+        end
+
+        def planned_step_hash(step, source)
+          step_names = parameter_type_names(step.step_def.compiled)
+          result = {
+            "text" => step.text,
+            "matchSpan" => span_hash(step.match_span),
+            "paramSpans" => step.param_spans.map { |s| span_hash(s) },
+            "matchedExpression" => step.step_def.expression,
+            "args" => step.param_spans.each_with_index.map do |s, i|
+              {
+                "value" => Offsets.utf16_slice(source, s.start_offset, s.end_offset),
+                "parameterType" => i < step_names.length ? step_names[i] : nil
+              }
+            end
+          }
+          result["dataTable"] = block_hash(step.data_table) if step.data_table
+          result["docString"] = doc_string_hash(step.doc_string) if step.doc_string
+          result
+        end
       end
     end
   end
