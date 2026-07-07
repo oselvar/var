@@ -25,32 +25,28 @@ export const STEP_DEFINITION_QUERY = `
 ) @root
 `
 
-// Var has no raw-regexp step definitions, so unlike cucumber/language-service
-// this has no (regex)/(template_string) branch on @expression above. This
-// query's own (regex) alternative below is unrelated: it's for a parameter
-// type's *own* regexp property (e.g. `{ airport: { regexp: /[A-Z]{3}/ } }`),
-// which is a real regexp regardless of the step-definition rule.
+// A custom parameter type is a `param('name', /regexp/, parse?, format?)` call:
+// the name is the first (string) argument, the regexp the second. Var has no
+// raw-regexp step definitions, so unlike cucumber/language-service the step
+// query has no (regex)/(template_string) branch on @expression; this query's
+// (regex) alternative below is unrelated — it's the parameter type's own regexp
+// (e.g. `param('airport', /[A-Z]{3}/)`), a real regexp regardless of that rule.
+// `param` is normally reached as a method on the chain returned by `steps()`
+// (`steps(f).param('money', /…/)`), so match it both as a bare call and as a
+// member call.
 export const PARAMETER_TYPE_QUERY = `
 (call_expression
-  function: (identifier) @function-name
+  function: [
+    (identifier) @function-name
+    (member_expression property: (property_identifier) @function-name)
+  ]
   arguments: (arguments
     .
-    (_)
+    (string) @name
     .
-    (object
-      (pair
-        key: (property_identifier) @name
-        value: (object
-          (pair
-            key: (property_identifier) @regexp-key
-            value: [(regex) (string)] @regexp-value
-          )
-        )
-      )
-    )
+    [(regex) (string)] @regexp-value
   )
-  (#eq? @function-name "defineState")
-  (#eq? @regexp-key "regexp")
+  (#eq? @function-name "param")
 ) @root
 `
 

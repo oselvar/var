@@ -1,11 +1,13 @@
-import { defineState } from '@oselvar/var'
+import { steps } from '@oselvar/var'
 
 // Custom {airport} parameter type: IATA code, lowercased by the parse function.
 // The lowercasing is asserted by the sensor (the .md says "lhr"), so an
 // identity parse fails this bundle — proving parse functions execute.
-const { stimulus, sensor } = defineState<{ dest?: string }>(() => ({}), {
-  airport: { regexp: /[A-Z]{3}/, parse: (code: string) => code.toLowerCase() },
-})
+const { stimulus, sensor } = steps<{ dest?: string }>(() => ({})).param(
+  'airport',
+  /[A-Z]{3}/,
+  (code) => code.toLowerCase(),
+)
 
 stimulus('I fly to {airport}', (_state, dest: string) => ({ dest }))
 

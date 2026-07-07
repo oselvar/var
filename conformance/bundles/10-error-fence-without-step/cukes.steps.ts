@@ -1,6 +1,6 @@
-import { defineState } from '@oselvar/var'
+import { steps } from '@oselvar/var'
 
-const { stimulus } = defineState(() => ({}))
+const { stimulus } = steps(() => ({}))
 
 // The prose matches no step, so the `error` fence (which marks the example
 // expected-to-fail) has nothing to run → error-fence-without-step diagnostic,

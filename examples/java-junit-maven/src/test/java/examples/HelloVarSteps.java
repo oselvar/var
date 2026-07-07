@@ -11,7 +11,7 @@ public final class HelloVarSteps implements StepDefinitions {
 
     @Override
     public void defineSteps(Registrar registrar) {
-        StateBinder<Ctx> s = registrar.defineState(() -> new Ctx("", 0));
+        StateBinder<Ctx> s = registrar.steps(() -> new Ctx("", 0));
 
         s.stimulus("I greet {string}", (Ctx ctx, String name) -> new Ctx("Hello, " + name + "!", ctx.result()));
         s.sensor("the greeting should be {string}", (Ctx ctx, String expected) -> ctx.greeting());

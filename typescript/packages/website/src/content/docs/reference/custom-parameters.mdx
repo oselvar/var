@@ -13,13 +13,12 @@ can use it as a `{name}` placeholder.
 <Tabs syncKey="lang">
   <TabItem label="TypeScript">
     ```ts
-    const { stimulus, sensor } = defineState(() => ({ fee: GBP(0) }), {
-      money: {
-        regexp: /£\d+\.\d{2}/,
-        parse: (raw) => GBP(Number.parseFloat(raw.slice(1))),
-        format: (m) => `£${m.value.toFixed(2)}`,
-      },
-    })
+    const { stimulus, sensor } = steps(() => ({ fee: GBP(0) })).param(
+      'money',
+      /£\d+\.\d{2}/,
+      (raw) => GBP(Number.parseFloat(raw.slice(1))),
+      (m) => `£${m.value.toFixed(2)}`,
+    )
 
     sensor('owes a {money} late fee', (state) => state.fee)
     ```
@@ -27,7 +26,8 @@ can use it as a `{name}` placeholder.
   <TabItem label="Java">
     ```java
     // inside defineSteps(Registrar registrar)
-    registrar.defineParameterType(
+    var s = registrar.steps(Ctx::new);
+    s.param(
             "money",
             Pattern.compile("£\\d+\\.\\d{2}"),
             groups -> GBP.of(new BigDecimal(groups[0].substring(1))),
@@ -38,8 +38,8 @@ can use it as a `{name}` placeholder.
   </TabItem>
   <TabItem label="Kotlin">
     ```kotlin
-    val steps = defineState(::Ctx) {
-        parameterType(
+    val steps = steps(::Ctx) {
+        param(
             "money",
             Regex("""£\d+\.\d{2}"""),
             format = { "£%.2f".format(it.value) },
@@ -51,15 +51,12 @@ can use it as a `{name}` placeholder.
   </TabItem>
   <TabItem label="Python">
     ```python
-    stimulus, sensor = define_state(
-        lambda: {"fee": gbp(0)},
-        {
-            "money": {
-                "regexp": r"£\d+\.\d{2}",
-                "parse": lambda raw: gbp(Decimal(raw[1:])),
-                "format": lambda m: f"£{m.value:.2f}",
-            }
-        },
+    param, stimulus, sensor = steps(lambda: {"fee": gbp(0)})
+    param(
+        "money",
+        r"£\d+\.\d{2}",
+        parse=lambda raw: gbp(Decimal(raw[1:])),
+        format=lambda m: f"£{m.value:.2f}",
     )
 
 
@@ -93,11 +90,7 @@ The pattern that recognizes the parameter inside a sentence.
   parameter, put the markers in the pattern and strip them in `parse`:
 
   ```ts
-  title: {
-    regexp: /\*[^*]+\*/,
-    parse: (raw) => raw.slice(1, -1),
-    format: (t) => `*${t}*`,
-  }
+  param('title', /\*[^*]+\*/, (raw) => raw.slice(1, -1), (t) => `*${t}*`)
   ```
 
   The same recipe works for any markup — bold (`/\*\*[^*]+\*\*/`), AsciiDoc
@@ -110,8 +103,10 @@ The pattern that recognizes the parameter inside a sentence.
 ### `parse`
 
 Turns the matched text into the value your step handlers receive — a number, a
-date, a domain object. If omitted, the parameter is the matched text itself
-(TypeScript and Python; the Java and Kotlin signatures always take one).
+date, a domain object. It is a varargs function over the capture groups. If
+omitted, the parameter is the matched text itself (TypeScript, Python, and
+Java's two-argument `param`; the Kotlin signature always takes a trailing
+`parse` lambda).
 
 In TypeScript, the parse function's return type flows into the handlers: with the
 `money` type above, a handler for `'owes a {money} late fee'` receives a typed
@@ -179,7 +174,8 @@ so mismatch rendering never needs a `format` for them.
 
 ## Scope
 
-Custom parameter types are declared per step file, alongside
-`defineState` / `define_state` / the registrar. A type declared in one step
-file is not visible to another file's expressions — like state, parameter
+Custom parameter types are declared per step file with `param`, alongside
+`steps` — a chained `.param()` (TypeScript), the returned `param` function
+(Python), or the binder's `param` (Java and Kotlin). A type declared in one
+step file is not visible to another file's expressions — like state, parameter
 types are a per-file concern.

@@ -1,7 +1,7 @@
 @file:JvmName("MoneySteps")
 
 // Kotlin sibling of money.steps.ts / money.steps.py / MoneySteps.java
-// (bundle 15-custom-parameter-format) — exercises StepsScope.parameterType's
+// (bundle 15-custom-parameter-format) — exercises StepsScope.param's
 // `format` parameter: the inverse of `parse`, rendering a value back in the
 // document's notation. The sensor returns the WRONG Money on purpose: the
 // golden pins the formatted actual ("£2.60"), proving every port renders
@@ -10,12 +10,12 @@
 // outside conformance.
 package com.oselvar.varkt.conformance.bundle15
 
-import com.oselvar.varkt.defineState
+import com.oselvar.varkt.steps
 import com.oselvar.varkt.sensor
 import java.util.Locale
 
-val steps = defineState {
-    parameterType(
+val steps = steps {
+    param(
         "money",
         Regex("""£\d+\.\d{2}"""),
         format = { m: Map<String, Any> -> String.format(Locale.ROOT, "£%.2f", m["value"]) },

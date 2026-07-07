@@ -20,7 +20,7 @@ Each example in the Markdown specs becomes one vitest test.
 - **`var.config.json`** is the single source of truth: `docs.include` globs
   the Markdown specs and `steps` globs the step-definition files. The vitest
   plugin drives vitest's own include/exclude from it.
-- **`steps/*.steps.ts`** define the steps with `defineState` +
+- **`steps/*.steps.ts`** define the steps with `steps` +
   `stimulus`/`sensor`. A stimulus returns the next state, a sensor returns a
   value for Vár to compare against what the Markdown says.
 - **`steps/yahtzee.ts`** and **`steps/roman-numerals.ts`** are the sample's

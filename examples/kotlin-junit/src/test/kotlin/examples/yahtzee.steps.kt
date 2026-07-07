@@ -2,10 +2,10 @@
 
 package examples
 
-import com.oselvar.varkt.defineState
 import com.oselvar.varkt.sensor
+import com.oselvar.varkt.steps
 
-val yahtzeeSteps = defineState {
+val yahtzeeSteps = steps {
     // Header-bound table: the paragraph names every header cell (dice,
     // category, score), so this sensor runs once per row with the row as a
     // Map keyed by header. Returning mapOf("score" to …) checks that column;

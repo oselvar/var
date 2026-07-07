@@ -17,26 +17,20 @@ const STEP_DEFINITION_QUERY = `
 ) @root
 `
 
-// define_state(..., param_types={"name": {"regexp": <string|re.compile(...)>}}).
-// Dict keys are (string) nodes whose text INCLUDES the quotes, so the key
-// filter is #match? over quoted text, not #eq?.
+// A custom parameter type is a `param("name", r"regexp"|re.compile(...), ...)`
+// call: name the first positional (string) argument, regexp the second (a
+// string or an re.compile(...) call). Trailing parse=/format= keyword arguments
+// are not anchored, so they're ignored.
 const PARAMETER_TYPE_QUERY = `
 (call
   function: (identifier) @function-name
   arguments: (argument_list
-    (keyword_argument
-      name: (identifier) @kwarg-name
-      value: (dictionary
-        (pair
-          key: (string) @name
-          value: (dictionary
-            (pair
-              key: (string) @regexp-key
-              value: [(string) (call)] @regexp-value)))))
+    .
+    (string) @name
+    .
+    [(string) (call)] @regexp-value
   )
-  (#eq? @function-name "define_state")
-  (#eq? @kwarg-name "param_types")
-  (#match? @regexp-key "^[\\"'](regexp)[\\"']$")
+  (#eq? @function-name "param")
 ) @root
 `
 

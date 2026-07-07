@@ -21,9 +21,9 @@ test('the front-page library sample type-checks against the real @oselvar/var ty
   expect(problems).toEqual([])
 })
 
-test('stimulus and sensor are the destructurable names defineState returns', () => {
-  const source = `import { defineState } from '@oselvar/var'
-const { stimulus, sensor } = defineState(() => ({ total: 0 }))
+test('stimulus and sensor are the destructurable names steps returns', () => {
+  const source = `import { steps } from '@oselvar/var'
+const { stimulus, sensor } = steps(() => ({ total: 0 }))
 stimulus('I add {int}', (state, n) => ({ total: state.total + n }))
 sensor('the total is {int}', (state) => state.total)
 `
@@ -32,8 +32,8 @@ sensor('the total is {int}', (state) => state.total)
 })
 
 test('the stale pre-rename API names are rejected', () => {
-  const source = `import { defineState } from '@oselvar/var'
-const { context, action } = defineState(() => ({}))
+  const source = `import { steps } from '@oselvar/var'
+const { context, action } = steps(() => ({}))
 `
   const tsd = createTsDiagnostics()
   tsd.updateDoc('old.steps.ts', source)
@@ -42,14 +42,13 @@ const { context, action } = defineState(() => ({}))
 })
 
 test('a format whose parameter contradicts its parse return is a type error', () => {
-  const source = `import { defineState } from '@oselvar/var'
-const { sensor } = defineState(() => ({}), {
-  money: {
-    regexp: /£\\d+\\.\\d{2}/,
-    parse: (raw: string) => ({ value: Number(raw.slice(1)) }),
-    format: (m: string) => m,
-  },
-})
+  const source = `import { steps } from '@oselvar/var'
+const { sensor } = steps(() => ({})).param(
+  'money',
+  /£\\d+\\.\\d{2}/,
+  (raw) => ({ value: Number(raw.slice(1)) }),
+  (m: string) => m,
+)
 `
   const tsd = createTsDiagnostics()
   tsd.updateDoc('money.steps.ts', source)

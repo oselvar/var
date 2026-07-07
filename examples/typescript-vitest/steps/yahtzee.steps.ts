@@ -1,7 +1,7 @@
-import { defineState } from '@oselvar/var'
+import { steps } from '@oselvar/var'
 import { score } from './yahtzee'
 
-const { sensor } = defineState()
+const { sensor } = steps()
 
 // Header-bound table: the paragraph names every header cell (dice, category,
 // score), so the runner calls this sensor once per row with the row as an

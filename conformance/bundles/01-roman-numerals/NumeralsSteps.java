@@ -29,7 +29,7 @@ public final class NumeralsSteps implements StepDefinitions {
 
     @Override
     public void defineSteps(Registrar registrar) {
-        StateBinder<Ctx> s = registrar.defineState(() -> new Ctx(null));
+        StateBinder<Ctx> s = registrar.steps(() -> new Ctx(null));
 
         s.stimulus(
                 "I convert {int} to roman numerals",

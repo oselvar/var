@@ -61,7 +61,7 @@ def _import_steps(bundle: Path) -> None:
     """Import the step file from *bundle* as a fresh module (unique name each call).
 
     Using ``spec_from_file_location`` with a unique module name ensures
-    ``define_state`` sees a different ``co_filename`` per import, and also
+    ``steps`` sees a different ``co_filename`` per import, and also
     prevents Python's import cache from returning a stale module across bundles.
     """
     steps_py = _find_steps_file(bundle)

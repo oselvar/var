@@ -7,7 +7,6 @@
 
 package com.oselvar.varkt
 
-import com.oselvar.`var`.Registrar
 import com.oselvar.`var`.RegistrarGlue
 import com.oselvar.`var`.State
 import com.oselvar.`var`.StateBinder
@@ -25,18 +24,18 @@ internal class StateBox<C : Any>(val value: C) : State
 
 /**
  * The var-kotlin author entry point. Returns an INERT, replayable [StepDefinitions]: nothing
- * registers when a top-level `val steps = defineState(::Ctx) { … }` initializes — the block is
- * stored and replayed against whatever fresh [Registrar] the runner injects via
+ * registers when a top-level `val stepDefs = steps(::Ctx) { … }` initializes — the block is stored
+ * and replayed against whatever fresh `Registrar` the runner injects via
  * [StepDefinitions.defineSteps]. This keeps the Java port's rule that mutable accumulation lives in
  * the shell, never in a facade-global (see Registrar's javadoc), while giving Kotlin authors a
  * file-scoped API.
  */
-fun <C : Any> defineState(
+fun <C : Any> steps(
     factory: () -> C,
     block: StepsScope<C>.() -> Unit,
 ): StepDefinitions = StepDefinitions { registrar ->
-    val binder = registrar.defineState(Supplier { StateBox(factory()) })
-    StepsScope(registrar, binder).block()
+    val binder = registrar.steps(Supplier { StateBox(factory()) })
+    StepsScope(binder).block()
 }
 
 /**
@@ -44,12 +43,12 @@ fun <C : Any> defineState(
  * evolve. Handlers run against [Unit]: a stimulus body simply performs its effect (its implicit
  * `Unit` return IS the unchanged state), a sensor returns the value the core compares.
  */
-fun defineState(block: StepsScope<Unit>.() -> Unit): StepDefinitions = defineState({}, block)
+fun steps(block: StepsScope<Unit>.() -> Unit): StepDefinitions = steps({}, block)
 
 /**
- * The receiver of a [defineState] block: bare `stimulus`/`sensor` calls, one overload per handler
- * arity. Handlers are `suspend` with the state as receiver; they run on the Java engine's
- * synchronous executor via [runBlocking].
+ * The receiver of a [steps] block: bare `stimulus`/`sensor` calls, one overload per handler arity.
+ * Handlers are `suspend` with the state as receiver; they run on the Java engine's synchronous
+ * executor via [runBlocking].
  *
  * ONLY the zero-parameter overloads are members; the capturing arities are the top-level extension
  * functions below. This split is load-bearing, not style: a parameterless lambda (`sensor("…") {
@@ -58,7 +57,7 @@ fun defineState(block: StepsScope<Unit>.() -> Unit): StepDefinitions = defineSta
  * win over extensions in overload resolution, so the parameterless lambda binds the member; a
  * lambda that declares parameters (`{ n: Int -> … }`) is inapplicable to the member and falls
  * through to the matching extension. Authors outside this package import the extensions alongside
- * [defineState] (IDE auto-import handles it).
+ * [steps] (IDE auto-import handles it).
  *
  * A handler may declare FEWER parameters than the step supplies (captures plus the trailing
  * data-table/doc-string argument); the surplus is dropped — the same semantics as the TS facade,
@@ -69,11 +68,7 @@ fun defineState(block: StepsScope<Unit>.() -> Unit): StepDefinitions = defineSta
  * each step's source location is the author's own `.steps.kt` call site.
  */
 @RegistrarGlue
-class StepsScope<C : Any>
-internal constructor(
-    internal val registrar: Registrar,
-    internal val binder: StateBinder<StateBox<C>>,
-) {
+class StepsScope<C : Any> internal constructor(internal val binder: StateBinder<StateBox<C>>) {
 
     fun stimulus(expression: String, handler: suspend C.() -> C) {
         binder.stimulus(expression, StimulusAdapter<C>(0) { c, _ -> handler(c) })
@@ -93,28 +88,28 @@ internal constructor(
      * parameter mismatch, never for matching or the comparison verdict. [format] is a named
      * parameter before the trailing [parse] lambda:
      * ```kotlin
-     * parameterType("money", Regex("""£\d+\.\d{2}"""), format = { "£%.2f".format(it.value) }) {
+     * param("money", Regex("""£\d+\.\d{2}"""), format = { "£%.2f".format(it.value) }) {
      *     groups -> Money.gbp(groups[0].substring(1).toBigDecimal())
      * }
      * ```
      */
-    fun <T> parameterType(
+    fun <T> param(
         name: String,
         regexp: Regex,
         format: ((T) -> String)? = null,
         parse: (Array<String>) -> T,
     ) {
         if (format == null) {
-            registrar.defineParameterType(
+            binder.param(
                 name,
                 regexp.toPattern(),
-                Function<Array<String>, T> { captures -> parse(captures) },
+                StateBinder.Parse<T> { captures -> parse(captures) },
             )
         } else {
-            registrar.defineParameterType(
+            binder.param(
                 name,
                 regexp.toPattern(),
-                Function<Array<String>, T> { captures -> parse(captures) },
+                StateBinder.Parse<T> { captures -> parse(captures) },
                 Function<T, String> { value -> format(value) },
             )
         }

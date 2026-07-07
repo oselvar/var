@@ -1,8 +1,8 @@
 import { expect, test } from 'vitest'
 import { discoverStaticExamples } from '../src/static-examples.ts'
 
-const STEPS = `import { defineState } from '@oselvar/var'
-const { sensor } = defineState(() => ({}))
+const STEPS = `import { steps } from '@oselvar/var'
+const { sensor } = steps(() => ({}))
 sensor('the answer is {int}', () => 42)
 `
 
@@ -17,16 +17,14 @@ test('discovers only examples with matched steps, named by the whole paragraph',
 })
 
 test('matches expressions that use a custom parameter type', () => {
-  const steps = `import { defineState } from '@oselvar/var'
-const { sensor } = defineState(() => ({}), {
-  color: { regexp: /red|green/ },
-})
+  const stepSource = `import { steps } from '@oselvar/var'
+const { sensor } = steps(() => ({})).param('color', /red|green/)
 sensor('the light is {color}', () => 'green')
 `
   const examples = discoverStaticExamples({
     varPath: '/abs/light.md',
     source: 'Right now the light is green.\n',
-    stepFiles: [{ path: '/abs/light.steps.ts', source: steps }],
+    stepFiles: [{ path: '/abs/light.steps.ts', source: stepSource }],
   })
   expect(examples).toEqual([{ name: 'Right now the light is green', line: 1, col: 1 }])
 })

@@ -22,7 +22,7 @@ public final class AlphaSteps implements StepDefinitions {
 
     @Override
     public void defineSteps(Registrar registrar) {
-        var s = registrar.defineState(() -> new Ctx(0));
+        var s = registrar.steps(() -> new Ctx(0));
         s.stimulus("alpha increments to {int}", (Ctx ctx, Integer n) -> new Ctx(n));
         s.sensor("alpha count is {int}", (Ctx ctx, Integer expected) -> ctx.count());
     }

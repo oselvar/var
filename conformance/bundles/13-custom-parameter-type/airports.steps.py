@@ -1,14 +1,10 @@
-from var import define_state
+from var import steps
 
 # Custom {airport} parameter type: IATA code, lowercased by the parse function.
 # The lowercasing is asserted by the sensor (the .md says "lhr"), so an
 # identity parse fails this bundle — proving parse functions execute.
-stimulus, sensor = define_state(
-    lambda: {},
-    param_types={
-        "airport": {"regexp": "[A-Z]{3}", "parse": lambda code: code.lower()}
-    },
-)
+param, stimulus, sensor = steps(lambda: {})
+param("airport", "[A-Z]{3}", parse=lambda code: code.lower())
 
 
 @stimulus("I fly to {airport}")

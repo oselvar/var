@@ -22,12 +22,12 @@ public final class MoneySteps implements StepDefinitions {
 
     @Override
     public void defineSteps(Registrar registrar) {
-        Function<String[], Map<String, Object>> parse =
+        StateBinder<State.Empty> s = registrar.steps();
+
+        StateBinder.Parse<Map<String, Object>> parse =
                 groups -> Map.of("currency", "GBP", "value", Double.parseDouble(groups[0].substring(1)));
         Function<Map<String, Object>, String> format = m -> String.format(Locale.ROOT, "£%.2f", m.get("value"));
-        registrar.defineParameterType("money", Pattern.compile("£\\d+\\.\\d{2}"), parse, format);
-
-        StateBinder<State.Empty> s = registrar.defineState();
+        s.param("money", Pattern.compile("£\\d+\\.\\d{2}"), parse, format);
 
         s.sensor(
                 "The late fee is {money}",

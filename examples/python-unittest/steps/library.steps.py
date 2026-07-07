@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from library_example import FEE_PER_DAY, add_money, gbp, late_fee, may_borrow
-from var import define_state
+from var import steps
 
 
 def to_date(raw):
@@ -24,30 +24,19 @@ def format_money(m):
     return f"{round(m.value * 100)}p" if m.value < 1 else f"£{m.value:.2f}"
 
 
-stimulus, sensor = define_state(
-    lambda: {"loans": (), "fee": gbp(0), "granted": False},
-    {
-        "date": {
-            "regexp": r"[A-Z][a-z]+ \d{1,2}, \d{4}",
-            "parse": to_date,
-            "format": format_date,
-        },
-        "money": {
-            # £2.50 and 50p, both as GBP Money. The amount is cucumber-expressions'
-            # float regexp, minus the scientific notation.
-            "regexp": r"£(?=.*\d.*)[-+]?\d*(?:\.(?=\d.*))?\d*|\d+p",
-            "parse": to_money,
-            "format": format_money,
-        },
-        # The emphasised run IS the parameter: the markers live in the pattern,
-        # parse strips them, format restores them. Markup is notation, like £2.50.
-        "title": {
-            "regexp": r"\*[^*]+\*",
-            "parse": lambda raw: raw[1:-1],
-            "format": lambda t: f"*{t}*",
-        },
-    },
+param, stimulus, sensor = steps(lambda: {"loans": (), "fee": gbp(0), "granted": False})
+param("date", r"[A-Z][a-z]+ \d{1,2}, \d{4}", parse=to_date, format=format_date)
+# £2.50 and 50p, both as GBP Money. The amount is cucumber-expressions'
+# float regexp, minus the scientific notation.
+param(
+    "money",
+    r"£(?=.*\d.*)[-+]?\d*(?:\.(?=\d.*))?\d*|\d+p",
+    parse=to_money,
+    format=format_money,
 )
+# The emphasised run IS the parameter: the markers live in the pattern,
+# parse strips them, format restores them. Markup is notation, like £2.50.
+param("title", r"\*[^*]+\*", parse=lambda raw: raw[1:-1], format=lambda t: f"*{t}*")
 
 
 @stimulus("borrowed {title}, due back on {date}")

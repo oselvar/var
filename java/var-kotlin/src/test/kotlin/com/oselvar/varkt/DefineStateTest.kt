@@ -19,7 +19,7 @@ class DefineStateTest {
     // changing this test to `{ -> cukes }`; stop and report instead (the
     // approved API shape would need revisiting with the user).
     private fun canonicalSteps(): StepDefinitions =
-        defineState(::Ctx) {
+        steps(::Ctx) {
             stimulus("I have {int} cukes") { n: Int ->
                 copy(cukes = n)
             }
@@ -44,7 +44,7 @@ class DefineStateTest {
     }
 
     @Test
-    fun `top-level defineState registers nothing until replayed`() {
+    fun `top-level steps registers nothing until replayed`() {
         val definitions = canonicalSteps() // constructing the value is inert
         val registrar = RegistryRegistrar()
         assertTrue(registrar.registry().steps().isEmpty())
@@ -102,7 +102,7 @@ class DefineStateTest {
     @Test
     fun `handler declaring more parameters than the step supplies fails with an authoring error`() {
         val registrar = RegistryRegistrar()
-        defineState(::Ctx) {
+        steps(::Ctx) {
                 sensor("over-declared") { a: Int, b: Int -> a + b }
             }
             .defineSteps(registrar)
@@ -119,9 +119,9 @@ class DefineStateTest {
     }
 
     @Test
-    fun `factory-less defineState registers pure steps against Unit state`() {
+    fun `factory-less steps registers pure steps against Unit state`() {
         val registrar = RegistryRegistrar()
-        defineState {
+        steps {
                 stimulus("I warm up my mental math") {}
                 sensor("the square of {int} is {int}") { n: Int -> listOf(n, n * n) }
             }

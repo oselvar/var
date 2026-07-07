@@ -14,7 +14,7 @@ with sensors.
 <Tabs syncKey="lang">
   <TabItem label="TypeScript">
     ```ts
-    const { stimulus, sensor } = defineState(() => ({ total: 0 }))
+    const { stimulus, sensor } = steps(() => ({ total: 0 }))
 
     stimulus('I add {int}', (state, n) => ({ total: state.total + n }))
     sensor('the total is {int}', (state) => state.total)
@@ -25,7 +25,7 @@ with sensors.
     // inside defineSteps(Registrar registrar)
     record Ctx(int total) implements State {}
 
-    StateBinder<Ctx> s = registrar.defineState(() -> new Ctx(0));
+    StateBinder<Ctx> s = registrar.steps(() -> new Ctx(0));
 
     s.stimulus("I add {int}", (Ctx ctx, Integer n) -> new Ctx(ctx.total() + n));
     s.sensor("the total is {int}", (Ctx ctx, Integer expected) -> ctx.total());
@@ -35,7 +35,7 @@ with sensors.
     ```kotlin
     data class Ctx(val total: Int = 0)
 
-    val steps = defineState(::Ctx) {
+    val steps = steps(::Ctx) {
         stimulus("I add {int}") { n: Int -> copy(total = total + n) }
         sensor("the total is {int}") { _: Int -> total }
     }
@@ -43,7 +43,7 @@ with sensors.
   </TabItem>
   <TabItem label="Python">
     ```python
-    stimulus, sensor = define_state(lambda: {"total": 0})
+    param, stimulus, sensor = steps(lambda: {"total": 0})
 
 
     @stimulus("I add {int}")
@@ -75,7 +75,7 @@ full replacement, same principle: new value out, never mutation.
 <Tabs syncKey="lang">
   <TabItem label="TypeScript">
     ```ts
-    const { stimulus } = defineState(() => ({ greeting: '', count: 0 }))
+    const { stimulus } = steps(() => ({ greeting: '', count: 0 }))
 
     stimulus('I greet {string}', (state, name) => ({ greeting: `Hello, ${name}!` }))
     stimulus('I add {int}', (state, n) => ({ count: state.count + n }))
@@ -85,7 +85,7 @@ full replacement, same principle: new value out, never mutation.
     ```java
     record Ctx(String greeting, int count) implements State {}
 
-    StateBinder<Ctx> s = registrar.defineState(() -> new Ctx("", 0));
+    StateBinder<Ctx> s = registrar.steps(() -> new Ctx("", 0));
 
     s.stimulus("I greet {string}", (Ctx ctx, String name) -> new Ctx("Hello, " + name + "!", ctx.count()));
     s.stimulus("I add {int}", (Ctx ctx, Integer n) -> new Ctx(ctx.greeting(), ctx.count() + n));
@@ -95,7 +95,7 @@ full replacement, same principle: new value out, never mutation.
     ```kotlin
     data class Ctx(val greeting: String = "", val count: Int = 0)
 
-    val steps = defineState(::Ctx) {
+    val steps = steps(::Ctx) {
         stimulus("I greet {string}") { name: String -> copy(greeting = "Hello, $name!") }
         stimulus("I add {int}") { n: Int -> copy(count = count + n) }
     }
@@ -103,7 +103,7 @@ full replacement, same principle: new value out, never mutation.
   </TabItem>
   <TabItem label="Python">
     ```python
-    stimulus, sensor = define_state(lambda: {"greeting": "", "count": 0})
+    param, stimulus, sensor = steps(lambda: {"greeting": "", "count": 0})
 
 
     @stimulus("I greet {string}")
@@ -132,27 +132,27 @@ full replacement, same principle: new value out, never mutation.
 
 ## State is per step file, per example
 
-`defineState` declares the state its step file's examples start from. Every
+`steps` declares the state its step file's examples start from. Every
 example gets a fresh state from the factory, so examples never leak into each
 other; steps defined in different step files never see each other's state.
 
 ### No state? Omit the factory
 
 The factory is optional. A step file whose steps are pure — nothing to
-arrange, nothing to evolve — calls `defineState` bare; handlers receive an
+arrange, nothing to evolve — calls `steps` bare; handlers receive an
 empty state they can ignore:
 
 <Tabs syncKey="lang">
   <TabItem label="TypeScript">
     ```ts
-    const { stimulus, sensor } = defineState()
+    const { stimulus, sensor } = steps()
 
     sensor('the square of {int} is {int}', (_state, n) => [n, n * n])
     ```
   </TabItem>
   <TabItem label="Java">
     ```java
-    StateBinder<State.Empty> s = registrar.defineState();
+    StateBinder<State.Empty> s = registrar.steps();
 
     s.sensor("the square of {int} is {int}",
             (State.Empty state, Integer n, Integer expected) -> List.of(n, n * n));
@@ -160,14 +160,14 @@ empty state they can ignore:
   </TabItem>
   <TabItem label="Kotlin">
     ```kotlin
-    val steps = defineState {
+    val steps = steps {
         sensor("the square of {int} is {int}") { n: Int -> listOf(n, n * n) }
     }
     ```
   </TabItem>
   <TabItem label="Python">
     ```python
-    stimulus, sensor = define_state()
+    param, stimulus, sensor = steps()
 
 
     @sensor("the square of {int} is {int}")

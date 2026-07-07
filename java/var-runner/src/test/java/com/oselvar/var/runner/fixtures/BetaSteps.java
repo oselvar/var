@@ -7,7 +7,7 @@ import com.oselvar.var.StepDefinitions;
 /**
  * See {@link AlphaSteps}' javadoc — this fixture's role is to be a genuinely separate
  * step-definition file (own top-level class, own {@code .java} file) with its own
- * {@link State} type and its own {@code defineState} call, so {@code StepLoaderTest}
+ * {@link State} type and its own {@code steps} call, so {@code StepLoaderTest}
  * can prove {@link com.oselvar.var.runner.StepLoader} doesn't cross-wire this file's
  * state factory with {@link AlphaSteps}'.
  */
@@ -17,7 +17,7 @@ public final class BetaSteps implements StepDefinitions {
 
     @Override
     public void defineSteps(Registrar registrar) {
-        var s = registrar.defineState(() -> new Ctx(""));
+        var s = registrar.steps(() -> new Ctx(""));
         s.stimulus("beta sets label to {word}", (Ctx ctx, String label) -> new Ctx(label));
         s.sensor("beta label is {word}", (Ctx ctx, String expected) -> ctx.label());
     }

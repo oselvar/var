@@ -1,6 +1,6 @@
-import { defineState } from '@oselvar/var'
+import { steps } from '@oselvar/var'
 
-const { stimulus, sensor } = defineState<{ count: number }>(() => ({ count: 0 }))
+const { stimulus, sensor } = steps<{ count: number }>(() => ({ count: 0 }))
 
 stimulus('I increment', (state) => ({ count: state.count + 1 }))
 

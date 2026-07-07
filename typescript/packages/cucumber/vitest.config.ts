@@ -6,7 +6,7 @@ export default defineConfig({
   // which is scoped to the tutorial).
   plugins: [varPlugin({ cwd: new URL('.', import.meta.url).pathname })],
   // Force a single `@oselvar/var` instance so the steps registered via
-  // `defineState` (author side) and the registry glue (`@oselvar/var/registry`)
+  // `steps` (author side) and the registry glue (`@oselvar/var/registry`)
   // share one module — otherwise the registry splits and no steps are seen.
   resolve: { dedupe: ['@oselvar/var'] },
   test: {

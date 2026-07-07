@@ -50,9 +50,9 @@ export function varVitestPlugin(options: VarVitestPluginOptions = {}): Plugin {
       const abs = (g: string) => resolve(cwd, g)
       return {
         // Force a single @oselvar/var (and @oselvar/var-core) module instance.
-        // The authoring API (defineState) and the registry glue
+        // The authoring API (steps) and the registry glue
         // (@oselvar/var/registry, used by runtime.ts) MUST share one module so
-        // buildRegistry() sees the steps registered via defineState. Under
+        // buildRegistry() sees the steps registered via steps(). Under
         // resolve.preserveSymlinks these can split into two instances, leaving
         // an empty registry and zero steps run with no error — so we dedupe.
         resolve: { dedupe: ['@oselvar/var', '@oselvar/var-core'] },

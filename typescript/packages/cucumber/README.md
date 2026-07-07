@@ -16,7 +16,7 @@ features/
   library.feature.md  ->   symlink to library.feature, parsed by var
 
 cucumber/steps/library.steps.ts   cucumber-js handlers (Given/When/Then + hooks)
-steps/library.steps.ts            var handlers (stimulus/sensor + defineState)
+steps/library.steps.ts            var handlers (stimulus/sensor + steps)
 
 src/library.ts                    the shared domain (a tiny library catalogue)
 ```
@@ -82,7 +82,7 @@ directly, with no test runner in the way — which is most of the gap.
    `Then(...)` with the role function that matches what each step does —
    `context('expr', fn)` to set up state, `action('expr', fn)` to perform an
    action, `sensor('expr', fn)` to return a value Vár checks — and replace
-   `World` + `Before`/`After` with a `defineState(() => ({...}))` factory whose
+   `World` + `Before`/`After` with a `steps(() => ({...}))` factory whose
    return value flows into each handler as the first argument.
 4. Data tables arrive as `ReadonlyArray<ReadonlyArray<string>>` (header row
    first); doc strings as `string`. Both are the LAST handler argument,

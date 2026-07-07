@@ -9,14 +9,14 @@
 package com.oselvar.varkt.conformance.bundle01
 
 import com.oselvar.varkt.stimulus
-import com.oselvar.varkt.defineState
+import com.oselvar.varkt.steps
 import com.oselvar.varkt.sensor
 
 data class Ctx(val result: String? = null)
 
 private val ROMAN = mapOf(1 to "I", 4 to "IV", 9 to "IX", 40 to "XL")
 
-val steps = defineState(::Ctx) {
+val steps = steps(::Ctx) {
     stimulus("I convert {int} to roman numerals") { n: Int ->
         copy(result = ROMAN[n])
     }

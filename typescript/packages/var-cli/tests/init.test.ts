@@ -13,7 +13,7 @@ test('scaffolds var.config.json and an example .md + steps file', async () => {
     expect(existsSync(join(dir, 'var-examples/01-hello.md'))).toBe(true)
     expect(existsSync(join(dir, 'var-examples/steps/01-hello.steps.ts'))).toBe(true)
     const stepsTs = readFileSync(join(dir, 'var-examples/steps/01-hello.steps.ts'), 'utf8')
-    expect(stepsTs).toContain('defineState')
+    expect(stepsTs).toContain('steps')
     expect(stepsTs).toContain('({ greeting:')
     expect(stepsTs).not.toContain('ctx.greeting =')
   } finally {

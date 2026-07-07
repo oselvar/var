@@ -65,7 +65,7 @@ function createModuleLoader(files: ReadonlyArray<SourceFile>) {
         if (target) return load(target)
       }
       throw new Error(
-        `Cannot import "${spec}" in the browser runner — import defineState() from "@oselvar/var", or add the imported file to this editor.`,
+        `Cannot import "${spec}" in the browser runner — import steps() from "@oselvar/var", or add the imported file to this editor.`,
       )
     }
     const mod = { exports: {} as Record<string, unknown> }

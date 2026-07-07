@@ -2,8 +2,8 @@
 
 package examples
 
-import com.oselvar.varkt.defineState
 import com.oselvar.varkt.sensor
+import com.oselvar.varkt.steps
 import com.oselvar.varkt.stimulus
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -28,8 +28,8 @@ private fun formatMoney(m: Money): String =
     if (m.value < 1) "${(m.value * 100).roundToInt()}p" else "£%.2f".format(Locale.ROOT, m.value)
 
 val librarySteps =
-    defineState(::LibraryCtx) {
-        parameterType(
+    steps(::LibraryCtx) {
+        param(
             "date",
             Regex("""[A-Z][a-z]+ \d{1,2}, \d{4}"""),
             format = { DATE_FORMAT.format(it) },
@@ -38,7 +38,7 @@ val librarySteps =
         }
         // £2.50 and 50p, both as GBP Money. The amount is cucumber-expressions'
         // float regexp, minus the scientific notation.
-        parameterType(
+        param(
             "money",
             Regex("""£(?=.*\d.*)[-+]?\d*(?:\.(?=\d.*))?\d*|\d+p"""),
             format = ::formatMoney,
@@ -47,7 +47,7 @@ val librarySteps =
         }
         // The emphasised run IS the parameter: the markers live in the pattern,
         // parse strips them, format restores them. Markup is notation, like £2.50.
-        parameterType(
+        param(
             "title",
             Regex("""\*[^*]+\*"""),
             format = { "*$it*" },

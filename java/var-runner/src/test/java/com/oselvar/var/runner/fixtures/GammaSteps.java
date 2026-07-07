@@ -15,8 +15,8 @@ public final class GammaSteps implements StepDefinitions {
 
     @Override
     public void defineSteps(Registrar registrar) {
-        registrar.defineParameterType("color", Pattern.compile("red|green|blue"), groups -> groups[0]);
-        var s = registrar.defineState(() -> new Ctx(""));
+        var s = registrar.steps(() -> new Ctx(""));
+        s.param("color", Pattern.compile("red|green|blue"));
         s.stimulus("gamma sets color to {color}", (Ctx ctx, String color) -> new Ctx(color));
     }
 }

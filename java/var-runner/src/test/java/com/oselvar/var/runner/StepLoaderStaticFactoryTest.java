@@ -38,6 +38,6 @@ class StepLoaderStaticFactoryTest {
                 IllegalArgumentException.class,
                 () -> StepLoader.loadSteps(List.of("com.oselvar.var.runner.DuplicateStateSteps"), LOADER));
         assertTrue(e.getMessage().contains("DuplicateStateSteps.java"), e.getMessage());
-        assertTrue(e.getMessage().contains("one defineState"), e.getMessage());
+        assertTrue(e.getMessage().contains("one steps"), e.getMessage());
     }
 }

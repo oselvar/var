@@ -2,10 +2,10 @@
 
 package examples
 
-import com.oselvar.varkt.defineState
 import com.oselvar.varkt.sensor
+import com.oselvar.varkt.steps
 
-val tablesAndDocStringsSteps = defineState {
+val tablesAndDocStringsSteps = steps {
     // Whole-table mode: the table arrives as List<List<String>> (header row
     // first). It is this sensor's only slot, so return the reproduced table
     // bare — Vár compares every cell.

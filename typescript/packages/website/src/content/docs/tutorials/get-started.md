@@ -57,9 +57,9 @@ prose and it would still run.
 The steps file binds those phrases to code:
 
 ```ts
-import { defineState } from '@oselvar/var'
+import { steps } from '@oselvar/var'
 
-const { stimulus, sensor } = defineState(() => ({ greeting: '' }))
+const { stimulus, sensor } = steps(() => ({ greeting: '' }))
 
 stimulus('I greet {string}', (_state, name: string) => ({ greeting: `Hello, ${name}!` }))
 

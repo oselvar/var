@@ -23,7 +23,7 @@ class AuthorApiTest {
 
         @Override
         public void defineSteps(Registrar registrar) {
-            StateBinder<Ctx> s = registrar.defineState(() -> new Ctx(null));
+            StateBinder<Ctx> s = registrar.steps(() -> new Ctx(null));
 
             s.stimulus("I convert {int} to roman numerals", (Ctx ctx, Integer n) -> new Ctx(ROMAN.get(n)));
 
@@ -36,7 +36,7 @@ class AuthorApiTest {
         RecordingRegistrar registrar = new RecordingRegistrar();
         new RomanNumeralSteps().defineSteps(registrar);
 
-        var steps = registrar.steps();
+        var steps = registrar.recordedSteps();
         assertEquals(2, steps.size(), "one action + one sensor");
         assertEquals(1, registrar.factories().size(), "one state factory per step class");
 
@@ -63,11 +63,11 @@ class AuthorApiTest {
         assertTrue(action.sourceLine() > 0);
     }
 
-    /** Pure steps need no evolving state: the factory-less {@code defineState()}. */
+    /** Pure steps need no evolving state: the factory-less {@code steps()}. */
     static final class SquareSteps implements StepDefinitions {
         @Override
         public void defineSteps(Registrar registrar) {
-            StateBinder<State.Empty> s = registrar.defineState();
+            StateBinder<State.Empty> s = registrar.steps();
 
             s.stimulus("I warm up my mental math", (State.Empty state) -> state);
 
@@ -82,7 +82,7 @@ class AuthorApiTest {
         RecordingRegistrar registrar = new RecordingRegistrar();
         new SquareSteps().defineSteps(registrar);
 
-        var steps = registrar.steps();
+        var steps = registrar.recordedSteps();
         assertEquals(2, steps.size(), "one stimulus + one sensor");
         assertEquals(1, registrar.factories().size(), "the default factory still registers");
         assertEquals(State.Empty.INSTANCE, registrar.factories().get(0).get());

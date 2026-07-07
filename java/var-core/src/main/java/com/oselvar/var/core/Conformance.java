@@ -199,7 +199,7 @@ public final class Conformance {
      *
      * <p><b>{@code contextFactory} is a single {@link Supplier}</b>, not (as in TS/Python) a
      * function keyed by step file: every Java conformance fixture registers exactly one state
-     * type via a single {@code defineState} call (see {@code RegistryRegistrar}), so there is
+     * type via a single {@code steps} call (see {@code RegistryRegistrar}), so there is
      * never more than one context factory to dispatch to. {@link Execute.ExecutePorts} still
      * declares {@code createContext} as a {@code Function<String, Object>} keyed by step file
      * (that port is unaware of this simplification — it's shared with any future non-conformance

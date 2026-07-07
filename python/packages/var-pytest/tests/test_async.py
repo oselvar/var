@@ -13,9 +13,9 @@ VAR_CONFIG = """\
 # A sensor that is async def, returns its single slot bare so the core can compare it.
 ASYNC_STEPS = """\
 import asyncio
-from var import define_state
+from var import steps
 
-stimulus, sensor = define_state(lambda: {"value": 0})
+param, stimulus, sensor = steps(lambda: {"value": 0})
 
 
 @stimulus("I asynchronously add {int}")

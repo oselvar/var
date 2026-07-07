@@ -19,7 +19,7 @@ public final class GreetingSteps implements StepDefinitions {
 
     @Override
     public void defineSteps(Registrar registrar) {
-        var s = registrar.defineState(Ctx::new);
+        var s = registrar.steps(Ctx::new);
         s.sensor("the greeting is", (Ctx ctx, String body) -> "Goodbye!\n");
     }
 }

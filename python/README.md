@@ -15,7 +15,7 @@ uv run ruff check
 | Package (dist / import) | Layer |
 |---|---|
 | `oselvar-var-core` / `var_core` | pure functional core: parse → plan → execute, matcher, diffs, conformance |
-| `oselvar-var` / `var` | author facade: `define_state` (+ `internal`, `registry` glue) |
+| `oselvar-var` / `var` | author facade: `steps` (+ `internal`, `registry` glue) |
 | `oselvar-var-config` / `var_config` | reads `var.config.json` — the shared config file for all var tools |
 | `oselvar-var-runner` / `var_runner` | shared imperative shell: discovery, step loading, run orchestration, failure rendering |
 | `pytest-var` / `var_pytest` | pytest plugin: `.md` specs as first-class tests |

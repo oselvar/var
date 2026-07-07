@@ -1,6 +1,6 @@
-import { defineState } from '@oselvar/var'
+import { steps } from '@oselvar/var'
 
-const { sensor } = defineState()
+const { sensor } = steps()
 
 // Intentionally returns the captured values unchanged → the example passes.
 // Flip 3 → 4 in the return to see the span-anchored CellMismatch on {int}.

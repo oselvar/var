@@ -1,4 +1,4 @@
-"""Author-facing API for declaring step state — port of var/src/internal.ts (defineState)."""
+"""Author-facing API for declaring step state — port of var/src/internal.ts (steps)."""
 from __future__ import annotations
 
 import sys
@@ -23,21 +23,27 @@ _custom_types: list[dict[str, Any]] = []
 # ---------------------------------------------------------------------------
 
 
-def define_state(
+def steps(
     factory: Optional[Callable[[], Any]] = None,
-    param_types: Optional[dict[str, dict[str, Any]]] = None,
 ) -> tuple[
+    Callable[..., None],
     Callable[[str], Callable[[Callable], Callable]],
     Callable[[str], Callable[[Callable], Callable]],
 ]:
     """Register *factory* as the context-state constructor for its step file.
 
     *factory* is optional: a step file whose steps are pure (nothing to
-    arrange, nothing to evolve) calls ``define_state()`` bare and its handlers
+    arrange, nothing to evolve) calls ``steps()`` bare and its handlers
     receive an empty ``dict`` as state.
 
-    Returns ``(stimulus, sensor)`` — each is a decorator factory:
-    ``@stimulus("expression")`` registers the decorated function as a step.
+    Returns ``(param, stimulus, sensor)``:
+
+    - ``param(name, regexp, parse=None, format=None)`` declares a custom
+      cucumber-expression parameter type. ``parse`` is a varargs function over
+      the capture groups (``parse(*groups)``); omitted, the parameter stays the
+      matched text. ``format`` is the display-only inverse.
+    - ``stimulus`` / ``sensor`` are decorator factories:
+      ``@stimulus("expression")`` registers the decorated function as a step.
 
     Source location is captured from the decorated function's ``__code__``
     attributes (``co_filename`` / ``co_firstlineno``).
@@ -55,20 +61,19 @@ def define_state(
         source_file = factory.__code__.co_filename
     if source_file in _context_factories_by_file:
         raise RuntimeError(
-            f"defineState() called more than once in {source_file}"
+            f"steps() called more than once in {source_file}"
         )
     _context_factories_by_file[source_file] = factory
 
-    if param_types:
-        for name, defn in param_types.items():
-            _custom_types.append(
-                {
-                    "name": name,
-                    "regexp": defn["regexp"],
-                    "parse": defn.get("parse"),
-                    "format": defn.get("format"),
-                }
-            )
+    def param(
+        name: str,
+        regexp: Any,
+        parse: Optional[Callable[..., Any]] = None,
+        format: Optional[Callable[[Any], str]] = None,
+    ) -> None:
+        _custom_types.append(
+            {"name": name, "regexp": regexp, "parse": parse, "format": format}
+        )
 
     def _make_decorator(kind: StepKind) -> Callable[[str], Callable[[Callable], Callable]]:
         def decorator_factory(expression: str) -> Callable[[Callable], Callable]:
@@ -88,7 +93,7 @@ def define_state(
 
         return decorator_factory
 
-    return _make_decorator("stimulus"), _make_decorator("sensor")
+    return param, _make_decorator("stimulus"), _make_decorator("sensor")
 
 
 def context_factory() -> Callable[[str], Any]:
@@ -143,7 +148,7 @@ def _reset_builder() -> None:
 
 def _custom_parameter_types() -> list[dict[str, str]]:
     """Conformance-harness accessor: the custom parameter types accumulated by
-    ``define_state`` since the last ``_reset_builder``, projected to the
+    ``param`` since the last ``_reset_builder``, projected to the
     ``{"name", "regexp"}`` wire shape ``to_registry_artifact`` serializes.
 
     ``regexp`` is the bare pattern source (``re.Pattern.pattern`` or the string

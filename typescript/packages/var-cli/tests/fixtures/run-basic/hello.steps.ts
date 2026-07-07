@@ -1,6 +1,6 @@
-import { defineState } from '@oselvar/var'
+import { steps } from '@oselvar/var'
 
-const { stimulus, sensor } = defineState(() => ({ greeting: '' }))
+const { stimulus, sensor } = steps(() => ({ greeting: '' }))
 
 stimulus('I greet {string}', (_ctx, name: string) => ({ greeting: `Hello, ${name}!` }))
 

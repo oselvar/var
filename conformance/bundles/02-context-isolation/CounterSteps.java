@@ -12,7 +12,7 @@ public final class CounterSteps implements StepDefinitions {
 
     @Override
     public void defineSteps(Registrar registrar) {
-        StateBinder<Ctx> s = registrar.defineState(() -> new Ctx(0));
+        StateBinder<Ctx> s = registrar.steps(() -> new Ctx(0));
 
         s.stimulus("I increment", (Ctx ctx) -> new Ctx(ctx.count() + 1));
 

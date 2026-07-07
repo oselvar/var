@@ -1,5 +1,5 @@
-import { defineState } from '@oselvar/var'
+import { steps } from '@oselvar/var'
 
-const { stimulus } = defineState(() => ({}))
+const { stimulus } = steps(() => ({}))
 
 stimulus('I greet {string}', () => {})

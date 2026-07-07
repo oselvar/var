@@ -1,12 +1,10 @@
 import { expect, test } from 'vitest'
-import { defineState } from '../src/index.ts'
+import { steps } from '../src/index.ts'
 import { _customParameterTypes, _resetBuilder } from '../src/registry.ts'
 
 test('_customParameterTypes projects name and regexp source', () => {
   _resetBuilder()
-  defineState(() => ({}), {
-    airport: { regexp: /[A-Z]{3}/, parse: (code: string) => code.toLowerCase() },
-  })
+  steps(() => ({})).param('airport', /[A-Z]{3}/, (code) => code.toLowerCase())
   expect(_customParameterTypes()).toEqual([{ name: 'airport', regexp: '[A-Z]{3}' }])
   _resetBuilder()
   expect(_customParameterTypes()).toEqual([])
@@ -14,9 +12,7 @@ test('_customParameterTypes projects name and regexp source', () => {
 
 test('_customParameterTypes rejects the regexp-array form for now', () => {
   _resetBuilder()
-  defineState(() => ({}), {
-    code: { regexp: [/[A-Z]{3}/, /[0-9]{3}/], parse: (c: string) => c },
-  })
+  steps(() => ({})).param('code', [/[A-Z]{3}/, /[0-9]{3}/], (c) => c)
   expect(() => _customParameterTypes()).toThrowError(/not supported/i)
   _resetBuilder()
 })

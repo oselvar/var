@@ -6,11 +6,11 @@
 package com.oselvar.varkt.conformance.bundle05
 
 import com.oselvar.varkt.stimulus
-import com.oselvar.varkt.defineState
+import com.oselvar.varkt.steps
 
 class Ctx
 
-val steps = defineState(::Ctx) {
+val steps = steps(::Ctx) {
     stimulus("I have {int} cukes") { n: Int -> this }
     stimulus("I have 5 cukes") { this }
 }

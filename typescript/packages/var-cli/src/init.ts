@@ -13,9 +13,9 @@ Given I greet "world"
 Then the greeting is "Hello, world!"
 `
 
-const EXAMPLE_STEPS = `import { defineState } from '@oselvar/var'
+const EXAMPLE_STEPS = `import { steps } from '@oselvar/var'
 
-const { stimulus, sensor } = defineState(() => ({ greeting: '' }))
+const { stimulus, sensor } = steps(() => ({ greeting: '' }))
 
 stimulus('I greet {string}', (_state, name: string) => ({ greeting: \`Hello, \${name}!\` }))
 

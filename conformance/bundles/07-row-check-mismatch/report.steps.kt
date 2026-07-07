@@ -6,12 +6,12 @@
 // (wrong) columns, producing a cell mismatch at the trace stage.
 package com.oselvar.varkt.conformance.bundle07
 
-import com.oselvar.varkt.defineState
+import com.oselvar.varkt.steps
 import com.oselvar.varkt.sensor
 
 class Ctx
 
-val steps = defineState(::Ctx) {
+val steps = steps(::Ctx) {
     sensor("I report the score and grade") { row: Map<String, String> ->
         mapOf("score" to "99", "grade" to "A")
     }

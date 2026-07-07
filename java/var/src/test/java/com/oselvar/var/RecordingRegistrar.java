@@ -24,7 +24,7 @@ final class RecordingRegistrar implements Registrar {
     private final List<Supplier<? extends State>> factories = new ArrayList<>();
     private final List<ParamTypeRegistration> paramTypes = new ArrayList<>();
 
-    List<Registration> steps() {
+    List<Registration> recordedSteps() {
         return List.copyOf(steps);
     }
 
@@ -37,20 +37,9 @@ final class RecordingRegistrar implements Registrar {
     }
 
     @Override
-    public <C extends State> StateBinder<C> defineState(Supplier<C> factory) {
+    public <C extends State> StateBinder<C> steps(Supplier<C> factory) {
         factories.add(factory);
         return new Binder<>();
-    }
-
-    @Override
-    public <T> void defineParameterType(String name, Pattern regexp, Function<String[], T> parse) {
-        paramTypes.add(new ParamTypeRegistration(name, regexp, parse, null));
-    }
-
-    @Override
-    public <T> void defineParameterType(
-            String name, Pattern regexp, Function<String[], T> parse, Function<T, String> format) {
-        paramTypes.add(new ParamTypeRegistration(name, regexp, parse, format));
     }
 
     private void record(String expression, StepKind kind, Object handler) {
@@ -71,6 +60,21 @@ final class RecordingRegistrar implements Registrar {
     }
 
     private final class Binder<C extends State> implements StateBinder<C> {
+        @Override
+        public void param(String name, Pattern regexp) {
+            paramTypes.add(new ParamTypeRegistration(name, regexp, groups -> groups[0], null));
+        }
+
+        @Override
+        public <T> void param(String name, Pattern regexp, Parse<T> parse) {
+            paramTypes.add(new ParamTypeRegistration(name, regexp, parse::apply, null));
+        }
+
+        @Override
+        public <T> void param(String name, Pattern regexp, Parse<T> parse, Function<T, String> format) {
+            paramTypes.add(new ParamTypeRegistration(name, regexp, parse::apply, format));
+        }
+
         @Override
         public void stimulus(String expression, Stimulus0<C> handler) {
             record(expression, StepKind.STIMULUS, handler);

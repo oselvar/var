@@ -1,6 +1,6 @@
-import { defineState } from '@oselvar/var'
+import { steps } from '@oselvar/var'
 
-const { stimulus, sensor } = defineState<{ result?: string }>(() => ({}))
+const { stimulus, sensor } = steps<{ result?: string }>(() => ({}))
 
 const ROMAN: Record<number, string> = { 1: 'I', 4: 'IV', 9: 'IX', 40: 'XL' }
 

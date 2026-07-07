@@ -26,7 +26,7 @@ bound by matching phrases in the text.
 | `Given` / `When` / `Then` step types | Two roles — `stimulus` and `sensor` — chosen by what a step *does*, not by a keyword. Keywords in prose are narration for the reader; they're never matched. |
 | Assertions inside step bodies | Steps *return* what the software did; Vár compares it against what the document claims, and failures are anchored to the exact span in the source. |
 | `DataTable` and doc-string APIs | Native Markdown tables and fenced code blocks, checked by [return-based comparison](/how-to/tables-and-doc-strings/). |
-| `World` and untyped state | `defineState` — a typed state factory per spec; every example starts fresh. |
+| `World` and untyped state | `steps` — a typed state factory per spec; every example starts fresh. |
 | `Before` / `After` hooks | None in Vár. Use your test runner's own `beforeEach` / `afterEach`. |
 | Tags | Not in v1. |
 | A separate test-run artefact | The document *is* the test. There is no report that drifts from the docs, because the docs are what ran. |
@@ -53,7 +53,7 @@ true.
 The usual complaints, taken seriously:
 
 - **"Regex glue and mystery state."** Steps bind with Cucumber Expressions and
-  a typed state you declare once with `defineState`. No `this`, no untyped
+  a typed state you declare once with `steps`. No `this`, no untyped
   `World`.
 - **"Extra layer of indirection."** Vár still has that layer (step definitions).
   Only write a *few* tests in Vár - the ones that *really* matter. Use unit testing tools for the rest.

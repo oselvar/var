@@ -32,27 +32,27 @@ public final class LibrarySteps implements StepDefinitions {
 
     @Override
     public void defineSteps(Registrar registrar) {
-        registrar.defineParameterType(
+        StateBinder<Ctx> s = registrar.steps(() -> new Ctx(List.of(), Library.gbp(0), false));
+
+        s.param(
                 "date",
                 Pattern.compile("[A-Z][a-z]+ \\d{1,2}, \\d{4}"),
                 groups -> LocalDate.parse(groups[0], DATE),
                 DATE::format);
         // £2.50 and 50p, both as GBP Money. The amount is cucumber-expressions'
         // float regexp, minus the scientific notation.
-        registrar.defineParameterType(
+        s.param(
                 "money",
                 Pattern.compile("£(?=.*\\d.*)[-+]?\\d*(?:\\.(?=\\d.*))?\\d*|\\d+p"),
                 groups -> toMoney(groups[0]),
                 LibrarySteps::formatMoney);
         // The emphasised run IS the parameter: the markers live in the pattern,
         // parse strips them, format restores them. Markup is notation, like £2.50.
-        registrar.defineParameterType(
+        s.param(
                 "title",
                 Pattern.compile("\\*[^*]+\\*"),
                 groups -> groups[0].substring(1, groups[0].length() - 1),
                 title -> "*" + title + "*");
-
-        StateBinder<Ctx> s = registrar.defineState(() -> new Ctx(List.of(), Library.gbp(0), false));
 
         s.stimulus(
                 "borrowed {title}, due back on {date}",

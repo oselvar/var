@@ -15,8 +15,8 @@ class ParameterTypeTest {
     @Test
     fun `custom parameter type transforms captures before the handler sees them`() {
         val registrar = RegistryRegistrar()
-        defineState(::Ctx) {
-                parameterType("color", Regex("red|green|blue")) { captures ->
+        steps(::Ctx) {
+                param("color", Regex("red|green|blue")) { captures ->
                     captures[0].uppercase()
                 }
                 stimulus("I pick {color}") { c: String -> copy(color = c) }
@@ -35,9 +35,9 @@ class ParameterTypeTest {
     fun `a step using a not-yet-declared parameter type fails at replay with the cucumber error`() {
         val registrar = RegistryRegistrar()
         val definitions =
-            defineState(::Ctx) {
+            steps(::Ctx) {
                 stimulus("I pick {color}") { c: String -> copy(color = c) }
-                parameterType("color", Regex("red|green|blue")) { captures -> captures[0] }
+                param("color", Regex("red|green|blue")) { captures -> captures[0] }
             }
         assertThrows(UndefinedParameterTypeException::class.java) {
             definitions.defineSteps(registrar)

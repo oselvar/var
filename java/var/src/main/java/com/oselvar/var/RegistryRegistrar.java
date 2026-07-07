@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 /**
  * The production {@link Registrar}: every {@code stimulus}/{@code sensor}
  * registration is delegated to {@link Registry#addStep}, and every {@link
- * #defineParameterType} call to {@link Registry#defineParameterType} — building a real
+ * StateBinder#param} call to {@link Registry#defineParameterType} — building a real
  * var-core {@link Registry}, not just recording calls the way {@code RecordingRegistrar}
  * (a test-only double, see {@code AuthorApiTest}) does.
  *
@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
  * {@link Registrar}'s Javadoc for why there is deliberately no static/global
  * accumulator. The resulting immutable {@link Registry} is retrieved via {@link
  * #registry()} once {@link StepDefinitions#defineSteps} returns. The single state
- * factory passed to {@link #defineState} is retained via {@link #stateFactory()} — it is
+ * factory passed to {@link #steps} is retained via {@link #stateFactory()} — it is
  * not part of the core {@link Registry} (mirrors TS's {@code contextFactoriesByFile}: a
  * facade-only concern, since the core registry only knows about step
  * expressions/handlers, not per-file state factories).
@@ -38,28 +38,17 @@ public final class RegistryRegistrar implements Registrar {
     }
 
     /**
-     * The single state factory registered via {@link #defineState}, or {@code null} if
-     * {@link #defineState} has not been called yet.
+     * The single state factory registered via {@link #steps}, or {@code null} if
+     * {@link #steps} has not been called yet.
      */
     public Supplier<? extends State> stateFactory() {
         return stateFactory;
     }
 
     @Override
-    public <C extends State> StateBinder<C> defineState(Supplier<C> factory) {
+    public <C extends State> StateBinder<C> steps(Supplier<C> factory) {
         this.stateFactory = factory;
         return new Binder<>();
-    }
-
-    @Override
-    public <T> void defineParameterType(String name, Pattern regexp, Function<String[], T> parse) {
-        registry = Registry.defineParameterType(registry, name, regexp, parse);
-    }
-
-    @Override
-    public <T> void defineParameterType(
-            String name, Pattern regexp, Function<String[], T> parse, Function<T, String> format) {
-        registry = Registry.defineParameterType(registry, name, regexp, parse, format);
     }
 
     private void register(String expression, StepKind kind, Object handler) {
@@ -96,6 +85,21 @@ public final class RegistryRegistrar implements Registrar {
     }
 
     private final class Binder<C extends State> implements StateBinder<C> {
+        @Override
+        public void param(String name, Pattern regexp) {
+            registry = Registry.defineParameterType(registry, name, regexp, groups -> groups[0]);
+        }
+
+        @Override
+        public <T> void param(String name, Pattern regexp, Parse<T> parse) {
+            registry = Registry.defineParameterType(registry, name, regexp, groups -> parse.apply(groups));
+        }
+
+        @Override
+        public <T> void param(String name, Pattern regexp, Parse<T> parse, Function<T, String> format) {
+            registry = Registry.defineParameterType(registry, name, regexp, groups -> parse.apply(groups), format);
+        }
+
         @Override
         public void stimulus(String expression, Stimulus0<C> handler) {
             register(expression, StepKind.STIMULUS, handler);

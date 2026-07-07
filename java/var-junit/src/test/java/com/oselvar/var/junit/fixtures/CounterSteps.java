@@ -9,7 +9,7 @@ import com.oselvar.var.StepDefinitions;
  * WidgetSteps}' absolute-set {@code context} step) — used by {@code
  * VarExampleDescriptorExecutionTest} to prove state does NOT leak between two examples in
  * the same file: if a second example's initial state were anything other than the fresh
- * {@code Ctx(0)} {@link Registrar#defineState} produces, its counter would come out wrong,
+ * {@code Ctx(0)} {@link Registrar#steps} produces, its counter would come out wrong,
  * not merely "still correct by coincidence" (the risk an absolute-set step like {@code
  * WidgetSteps}' can't expose).
  */
@@ -19,7 +19,7 @@ public final class CounterSteps implements StepDefinitions {
 
     @Override
     public void defineSteps(Registrar registrar) {
-        var s = registrar.defineState(() -> new Ctx(0));
+        var s = registrar.steps(() -> new Ctx(0));
         s.stimulus("I add {int} to the counter", (Ctx ctx, Integer n) -> new Ctx(ctx.count() + n));
         s.sensor("the counter should be {int}", (Ctx ctx, Integer expected) -> ctx.count());
     }

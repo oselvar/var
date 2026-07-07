@@ -14,7 +14,7 @@ public final class YahtzeeSteps implements StepDefinitions {
 
     @Override
     public void defineSteps(Registrar registrar) {
-        StateBinder<Ctx> s = registrar.defineState(Ctx::new);
+        StateBinder<Ctx> s = registrar.steps(Ctx::new);
 
         // Header-bound table: the paragraph names every header cell (dice,
         // category, score), so this sensor runs once per row with the row as a

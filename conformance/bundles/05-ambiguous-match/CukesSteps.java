@@ -16,7 +16,7 @@ public final class CukesSteps implements StepDefinitions {
 
     @Override
     public void defineSteps(Registrar registrar) {
-        StateBinder<Ctx> s = registrar.defineState(Ctx::new);
+        StateBinder<Ctx> s = registrar.steps(Ctx::new);
 
         s.stimulus("I have {int} cukes", (Ctx ctx, Integer n) -> ctx);
         s.stimulus("I have 5 cukes", (Ctx ctx) -> ctx);

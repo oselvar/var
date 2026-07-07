@@ -9,9 +9,9 @@ async function pythonScanner() {
 describe('python dialect', () => {
   test('discovers decorated step defs with kind, expression, and handler params', async () => {
     const scanner = await pythonScanner()
-    const source = `from var import define_state
+    const source = `from var import steps
 
-context, action, sensor = define_state(lambda: {})
+param, stimulus, sensor = steps(lambda: {})
 
 
 @stimulus("I fly to {airport}")
@@ -51,16 +51,12 @@ def _(state, n: int, row=None):
   test('discovers parameter types from string, raw-string, and re.compile regexps', async () => {
     const scanner = await pythonScanner()
     const source = `import re
-from var import define_state
+from var import steps
 
-context, action, sensor = define_state(
-    lambda: {},
-    param_types={
-        "airport": {"regexp": "[A-Z]{3}", "parse": lambda code: code.lower()},
-        "iata": {"regexp": r"[A-Z]{3}\\d"},
-        "code": {"regexp": re.compile(r"[0-9]+")},
-    },
-)
+param, stimulus, sensor = steps(lambda: {})
+param("airport", "[A-Z]{3}", parse=lambda code: code.lower())
+param("iata", r"[A-Z]{3}\\d")
+param("code", re.compile(r"[0-9]+"))
 `
     const types = scanner.discoverParameterTypes('a.steps.py', source)
     expect(types.map((t) => [t.name, t.regexp])).toEqual([

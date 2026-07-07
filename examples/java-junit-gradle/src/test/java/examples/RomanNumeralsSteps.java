@@ -12,7 +12,7 @@ public final class RomanNumeralsSteps implements StepDefinitions {
 
     @Override
     public void defineSteps(Registrar registrar) {
-        StateBinder<Ctx> s = registrar.defineState(Ctx::new);
+        StateBinder<Ctx> s = registrar.steps(Ctx::new);
 
         s.sensor(
                 "a decimal and a roman number",

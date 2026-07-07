@@ -1,6 +1,6 @@
-from var import define_state
+from var import steps
 
-stimulus, sensor = define_state(lambda: {"count": 0})
+param, stimulus, sensor = steps(lambda: {"count": 0})
 
 
 @stimulus("I increment")

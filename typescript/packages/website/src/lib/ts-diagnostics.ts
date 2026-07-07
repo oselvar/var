@@ -18,7 +18,7 @@ for (const [p, text] of Object.entries(libModules)) {
 // same files authors install — no hand-maintained ambient copy to drift when
 // the API changes. `internal.ts`'s own imports from @oselvar/var-core stay
 // unresolved in here; that only degrades types INSIDE internal.ts (whose
-// diagnostics are never requested) — defineState's public type closure is
+// diagnostics are never requested) — steps's public type closure is
 // self-contained.
 import varIndexSource from '../../../var/src/index.ts?raw'
 import varInternalSource from '../../../var/src/internal.ts?raw'

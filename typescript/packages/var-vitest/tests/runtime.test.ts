@@ -1,4 +1,4 @@
-import { defineState } from '@oselvar/var'
+import { steps } from '@oselvar/var'
 import { _resetBuilder } from '@oselvar/var/registry'
 import {
   type CellDiff,
@@ -33,7 +33,7 @@ function fakeCtx() {
 
 test('collectVarExamples returns one indexed example per BDD example, with step lines', async () => {
   const calls: string[] = []
-  const { stimulus } = defineState(() => ({}))
+  const { stimulus } = steps(() => ({}))
   stimulus('I have {int} cukes', (_ctx, n) => {
     calls.push(`have:${n as number}`)
   })
@@ -67,7 +67,7 @@ test('the drift gate reports a baseline example that no longer matches', () => {
 })
 
 test('the drift gate stays quiet when the baseline example still matches', () => {
-  const { stimulus } = defineState(() => ({}))
+  const { stimulus } = steps(() => ({}))
   stimulus('I open the vault', () => {})
   const baseline: SpecBaseline = {
     sourceHash: 'fnv1a:00000000',
@@ -90,7 +90,7 @@ test('VAR_UPDATE skips the drift gate', () => {
 })
 
 test('varTestBody runs the example and attaches a passed varResult to the task meta', async () => {
-  const { stimulus } = defineState(() => ({}))
+  const { stimulus } = steps(() => ({}))
   stimulus('I pass', () => {})
   const examples = collectVarExamples('ok.md', 'I pass.', { reporter: { diagnostic: () => {} } })
   const { ctx, meta } = fakeCtx()
@@ -99,7 +99,7 @@ test('varTestBody runs the example and attaches a passed varResult to the task m
 })
 
 test('varTestBody attaches a failed varResult and rethrows when the example fails', async () => {
-  const { stimulus } = defineState(() => ({}))
+  const { stimulus } = steps(() => ({}))
   stimulus('I fail', () => {
     throw new Error('boom')
   })
@@ -132,7 +132,7 @@ const cell = (at: ReturnType<typeof sp>, expected: string, actual: string): Cell
 })
 
 async function rethrown(error: Error): Promise<Error & { expected?: string; actual?: string }> {
-  const { stimulus } = defineState(() => ({}))
+  const { stimulus } = steps(() => ({}))
   stimulus('It mismatches', () => {
     throw error
   })

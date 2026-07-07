@@ -1,6 +1,6 @@
-import { defineState } from '@oselvar/var'
+import { steps } from '@oselvar/var'
 
-const { sensor } = defineState(() => ({}))
+const { sensor } = steps(() => ({}))
 
 // Returns the WRONG string (bare — the doc string is the only slot); the core
 // compares it to the doc string and throws DocStringMismatchError → trace

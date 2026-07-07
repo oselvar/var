@@ -16,8 +16,8 @@ public final class EpsilonSteps implements StepDefinitions {
 
     @Override
     public void defineSteps(Registrar registrar) {
-        registrar.defineParameterType("color", Pattern.compile("[a-z]+"), groups -> groups[0]);
-        var s = registrar.defineState(() -> new Ctx(""));
+        var s = registrar.steps(() -> new Ctx(""));
+        s.param("color", Pattern.compile("[a-z]+"));
         s.stimulus("epsilon sets color to {color}", (Ctx ctx, String color) -> new Ctx(color));
     }
 }

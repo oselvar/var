@@ -28,7 +28,7 @@ const PARAMETER_TYPE_QUERY = `
       object: (identifier) @pattern-object
       name: (identifier) @pattern-name
       arguments: (argument_list . (string_literal) @regexp-value)))
-  (#eq? @function-name "defineParameterType")
+  (#eq? @function-name "param")
   (#eq? @pattern-object "Pattern")
   (#eq? @pattern-name "compile")
 ) @root

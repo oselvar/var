@@ -15,7 +15,7 @@ class ExecuteIntegrationTest {
     data class Ctx(val cukes: Int = 0)
 
     private fun steps() =
-        defineState(::Ctx) {
+        steps(::Ctx) {
             stimulus("I have {int} cukes") { n: Int -> copy(cukes = n) }
             stimulus("I eat {int} cukes") { n: Int ->
                 delay(1) // proves a genuinely suspending handler runs through runBlocking

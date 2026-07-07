@@ -22,16 +22,16 @@ type CustomTypeDef = {
   readonly format?: (value: unknown) => string
 }
 
-let steps: Entry[] = []
+let stepEntries: Entry[] = []
 // One context factory per stepfile. Each .steps.ts that calls
-// defineState() owns its own slice of state; steps from different
+// steps() owns its own slice of state; steps from different
 // stepfiles never see each other's context.
 const contextFactoriesByFile = new Map<string, () => unknown | Promise<unknown>>()
 let customTypes: CustomTypeDef[] = []
 
 function registerStep(expression: string, handler: StepHandler, kind: StepKind): void {
   const { sourceFile, sourceLine } = callerLocation()
-  steps.push({ expression, sourceFile, sourceLine, handler, kind })
+  stepEntries.push({ expression, sourceFile, sourceLine, handler, kind })
 }
 
 // ─── Argument-type inference from the cucumber expression ───
@@ -41,7 +41,7 @@ function registerStep(expression: string, handler: StepHandler, kind: StepKind):
 // grammar is small and stable, and var's needs are narrow.) The one
 // var-specific choice is the `AnyArg` fallback for a name with no known type:
 // `any`, not `unknown`, so authors can still annotate a slot the inference can't
-// reach — a custom type not declared via `defineState`, or the trailing
+// reach — a custom type not declared via `.param()`, or the trailing
 // data-table / doc-string arg the runtime appends.
 
 // `any`, not `unknown`: an annotated fallback param (`code: string`) must stay
@@ -117,7 +117,7 @@ type DeepReadonly<T> = T extends (...args: never[]) => unknown
 
 // A stimulus handler receives the immutable `state` (deeply readonly) plus
 // the args inferred from the expression `E` (built-in parameter types, plus any
-// `Custom` types declared via `defineState`), so `(state, name) => …` types
+// `Custom` types declared via `.param()`), so `(state, name) => …` types
 // `name` without an annotation and without TS2345. It EVOLVES state by RETURNING
 // a partial state object (shallow-merged by the runtime) — or nothing, for no
 // change. It never mutates `state`.
@@ -140,70 +140,82 @@ type SensorFn<C = unknown, Custom = Record<never, never>> = <E extends string, R
   handler: (state: DeepReadonly<C>, ...args: HandlerArgs<E, Custom>) => R | Promise<R>,
 ) => void
 
-// A custom parameter type, declared inline in `defineState` so its parse
-// function's return type can be captured for inference (and registered for
-// matching). `parse` is optional — omitted, the parameter is the matched
-// text. `format` is the inverse: value → the document's notation, used only
-// to display the actual side of a parameter mismatch.
+// The step-authoring surface returned by `steps()`: the three roles a step
+// file needs, all hanging off one object. `param` declares a custom parameter
+// type AND widens `Custom` at the type level, so a later `{name}` in a stimulus
+// or sensor expression resolves to that type without an annotation.
 //
-// `format` is contravariant in its value, so a plain `ParamTypeDef<unknown>`
-// bound would reject `(m: Money) => string`. The constraint is therefore
-// SELF-REFERENTIAL (`P extends { [K in keyof P]: ParamTypeDefOf<P[K]> }`):
-// each def's `format` parameter is tied to that same def's `parse` return,
-// which both checks the pairing and contextually types an unannotated
-// `format: (m) => …`.
-type ParamTypeDefOf<D> = {
-  readonly regexp: RegExp | ReadonlyArray<RegExp>
-  readonly parse?: (...captures: string[]) => unknown
-  readonly format?: (
-    value: D extends { parse: (...captures: string[]) => infer T } ? T : string,
-  ) => string
+// `param` is CHAINABLE: each call returns a `Steps` whose `Custom` gained this
+// type, so `stimulus`/`sensor` read off the accumulated map. Declaring params
+// via a returned-and-reassigned chain (rather than an up-front object) is what
+// preserves inference — `stimulus`/`sensor` must be reached *after* the params
+// they use. A file with no custom types can still destructure
+// `const { stimulus, sensor } = steps(factory)`; built-in `{int}`/`{word}`
+// inference doesn't depend on `Custom`.
+//
+// `parse` is a VARARGS function over the capture groups — cucumber-expressions
+// passes each group as a separate argument. Omitted, the parameter stays the
+// matched text (`T` defaults to `string`). `format` is the inverse: value →
+// the document's notation, used only to display the actual side of a parameter
+// mismatch. Because `param` is generic per call, `format`'s value is typed `T`
+// — the exact return of this call's `parse` — so an unannotated `format: (m) =>
+// …` is contextually typed and the parse/format pairing is checked.
+export interface Steps<C = Record<string, never>, Custom = Record<never, never>> {
+  param<const Name extends string, T = string>(
+    name: Name,
+    regexp: RegExp | ReadonlyArray<RegExp>,
+    parse?: (...captures: string[]) => T,
+    format?: (value: T) => string,
+  ): Steps<C, Custom & Record<Name, T>>
+  readonly stimulus: StimulusFn<C, Custom>
+  readonly sensor: SensorFn<C, Custom>
 }
 
-// Record of parameter-type definitions → `{ name: producedType }`, the custom
-// registry that drives `{name}` → type inference for this stepfile's steps.
-// No parse function means the parameter stays the matched text: string.
-type CustomRegistry<P> = {
-  [K in keyof P]: P[K] extends { parse: (...captures: string[]) => infer T } ? T : string
+// Non-generic runtime view of the builder. The three methods just push into the
+// module-level accumulators; `param` returns the same object (the widening is
+// purely type-level). Kept separate from the generic public `Steps<C, Custom>`
+// so `param`'s self-referential return type doesn't need to be inferred here —
+// `steps()` casts this to the public contract, which drives all author-facing
+// inference.
+interface StepsRuntime {
+  param(
+    name: string,
+    regexp: RegExp | ReadonlyArray<RegExp>,
+    parse?: (...captures: string[]) => unknown,
+    format?: (value: unknown) => string,
+  ): StepsRuntime
+  stimulus(expression: string, handler: StepHandler): void
+  sensor(expression: string, handler: StepHandler): void
 }
 
 // The factory is OPTIONAL: a step file whose steps are pure (nothing to
-// arrange, nothing to evolve) calls `defineState()` bare and its handlers
-// receive an empty state. `C` then defaults to `Record<string, never>`, so a
-// stimulus can only return `{}`/nothing and a sensor can't read phantom fields.
-export function defineState<
-  C = Record<string, never>,
-  P extends { [K in keyof P]: ParamTypeDefOf<P[K]> } = Record<never, never>,
->(
-  factory?: () => C | Promise<C>,
-  paramTypes?: P,
-): {
-  readonly stimulus: StimulusFn<C, CustomRegistry<P>>
-  readonly sensor: SensorFn<C, CustomRegistry<P>>
-} {
+// arrange, nothing to evolve) calls `steps()` bare and its handlers receive an
+// empty state. `C` then defaults to `Record<string, never>`, so a stimulus can
+// only return `{}`/nothing and a sensor can't read phantom fields.
+export function steps<C = Record<string, never>>(factory?: () => C | Promise<C>): Steps<C> {
   const { sourceFile } = callerLocation()
   if (contextFactoriesByFile.has(sourceFile)) {
-    throw new Error(`defineState() called more than once in ${sourceFile}`)
+    throw new Error(`steps() called more than once in ${sourceFile}`)
   }
   contextFactoriesByFile.set(sourceFile, (factory ?? (() => ({}))) as () => unknown)
-  if (paramTypes) {
-    // The self-referential bound on P (see ParamTypeDefOf) has no string
-    // index, so Object.entries types values as unknown — reassert the
-    // runtime shape, which every P member satisfies by construction.
-    const defs = paramTypes as Record<string, Omit<CustomTypeDef, 'name'>>
-    for (const [name, def] of Object.entries(defs)) {
+  const self: StepsRuntime = {
+    param(name, regexp, parse, format) {
       customTypes.push({
         name,
-        regexp: def.regexp,
-        ...(def.parse ? { parse: def.parse } : {}),
-        ...(def.format ? { format: def.format } : {}),
+        regexp,
+        ...(parse ? { parse } : {}),
+        ...(format ? { format } : {}),
       })
-    }
+      return self
+    },
+    stimulus(expression, handler) {
+      registerStep(expression, handler, 'stimulus')
+    },
+    sensor(expression, handler) {
+      registerStep(expression, handler, 'sensor')
+    },
   }
-  return {
-    stimulus: (expression, handler) => registerStep(expression, handler as StepHandler, 'stimulus'),
-    sensor: (expression, handler) => registerStep(expression, handler as StepHandler, 'sensor'),
-  }
+  return self as unknown as Steps<C>
 }
 
 export function contextFactory(): (stepFile: string) => unknown | Promise<unknown> {
@@ -223,7 +235,7 @@ export function buildRegistry(): Registry {
       ...(t.format ? { format: t.format } : {}),
     })
   }
-  for (const e of steps) {
+  for (const e of stepEntries) {
     r = addStep(r, {
       expression: e.expression,
       expressionSourceFile: e.sourceFile,
@@ -236,7 +248,7 @@ export function buildRegistry(): Registry {
 }
 
 // Conformance-harness accessor: the custom parameter types accumulated by
-// defineState since the last _resetBuilder, projected to the {name, regexp}
+// steps().param() since the last _resetBuilder, projected to the {name, regexp}
 // wire shape toRegistryArtifact serializes. regexp is the bare pattern
 // source (RegExp.source — no flags/delimiters), the cross-port convention
 // every language's registry golden uses. Internal-only: exported via
@@ -256,7 +268,7 @@ export function _customParameterTypes(): ReadonlyArray<{
 }
 
 export function _resetBuilder(): void {
-  steps = []
+  stepEntries = []
   contextFactoriesByFile.clear()
   customTypes = []
 }
@@ -281,12 +293,12 @@ function callerLocation(): { sourceFile: string; sourceLine: number } {
 // The deepest parseable frame is callerLocation's own — its file identifies
 // *this* module: a real source path when loaded from disk (`.../var/src/…` or
 // `.../var/dist/…`), or a bundled chunk when a runner bundles the package (the
-// website's Web Worker). Every internal frame — callerLocation, defineState,
-// registerStep, the stimulus/sensor closures — shares that file, so the first
-// frame with a *different* file is the step author's. Keying on file identity
-// instead of a hardcoded `/var/src/internal` substring is what makes this work
-// once bundled: the old substring never appears in a minified chunk, and on
-// engines whose stack omits the `Error:` header (Firefox/JSC) defineState and
+// website's Web Worker). Every internal frame — callerLocation, steps,
+// registerStep, the param/stimulus/sensor closures — shares that file, so the
+// first frame with a *different* file is the step author's. Keying on file
+// identity instead of a hardcoded `/var/src/internal` substring is what makes
+// this work once bundled: the old substring never appears in a minified chunk,
+// and on engines whose stack omits the `Error:` header (Firefox/JSC) steps and
 // registerStep would otherwise resolve to different internal frames, keying the
 // context factory under mismatched paths — the exact cause of a lost state
 // factory (`state.<field> is undefined`) in the bundled worker.

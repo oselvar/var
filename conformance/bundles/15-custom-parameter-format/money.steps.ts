@@ -1,4 +1,4 @@
-import { defineState } from '@oselvar/var'
+import { steps } from '@oselvar/var'
 
 // Custom {money} parameter type with a `format` — the inverse of `parse`,
 // rendering a value back in the document's notation. The sensor
@@ -8,15 +8,11 @@ import { defineState } from '@oselvar/var'
 // native object rendering, which is deliberately outside conformance.
 type Money = { readonly currency: string; readonly value: number }
 
-const { sensor } = defineState(() => ({}), {
-  money: {
-    regexp: /£\d+\.\d{2}/,
-    parse: (raw: string): Money => ({
-      currency: 'GBP',
-      value: Number.parseFloat(raw.slice(1)),
-    }),
-    format: (m: Money) => `£${m.value.toFixed(2)}`,
-  },
-})
+const { sensor } = steps(() => ({})).param(
+  'money',
+  /£\d+\.\d{2}/,
+  (raw): Money => ({ currency: 'GBP', value: Number.parseFloat(raw.slice(1)) }),
+  (m) => `£${m.value.toFixed(2)}`,
+)
 
 sensor('The late fee is {money}', (): Money => ({ currency: 'GBP', value: 2.6 }))

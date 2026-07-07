@@ -27,8 +27,8 @@ I report the score and grade.
 """
 
 CELL_MISMATCH_STEPS = """\
-from var import define_state
-stimulus, sensor = define_state(lambda: {})
+from var import steps
+param, stimulus, sensor = steps(lambda: {})
 
 @sensor("I report the score and grade")
 def _(state, row=None):
@@ -66,8 +66,8 @@ This sentence matches no step definition at all.
 """
 
 PROSE_STEPS = """\
-from var import define_state
-stimulus, sensor = define_state(lambda: {})
+from var import steps
+param, stimulus, sensor = steps(lambda: {})
 
 @sensor("I report the score and grade")
 def _(state, row=None):
@@ -76,8 +76,8 @@ def _(state, row=None):
 
 # Steps that register NO defs at all.
 EMPTY_STEPS = """\
-from var import define_state
-stimulus, sensor = define_state(lambda: {})
+from var import steps
+param, stimulus, sensor = steps(lambda: {})
 """
 
 

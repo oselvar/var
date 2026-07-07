@@ -290,7 +290,7 @@ test('planRename surfaces a type change as kept + nameUnchanged:false (the clien
     )
     writeFileSync(
       join(dir, 'a.steps.ts'),
-      `const { stimulus } = defineState(() => ({}), { airport: { regexp: /[A-Z]{3}/ } })
+      `const { stimulus } = steps(() => ({})).param('airport', /[A-Z]{3}/)
 stimulus('I fly to {string}', () => {})
 `,
     )
@@ -389,7 +389,7 @@ test('planRename emits a handlerSync that swaps the TS type when a param type ch
     )
     writeFileSync(
       join(dir, 'a.steps.ts'),
-      `const { stimulus } = defineState(() => ({}), { airport: { regexp: /[A-Z]{3}/ } })
+      `const { stimulus } = steps(() => ({})).param('airport', /[A-Z]{3}/)
 stimulus('I fly to {string}', (ctx, name: string) => {})
 `,
     )
@@ -457,7 +457,7 @@ test('renderExpressionText rebuilds a sentence from an expression + captured val
     )
     writeFileSync(
       join(dir, 'a.steps.ts'),
-      `const { stimulus } = defineState(() => ({}), { airport: { regexp: /[A-Z]{3}/ } })
+      `const { stimulus } = steps(() => ({})).param('airport', /[A-Z]{3}/)
 `,
     )
   })
@@ -610,7 +610,7 @@ test('completions: a custom {airport} type uses its name as the placeholder', as
     )
     writeFileSync(
       join(dir, 'a.steps.ts'),
-      `const { stimulus } = defineState(() => ({}), { airport: { regexp: /[A-Z]{3}/ } })
+      `const { stimulus } = steps(() => ({})).param('airport', /[A-Z]{3}/)
 stimulus('I fly to {airport}', () => {})
 `,
     )

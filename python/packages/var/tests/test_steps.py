@@ -1,10 +1,10 @@
-"""Tests for define_state.py — translated from var/src/internal.ts tests."""
+"""Tests for internal.py steps() — translated from var/src/internal.ts tests."""
 from __future__ import annotations
 
 import pytest
 
 from var.registry import _reset_builder, build_registry, context_factory
-from var import define_state
+from var import steps
 
 
 def test_two_decorators_register_with_correct_kinds() -> None:
@@ -13,7 +13,7 @@ def test_two_decorators_register_with_correct_kinds() -> None:
     def factory():
         return {}
 
-    stimulus, sensor = define_state(factory)
+    _param, stimulus, sensor = steps(factory)
 
     @stimulus("I have set up the world")
     def setup(state):
@@ -41,7 +41,7 @@ def test_decorators_capture_source_file_and_line() -> None:
     def factory():
         return {}
 
-    stimulus, _sensor = define_state(factory)
+    _param, stimulus, _sensor = steps(factory)
 
     @stimulus("a step")
     def my_step(state):
@@ -50,10 +50,10 @@ def test_decorators_capture_source_file_and_line() -> None:
     r = build_registry()
     step = r.steps[0]
     assert step.expression_source_line >= 1
-    assert "test_define_state" in step.expression_source_file
+    assert "test_steps" in step.expression_source_file
 
 
-def test_second_define_state_in_same_module_raises() -> None:
+def test_second_steps_in_same_module_raises() -> None:
     _reset_builder()
 
     def factory1():
@@ -62,9 +62,9 @@ def test_second_define_state_in_same_module_raises() -> None:
     def factory2():
         return {}
 
-    define_state(factory1)
-    with pytest.raises(Exception, match=r"defineState.*called more than once"):
-        define_state(factory2)
+    steps(factory1)
+    with pytest.raises(Exception, match=r"steps.*called more than once"):
+        steps(factory2)
 
 
 def test_build_registry_returns_steps_in_registration_order() -> None:
@@ -73,7 +73,7 @@ def test_build_registry_returns_steps_in_registration_order() -> None:
     def factory():
         return {}
 
-    stimulus, sensor = define_state(factory)
+    _param, stimulus, sensor = steps(factory)
 
     @stimulus("step one")
     def s1(state):
@@ -97,7 +97,7 @@ def test_context_factory_returns_callable_that_invokes_registered_factory() -> N
     def factory():
         return {"count": 42}
 
-    stimulus, _sensor = define_state(factory)
+    _param, stimulus, _sensor = steps(factory)
 
     @stimulus("some step")
     def step(state):
@@ -119,10 +119,10 @@ def test_context_factory_returns_empty_dict_for_unknown_file() -> None:
     assert result == {}
 
 
-def test_define_state_without_factory_registers_steps_against_empty_state() -> None:
+def test_steps_without_factory_registers_steps_against_empty_state() -> None:
     _reset_builder()
 
-    stimulus, sensor = define_state()
+    _param, stimulus, sensor = steps()
 
     @stimulus("I warm up my mental math")
     def warm_up(state):
@@ -141,9 +141,9 @@ def test_define_state_without_factory_registers_steps_against_empty_state() -> N
     assert cf(r.steps[0].expression_source_file) is not state
 
 
-def test_define_state_without_factory_still_enforces_once_per_file() -> None:
+def test_steps_without_factory_still_enforces_once_per_file() -> None:
     _reset_builder()
 
-    define_state()
-    with pytest.raises(Exception, match=r"defineState.*called more than once"):
-        define_state()
+    steps()
+    with pytest.raises(Exception, match=r"steps.*called more than once"):
+        steps()

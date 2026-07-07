@@ -22,7 +22,7 @@ that generates one `TestCase` per spec, which plain `python -m unittest`
 
 - **`var.config.json`** is the single source of truth: `docs.include` globs
   the Markdown specs and `steps` globs the step-definition files.
-- **`steps/*.steps.py`** define the steps with `define_state` +
+- **`steps/*.steps.py`** define the steps with `steps` +
   `@stimulus`/`@sensor`. A stimulus returns the next state, a sensor returns
   a value for Vár to compare against what the Markdown says.
 - **`src/yahtzee_example/`** is the sample's domain code — an ordinary

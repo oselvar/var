@@ -2,10 +2,10 @@
 
 package examples
 
-import com.oselvar.varkt.defineState
 import com.oselvar.varkt.sensor
+import com.oselvar.varkt.steps
 
-val romanNumeralsSteps = defineState {
+val romanNumeralsSteps = steps {
     sensor("a decimal and a roman number") { row: Map<String, String> ->
         mapOf(
             "decimal" to row.getValue("decimal"),

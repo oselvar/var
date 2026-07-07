@@ -2,9 +2,9 @@
 
 package examples
 
-import com.oselvar.varkt.defineState
 import com.oselvar.varkt.sensor
+import com.oselvar.varkt.steps
 
-val deepThoughtSteps = defineState {
+val deepThoughtSteps = steps {
     sensor("life, the universe and everything is {int}") { _: Int -> 42 }
 }

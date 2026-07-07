@@ -42,9 +42,9 @@ sensor('third', () => {})
     expect(defs.map((d) => d.kind)).toEqual(['stimulus', 'stimulus', 'sensor'])
   })
 
-  test('handles the destructured-role pattern: const { stimulus } = defineState(...)', () => {
-    const source = `import { defineState } from '@oselvar/var'
-const { stimulus } = defineState(() => ({}))
+  test('handles the destructured-role pattern: const { stimulus } = steps(...)', () => {
+    const source = `import { steps } from '@oselvar/var'
+const { stimulus } = steps(() => ({}))
 stimulus('I greet {string}', (ctx, name: string) => {})
 `
     const defs = scanner.discoverStepDefs('steps.ts', source)
@@ -67,11 +67,9 @@ const obj = { stimulus: 1 }
     expect(scanner.discoverStepDefs('empty.ts', 'const x = 1\n')).toEqual([])
   })
 
-  test('discovers a paramType from defineState with a regexp literal', () => {
-    const source = `import { defineState } from '@oselvar/var-core'
-const { stimulus } = defineState(() => ({}), {
-  airport: { regexp: /[A-Z]{3}/, parse: (r) => r },
-})
+  test('discovers a paramType from a .param() call with a regexp literal', () => {
+    const source = `import { steps } from '@oselvar/var'
+const { stimulus } = steps(() => ({})).param('airport', /[A-Z]{3}/, (r) => r)
 `
     const defs = scanner.discoverParameterTypes('p.ts', source)
     expect(defs).toHaveLength(1)
@@ -79,10 +77,8 @@ const { stimulus } = defineState(() => ({}), {
     expect(defs[0]?.regexp).toBe('[A-Z]{3}')
   })
 
-  test('discovers a paramType from defineState with a string-literal regexp', () => {
-    const source = `const { stimulus } = defineState(() => ({}), {
-  airport: { regexp: '[A-Z]{3}' },
-})
+  test('discovers a paramType from a .param() call with a string-literal regexp', () => {
+    const source = `const { stimulus } = steps(() => ({})).param('airport', '[A-Z]{3}')
 `
     const defs = scanner.discoverParameterTypes('p.ts', source)
     expect(defs).toHaveLength(1)
@@ -90,26 +86,21 @@ const { stimulus } = defineState(() => ({}), {
     expect(defs[0]?.regexp).toBe('[A-Z]{3}')
   })
 
-  test('discovers multiple paramTypes from one defineState call', () => {
-    const source = `const x = defineState(() => ({}), {
-  airport: { regexp: /[A-Z]{3}/ },
-  digit: { regexp: '[0-9]' },
-})
+  test('discovers multiple paramTypes from chained .param() calls', () => {
+    const source = `const x = steps(() => ({})).param('airport', /[A-Z]{3}/).param('digit', '[0-9]')
 `
     const names = scanner.discoverParameterTypes('p.ts', source).map((d) => d.name)
     expect(names).toEqual(['airport', 'digit'])
   })
 
   test('skips paramType entries with a non-literal regexp', () => {
-    const source = `const x = defineState(() => ({}), {
-  airport: { regexp: someRe },
-})
+    const source = `const x = steps(() => ({})).param('airport', someRe)
 `
     expect(scanner.discoverParameterTypes('p.ts', source)).toHaveLength(0)
   })
 
-  test('returns empty when defineState has no paramTypes argument', () => {
-    const source = `const { stimulus } = defineState(() => ({ n: 0 }))
+  test('returns empty when steps() has no .param() calls', () => {
+    const source = `const { stimulus } = steps(() => ({ n: 0 }))
 `
     expect(scanner.discoverParameterTypes('p.ts', source)).toEqual([])
   })

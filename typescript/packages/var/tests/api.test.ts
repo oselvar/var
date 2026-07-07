@@ -1,21 +1,21 @@
 import { beforeEach, expect, expectTypeOf, test } from 'vitest'
-import { defineState } from '../src/index.ts'
+import { steps } from '../src/index.ts'
 import { _resetBuilder, buildRegistry, contextFactory } from '../src/registry.ts'
 
 beforeEach(() => _resetBuilder())
 
 test('stimulus() adds a registration; buildRegistry() returns an immutable Registry', () => {
-  const { stimulus } = defineState(() => ({}))
+  const { stimulus } = steps(() => ({}))
   stimulus('I have {int} cukes', () => {})
   const r = buildRegistry()
   expect(r.steps).toHaveLength(1)
   expect(r.steps[0]?.expression).toBe('I have {int} cukes')
 })
 
-test('defineState() sets a per-stepfile factory keyed by caller path', () => {
-  defineState(() => ({ balance: 0 }))
+test('steps() sets a per-stepfile factory keyed by caller path', () => {
+  steps(() => ({ balance: 0 }))
   const f = contextFactory()
-  // `defineState` was just called from THIS file, so look it up by our path.
+  // `steps` was just called from THIS file, so look it up by our path.
   const here = new URL(import.meta.url).pathname
   const c1 = f(here)
   const c2 = f(here)
@@ -23,14 +23,14 @@ test('defineState() sets a per-stepfile factory keyed by caller path', () => {
   expect(c1).not.toBe(c2)
 })
 
-test('contextFactory() returns a default `{}` for a stepfile that did not call defineState', () => {
+test('contextFactory() returns a default `{}` for a stepfile that did not call steps', () => {
   const here = new URL(import.meta.url).pathname
   expect(contextFactory()(here)).toEqual({})
   expect(contextFactory()('/some/other/file.steps.ts')).toEqual({})
 })
 
 test('duplicate stimulus() calls throw at buildRegistry()', () => {
-  const { stimulus } = defineState(() => ({}))
+  const { stimulus } = steps(() => ({}))
   stimulus('I have {int} cukes', () => {})
   stimulus('I have {int} cukes', () => {})
   expect(() => buildRegistry()).toThrow(/duplicate step definition/)
@@ -39,7 +39,7 @@ test('duplicate stimulus() calls throw at buildRegistry()', () => {
 test('stimulus() type-checks typed handler arguments matching the cucumber expression', () => {
   // This is a TYPE-LEVEL assertion via a compile check. If `stimulus()` lost its generic,
   // the typed `name: string` parameter below would error with TS2345.
-  const { stimulus } = defineState(() => ({}))
+  const { stimulus } = steps(() => ({}))
   stimulus('I greet {string}', (_ctx, name: string) => {
     expect(typeof name).toBe('string')
   })
@@ -54,7 +54,7 @@ test('sensor() accepts return shapes independent of its captured args', () => {
   // TYPE-LEVEL assertion (fires via tsconfig.tests.json). A sensor's return is
   // compared by the pure core against the Markdown; its shape is NOT tied to the
   // captured args. All of these must type-check without a cast.
-  const { sensor: sense } = defineState(() => ({ greeting: '' }))
+  const { sensor: sense } = steps(() => ({ greeting: '' }))
   sense('bare single value', (ctx) => ctx.greeting)
   sense('header-bound row object', (_ctx, _row: { score: string }) => ({ score: 42 }))
   sense('whole reproduced table', (_ctx, rows: ReadonlyArray<ReadonlyArray<string>>) => rows)
@@ -64,7 +64,7 @@ test('sensor() accepts return shapes independent of its captured args', () => {
 })
 
 test('typed handlers reject mismatched ctx and arg usage', () => {
-  const { stimulus: act } = defineState(() => ({ greeting: '' }))
+  const { stimulus: act } = steps(() => ({ greeting: '' }))
   // @ts-expect-error - `name` is declared string; multiplying it is a type error
   act('I greet {string}', (_ctx, name: string) => name * 2)
   // @ts-expect-error - `count` is not a field on the state context
@@ -77,7 +77,7 @@ test('built-in parameter types are inferred from the expression (no annotations)
   // TYPE-LEVEL assertions (fire via tsconfig.tests.json under `pnpm typecheck`).
   // The handler params carry NO annotations — their types come from the
   // cucumber expression. This is the Tier 1 inference contract.
-  const { stimulus: act, sensor: sense } = defineState(() => ({ n: 0 }))
+  const { stimulus: act, sensor: sense } = steps(() => ({ n: 0 }))
   act('I greet {string}', (_ctx, name) => {
     expectTypeOf(name).toEqualTypeOf<string>()
   })
@@ -99,14 +99,13 @@ test('built-in parameter types are inferred from the expression (no annotations)
   expect(r.steps).toHaveLength(4)
 })
 
-test('custom parameter types declared in defineState are inferred (Tier 2)', () => {
+test('custom parameter types declared with .param() are inferred (Tier 2)', () => {
   // TYPE-LEVEL assertions (fire via tsconfig.tests.json under `pnpm typecheck`).
-  // The parse return types form the registry: {airport} → string,
-  // {date} → Date. Built-ins still resolve alongside them.
-  const { stimulus: act, sensor: sense } = defineState(() => ({ from: '' }), {
-    airport: { regexp: /[A-Z]{3}/, parse: (code: string) => code },
-    date: { regexp: /.+/, parse: (s: string) => new Date(s) },
-  })
+  // The parse return types accumulate into the registry as the chain widens:
+  // {airport} → string, {date} → Date. Built-ins still resolve alongside them.
+  const { stimulus: act, sensor: sense } = steps(() => ({ from: '' }))
+    .param('airport', /[A-Z]{3}/, (code) => code)
+    .param('date', /.+/, (s) => new Date(s))
   act('fly from {airport} to {airport} on {date}', (_ctx, from, to, when) => {
     expectTypeOf(from).toEqualTypeOf<string>()
     expectTypeOf(to).toEqualTypeOf<string>()
@@ -123,7 +122,7 @@ test('custom parameter types declared in defineState are inferred (Tier 2)', () 
 })
 
 test('stimulus/sensor register with their kind', () => {
-  const { stimulus, sensor } = defineState(() => ({}))
+  const { stimulus, sensor } = steps(() => ({}))
   stimulus('a logged-in user', () => {})
   stimulus('I click submit', () => {})
   sensor('the total is {int}', (_ctx, total: number) => total)
@@ -131,8 +130,8 @@ test('stimulus/sensor register with their kind', () => {
   expect(r.steps.map((s) => s.kind)).toEqual(['stimulus', 'stimulus', 'sensor'])
 })
 
-test('defineState returns role functions typed against the state', () => {
-  const { stimulus: ctxStep, sensor: sense } = defineState(() => ({ greeting: '' }))
+test('steps() returns role functions typed against the state', () => {
+  const { stimulus: ctxStep, sensor: sense } = steps(() => ({ greeting: '' }))
   // A stimulus EVOLVES state by RETURNING a partial — never by mutating.
   ctxStep('I greet {string}', (_state, name: string) => ({ greeting: `Hello, ${name}!` }))
   sense('the greeting should be {string}', (state) => state.greeting)
@@ -144,7 +143,7 @@ test('defineState returns role functions typed against the state', () => {
 test('state is deeply readonly and stimulus returns are partial-state (type-level)', () => {
   // TYPE-LEVEL assertions (fire via tsconfig.tests.json under `pnpm typecheck`).
   type S = { greeting: string; nested: { n: number } }
-  const { stimulus: act } = defineState((): S => ({ greeting: '', nested: { n: 0 } }))
+  const { stimulus: act } = steps((): S => ({ greeting: '', nested: { n: 0 } }))
   // returning a partial is fine
   act('a', () => ({ greeting: 'hi' }))
   // returning nothing is fine
@@ -163,13 +162,13 @@ test('state is deeply readonly and stimulus returns are partial-state (type-leve
   expect(r.steps).toHaveLength(5)
 })
 
-test('a second defineState in the SAME file throws', () => {
-  defineState(() => ({ balance: 0 }))
-  expect(() => defineState(() => ({ other: 1 }))).toThrow(/called more than once/)
+test('a second steps() in the SAME file throws', () => {
+  steps(() => ({ balance: 0 }))
+  expect(() => steps(() => ({ other: 1 }))).toThrow(/called more than once/)
 })
 
-test('defineState() without a factory registers steps against an empty state', () => {
-  const { stimulus, sensor } = defineState()
+test('steps() without a factory registers steps against an empty state', () => {
+  const { stimulus, sensor } = steps()
   stimulus('I warm up my mental math', () => {})
   sensor('the square of {int} is {int}', (_state, n) => [n, n * n])
   const r = buildRegistry()
@@ -178,14 +177,14 @@ test('defineState() without a factory registers steps against an empty state', (
   expect(contextFactory()(here)).toEqual({})
 })
 
-test('defineState() without a factory still enforces once-per-file', () => {
-  defineState()
-  expect(() => defineState()).toThrow(/called more than once/)
+test('steps() without a factory still enforces once-per-file', () => {
+  steps()
+  expect(() => steps()).toThrow(/called more than once/)
 })
 
 test('factory-less state is empty at the type level too', () => {
   // TYPE-LEVEL assertions (fire via tsconfig.tests.json under `pnpm typecheck`).
-  const { stimulus: act, sensor: sense } = defineState()
+  const { stimulus: act, sensor: sense } = steps()
   // returning nothing is fine; there are no fields to evolve
   act('a', () => {})
   sense('b', (state) => {

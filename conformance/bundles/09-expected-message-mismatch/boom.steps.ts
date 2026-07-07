@@ -1,6 +1,6 @@
-import { defineState } from '@oselvar/var'
+import { steps } from '@oselvar/var'
 
-const { stimulus } = defineState(() => ({}))
+const { stimulus } = steps(() => ({}))
 
 // Throws a message that does NOT contain the expected substring "expected
 // message", so the expected-failure is NOT satisfied → the example fails.

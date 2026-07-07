@@ -1,8 +1,8 @@
-from var import define_state
+from var import steps
 
-# No state factory: these steps are pure, so define_state() is called bare
+# No state factory: these steps are pure, so steps() is called bare
 # and handlers get an empty dict as state.
-stimulus, sensor = define_state()
+param, stimulus, sensor = steps()
 
 
 @stimulus("I warm up my mental math")

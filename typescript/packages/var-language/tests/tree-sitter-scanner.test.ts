@@ -19,7 +19,7 @@ describe('createTreeSitterScanner', () => {
 
     const paramTypes = scanner.discoverParameterTypes(
       'p.ts',
-      `const x = defineState(() => ({}), {\n  airport: { regexp: /[A-Z]{3}/ },\n})\n`,
+      `const x = steps(() => ({})).param('airport', /[A-Z]{3}/)\n`,
     )
     expect(paramTypes).toHaveLength(1)
     expect(paramTypes[0]?.name).toBe('airport')
@@ -54,7 +54,7 @@ describe('createTreeSitterScanner', () => {
     const scanner = await createTreeSitterScanner(createTestGrammarLoader())
     const paramTypes = scanner.discoverParameterTypes(
       'p.ts',
-      `const x = defineState(() => ({}), {\n  digit: { regexp: '[0-9]' },\n})\n`,
+      `const x = steps(() => ({})).param('digit', '[0-9]')\n`,
     )
     expect(paramTypes).toHaveLength(1)
     expect(paramTypes[0]?.name).toBe('digit')

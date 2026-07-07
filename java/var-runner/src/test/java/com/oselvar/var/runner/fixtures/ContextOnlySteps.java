@@ -5,7 +5,7 @@ import com.oselvar.var.State;
 import com.oselvar.var.StepDefinitions;
 
 /**
- * A {@link StepDefinitions} fixture that calls {@code defineState} but registers zero
+ * A {@link StepDefinitions} fixture that calls {@code steps} but registers zero
  * {@code context}/{@code action}/{@code sensor} steps — the edge case {@code
  * StepLoaderTest} uses to prove {@link com.oselvar.var.runner.StepLoader} skips (rather
  * than crashes on) a class with a {@code stateFactory} but no {@code
@@ -19,6 +19,6 @@ public final class ContextOnlySteps implements StepDefinitions {
 
     @Override
     public void defineSteps(Registrar registrar) {
-        registrar.defineState(Ctx::new);
+        registrar.steps(Ctx::new);
     }
 }

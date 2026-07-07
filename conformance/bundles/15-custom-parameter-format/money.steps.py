@@ -1,4 +1,4 @@
-from var import define_state
+from var import steps
 
 # Custom {money} parameter type with a `format` — the inverse of `parse`,
 # rendering a value back in the document's notation. The sensor returns the
@@ -6,15 +6,12 @@ from var import define_state
 # proving every port renders parameter mismatches through `format`
 # identically. Without a format this actual would be each port's native
 # object rendering, which is deliberately outside conformance.
-stimulus, sensor = define_state(
-    lambda: {},
-    param_types={
-        "money": {
-            "regexp": r"£\d+\.\d{2}",
-            "parse": lambda raw: {"currency": "GBP", "value": float(raw[1:])},
-            "format": lambda m: f"£{m['value']:.2f}",
-        }
-    },
+param, stimulus, sensor = steps(lambda: {})
+param(
+    "money",
+    r"£\d+\.\d{2}",
+    parse=lambda raw: {"currency": "GBP", "value": float(raw[1:])},
+    format=lambda m: f"£{m['value']:.2f}",
 )
 
 

@@ -8,7 +8,7 @@ const HERE = dirname(fileURLToPath(import.meta.url))
 const BIN_TS = resolve(HERE, '..', 'src', 'bin.ts')
 
 // The temp project lives INSIDE the workspace (under tests/fixtures) so its
-// steps file can `import { defineState } from '@oselvar/var'` — Node resolves
+// steps file can `import { steps } from '@oselvar/var'` — Node resolves
 // that up the tree to the workspace's node_modules. A temp dir in the OS tmp
 // root could not.
 let dir: string
@@ -24,8 +24,8 @@ beforeEach(() => {
   // A step that matches "I open the vault" but NOT "The vault is sealed".
   writeFileSync(
     join(dir, 'vault.steps.ts'),
-    "import { defineState } from '@oselvar/var'\n" +
-      'const { stimulus } = defineState(() => ({}))\n' +
+    "import { steps } from '@oselvar/var'\n" +
+      'const { stimulus } = steps(() => ({}))\n' +
       "stimulus('I open the vault', () => ({}))\n",
   )
 })

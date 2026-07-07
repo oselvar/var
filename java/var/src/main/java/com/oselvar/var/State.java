@@ -16,7 +16,7 @@ public interface State {
 
     /**
      * The state of a step-definition class that declares none: what the factory-less
-     * {@link Registrar#defineState()} binds handlers to. A stimulus that has nothing to
+     * {@link Registrar#steps()} binds handlers to. A stimulus that has nothing to
      * evolve returns the instance it received; a sensor has no fields to read.
      */
     record Empty() implements State {

@@ -10,7 +10,7 @@ class RegistrarGlueTest {
     @Test
     void framesOfRegistrarGlueAnnotatedClassesAreSkipped() {
         RegistryRegistrar registrar = new RegistryRegistrar();
-        StateBinder<GlueForwarder.Ctx> binder = registrar.defineState(GlueForwarder.Ctx::new);
+        StateBinder<GlueForwarder.Ctx> binder = registrar.steps(GlueForwarder.Ctx::new);
 
         GlueForwarder.forwardAction(binder, "I do a forwarded thing");
 

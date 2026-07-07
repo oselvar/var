@@ -31,9 +31,9 @@ Nothing runs yet — no step matches our sentence. Create
 `var-examples/steps/calculator.steps.ts`:
 
 ```ts
-import { defineState } from '@oselvar/var'
+import { steps } from '@oselvar/var'
 
-const { stimulus, sensor } = defineState(() => ({ result: 0 }))
+const { stimulus, sensor } = steps(() => ({ result: 0 }))
 
 stimulus('expression `{int}+{int}`', (_state, op1, op2) => ({ result: op1 + op2 }))
 
@@ -42,7 +42,7 @@ sensor('evaluate to `{int}`', (state, _expected) => state.result)
 
 Three things to notice:
 
-- **`defineState`** declares the state each example starts from — a fresh
+- **`steps`** declares the state each example starts from — a fresh
   `{ result: 0 }` every run, so examples never leak into each other.
 - The **`stimulus`** drives the software. It matches `` expression `1+1` `` in
   the prose, computes, and returns a patch to the state.

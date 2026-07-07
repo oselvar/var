@@ -1,4 +1,4 @@
-import { defineState } from '@oselvar/var'
+import { steps } from '@oselvar/var'
 
-const { sensor } = defineState<Record<string, never>>(() => ({}))
+const { sensor } = steps<Record<string, never>>(() => ({}))
 sensor('I greet {string}', () => undefined)

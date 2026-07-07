@@ -34,7 +34,7 @@ const PARAMETER_TYPE_QUERY = `
             (string_literal)
             (multiline_string_literal)
           ] @regexp-value))))))
-  (#eq? @function-name "parameterType")
+  (#eq? @function-name "param")
   (#eq? @regex-fn "Regex")
 ) @root
 `
@@ -138,7 +138,7 @@ function decodeStringContent(text: string): string {
 }
 
 // Kotlin lambda params are USER params only — the state is the lambda's
-// receiver (defineState(::Ctx) { ... }), so unlike TS/Python/Java there is no
+// receiver (steps(::Ctx) { ... }), so unlike TS/Python/Java there is no
 // leading ctx/state entry. A zero-parameter lambda has no lambda_parameters
 // node at all -> undefined (no signature to sync).
 function extractHandlerParams(handlerNode: Node): HandlerParams | undefined {

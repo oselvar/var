@@ -1,6 +1,6 @@
-import { defineState } from '@oselvar/var'
+import { steps } from '@oselvar/var'
 
-const { sensor } = defineState(() => ({}))
+const { sensor } = steps(() => ({}))
 
 // The doc string is this sensor's only slot, so it is returned bare; the core
 // compares it against the input (compareDocString); equal content passes.

@@ -5,16 +5,16 @@ import { _callerLocationFromStack } from '../src/registry.ts'
 // one chunk (`run-worker-*.js`) whose frames contain NO `/var/src/internal`
 // substring, while the step file is eval'd with `//# sourceURL=library.steps.ts`
 // so its frame reports that clean path. The registered sourceFile MUST resolve
-// to the steps file for BOTH call depths (defineState directly from the module,
+// to the steps file for BOTH call depths (steps directly from the module,
 // and stimulus → registerStep), otherwise the context factory keys mismatch and
 // the state factory is lost (`state.loans is undefined`).
 
-test('V8 bundled: defineState and registerStep both resolve to the steps file', () => {
+test('V8 bundled: steps and registerStep both resolve to the steps file', () => {
   // Chrome/V8 prefixes an `Error: locate` header line.
-  const defineStateStack = [
+  const stepsStack = [
     'Error: locate',
     '    at Pr (http://localhost:4321/_astro/run-worker-abc.js:1:1000)',
-    '    at Ar (http://localhost:4321/_astro/run-worker-abc.js:1:1100)', // defineState
+    '    at Ar (http://localhost:4321/_astro/run-worker-abc.js:1:1100)', // steps
     '    at library.steps.ts:8:20',
     '    at Ir (http://localhost:4321/_astro/run-worker-abc.js:1:2000)',
   ].join('\n')
@@ -26,7 +26,7 @@ test('V8 bundled: defineState and registerStep both resolve to the steps file', 
     '    at library.steps.ts:47:5',
   ].join('\n')
 
-  expect(_callerLocationFromStack(defineStateStack)).toEqual({
+  expect(_callerLocationFromStack(stepsStack)).toEqual({
     sourceFile: 'library.steps.ts',
     sourceLine: 8,
   })
@@ -39,8 +39,8 @@ test('V8 bundled: defineState and registerStep both resolve to the steps file', 
 test('Firefox bundled (no Error header): both depths resolve to the steps file', () => {
   // The regression: Firefox/SpiderMonkey stacks have no header line, so a blind
   // `.slice(1)` used to drop callerLocation's own frame and expose the differing
-  // defineState vs registerStep frames.
-  const defineStateStack = [
+  // steps vs registerStep frames.
+  const stepsStack = [
     'Pr@http://localhost:4321/_astro/run-worker-abc.js:1:1000',
     'Ar@http://localhost:4321/_astro/run-worker-abc.js:1:1100',
     '@library.steps.ts:8:20',
@@ -52,7 +52,7 @@ test('Firefox bundled (no Error header): both depths resolve to the steps file',
     '@library.steps.ts:47:5',
   ].join('\n')
 
-  expect(_callerLocationFromStack(defineStateStack)).toEqual({
+  expect(_callerLocationFromStack(stepsStack)).toEqual({
     sourceFile: 'library.steps.ts',
     sourceLine: 8,
   })

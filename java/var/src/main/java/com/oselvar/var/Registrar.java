@@ -1,8 +1,6 @@
 package com.oselvar.var;
 
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 
 /**
  * The sink a step-definition class registers into. Task 11 winning shape (Candidate B):
@@ -31,55 +29,27 @@ import java.util.regex.Pattern;
  * test runner does.
  *
  * <p>Preserves the semantics the design doc requires: one state factory per
- * step-definition class (one {@link #defineState} call), fresh per example (the runner
+ * step-definition class (one {@link #steps} call), fresh per example (the runner
  * re-invokes the {@link Supplier}).
  */
 public interface Registrar {
 
     /**
      * Register {@code factory} as this step file's initial-state constructor and return
-     * the {@code context}/{@code action}/{@code sensor} binder bound to it.
+     * the binder bound to it — the one object an author uses to declare custom parameter
+     * types ({@link StateBinder#param}) and register {@code stimulus}/{@code sensor} steps.
      *
      * @param factory produces a fresh initial state per example
      * @param <C> the context-state type
      */
-    <C extends State> StateBinder<C> defineState(Supplier<C> factory);
+    <C extends State> StateBinder<C> steps(Supplier<C> factory);
 
     /**
      * Factory-less variant for a step-definition class whose steps are pure — nothing
      * to arrange, nothing to evolve. Handlers are bound to {@link State.Empty}.
-     * Equivalent to {@code defineState(() -> State.Empty.INSTANCE)}.
+     * Equivalent to {@code steps(() -> State.Empty.INSTANCE)}.
      */
-    default StateBinder<State.Empty> defineState() {
-        return defineState(() -> State.Empty.INSTANCE);
+    default StateBinder<State.Empty> steps() {
+        return steps(() -> State.Empty.INSTANCE);
     }
-
-    /**
-     * Registers a custom cucumber-expression parameter type, available to every step
-     * subsequently compiled through this registrar — the facade-level equivalent of
-     * {@code com.oselvar.var.core.Registry#defineParameterType}.
-     *
-     * @param name the {@code {name}} placeholder this type matches
-     * @param regexp the pattern a placeholder occurrence must match
-     * @param parse maps the matched capture group(s) to the argument value a
-     *     handler receives for this placeholder
-     * @param <T> the type {@code parse} produces
-     */
-    <T> void defineParameterType(String name, Pattern regexp, Function<String[], T> parse);
-
-    /**
-     * As {@link #defineParameterType(String, Pattern, Function)}, additionally declaring
-     * {@code format} — the inverse of {@code parse}, rendering a value of this type back
-     * in the document's notation. Display-only: when a sensor's returned value mismatches
-     * a transformed inline parameter, the failure's expected/actual strings render
-     * through {@code format}; it never affects matching or the comparison verdict.
-     *
-     * @param name the {@code {name}} placeholder this type matches
-     * @param regexp the pattern a placeholder occurrence must match
-     * @param parse maps the matched capture group(s) to the argument value a
-     *     handler receives for this placeholder
-     * @param format renders a value of this type in the document's notation
-     * @param <T> the type {@code parse} produces and {@code format} renders
-     */
-    <T> void defineParameterType(String name, Pattern regexp, Function<String[], T> parse, Function<T, String> format);
 }

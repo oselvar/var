@@ -12,7 +12,7 @@ describe('java dialect', () => {
     const source = `public final class AirportsSteps implements StepDefinitions {
     @Override
     public void defineSteps(Registrar registrar) {
-        StateBinder<Ctx> s = registrar.defineState(() -> new Ctx(null));
+        var s = registrar.steps(() -> new Ctx(null));
         s.stimulus("I fly to {airport}", (Ctx ctx, String dest) -> new Ctx(dest));
         s.sensor("The count is {int}", (Ctx ctx, Integer n) -> null);
     }
@@ -47,10 +47,11 @@ describe('java dialect', () => {
     expect(defs[0]?.expression).toBe('I said "hi"\né')
   })
 
-  test('discovers defineParameterType with Pattern.compile', async () => {
+  test('discovers param with Pattern.compile', async () => {
     const scanner = await javaScanner()
     const source = `class X { void f(Registrar registrar) {
-        registrar.defineParameterType("airport", Pattern.compile("[A-Z]{3}"), groups -> groups[0]);
+        var s = registrar.steps(() -> new Ctx(null));
+        s.param("airport", Pattern.compile("[A-Z]{3}"), groups -> groups[0]);
     } }
 `
     const types = scanner.discoverParameterTypes('XSteps.java', source)

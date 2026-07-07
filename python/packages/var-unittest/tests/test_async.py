@@ -12,9 +12,9 @@ VAR_CONFIG = """\
 
 ASYNC_STEPS = """\
 import asyncio
-from var import define_state
+from var import steps
 
-stimulus, sensor = define_state(lambda: {"value": 0})
+param, stimulus, sensor = steps(lambda: {"value": 0})
 
 
 @stimulus("I asynchronously add {int}")

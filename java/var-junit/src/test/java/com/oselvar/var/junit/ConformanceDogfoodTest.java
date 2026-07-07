@@ -149,7 +149,7 @@ class ConformanceDogfoodTest {
                         new BundleCase(
                                 "13-custom-parameter-type", "com.oselvar.var.conformance.bundle13.AirportsSteps", 1, 0),
                         // 14-stateless-steps/golden/trace.json: one example, "pass" -- the
-                        // step file declares no state factory (factory-less defineState()).
+                        // step file declares no state factory (factory-less steps()).
                         new BundleCase("14-stateless-steps", "com.oselvar.var.conformance.bundle14.SquaresSteps", 1, 0),
                         // 15-custom-parameter-format/golden/trace.json: one example, outcome
                         // "fail" -- the sensor deliberately returns the wrong Money, so the

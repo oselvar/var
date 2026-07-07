@@ -9,7 +9,7 @@ async function kotlinScanner() {
 describe('kotlin dialect', () => {
   test('discovers trailing-lambda step calls with kind, expression, and lambda params', async () => {
     const scanner = await kotlinScanner()
-    const source = `val steps = defineState(::Ctx) {
+    const source = `val stepDefs = steps(::Ctx) {
     stimulus("I fly to {airport}") { dest: String ->
         copy(dest = dest)
     }
@@ -33,7 +33,7 @@ describe('kotlin dialect', () => {
     const scanner = await kotlinScanner()
     const defs = scanner.discoverStepDefs(
       'x.steps.kt',
-      `val steps = defineState(::Ctx) {\n    sensor("zero") { dest }\n}\n`,
+      `val stepDefs = steps(::Ctx) {\n    sensor("zero") { dest }\n}\n`,
     )
     expect(defs).toHaveLength(1)
     expect(defs[0]?.handlerParams).toBeUndefined()
@@ -43,15 +43,15 @@ describe('kotlin dialect', () => {
     const scanner = await kotlinScanner()
     const defs = scanner.discoverStepDefs(
       'x.steps.kt',
-      `val steps = defineState(::Ctx) {\n    stimulus("costs \\$5\\n\\u00e9") { n: Int -> copy() }\n}\n`,
+      `val stepDefs = steps(::Ctx) {\n    stimulus("costs \\$5\\n\\u00e9") { n: Int -> copy() }\n}\n`,
     )
     expect(defs[0]?.expression).toBe('costs $5\né')
   })
 
-  test('discovers parameterType with Regex(...)', async () => {
+  test('discovers param with Regex(...)', async () => {
     const scanner = await kotlinScanner()
-    const source = `val steps = defineState(::Ctx) {
-    parameterType("airport", Regex("[A-Z]{3}")) { captures -> captures[0].lowercase() }
+    const source = `val stepDefs = steps(::Ctx) {
+    param("airport", Regex("[A-Z]{3}")) { captures -> captures[0].lowercase() }
     stimulus("I fly to {airport}") { dest: String -> copy(dest = dest) }
 }
 `
@@ -59,10 +59,10 @@ describe('kotlin dialect', () => {
     expect(types.map((t) => [t.name, t.regexp])).toEqual([['airport', '[A-Z]{3}']])
   })
 
-  test('discovers parameterType with a raw-string Regex and a format argument', async () => {
+  test('discovers param with a raw-string Regex and a format argument', async () => {
     const scanner = await kotlinScanner()
-    const source = `val steps = defineState {
-    parameterType(
+    const source = `val stepDefs = steps {
+    param(
         "money",
         Regex("""£\\d+\\.\\d{2}"""),
         format = { m: Map<String, Any> -> "x" },

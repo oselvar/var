@@ -28,7 +28,7 @@ class RegistryRegistrarTest {
 
         @Override
         public void defineSteps(Registrar registrar) {
-            StateBinder<Ctx> s = registrar.defineState(() -> new Ctx(null));
+            StateBinder<Ctx> s = registrar.steps(() -> new Ctx(null));
             s.stimulus("I convert {int} to roman numerals", (Ctx ctx, Integer n) -> new Ctx(ROMAN.get(n)));
             s.sensor("The result is {word}", (Ctx ctx, String expected) -> ctx.result());
         }
@@ -65,7 +65,7 @@ class RegistryRegistrarTest {
     void duplicateExpressionRegisteredTwiceInOneRunThrows() {
         record Empty() implements State {}
         RegistryRegistrar registrar = new RegistryRegistrar();
-        StateBinder<Empty> s = registrar.defineState(Empty::new);
+        StateBinder<Empty> s = registrar.steps(Empty::new);
         s.stimulus("I do a thing", (Empty state) -> state);
 
         IllegalArgumentException ex =
@@ -74,11 +74,11 @@ class RegistryRegistrarTest {
     }
 
     @Test
-    void defineParameterTypeWiresARealCustomTypeThroughToTheRegistry() {
+    void paramWiresARealCustomTypeThroughToTheRegistry() {
         record Empty() implements State {}
         RegistryRegistrar registrar = new RegistryRegistrar();
-        registrar.defineParameterType("airport", Pattern.compile("[A-Z]{3}"), groups -> groups[0].toLowerCase());
-        StateBinder<Empty> s = registrar.defineState(Empty::new);
+        StateBinder<Empty> s = registrar.steps(Empty::new);
+        s.param("airport", Pattern.compile("[A-Z]{3}"), groups -> groups[0].toLowerCase());
         s.sensor("I fly to {airport}", (Empty state, String code) -> code);
 
         var step = registrar.registry().steps().get(0);

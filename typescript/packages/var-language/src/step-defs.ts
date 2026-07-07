@@ -64,49 +64,46 @@ function visitForParameterTypes(
   out: ParameterTypeDef[],
   file: string,
 ): void {
-  if (ts.isCallExpression(node) && isDefineStateCall(node) && node.arguments.length >= 2) {
-    const arg1 = node.arguments[1]
-    if (arg1 && ts.isObjectLiteralExpression(arg1)) {
-      for (const prop of arg1.properties) {
-        if (!ts.isPropertyAssignment(prop)) continue
-        const name = ts.isIdentifier(prop.name)
-          ? prop.name.text
-          : ts.isStringLiteral(prop.name)
-            ? prop.name.text
-            : undefined
-        if (name === undefined) continue
-        const def = prop.initializer
-        if (!ts.isObjectLiteralExpression(def)) continue
-        const regexp = readRegexpProperty(def, 'regexp')
-        if (regexp !== undefined) {
-          out.push({ file, name, regexp, callRange: rangeOf(sf, node) })
-        }
-      }
-    }
-  }
+  // Recurse BEFORE recording this node: in a `.param(...).param(...)` chain the
+  // outer call is the LATER one in source, so descending first yields the
+  // params in source order (matching the tree-sitter scanner).
   ts.forEachChild(node, (child) => visitForParameterTypes(sf, child, out, file))
-}
-
-function isDefineStateCall(node: ts.CallExpression): boolean {
-  // Match a bare `defineState(...)` call, regardless of import shape. Shadowed
-  // locals are an accepted false-positive risk, same as the role-call matcher.
-  return ts.isIdentifier(node.expression) && node.expression.text === 'defineState'
-}
-
-function readRegexpProperty(obj: ts.ObjectLiteralExpression, name: string): string | undefined {
-  for (const prop of obj.properties) {
-    if (!ts.isPropertyAssignment(prop)) continue
-    if (!ts.isIdentifier(prop.name) || prop.name.text !== name) continue
-    const init = prop.initializer
-    if (ts.isRegularExpressionLiteral(init)) {
-      // Strip the leading `/` and trailing `/flags` so the cucumber-expressions
-      // ParameterType can take a plain pattern string.
-      const text = init.text // e.g. "/[A-Z]{3}/i"
-      const lastSlash = text.lastIndexOf('/')
-      if (lastSlash > 0) return text.slice(1, lastSlash)
+  if (ts.isCallExpression(node) && isParamCall(node) && node.arguments.length >= 2) {
+    // param('name', /regexp/, parse?, format?) — name the first string
+    // argument, regexp the second (a regex literal or a plain-pattern string).
+    const nameArg = node.arguments[0]
+    const regexpArg = node.arguments[1]
+    const name =
+      nameArg && (ts.isStringLiteral(nameArg) || ts.isNoSubstitutionTemplateLiteral(nameArg))
+        ? nameArg.text
+        : undefined
+    const regexp = regexpArg ? readRegexpNode(regexpArg) : undefined
+    if (name !== undefined && regexp !== undefined) {
+      out.push({ file, name, regexp, callRange: rangeOf(sf, node) })
     }
-    if (ts.isStringLiteral(init) || ts.isNoSubstitutionTemplateLiteral(init)) return init.text
   }
+}
+
+function isParamCall(node: ts.CallExpression): boolean {
+  // Match `param(...)` — normally reached as a method on the chain returned by
+  // `steps()` (`steps(f).param(...)`), so accept both a bare identifier and a
+  // property access. Shadowed locals are an accepted false-positive risk, same
+  // as the role-call matcher.
+  const e = node.expression
+  if (ts.isIdentifier(e)) return e.text === 'param'
+  if (ts.isPropertyAccessExpression(e)) return e.name.text === 'param'
+  return false
+}
+
+function readRegexpNode(init: ts.Expression): string | undefined {
+  if (ts.isRegularExpressionLiteral(init)) {
+    // Strip the leading `/` and trailing `/flags` so the cucumber-expressions
+    // ParameterType can take a plain pattern string.
+    const text = init.text // e.g. "/[A-Z]{3}/i"
+    const lastSlash = text.lastIndexOf('/')
+    if (lastSlash > 0) return text.slice(1, lastSlash)
+  }
+  if (ts.isStringLiteral(init) || ts.isNoSubstitutionTemplateLiteral(init)) return init.text
   return undefined
 }
 

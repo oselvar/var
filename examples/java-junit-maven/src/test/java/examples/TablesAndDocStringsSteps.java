@@ -15,7 +15,7 @@ public final class TablesAndDocStringsSteps implements StepDefinitions {
 
     @Override
     public void defineSteps(Registrar registrar) {
-        StateBinder<Ctx> s = registrar.defineState(Ctx::new);
+        StateBinder<Ctx> s = registrar.steps(Ctx::new);
 
         // Whole-table mode: the table arrives as List<List<String>> (header row
         // first). It is this sensor's only slot, so return the reproduced table

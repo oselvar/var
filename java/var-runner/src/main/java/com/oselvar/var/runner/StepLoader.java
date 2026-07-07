@@ -26,7 +26,7 @@ import java.util.function.Supplier;
  *
  * <p>Mirrors {@code Registrar}'s own contract (see its javadoc): "one state factory per
  * step-definition class." Sharing a single {@code RegistryRegistrar} across multiple
- * {@code StepDefinitions} instances would let a second class's {@code defineState} call
+ * {@code StepDefinitions} instances would let a second class's {@code steps} call
  * silently overwrite the first's {@code stateFactory} — this class avoids that by
  * constructing a fresh {@code RegistryRegistrar} per instantiated class (see the loop in
  * {@link #loadSteps}), exactly as {@code Execute.runExample}'s per-example, per-file
@@ -46,7 +46,7 @@ import java.util.function.Supplier;
  * <p>Because every step a class registers reports the SAME {@code
  * expressionSourceFile}, this class only needs to read ONE of them (the first) to learn
  * the key for that whole class's {@code stateFactory}. A class whose {@code
- * defineSteps} calls {@code defineState} but registers zero {@code
+ * defineSteps} calls {@code steps} but registers zero {@code
  * context}/{@code action}/{@code sensor} steps has a {@code stateFactory} but no
  * {@code expressionSourceFile} to key it by — {@link #loadSteps} skips contributing a
  * context-map entry for it. This is safe, not a loss: {@code Execute} only ever calls
@@ -104,7 +104,7 @@ public final class StepLoader {
      *     resolved class neither implements {@link StepDefinitions} nor exposes a matching
      *     static factory method, two classes register the identical step expression, two
      *     classes register a custom parameter type with the same name, or two load units'
-     *     steps report the same {@code expressionSourceFile} (one defineState per
+     *     steps report the same {@code expressionSourceFile} (one steps per
      *     step-definition file)
      * @throws IllegalStateException if a resolved class can't be instantiated or invoked
      */
@@ -144,15 +144,15 @@ public final class StepLoader {
                     String file = own.steps().get(0).expressionSourceFile();
                     if (factoriesByFile.containsKey(file)) {
                         throw new IllegalArgumentException(
-                                "more than one defineState registration reports the step-definition file \""
+                                "more than one steps registration reports the step-definition file \""
                                         + file
-                                        + "\" (one defineState per step-definition file; loaded classes: "
+                                        + "\" (one steps per step-definition file; loaded classes: "
                                         + stepClassNames
                                         + ")");
                     }
                     factoriesByFile.put(file, registrar.stateFactory());
                 }
-                // else: defineState was called but zero steps were registered (a
+                // else: steps was called but zero steps were registered (a
                 // context-only class) — there's no expressionSourceFile to key it by, and
                 // none is ever needed, since Execute only looks up a file that has at least
                 // one step registered against it.
@@ -214,7 +214,7 @@ public final class StepLoader {
      * no-arg constructor — the original path), or it exposes public static
      * no-arg methods whose return type is assignable to {@link StepDefinitions}
      * (each invoked; name-sorted for determinism). The static-factory shape is
-     * what a Kotlin top-level {@code val steps = defineState(...) {...}}
+     * what a Kotlin top-level {@code val steps = steps(...) {...}}
      * compiles to (a file-facade class with a static getter), but the check is
      * plain reflection — nothing Kotlin-specific.
      */

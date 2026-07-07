@@ -62,7 +62,7 @@ test('a custom parameter type defined in *.steps.ts is registered before step co
     stepFiles: [
       {
         path: '/airports.steps.ts',
-        source: `const { stimulus } = defineState(() => ({}), { airport: { regexp: /[A-Z]{3}/ } })
+        source: `const { stimulus } = steps(() => ({})).param('airport', /[A-Z]{3}/)
 stimulus('I fly to {airport}', (ctx, code) => {})
 `,
       },

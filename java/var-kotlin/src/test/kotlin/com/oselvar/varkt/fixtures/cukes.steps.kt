@@ -2,14 +2,14 @@
 
 package com.oselvar.varkt.fixtures
 
-import com.oselvar.varkt.defineState
 import com.oselvar.varkt.sensor
+import com.oselvar.varkt.steps
 import com.oselvar.varkt.stimulus
 
 data class CukeCtx(val cukes: Int = 0)
 
 val steps =
-    defineState(::CukeCtx) {
+    steps(::CukeCtx) {
         stimulus("I have {int} cukes") { n: Int ->
             copy(cukes = n)
         }

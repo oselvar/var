@@ -1,6 +1,6 @@
-from var import define_state
+from var import steps
 
-stimulus, sensor = define_state(lambda: {})
+param, stimulus, sensor = steps(lambda: {})
 
 ROMAN = {1: "I", 4: "IV", 9: "IX", 40: "XL"}
 
