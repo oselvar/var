@@ -31,12 +31,24 @@ the changelog at any time with `make changelog` (stdout only, no file change).
 ## Step 2 — `make release`
 
 Reads the prepared version from the manifests (no argument), publishes every
-registry target — npm, PyPI, Maven Central, Open VSX (VS Code Marketplace is
-parked; see below), each **skipping what already exists** — and only once every
+registry target, each **skipping what already exists** — and only once every
 target is up does it create and push the tag `vX.Y.Z`, then the GitHub release.
 Finally it returns Java to a `-SNAPSHOT` placeholder (so a local `mvn install`
 doesn't shadow the immutable release in `~/.m2`; Ruby has no such constraint, so
 its gems stay stamped at the released version).
+
+Targets run in this order, deliberately: the two that need you at the keyboard
+come **first** so you can clear them and walk away, and the slow Maven Central
+deploy comes **last**:
+
+1. **npm** — browser 2FA, one round-trip per package.
+2. **RubyGems** — one OTP prompt for all six gems (see below).
+3. **PyPI**, **Open VSX** — token-based, unattended. (VS Code Marketplace is
+   parked; see below.)
+4. **Maven Central** — slow (GPG-signed, atomic multi-module deploy); runs
+   unattended at the end.
+5. **var-examples** — a quick git sync of `examples/` to the `oselvar/var-examples`
+   repo, pinned to the just-published versions.
 
 Idempotent: if a publish fails, fix the cause and re-run `make release` — it
 skips what's already out and picks up where it left off. Because the **tag is
@@ -45,8 +57,11 @@ created last**, a failed publish never leaves a dangling tag.
 
 Run `make release` from an interactive shell, not CI: npm keeps 2FA on publishes
 (deliberately — no bypass-2FA token), so each npm publish opens a browser
-`npmjs.com/auth/cli/...` challenge answered with 1Password/passkey, and RubyGems
-prompts for an OTP.
+`npmjs.com/auth/cli/...` challenge answered with 1Password/passkey. RubyGems
+requires an OTP too (the gemspecs set `rubygems_mfa_required`); the target builds
+all pending gems first, then prompts **once** and reuses that code for the whole
+batch (`GEM_HOST_OTP_CODE`). If a code expires mid-batch, re-run — published gems
+are skipped and you're prompted again for the rest.
 
 A target can be parked with the `DISABLED=1` variable at the top of its
 `release/targets/*.sh` (it warns and reports OK). Currently parked:
