@@ -32,4 +32,7 @@ log "stamping Java modules"
 log "stamping Java sample projects"
 stamp_java_samples "$VERSION"
 
+log "stamping Ruby gems (+ pinning internal deps, relocking)"
+stamp_ruby "$VERSION"
+
 log "stamped $VERSION"

@@ -28,6 +28,21 @@ stamp_java_samples() {
     examples/java-junit-maven/pom.xml
 }
 
+# Stamp <version> into every Ruby workspace gem: the gemspec version, the
+# gemspec's internal (oselvar-*) dependency pins, the VERSION constants, and the
+# lockfile. External dep pins (cucumber, minitest, rspec, ...) are left alone.
+# perl -pi, not sed -i: BSD/GNU-portable in-place.
+stamp_ruby() {
+  local version="$1" f
+  perl -pi -e "s/^(\s*s\.version\s*=\s*)'[^']*'/\${1}'$version'/" ruby/packages/*/*.gemspec
+  perl -pi -e "s/(add_dependency\s+'oselvar-[a-z0-9-]+',\s*)'[^']*'/\${1}'$version'/" ruby/packages/*/*.gemspec
+  while IFS= read -r f; do
+    perl -pi -e "s/(VERSION\s*=\s*)'[^']*'/\${1}'$version'/" "$f"
+  done < <(grep -rlE "VERSION\s*=\s*'" ruby/packages/*/lib)
+  # Regenerate the lockfile so the committed tree stays consistent (cf. uv lock).
+  (cd ruby && bundle lock >/dev/null)
+}
+
 # Everything before v0.1.0 predates the conventional-commit convention; that
 # release is kept verbatim in cliff.toml's `footer`, and generation starts here.
 CHANGELOG_SINCE="v0.1.0"
