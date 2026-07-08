@@ -86,7 +86,7 @@ export default defineConfig({
           label: 'Understanding Vár',
           items: [
             'explanation/oaths',
-            'explanation/given-when-then',
+            'explanation/test-anatomy',
             'explanation/thin-steps',
             'explanation/markup-is-yours',
             'explanation/var-for-cucumber-users',
