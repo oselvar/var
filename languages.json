@@ -19,7 +19,7 @@
     "hasCli": false,
     "install": {
       "lang": "xml",
-      "code": "<!-- pom.xml — use the latest release from Maven Central -->\n<dependency>\n  <groupId>com.oselvar</groupId>\n  <artifactId>var-junit</artifactId>\n  <version>0.3.1</version>\n  <scope>test</scope>\n</dependency>"
+      "code": "<!-- pom.xml — use the latest release from Maven Central -->\n<dependency>\n  <groupId>com.oselvar</groupId>\n  <artifactId>var-junit</artifactId>\n  <version>{{version}}</version>\n  <scope>test</scope>\n</dependency>"
     },
     "scaffold": null,
     "run": { "lang": "bash", "code": "mvn test" }
@@ -33,7 +33,7 @@
     "hasCli": false,
     "install": {
       "lang": "kotlin",
-      "code": "// build.gradle.kts — use the latest release from Maven Central\ntestImplementation(\"com.oselvar:var-kotlin:0.3.1\")\ntestImplementation(\"com.oselvar:var-junit:0.3.1\")"
+      "code": "// build.gradle.kts — use the latest release from Maven Central\ntestImplementation(\"com.oselvar:var-kotlin:{{version}}\")\ntestImplementation(\"com.oselvar:var-junit:{{version}}\")"
     },
     "scaffold": null,
     "run": { "lang": "bash", "code": "./gradlew test" }

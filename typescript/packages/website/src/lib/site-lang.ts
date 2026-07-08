@@ -13,6 +13,20 @@
 // picks it up.
 
 import languagesData from '../../../../../languages.json'
+import websitePkg from '../../package.json'
+
+// The version shown in the install snippets (the JVM Maven `pom.xml` / Gradle
+// `build.gradle.kts` coordinates — the only ports that pin an explicit version;
+// npm/pip/gem resolve the latest themselves). `release/stamp.sh` bumps every
+// `typescript/packages/*/package.json` — this website's own included — to the
+// version being released, so the website's package version *is* that number at
+// build time. Every `{{version}}` token in a `languages.json` command is filled
+// in with it below, keeping the docs' JVM coordinates in lockstep with what
+// `make release` publishes, with no separate variable to remember to bump.
+export const RELEASE_VERSION: string = websitePkg.version
+
+const fillVersion = (block: CommandBlock | null): CommandBlock | null =>
+  block && { ...block, code: block.code.replaceAll('{{version}}', RELEASE_VERSION) }
 
 export type SiteLang = 'ts' | 'java' | 'kotlin' | 'python' | 'ruby'
 
@@ -43,7 +57,14 @@ export type Language = {
 // `languages.json` is data, so its inferred type widens `id` to `string`; the
 // cast pins it to the SiteLang union. Keep the union above in step with the
 // ids in the manifest — those are the only two places the language set lives.
-export const LANGUAGES: ReadonlyArray<Language> = languagesData as ReadonlyArray<Language>
+export const LANGUAGES: ReadonlyArray<Language> = (languagesData as ReadonlyArray<Language>).map(
+  (l) => ({
+    ...l,
+    install: fillVersion(l.install) as CommandBlock,
+    scaffold: fillVersion(l.scaffold),
+    run: fillVersion(l.run) as CommandBlock,
+  }),
+)
 
 export const SITE_LANGS: ReadonlyArray<SiteLang> = LANGUAGES.map((l) => l.id)
 
