@@ -78,6 +78,7 @@ export default defineConfig({
             'reference/stimuli',
             'reference/sensors',
             'reference/custom-parameters',
+            'reference/editor-support',
             'reference/example-projects',
           ],
         },

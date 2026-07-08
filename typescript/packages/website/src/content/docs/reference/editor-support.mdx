@@ -1,0 +1,130 @@
+---
+title: Editor support
+description: The Vár VS Code extension and its language server — matched-step highlighting, go-to step definition, hover, completion, drift and mismatch diagnostics, Generate Step Definition, and cross-file Rename.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Vár ships an editor integration so that a spec — plain Markdown that happens to
+be executable — reads and edits like real code: matched steps are highlighted,
+you can jump from a sentence to the function that runs it, and the editor tells
+you when a paragraph has stopped being an example. It comes in two pieces:
+
+- **`@oselvar/var-lsp`** — a standalone [Language Server
+  Protocol](https://microsoft.github.io/language-server-protocol/) server. It
+  holds all the intelligence: parsing, step matching, diagnostics, snippet
+  generation, and rename planning. Because it speaks LSP, any editor with an LSP
+  client can drive it.
+- **The Vár VS Code extension** (`oselvar.oselvar-var`) — a thin client that
+  bundles the language server and wires its features into VS Code menus,
+  commands, and the editor surface.
+
+Everything on this page is powered by the language server, so an editor other
+than VS Code that points an LSP client at `var-lsp` gets the same feature set.
+
+## Install
+
+The extension is published to the [Open VSX Registry](https://open-vsx.org), so
+it installs in VS Code and every VS Code–compatible editor — VSCodium, Cursor,
+Windsurf — that resolves extensions from Open VSX:
+
+- **In-editor:** open the Extensions view, search for **Vár**, and install
+  `oselvar.oselvar-var`.
+- **From the CLI:** `code --install-extension oselvar.oselvar-var` (or the
+  equivalent `codium` / `cursor` command).
+
+The extension activates when a workspace contains a `var.config.json`, or when
+you open a Markdown, TypeScript, Python, Java, or Kotlin file. It needs that
+config to know which files are specs and where your step definitions live — see
+the [Examples reference](/reference/examples/) for the `docs` globs that decide
+what counts as a spec.
+
+<Aside type="note" title="VS Code Marketplace">
+Publishing to Microsoft's VS Code Marketplace is parked for now. Install from
+Open VSX using the steps above; on stock VS Code that means the Extensions view
+must be configured to include the Open VSX gallery, or install from the CLI.
+</Aside>
+
+## Feature set
+
+The features below work in any spec (`.md`) and its step-definition files.
+Step definitions are supported in **TypeScript, Python, Java, Kotlin, and
+Ruby** — the language server carries a tree-sitter grammar for each, so
+matching, go-to-definition, and rename cross the Markdown ↔ code boundary in
+whichever language your steps are written.
+
+### Matched-step highlighting
+
+The editor colours the sentences in a spec that actually match a registered
+[stimulus](/reference/stimuli/) or [sensor](/reference/sensors/), and the
+parameter spans within them, using semantic tokens. Prose that matches nothing
+stays plain. At a glance you can see which paragraphs are executable examples
+and which are narration — and a step you *expected* to be live but that reads as
+plain prose is instantly visible.
+
+### Go-to step definition
+
+Invoke **Go to Definition** on a matched sentence and the editor jumps to the
+`stimulus()` / `sensor()` call that runs it, in the step-definition file, in any
+supported language. It also works in reverse from the step-definition
+expression.
+
+### Hover
+
+Hovering a matched step surfaces details about the step it resolves to — the
+binding behind the sentence — without leaving the spec.
+
+### Completion
+
+As you write a sentence in a spec, completion offers the registered steps that
+could match, so you can author against the vocabulary your step definitions
+already provide instead of guessing at wording.
+
+### Diagnostics
+
+The server publishes diagnostics into the editor's Problems panel and inline
+squiggles. Beyond parse errors, it ingests the results of the last run (the
+`.var/*.json` files the runner writes) and reflects them back onto the source:
+
+- **Drift** — a paragraph that *used to be* an example and now matches nothing.
+  This is the dangerous case Vár refuses to let pass silently; see
+  [Drift detection](/reference/examples/#drift-detection).
+- **Missing steps** — a sentence that looks like it should run but has no
+  matching step definition.
+- **Cell and doc-string mismatches** — when a sensor's returned value disagrees
+  with the Markdown, the diff is anchored to the exact source span, so the
+  failing cell or doc-string line is reddened in place.
+
+### Accept as prose (drift quick-fix)
+
+Drift is held until you acknowledge it. On a drift diagnostic the editor offers
+an **Accept as prose** quick-fix: confirming that a paragraph is *intentionally*
+no longer an example records the new baseline — the editor equivalent of
+acknowledging the drift in the runner.
+
+### Generate Step Definition from selection
+
+Select a sentence in a spec and run **BDD: Generate Step Definition from
+Selection** — from the context menu, the Command Palette, or as a refactor
+action. The server generates a step-definition snippet for the selection (with a
+parameter for each captured value), you pick which steps file to add it to, and
+the extension appends it. This is the fast path from an unbound sentence to a
+working step.
+
+### Cross-file Rename
+
+Press **F2** on a matched step — either on the sentence in the Markdown or on the
+`stimulus()` / `sensor()` expression in a steps file — and Vár renames the step
+everywhere at once: it rewrites the step-definition expression and its handler,
+and re-renders every matching sentence across every spec to the new wording. If
+the new form adds a parameter or changes a parameter's type, the editor prompts
+for the value each affected example should use, so the specs stay runnable
+through the rename.
+
+## Using the language server in other editors
+
+`@oselvar/var-lsp` is a plain LSP server with a `var-lsp` executable. Any editor
+that can launch a language server for Markdown and your step-definition files can
+consume it directly and get the same highlighting, navigation, diagnostics, and
+rename features described above — the VS Code extension is just the reference
+client.
