@@ -7,19 +7,20 @@ const CONFIG = `{
 }
 `
 
-const EXAMPLE_MD = `# Hello, BDD
+const EXAMPLE_MD = `# Deep Thought
 
-Given I greet "world"
-Then the greeting is "Hello, world!"
+You're really not going to like it.
+
+The answer to the great question of life, the universe and everything is 42.
+
+It was a tough assignment.
 `
 
 const EXAMPLE_STEPS = `import { steps } from '@oselvar/var'
 
-const { stimulus, sensor } = steps(() => ({ greeting: '' }))
+const { sensor } = steps()
 
-stimulus('I greet {string}', (_state, name: string) => ({ greeting: \`Hello, \${name}!\` }))
-
-sensor('the greeting is {string}', (state, _expected: string) => state.greeting)
+sensor('life, the universe and everything is {int}', () => 42)
 `
 
 export type InitOptions = {
@@ -32,8 +33,8 @@ export type InitResult = { readonly exitCode: number }
 export async function runInit(opts: InitOptions): Promise<InitResult> {
   const files: Array<{ readonly relPath: string; readonly content: string }> = [
     { relPath: 'var.config.json', content: CONFIG },
-    { relPath: 'var-examples/01-hello.md', content: EXAMPLE_MD },
-    { relPath: 'var-examples/steps/01-hello.steps.ts', content: EXAMPLE_STEPS },
+    { relPath: 'var-examples/deep-thought.md', content: EXAMPLE_MD },
+    { relPath: 'var-examples/steps/deep-thought.steps.ts', content: EXAMPLE_STEPS },
   ]
   for (const f of files) {
     const target = join(opts.cwd, f.relPath)

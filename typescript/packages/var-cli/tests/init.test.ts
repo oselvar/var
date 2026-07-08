@@ -11,12 +11,15 @@ test('scaffolds var.config.json and an example .md + steps file', async () => {
     const result = await runInit({ cwd: dir, writeStdout: () => {} })
     expect(result.exitCode).toBe(0)
     expect(existsSync(join(dir, 'var.config.json'))).toBe(true)
-    expect(existsSync(join(dir, 'var-examples/01-hello.md'))).toBe(true)
-    expect(existsSync(join(dir, 'var-examples/steps/01-hello.steps.ts'))).toBe(true)
-    const stepsTs = readFileSync(join(dir, 'var-examples/steps/01-hello.steps.ts'), 'utf8')
+    expect(existsSync(join(dir, 'var-examples/deep-thought.md'))).toBe(true)
+    expect(existsSync(join(dir, 'var-examples/steps/deep-thought.steps.ts'))).toBe(true)
+    const exampleMd = readFileSync(join(dir, 'var-examples/deep-thought.md'), 'utf8')
+    // The scaffolded spec is plain prose — no Given/When/Then keyword ceremony.
+    expect(exampleMd).not.toMatch(/^\s*(Given|When|Then)\b/m)
+    const stepsTs = readFileSync(join(dir, 'var-examples/steps/deep-thought.steps.ts'), 'utf8')
     expect(stepsTs).toContain('steps')
-    expect(stepsTs).toContain('({ greeting:')
-    expect(stepsTs).not.toContain('ctx.greeting =')
+    expect(stepsTs).toContain('sensor(')
+    expect(stepsTs).toContain('=> 42')
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }
