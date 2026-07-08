@@ -28,8 +28,8 @@ Every command and code sample below follows that choice.
 
    ```
    created var.config.json
-   created var-examples/01-hello.md
-   created var-examples/steps/01-hello.steps.<ext>
+   created var-examples/deep-thought.md
+   created var-examples/steps/deep-thought.steps.<ext>
    ```
 
    (`<ext>` is your language's step-file extension — `ts`, `py`, `rb`, and so on.)
@@ -47,29 +47,31 @@ Every command and code sample below follows that choice.
    The spec itself is plain Markdown with one concrete example:
 
    ```markdown
-   # Hello, BDD
+   # Deep Thought
 
-   Given I greet "world"
-   Then the greeting is "Hello, world!"
+   You're really not going to like it.
+
+   The answer to the great question of life, the universe and everything is 42.
+
+   It was a tough assignment.
    ```
 
-   Notice that `Given` and `Then` are just narration for the reader — Vár matches
-   the phrases, never the keywords. You could write the same example as ordinary
-   prose and it would still run.
+   Notice there are no keywords and no special syntax — it's ordinary Markdown
+   prose. One sentence makes a checkable claim; Vár matches that phrase, and
+   everything around it is just documentation for the reader.
 
-   The steps file binds those phrases to code. A **stimulus** drives the software
-   and returns the next state; a **sensor** reads the state and returns what the
-   software actually produced, for Vár to compare against the Markdown:
+   The steps file binds that sentence to code. A **sensor** reads the software and
+   returns what it actually produced, for Vár to compare against the number in the
+   Markdown:
 
    <Tabs syncKey="lang">
      <TabItem label="TypeScript">
        ```ts
        import { steps } from '@oselvar/var'
 
-       const { stimulus, sensor } = steps(() => ({ greeting: '' }))
+       const { sensor } = steps()
 
-       stimulus('I greet {string}', (_state, name: string) => ({ greeting: `Hello, ${name}!` }))
-       sensor('the greeting is {string}', (state, _expected: string) => state.greeting)
+       sensor('life, the universe and everything is {int}', () => 42)
        ```
      </TabItem>
      <TabItem label="Java">
@@ -81,34 +83,29 @@ Every command and code sample below follows that choice.
        import com.oselvar.var.StateBinder;
        import com.oselvar.var.StepDefinitions;
 
-       public final class HelloSteps implements StepDefinitions {
-           record Ctx(String greeting) implements State {}
+       public final class DeepThoughtSteps implements StepDefinitions {
+           record Ctx() implements State {}
 
            @Override
            public void defineSteps(Registrar registrar) {
-               StateBinder<Ctx> s = registrar.steps(() -> new Ctx(""));
-               s.stimulus("I greet {string}", (Ctx ctx, String name) -> new Ctx("Hello, " + name + "!"));
-               s.sensor("the greeting is {string}", (Ctx ctx, String expected) -> ctx.greeting());
+               StateBinder<Ctx> s = registrar.steps(Ctx::new);
+               s.sensor("life, the universe and everything is {int}", (Ctx ctx, Integer answer) -> 42);
            }
        }
        ```
      </TabItem>
      <TabItem label="Kotlin">
        ```kotlin
-       @file:JvmName("HelloSteps")
+       @file:JvmName("DeepThoughtSteps")
 
        package examples
 
        import com.oselvar.varkt.sensor
        import com.oselvar.varkt.steps
-       import com.oselvar.varkt.stimulus
 
-       data class HelloCtx(val greeting: String = "")
-
-       val helloSteps =
-           steps(::HelloCtx) {
-               stimulus("I greet {string}") { name: String -> copy(greeting = "Hello, $name!") }
-               sensor("the greeting is {string}") { _: String -> greeting }
+       val deepThoughtSteps =
+           steps {
+               sensor("life, the universe and everything is {int}") { _: Int -> 42 }
            }
        ```
      </TabItem>
@@ -116,26 +113,20 @@ Every command and code sample below follows that choice.
        ```python
        from var import steps
 
-       param, stimulus, sensor = steps(lambda: {"greeting": ""})
+       param, stimulus, sensor = steps()
 
 
-       @stimulus("I greet {string}")
-       def _(state, name):
-           return {"greeting": f"Hello, {name}!"}
-
-
-       @sensor("the greeting is {string}")
-       def _(state, expected):
-           return state["greeting"]
+       @sensor("life, the universe and everything is {int}")
+       def _(state, answer):
+           return 42
        ```
      </TabItem>
      <TabItem label="Ruby">
        ```ruby
        require 'oselvar/var'
 
-       steps(greeting: '') do
-         stimulus('I greet {string}') { |_state, name| { greeting: "Hello, #{name}!" } }
-         sensor('the greeting is {string}') { |state, _expected| state[:greeting] }
+       steps do
+         sensor('life, the universe and everything is {int}') { 42 }
        end
        ```
      </TabItem>
@@ -147,7 +138,7 @@ Every command and code sample below follows that choice.
 
    - `var.config.json` lists step classes by fully-qualified name instead of a glob:
      ```json
-     { "docs": { "include": ["*.md"], "exclude": [] }, "steps": ["examples.HelloSteps"] }
+     { "docs": { "include": ["*.md"], "exclude": [] }, "steps": ["examples.DeepThoughtSteps"] }
      ```
    - add a one-line JUnit suite so Maven or Gradle discovers the specs — `RunVarSpecsTest.java` / `.kt`:
      ```java
@@ -166,8 +157,8 @@ Every command and code sample below follows that choice.
    Vár reports one example passing:
 
    ```
-   var-examples/01-hello.md
-     ✓ Hello, BDD
+   var-examples/deep-thought.md
+     ✓ Deep Thought
 
    1 example, 1 passed, 0 failed
    ```
@@ -178,41 +169,41 @@ Every command and code sample below follows that choice.
 4. Watch it fail on purpose
 
    Never trust a test you haven't seen fail. Open the steps file and change the
-   greeting the stimulus produces from `Hello` to `Hi`:
+   answer the sensor returns from `42` to `43`:
 
    <Tabs syncKey="lang">
      <TabItem label="TypeScript">
        ```ts
-       stimulus('I greet {string}', (_state, name: string) => ({ greeting: `Hi, ${name}!` }))
+       sensor('life, the universe and everything is {int}', () => 43)
        ```
      </TabItem>
      <TabItem label="Java">
        ```java
-       s.stimulus("I greet {string}", (Ctx ctx, String name) -> new Ctx("Hi, " + name + "!"));
+       s.sensor("life, the universe and everything is {int}", (Ctx ctx, Integer answer) -> 43);
        ```
      </TabItem>
      <TabItem label="Kotlin">
        ```kotlin
-       stimulus("I greet {string}") { name: String -> copy(greeting = "Hi, $name!") }
+       sensor("life, the universe and everything is {int}") { _: Int -> 43 }
        ```
      </TabItem>
      <TabItem label="Python">
        ```python
-       @stimulus("I greet {string}")
-       def _(state, name):
-           return {"greeting": f"Hi, {name}!"}
+       @sensor("life, the universe and everything is {int}")
+       def _(state, answer):
+           return 43
        ```
      </TabItem>
      <TabItem label="Ruby">
        ```ruby
-       stimulus('I greet {string}') { |_state, name| { greeting: "Hi, #{name}!" } }
+       sensor('life, the universe and everything is {int}') { 43 }
        ```
      </TabItem>
    </Tabs>
 
-   Run Vár again. The example now fails: the spec still says `"Hello, world!"`, but
-   the sensor observed `"Hi, world!"`. The output shows both values and points at
-   the exact place in the Markdown where the promise broke.
+   Run Vár again. The example now fails: the spec still says `42`, but the sensor
+   observed `43`. The output shows both values and points at the exact `42` in the
+   Markdown where the promise broke.
 
    Revert the change and run once more — one example, one passed. You have seen
    both sides of the contract.
