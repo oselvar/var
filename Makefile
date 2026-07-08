@@ -27,6 +27,9 @@ typescript:
 	cd typescript && pnpm install && pnpm build && pnpm check
 
 python:
+	# Drop any .venv left pointing at an old checkout path (e.g. after a repo
+	# rename); uv won't repair a relocated venv on its own. See fresh-venv.sh.
+	scripts/fresh-venv.sh python examples/python-pytest examples/python-unittest
 	cd python && uv sync && uv run pytest --cov && uv run ruff check && uv run python scripts/lint_no_reexports.py
 	cd examples/python-pytest && uv run pytest
 	cd examples/python-unittest && uv run python -m unittest
