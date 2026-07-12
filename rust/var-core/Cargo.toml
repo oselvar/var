@@ -1,0 +1,13 @@
+[package]
+name = "var-core"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+regex = "1"
+cucumber-expressions = { version = "0.5", features = ["into-regex"] }
+
+[lib]
+name = "var_core"
+path = "src/lib.rs"
