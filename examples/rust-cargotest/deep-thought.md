@@ -1,0 +1,1 @@
+../typescript-vitest/deep-thought.md

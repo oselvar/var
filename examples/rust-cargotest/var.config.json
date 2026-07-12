@@ -1,0 +1,14 @@
+{
+  "$schema": "../../conformance/config/var.config.schema.json",
+  "docs": {
+    "include": [
+      "*.md"
+    ],
+    "exclude": [
+      "README.md"
+    ]
+  },
+  "steps": [
+    "src/steps/*.rs"
+  ]
+}

@@ -1,0 +1,34 @@
+[package]
+name = "var-example-rust-cargotest"
+version = "0.0.1"
+edition = "2024"
+publish = false
+description = "Standalone sample: run Markdown specs as `cargo test` tests with Vár"
+
+# In this monorepo the Vár crates resolve from source (path deps), so the sample
+# gates trunk against the local build. A real project depends on the published
+# crates instead.
+[dependencies]
+# The engine (steps are authored against it) and the cargo-test adapter.
+var-core = { path = "../../rust/var-core" }
+var-cargotest = { path = "../../rust/var-cargotest" }
+
+[dev-dependencies]
+# The `unit` test drives discovery and a single example directly.
+var-config = { path = "../../rust/var-config" }
+var-runner = { path = "../../rust/var-runner" }
+
+[lib]
+name = "example"
+path = "src/lib.rs"
+
+# The specs run through the var-cargotest adapter, which owns the libtest
+# harness — hence `harness = false` and a `main` in tests/specs.rs.
+[[test]]
+name = "specs"
+path = "tests/specs.rs"
+harness = false
+
+[[test]]
+name = "unit"
+path = "tests/unit.rs"
