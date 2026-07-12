@@ -1,0 +1,16 @@
+[package]
+name = "var"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+var-core = { path = "../var-core" }
+
+[lib]
+name = "var"
+path = "src/lib.rs"
+
+[[test]]
+name = "conformance"
+path = "tests/conformance.rs"
