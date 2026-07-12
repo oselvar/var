@@ -1,0 +1,15 @@
+[package]
+name = "var-cargotest"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+var-core = { path = "../var-core" }
+var-config = { path = "../var-config" }
+var-runner = { path = "../var-runner" }
+libtest-mimic = "0.8"
+
+[lib]
+name = "var_cargotest"
+path = "src/lib.rs"
