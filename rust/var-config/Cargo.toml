@@ -1,0 +1,21 @@
+[package]
+name = "var-config"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+serde_json = "1"
+
+# Test-only: the conformance corpus is compared through var-core's canonical
+# JSON. The reader itself stays pure (serde_json only).
+[dev-dependencies]
+var-core = { path = "../var-core" }
+
+[lib]
+name = "var_config"
+path = "src/lib.rs"
+
+[[test]]
+name = "conformance"
+path = "tests/conformance.rs"
