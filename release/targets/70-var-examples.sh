@@ -53,6 +53,7 @@ rsync -a --copy-links \
   --exclude '.pytest_cache/' \
   --exclude 'uv.lock' \
   --exclude 'Gemfile.lock' \
+  --exclude 'Cargo.lock' \
   examples/ "$DEST"/
 
 # Pin the JVM samples to the released Maven Central artifacts (idempotent even
@@ -84,6 +85,13 @@ perl -pi -e "s/\"(pytest-var|oselvar-var[\\w-]*)\"/\"\$1==$VERSION\"/" \
 # (above), so `bundle install` regenerates it against the pins.
 perl -pi -e "s|, path: \"\\.\\./\\.\\./ruby/packages/[\\w-]+\"|, \"$VERSION\"|" \
   "$DEST"/ruby-*/Gemfile
+
+# Pin the Rust sample to the released crates.io version: swap the var-core
+# path dependency for a version constraint. Inert until var-core is published
+# to crates.io (the Rust port has no release target yet); kept here so the
+# sync stays correct the moment it is.
+perl -pi -e "s|var-core = \{ path = \"\\.\\./\\.\\./rust/var-core\" \}|var-core = \"$VERSION\"|" \
+  "$DEST"/rust-*/Cargo.toml
 
 git -C "$DEST" add -A
 if git -C "$DEST" diff --cached --quiet; then

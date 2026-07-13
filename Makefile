@@ -1,6 +1,6 @@
 # Build and test every language port from the repo root.
 #
-#   make            # same as `make check`: all four ports
+#   make            # same as `make check`: every port
 #   make typescript # pnpm build + pnpm check (lint, typecheck, test, knip, jscpd)
 #   make python     # pytest + ruff + no-reexports gate + examples/python-pytest
 #   make java       # spotless:apply (formats Java + Kotlin, incl. the JVM sample
@@ -10,13 +10,14 @@
 #   make ruby       # bundle + rake (rubocop + rspec + purity gate) +
 #                   # examples/ruby-rspec and examples/ruby-minitest (Ruby 3.2,
 #                   # pinned in ruby/.tool-versions)
+#   make rust       # cargo fmt/clippy/test (var-core) + examples/rust-cargotest
 #   make coverage   # test with coverage in all four ports (reports below)
 #
 # Each target runs the same gate as that port's CI workflow in .github/workflows/.
 
-.PHONY: check commits typescript python java ruby coverage changelog prepare release
+.PHONY: check commits typescript python java ruby rust coverage changelog prepare release
 
-check: commits typescript python java ruby
+check: commits typescript python java ruby rust
 
 # Commits since the last release tag must be conventional (they drive the
 # changelog and the version bump — see cliff.toml and CLAUDE.md).
@@ -47,6 +48,12 @@ ruby:
 	cd ruby && bundle install && bundle exec rake
 	cd examples/ruby-rspec && bundle install && bundle exec rspec
 	cd examples/ruby-minitest && bundle install && bundle exec rake test
+
+# Rust port: pure cargo (var-core), then the standalone sample project (which
+# depends on var-core by path and runs the Markdown specs via `cargo test`).
+rust:
+	cd rust && cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test
+	cd examples/rust-cargotest && cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test
 
 # Coverage reports: typescript/coverage/index.html, python/htmlcov/index.html,
 # java/<module>/target/site/jacoco/index.html (jacoco runs on every verify),

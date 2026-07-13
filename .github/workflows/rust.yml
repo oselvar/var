@@ -1,0 +1,37 @@
+name: Rust
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'rust/**'
+      - 'conformance/**'
+      - 'examples/**'
+      - '.github/workflows/rust.yml'
+  pull_request:
+    paths:
+      - 'rust/**'
+      - 'conformance/**'
+      - 'examples/**'
+      - '.github/workflows/rust.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      # The pure functional core: fmt + clippy (-D warnings) + the conformance
+      # harness (var-doc golden gate over 15 bundles + drift/hash units).
+      - run: cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test
+        working-directory: rust
+
+      # Standalone sample project (see examples/rust-cargotest): runs the
+      # Markdown specs through var-core via `cargo test`.
+      - run: cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test
+        working-directory: examples/rust-cargotest
