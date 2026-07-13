@@ -15,10 +15,19 @@ function run(args: ReadonlyArray<string>, cwd: string) {
   return spawnSync(process.execPath, [BIN_TS, ...args], { cwd, encoding: 'utf8' })
 }
 
+// Node emits its one-time experimental-feature notice as a two-line block:
+//   (node:12345) ExperimentalWarning: globSync is an experimental feature ...
+//   (Use `node --trace-warnings ...` to show where the warning was created)
+// Anchor on Node's own `(node:PID) ExperimentalWarning:` prefix (and the paired
+// trace-warnings hint) rather than an unanchored substring, so a CLI-emitted
+// line that merely contains the literal text can't be silently dropped.
+const NODE_EXPERIMENTAL_WARNING = /^\(node:\d+\) ExperimentalWarning:/
+const NODE_TRACE_WARNINGS_HINT = /^\(Use `node --trace-warnings /
+
 function filterWarnings(stderr: string): string {
   return stderr
     .split('\n')
-    .filter((line) => !line.includes('ExperimentalWarning') && !line.includes('--trace-warnings'))
+    .filter((line) => !NODE_EXPERIMENTAL_WARNING.test(line) && !NODE_TRACE_WARNINGS_HINT.test(line))
     .join('\n')
     .trim()
 }
