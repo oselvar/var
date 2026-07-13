@@ -988,3 +988,70 @@ fn handler_invocation_works_for_any_closure_shape() {
     let ports = ExecutePorts::silent();
     assert!(collect_examples(&p, &ports)[0].run().is_ok());
 }
+
+// -----------------------------------------------------------------------------
+// Variadic handlers: sync_var / async_var (any-arity escape hatch — Java
+// reflective invocation / Python *args parity)
+// -----------------------------------------------------------------------------
+
+#[test]
+fn a_three_slot_step_runs_through_a_sync_var_handler() {
+    // Two inline params + a trailing table = three slots, beyond sync2.
+    let seen: Rc<RefCell<Vec<usize>>> = Rc::new(RefCell::new(Vec::new()));
+    let seen2 = seen.clone();
+    let r = reg(
+        "I map {word} to {word}:",
+        "s.ts",
+        1,
+        Handler::sync_var(move |state, args| {
+            seen2.borrow_mut().push(args.len());
+            Ok(Some(state))
+        }),
+        Some(StepKind::Stimulus),
+    );
+    let source = "# M\n\nI map alpha to beta:\n\n| from | to |\n|------|----|\n| a    | b  |";
+    let p = plan_of(source, &r);
+    let ports = ExecutePorts::silent();
+    collect_examples(&p, &ports)[0].run().unwrap();
+    assert_eq!(vec![3], *seen.borrow()); // word, word, table
+}
+
+#[test]
+fn an_async_handler_with_parameters_runs_through_async_var() {
+    let r = create_registry();
+    let r = add_step(
+        &r,
+        "I greet {string} asynchronously",
+        "s.ts",
+        1,
+        Handler::async_var(|_state, args| {
+            Box::pin(async move {
+                let name = match &args[0] {
+                    Value::String(s) => s.clone(),
+                    _ => String::new(),
+                };
+                Ok(Some(Value::from(format!("hi {name}"))))
+            })
+        }),
+        Some(StepKind::Stimulus),
+    )
+    .unwrap();
+    let r = add_step(
+        &r,
+        "observe greeting",
+        "s.ts",
+        2,
+        Handler::sync0(|state| {
+            assert_eq!(Value::from("hi world"), state);
+            Ok(None)
+        }),
+        Some(StepKind::Sensor),
+    )
+    .unwrap();
+    let p = plan_of(
+        "# A\n\nI greet \"world\" asynchronously\nobserve greeting",
+        &r,
+    );
+    let ports = ExecutePorts::silent();
+    collect_examples(&p, &ports)[0].run().unwrap();
+}

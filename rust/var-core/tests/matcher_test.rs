@@ -124,3 +124,47 @@ fn param_spans_use_utf16_offsets_across_an_astral_character_no_manual_conversion
     assert_eq!("\"tea\"", utf16_slice(sentence, span.start, span.end));
     assert_eq!(vec![Value::from("tea")], hit.args);
 }
+
+// -----------------------------------------------------------------------------
+// Custom parameter types with capture groups (Java CaptureGroupTransformer /
+// Python parse(*groups) parity)
+// -----------------------------------------------------------------------------
+
+#[test]
+fn a_custom_type_with_capture_groups_passes_each_group_to_parse() {
+    use std::rc::Rc;
+    use var_core::registry::define_parameter_type;
+    let r = define_parameter_type(
+        &create_registry(),
+        "range",
+        r"(\d+)-(\d+)",
+        Rc::new(|groups: &[&str]| {
+            Value::list(groups.iter().map(|g| Value::from(*g)).collect::<Vec<_>>())
+        }),
+    );
+    let r = add_step(&r, "the range is {range}", "s.rs", 1, Handler::noop(), None).unwrap();
+    let hits = find_hits("the range is 10-20", &r);
+    assert_eq!(1, hits.len());
+    assert_eq!(
+        vec![Value::list(vec![Value::from("10"), Value::from("20")])],
+        hits[0].args
+    );
+}
+
+#[test]
+fn a_custom_type_without_groups_still_receives_the_whole_match() {
+    use std::rc::Rc;
+    use var_core::registry::define_parameter_type;
+    let r = define_parameter_type(
+        &create_registry(),
+        "airport",
+        "[A-Z]{3}",
+        Rc::new(|groups: &[&str]| {
+            assert_eq!(1, groups.len());
+            Value::from(groups[0].to_lowercase())
+        }),
+    );
+    let r = add_step(&r, "I fly to {airport}", "s.rs", 1, Handler::noop(), None).unwrap();
+    let hits = find_hits("I fly to LHR", &r);
+    assert_eq!(vec![Value::from("lhr")], hits[0].args);
+}
