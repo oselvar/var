@@ -416,6 +416,13 @@ static HOOK: Once = Once::new();
 /// Installs a panic hook (once) that suppresses the default stderr print for
 /// panics the executor deliberately catches (a handler's assertion-style
 /// failure), while leaving genuine test panics untouched on other threads.
+///
+/// DECLARED EXCEPTION to the "no globals in the core" rule (see `lib.rs`):
+/// `catch_unwind` is the executor's assertion channel — the AssertionError
+/// parity with Java — and the process-wide hook is the only way Rust offers to
+/// keep a *caught* panic from spewing to stderr. It is `Once`-guarded, chains
+/// the previous hook, and gates on a thread-local so it is inert outside
+/// [`invoke_resolve`]; observable behaviour is otherwise unchanged.
 fn install_hook() {
     HOOK.call_once(|| {
         let previous = std::panic::take_hook();

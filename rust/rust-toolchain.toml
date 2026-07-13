@@ -1,2 +1,7 @@
+# Pinned like java/.tool-versions pins JDK 21: "1.97" tracks 1.97.x patch
+# releases; bump deliberately, not to whatever `stable` happens to be.
+# Components listed so rustup auto-installs fmt/clippy with the pinned
+# toolchain (CI's setup action only adds them to `stable`).
 [toolchain]
-channel = "stable"
+channel = "1.97"
+components = ["rustfmt", "clippy"]

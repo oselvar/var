@@ -15,6 +15,10 @@
 // Nested `if`/`if let` blocks mirror the Java control flow faithfully; stable
 // Rust has no `let`-chains to collapse the `if let` cases into.
 #![allow(clippy::collapsible_if)]
+// Declared exception to "no globals in the core": `execute::install_hook`
+// registers a Once-guarded, thread-local-gated process panic hook — the only
+// way to silence stderr for the panics `catch_unwind` deliberately catches
+// (the AssertionError parity channel). See its doc comment for the guarantees.
 
 pub mod ast;
 pub mod canonical_json;
