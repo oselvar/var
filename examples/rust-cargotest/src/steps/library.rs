@@ -10,12 +10,7 @@ use crate::library_example::{
     Date, FEE_PER_DAY, format_date, format_money, late_fee, may_borrow, parse_date, parse_money,
 };
 use std::rc::Rc;
-use var_core::handler::Handler;
-use var_core::registry::{
-    FormatFn, ParseFn, Registry, add_step, define_parameter_type_with_format,
-};
-use var_core::step_kind::StepKind;
-use var_core::value::Value;
+use var::{FormatFn, Handler, ParseFn, Registry, Steps, Value};
 
 pub const FILE: &str = "library.steps";
 
@@ -48,12 +43,12 @@ fn loans_of(state: &Value) -> Vec<Value> {
 }
 
 pub fn register(r: Registry) -> Registry {
+    let mut s = Steps::from_registry(r);
     // --- custom parameter types (parse + display format) --------------------
 
     let date_parse: ParseFn = Rc::new(|g: &[&str]| date_value(parse_date(g[0])));
     let date_format: FormatFn = Rc::new(|v: &Value| Some(format_date(value_date(v))));
-    let r = define_parameter_type_with_format(
-        &r,
+    s.param_with_format(
         "date",
         r"[A-Z][a-z]+ \d{1,2}, \d{4}",
         date_parse,
@@ -69,13 +64,7 @@ pub fn register(r: Registry) -> Registry {
         Value::Int(pennies) => Some(format_money(*pennies)),
         _ => None,
     });
-    let r = define_parameter_type_with_format(
-        &r,
-        "money",
-        r"£\d+(?:\.\d+)?|\d+p",
-        money_parse,
-        money_format,
-    );
+    s.param_with_format("money", r"£\d+(?:\.\d+)?|\d+p", money_parse, money_format);
 
     // The emphasised run IS the parameter: the markers live in the pattern,
     // parse strips them, format restores them. Markup is notation, like £2.50.
@@ -91,12 +80,11 @@ pub fn register(r: Registry) -> Registry {
         Value::String(t) => Some(format!("*{t}*")),
         _ => None,
     });
-    let r = define_parameter_type_with_format(&r, "title", r"\*[^*]+\*", title_parse, title_format);
+    s.param_with_format("title", r"\*[^*]+\*", title_parse, title_format);
 
     // --- steps --------------------------------------------------------------
 
-    let r = add_step(
-        &r,
+    s.stimulus(
         "borrowed {title}, due back on {date}",
         FILE,
         1,
@@ -107,12 +95,9 @@ pub fn register(r: Registry) -> Registry {
             m.insert("loans".to_string(), Value::List(loans));
             Ok(Some(Value::Map(m)))
         }),
-        Some(StepKind::Stimulus),
-    )
-    .unwrap();
+    );
 
-    let r = add_step(
-        &r,
+    s.stimulus(
         "returns it on {date}",
         FILE,
         5,
@@ -126,32 +111,23 @@ pub fn register(r: Registry) -> Registry {
             m.insert("fee".to_string(), Value::Int(fee));
             Ok(Some(Value::Map(m)))
         }),
-        Some(StepKind::Stimulus),
-    )
-    .unwrap();
+    );
 
-    let r = add_step(
-        &r,
+    s.sensor(
         "owes a {money} late fee",
         FILE,
         10,
         Handler::sync1(|state, _expected| Ok(smap(&state).get("fee").cloned())),
-        Some(StepKind::Sensor),
-    )
-    .unwrap();
+    );
 
-    let r = add_step(
-        &r,
+    s.sensor(
         "{money} for each day overdue",
         FILE,
         14,
         Handler::sync1(|_state, _expected| Ok(Some(Value::Int(FEE_PER_DAY)))),
-        Some(StepKind::Sensor),
-    )
-    .unwrap();
+    );
 
-    let r = add_step(
-        &r,
+    s.stimulus(
         "asks to borrow {title} on {date}",
         FILE,
         18,
@@ -162,12 +138,9 @@ pub fn register(r: Registry) -> Registry {
             m.insert("granted".to_string(), Value::Bool(may_borrow(&dues, on)));
             Ok(Some(Value::Map(m)))
         }),
-        Some(StepKind::Stimulus),
-    )
-    .unwrap();
+    );
 
-    let r = add_step(
-        &r,
+    s.sensor(
         "the library refuses",
         FILE,
         24,
@@ -177,12 +150,9 @@ pub fn register(r: Registry) -> Registry {
             }
             Ok(None)
         }),
-        Some(StepKind::Sensor),
-    )
-    .unwrap();
+    );
 
-    add_step(
-        &r,
+    s.sensor(
         "the library agrees",
         FILE,
         30,
@@ -192,7 +162,6 @@ pub fn register(r: Registry) -> Registry {
             }
             Ok(None)
         }),
-        Some(StepKind::Sensor),
-    )
-    .unwrap()
+    );
+    s.into_registry()
 }

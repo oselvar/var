@@ -12,6 +12,8 @@ description = "Standalone sample: run Markdown specs as `cargo test` tests with 
 # The engine (steps are authored against it) and the cargo-test adapter.
 var-core = { path = "../../rust/var-core" }
 var-cargotest = { path = "../../rust/var-cargotest" }
+# The ergonomic author facade (`var::Steps`), used by the step definitions.
+var = { path = "../../rust/var" }
 
 [dev-dependencies]
 # The `unit` test drives discovery and a single example directly.

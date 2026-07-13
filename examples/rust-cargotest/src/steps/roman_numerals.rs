@@ -2,18 +2,15 @@
 
 use super::{as_str, smap, vmap};
 use crate::roman_numerals_example::to_roman;
-use var_core::handler::Handler;
-use var_core::registry::{Registry, add_step};
-use var_core::step_kind::StepKind;
-use var_core::value::Value;
+use var::{Handler, Registry, Steps, Value};
 
 pub const FILE: &str = "roman_numerals.steps";
 
 pub fn register(r: Registry) -> Registry {
+    let mut s = Steps::from_registry(r);
     // Header-bound table: one example per row, the row keyed by header
     // (decimal, roman). The returned {decimal, roman} is checked cell by cell.
-    add_step(
-        &r,
+    s.sensor(
         "a decimal and a roman number",
         FILE,
         1,
@@ -26,7 +23,6 @@ pub fn register(r: Registry) -> Registry {
                 ("roman", Value::from(roman)),
             ])))
         }),
-        Some(StepKind::Sensor),
-    )
-    .unwrap()
+    );
+    s.into_registry()
 }

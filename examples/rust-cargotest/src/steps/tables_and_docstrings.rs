@@ -1,19 +1,16 @@
 //! Steps for `tables-and-docstrings.md`.
 
 use super::{as_str, vmap};
-use var_core::handler::Handler;
-use var_core::registry::{Registry, add_step};
-use var_core::step_kind::StepKind;
-use var_core::value::Value;
+use var::{Handler, Registry, Steps, Value};
 
 pub const FILE: &str = "tables_and_docstrings.steps";
 
 pub fn register(r: Registry) -> Registry {
+    let mut s = Steps::from_registry(r);
     // Whole-table mode: the table arrives as a list of rows (header row first).
     // It is this sensor's only slot, so return the reproduced table bare — Vár
     // compares every cell.
-    let r = add_step(
-        &r,
+    s.sensor(
         "Uppercase each one:",
         FILE,
         1,
@@ -39,14 +36,11 @@ pub fn register(r: Registry) -> Registry {
                 .collect();
             Ok(Some(Value::List(out)))
         }),
-        Some(StepKind::Sensor),
-    )
-    .unwrap();
+    );
 
     // Doc-string mode: two slots ({word} plus the trailing doc string), so
     // return one element per slot.
-    add_step(
-        &r,
+    s.sensor(
         "Greet {word}:",
         FILE,
         10,
@@ -57,7 +51,6 @@ pub fn register(r: Registry) -> Registry {
                 Value::from(format!("Hello, {name}!\n")),
             ])))
         }),
-        Some(StepKind::Sensor),
-    )
-    .unwrap()
+    );
+    s.into_registry()
 }
