@@ -69,6 +69,24 @@ keyed by the header, and returns the computed columns:
     end
     ```
   </TabItem>
+  <TabItem label="Rust">
+    ```rust
+    s.sensor(
+        "a decimal and a roman number",
+        file!(),
+        line!() as usize,
+        Handler::sync1(|_state, row| {
+            let m = smap(&row);
+            let decimal = as_str(&m["decimal"]);
+            let roman = to_roman(decimal.parse().expect("decimal"));
+            Ok(Some(vmap(vec![
+                ("decimal", Value::from(decimal)),
+                ("roman", Value::from(roman)),
+            ])))
+        }),
+    );
+    ```
+  </TabItem>
 </Tabs>
 
 Each row runs as its own check. If `toRoman(9)` returned `"VIIII"`, only the
@@ -129,6 +147,31 @@ Uppercase each one:
     end
     ```
   </TabItem>
+  <TabItem label="Rust">
+    ```rust
+    s.sensor(
+        "Uppercase each one:",
+        file!(),
+        line!() as usize,
+        Handler::sync1(|_state, table| {
+            let Value::List(rows) = table else { panic!("expected a table") };
+            let out: Vec<Value> = rows
+                .iter()
+                .skip(1) // drop the header row
+                .map(|row| {
+                    let Value::List(cells) = row else { panic!("expected a row") };
+                    let before = as_str(&cells[0]);
+                    vmap(vec![
+                        ("before", Value::from(before.clone())),
+                        ("after", Value::from(before.to_uppercase())),
+                    ])
+                })
+                .collect();
+            Ok(Some(Value::List(out)))
+        }),
+    );
+    ```
+  </TabItem>
 </Tabs>
 
 The table is this sensor's only comparable value, so it is returned bare. Vár
@@ -182,6 +225,22 @@ the text the software actually produces:
     sensor('Greet {word}:') { |_state, name, _doc| [name, "Hello, #{name}!\n"] }
     ```
   </TabItem>
+  <TabItem label="Rust">
+    ```rust
+    s.sensor(
+        "Greet {word}:",
+        file!(),
+        line!() as usize,
+        Handler::sync2(|_state, name, _doc| {
+            let name = as_str(&name);
+            Ok(Some(Value::List(vec![
+                Value::from(name.clone()),
+                Value::from(format!("Hello, {name}!\n")),
+            ])))
+        }),
+    );
+    ```
+  </TabItem>
 </Tabs>
 
 The comparison is exact equality, **including the trailing newline**. This step
@@ -217,6 +276,16 @@ whose doc string is its only comparable value returns the text bare:
   <TabItem label="Ruby">
     ```ruby
     sensor('Greet Bob:') { |_state, _doc| "Hello, Bob!\n" }
+    ```
+  </TabItem>
+  <TabItem label="Rust">
+    ```rust
+    s.sensor(
+        "Greet Bob:",
+        file!(),
+        line!() as usize,
+        Handler::sync1(|_state, _doc| Ok(Some(Value::from("Hello, Bob!\n")))),
+    );
     ```
   </TabItem>
 </Tabs>

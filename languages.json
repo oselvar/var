@@ -59,5 +59,16 @@
     "install": { "lang": "bash", "code": "bundle add oselvar-var-rspec" },
     "scaffold": { "lang": "bash", "code": "bundle exec var init" },
     "run": { "lang": "bash", "code": "bundle exec rspec" }
+  },
+  {
+    "id": "rust",
+    "label": "Rust",
+    "icon": "seti:rust",
+    "ext": ".rs",
+    "stepsGlob": "var-examples/**/*.steps.rs",
+    "hasCli": false,
+    "install": { "lang": "bash", "code": "cargo add var-cargotest --dev" },
+    "scaffold": null,
+    "run": { "lang": "bash", "code": "cargo test" }
   }
 ]

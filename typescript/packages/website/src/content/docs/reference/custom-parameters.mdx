@@ -79,6 +79,27 @@ can use it as a `{name}` placeholder.
     end
     ```
   </TabItem>
+  <TabItem label="Rust">
+    ```rust
+    let mut s = Steps::from_registry(r);
+
+    let parse: ParseFn = Rc::new(|g: &[&str]| {
+        Value::Float(g[0].strip_prefix('£').unwrap_or(g[0]).parse().unwrap_or(0.0))
+    });
+    let format: FormatFn = Rc::new(|v: &Value| match v {
+        Value::Float(pounds) => Some(format!("£{pounds:.2}")),
+        _ => None,
+    });
+    s.param_with_format("money", r"£\d+\.\d{2}", parse, format);
+
+    s.sensor(
+        "owes a {money} late fee",
+        file!(),
+        line!() as usize,
+        Handler::sync1(|state, _expected| Ok(smap(&state).get("fee").cloned())),
+    );
+    ```
+  </TabItem>
 </Tabs>
 
 This page is the reference for the three fields of a custom parameter type and

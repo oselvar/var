@@ -65,6 +65,29 @@ with sensors.
     end
     ```
   </TabItem>
+  <TabItem label="Rust">
+    ```rust
+    let mut s = Steps::from_registry(r);
+
+    s.stimulus(
+        "I add {int}",
+        file!(),
+        line!() as usize,
+        Handler::sync1(|state, n| {
+            let mut m = smap(&state);
+            let total = m.get("total").map(as_int).unwrap_or(0) + as_int(&n);
+            m.insert("total".into(), Value::Int(total));
+            Ok(Some(Value::Map(m)))
+        }),
+    );
+    s.sensor(
+        "the total is {int}",
+        file!(),
+        line!() as usize,
+        Handler::sync1(|state, _expected| Ok(smap(&state).get("total").cloned())),
+    );
+    ```
+  </TabItem>
 </Tabs>
 
 In your prose the stimulus covers both the *context* (arrange) and the *action*
@@ -133,6 +156,32 @@ full replacement, same principle: new value out, never mutation.
     end
     ```
   </TabItem>
+  <TabItem label="Rust">
+    ```rust
+    s.stimulus(
+        "I greet {string}",
+        file!(),
+        line!() as usize,
+        Handler::sync1(|state, name| {
+            // Full replacement: clone state, then set just the changed key.
+            let mut m = smap(&state);
+            m.insert("greeting".into(), Value::from(format!("Hello, {}!", as_str(&name))));
+            Ok(Some(Value::Map(m)))
+        }),
+    );
+    s.stimulus(
+        "I add {int}",
+        file!(),
+        line!() as usize,
+        Handler::sync1(|state, n| {
+            let mut m = smap(&state);
+            let count = m.get("count").map(as_int).unwrap_or(0) + as_int(&n);
+            m.insert("count".into(), Value::Int(count));
+            Ok(Some(Value::Map(m)))
+        }),
+    );
+    ```
+  </TabItem>
 </Tabs>
 
 - **Returning nothing** leaves state unchanged — right for a stimulus whose
@@ -199,6 +248,21 @@ empty state they can ignore:
     end
     ```
   </TabItem>
+  <TabItem label="Rust">
+    ```rust
+    let mut s = Steps::from_registry(r);
+
+    s.sensor(
+        "the square of {int} is {int}",
+        file!(),
+        line!() as usize,
+        Handler::sync2(|_state, n, _square| {
+            let n = as_int(&n);
+            Ok(Some(Value::List(vec![Value::Int(n), Value::Int(n * n)])))
+        }),
+    );
+    ```
+  </TabItem>
 </Tabs>
 
 ## Tables and doc strings
@@ -242,6 +306,32 @@ first), a doc string as its exact text:
     stimulus('these books exist:') do |_state, rows|
       { books: rows.drop(1).map { |title, author| { title: title, author: author } } }
     end
+    ```
+  </TabItem>
+  <TabItem label="Rust">
+    ```rust
+    s.stimulus(
+        "these books exist:",
+        file!(),
+        line!() as usize,
+        Handler::sync1(|state, table| {
+            let Value::List(rows) = table else { panic!("expected a table") };
+            let books: Vec<Value> = rows
+                .iter()
+                .skip(1)
+                .map(|row| {
+                    let Value::List(cells) = row else { panic!("expected a row") };
+                    vmap(vec![
+                        ("title", cells[0].clone()),
+                        ("author", cells[1].clone()),
+                    ])
+                })
+                .collect();
+            let mut m = smap(&state);
+            m.insert("books".into(), Value::List(books));
+            Ok(Some(Value::Map(m)))
+        }),
+    );
     ```
   </TabItem>
 </Tabs>

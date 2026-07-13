@@ -30,6 +30,7 @@
         "tree-sitter-java",
         "tree-sitter-python",
         "tree-sitter-ruby",
+        "tree-sitter-rust",
         "tree-sitter-typescript"
       ]
     },
@@ -40,6 +41,7 @@
         "tree-sitter-java",
         "tree-sitter-python",
         "tree-sitter-ruby",
+        "tree-sitter-rust",
         "tree-sitter-typescript"
       ]
     },

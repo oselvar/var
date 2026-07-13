@@ -70,6 +70,30 @@ sensors, rather than reaching inside it.
     end
     ```
   </TabItem>
+  <TabItem label="Rust">
+    ```rust
+    let mut s = Steps::from_registry(r);
+
+    s.stimulus(
+        "I add {int}",
+        file!(),
+        line!() as usize,
+        Handler::sync1(|state, n| {
+            // FULL-REPLACEMENT state: return the whole next state.
+            let mut m = smap(&state);
+            let total = m.get("total").map(as_int).unwrap_or(0) + as_int(&n);
+            m.insert("total".into(), Value::Int(total));
+            Ok(Some(Value::Map(m)))
+        }),
+    );
+    s.sensor(
+        "the total is {int}",
+        file!(),
+        line!() as usize,
+        Handler::sync1(|state, _expected| Ok(smap(&state).get("total").cloned())),
+    );
+    ```
+  </TabItem>
 </Tabs>
 
 In your prose the sensor is the *outcome* you expect; see
@@ -139,6 +163,21 @@ a return value against. Throw to fail, return nothing to pass:
     sensor('the alarm fired') { |state| raise 'no alarm' unless state[:alarm] }
     ```
   </TabItem>
+  <TabItem label="Rust">
+    ```rust
+    s.sensor(
+        "the alarm fired",
+        file!(),
+        line!() as usize,
+        Handler::sync0(|state| {
+            if !matches!(smap(&state).get("alarm"), Some(Value::Bool(true))) {
+                panic!("no alarm");
+            }
+            Ok(None)
+        }),
+    );
+    ```
+  </TabItem>
 </Tabs>
 
 Returning any other value is a `ReturnShapeError`. This is deliberate: a
@@ -173,6 +212,16 @@ certainly believed it was being checked.
   <TabItem label="Ruby">
     ```ruby
     sensor('the total is {int}') { |state, _expected| state[:total] }
+    ```
+  </TabItem>
+  <TabItem label="Rust">
+    ```rust
+    s.sensor(
+        "the total is {int}",
+        file!(),
+        line!() as usize,
+        Handler::sync1(|state, _expected| Ok(smap(&state).get("total").cloned())),
+    );
     ```
   </TabItem>
 </Tabs>
@@ -245,6 +294,22 @@ types whose `parse` produces an array:
     end
     ```
   </TabItem>
+  <TabItem label="Rust">
+    ```rust
+    let parse: ParseFn = Rc::new(|g: &[&str]| {
+        Value::List(g[0].split(", ").map(|n| Value::Int(n.parse().unwrap())).collect())
+    });
+    s.param("numbers", r"\d+(?:, \d+)*", parse);
+
+    // "The dice show 5, 6" — {numbers} transforms to [5, 6]
+    s.sensor(
+        "The dice show {numbers}",
+        file!(),
+        line!() as usize,
+        Handler::sync1(|state, _dice| Ok(smap(&state).get("dice").cloned())),
+    );
+    ```
+  </TabItem>
 </Tabs>
 
 Because a single-slot return is always the bare value, `[5, 6]` here is
@@ -289,6 +354,22 @@ never mistaken for a two-slot positional array.
     end
     ```
   </TabItem>
+  <TabItem label="Rust">
+    ```rust
+    s.sensor(
+        "I should have {int} cukes in my {word} belly",
+        file!(),
+        line!() as usize,
+        Handler::sync2(|state, _count, _belly| {
+            let m = smap(&state);
+            Ok(Some(Value::List(vec![
+                m["count"].clone(),
+                m["belly_name"].clone(),
+            ])))
+        }),
+    );
+    ```
+  </TabItem>
 </Tabs>
 
 The array must have exactly one element per slot; a different length or a
@@ -324,6 +405,22 @@ last element:
   <TabItem label="Ruby">
     ```ruby
     sensor('Greet {word}:') { |_state, name, _doc| [name, "Hello, #{name}!\n"] }
+    ```
+  </TabItem>
+  <TabItem label="Rust">
+    ```rust
+    s.sensor(
+        "Greet {word}:",
+        file!(),
+        line!() as usize,
+        Handler::sync2(|_state, name, _doc| {
+            let name = as_str(&name);
+            Ok(Some(Value::List(vec![
+                Value::from(name.clone()),
+                Value::from(format!("Hello, {name}!\n")),
+            ])))
+        }),
+    );
     ```
   </TabItem>
 </Tabs>
@@ -379,6 +476,24 @@ returns a **row object** keyed by the header — not slots:
     sensor('a decimal and a roman number') do |_state, row|
       { 'decimal' => row['decimal'], 'roman' => RomanNumerals.to_roman(row['decimal'].to_i) }
     end
+    ```
+  </TabItem>
+  <TabItem label="Rust">
+    ```rust
+    s.sensor(
+        "a decimal and a roman number",
+        file!(),
+        line!() as usize,
+        Handler::sync1(|_state, row| {
+            let m = smap(&row);
+            let decimal = as_str(&m["decimal"]);
+            let roman = to_roman(decimal.parse().expect("decimal"));
+            Ok(Some(vmap(vec![
+                ("decimal", Value::from(decimal)),
+                ("roman", Value::from(roman)),
+            ])))
+        }),
+    );
     ```
   </TabItem>
 </Tabs>

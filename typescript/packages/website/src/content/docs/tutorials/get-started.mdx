@@ -130,6 +130,22 @@ Every command and code sample below follows that choice.
        end
        ```
      </TabItem>
+     <TabItem label="Rust">
+       ```rust
+       use var::{Handler, Registry, Steps, Value};
+
+       pub fn register(r: Registry) -> Registry {
+           let mut s = Steps::from_registry(r);
+           s.sensor(
+               "life, the universe and everything is {int}",
+               file!(),
+               line!() as usize,
+               Handler::sync1(|_state, _answer| Ok(Some(Value::Int(42)))),
+           );
+           s.into_registry()
+       }
+       ```
+     </TabItem>
    </Tabs>
 
    <Aside type="note" title="Java & Kotlin: two extra steps">
@@ -197,6 +213,16 @@ Every command and code sample below follows that choice.
      <TabItem label="Ruby">
        ```ruby
        sensor('life, the universe and everything is {int}') { 43 }
+       ```
+     </TabItem>
+     <TabItem label="Rust">
+       ```rust
+       s.sensor(
+           "life, the universe and everything is {int}",
+           file!(),
+           line!() as usize,
+           Handler::sync1(|_state, _answer| Ok(Some(Value::Int(43)))),
+       );
        ```
      </TabItem>
    </Tabs>

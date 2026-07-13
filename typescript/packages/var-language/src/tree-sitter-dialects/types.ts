@@ -1,7 +1,14 @@
 import type { Node } from 'web-tree-sitter'
 import type { HandlerParams, Position, Range } from '../step-defs.ts'
 
-export type LanguageId = 'typescript' | 'typescript-tsx' | 'python' | 'java' | 'kotlin' | 'ruby'
+export type LanguageId =
+  | 'typescript'
+  | 'typescript-tsx'
+  | 'python'
+  | 'java'
+  | 'kotlin'
+  | 'ruby'
+  | 'rust'
 
 // One entry per language: the queries plus the three language-specific
 // behaviors (string decoding, handler-param extraction, regexp resolution).
