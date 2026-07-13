@@ -3,6 +3,16 @@
 //! crate's AST parser (the escape-rule-dense part) and own the small, corpus-pinned
 //! rest: regex generation with one named group per parameter, built-in + custom
 //! parameter types, argument extraction, and `parameter_type_names`.
+//!
+//! Deviation from the `cucumber-expressions` 20.0.0 line every other port pins
+//! (recorded in ADR 0006, `doc/adr/0006-rust-port.md`): there is no official
+//! Rust port, so this crate hand-writes the regex generation, and only the
+//! `{int}`, `{word}`, and `{string}` built-ins exist. All other 20.0.0
+//! built-ins — `{float}`, `{double}`, `{byte}`, `{short}`, `{long}`,
+//! `{biginteger}`, `{bigdecimal}`, and the anonymous `{}` — are omitted: the
+//! numeric ones need lookahead the `regex` crate lacks, and none is used by the
+//! conformance corpus. Using one fails loudly at registration
+//! ("Undefined parameter type {double}"), never silently misparses.
 
 use crate::value::Value;
 use cucumber_expressions::Expression;
@@ -10,7 +20,11 @@ use cucumber_expressions::ast::SingleExpression;
 use regex::Regex;
 use std::rc::Rc;
 
-/// A parameter-type transform: maps the matched capture group(s) to a value.
+/// A parameter-type transform. Receives the type's regexp **capture groups** in
+/// order (a group that did not participate arrives as `""` — the closest
+/// `&[&str]` can come to Java's `null`/Python's `None`); a regexp with no
+/// groups of its own receives the whole matched text as the single element.
+/// Mirrors Java's `CaptureGroupTransformer` / Python's `parse(*groups)`.
 pub type ParseFn = Rc<dyn Fn(&[&str]) -> Value>;
 
 /// One captured argument of a whole-string match.
@@ -117,6 +131,10 @@ struct ParamRef {
     group_name: String,
     type_name: String,
     transform: Transform,
+    /// Numeric indices of the capture groups the author wrote INSIDE this
+    /// parameter's own regexp (empty for group-free patterns and built-ins).
+    /// These are what a custom transform receives, matching Java/Python.
+    inner_groups: Vec<usize>,
 }
 
 impl CompiledExpression {
@@ -149,6 +167,7 @@ impl CompiledExpression {
                         group_name: group,
                         type_name: name.to_string(),
                         transform: def.transform.clone(),
+                        inner_groups: Vec::new(), // filled in below, once compiled
                     });
                 }
                 SingleExpression::Optional(opt) => {
@@ -164,6 +183,28 @@ impl CompiledExpression {
         let anchored = Regex::new(&regex_str).map_err(|e| ExpressionError {
             message: format!("failed to compile expression regex: {e}"),
         })?;
+
+        // Locate each author-written capture group inside its parameter. Every
+        // construct WE generate is non-capturing (the `__pN` named groups
+        // aside), so any group between `__pN` and `__p{N+1}` in paren order was
+        // written inside parameter N's own regexp — those are the groups its
+        // custom transform receives (Java/Python parity).
+        let names: Vec<Option<&str>> = anchored.capture_names().collect();
+        let param_positions: Vec<usize> = params
+            .iter()
+            .map(|p| {
+                names
+                    .iter()
+                    .position(|n| *n == Some(p.group_name.as_str()))
+                    .expect("named parameter group exists")
+            })
+            .collect();
+        for (n, param) in params.iter_mut().enumerate() {
+            let start = param_positions[n] + 1;
+            let end = param_positions.get(n + 1).copied().unwrap_or(names.len());
+            param.inner_groups = (start..end).collect();
+        }
+
         Ok(CompiledExpression {
             source: source.to_string(),
             regexp_source: regex_str,
@@ -189,11 +230,27 @@ impl CompiledExpression {
         let mut args = Vec::with_capacity(self.params.len());
         for p in &self.params {
             match caps.name(&p.group_name) {
-                Some(m) => args.push(Argument {
-                    value: apply_transform(&p.transform, m.as_str()),
-                    parameter_type_name: p.type_name.clone(),
-                    group: Some((m.start(), m.end())),
-                }),
+                Some(m) => {
+                    let value = match &p.transform {
+                        // A custom transform receives its regexp's own capture
+                        // groups (non-participating → ""); with no groups, the
+                        // whole match is the single element. See [`ParseFn`].
+                        Transform::Custom(f) if !p.inner_groups.is_empty() => {
+                            let groups: Vec<&str> = p
+                                .inner_groups
+                                .iter()
+                                .map(|&i| caps.get(i).map_or("", |g| g.as_str()))
+                                .collect();
+                            f(&groups)
+                        }
+                        other => apply_transform(other, m.as_str()),
+                    };
+                    args.push(Argument {
+                        value,
+                        parameter_type_name: p.type_name.clone(),
+                        group: Some((m.start(), m.end())),
+                    })
+                }
                 None => args.push(Argument {
                     value: Value::Null,
                     parameter_type_name: p.type_name.clone(),

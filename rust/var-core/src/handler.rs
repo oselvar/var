@@ -97,6 +97,27 @@ impl Handler {
         }
     }
 
+    /// A synchronous handler of any arity: `(state, args)` where `args` holds
+    /// every capture plus the trailing table/doc string, in slot order. The
+    /// general escape hatch matching Java's reflective any-arity invocation and
+    /// Python's `*args` — use it for steps with three or more slots, where the
+    /// fixed-arity conveniences above stop.
+    pub fn sync_var(f: impl Fn(Value, Vec<Value>) -> HandlerReturn + 'static) -> Handler {
+        Handler {
+            f: Rc::new(move |state, args| StepReturn::Ready(f(state, args))),
+        }
+    }
+
+    /// As [`Handler::sync_var`], returning a `Future` — the any-arity async form
+    /// (an async handler with parameters is inexpressible via [`Handler::async0`]).
+    pub fn async_var(
+        f: impl Fn(Value, Vec<Value>) -> Pin<Box<dyn Future<Output = HandlerReturn>>> + 'static,
+    ) -> Handler {
+        Handler {
+            f: Rc::new(move |state, args| StepReturn::Pending(f(state, args))),
+        }
+    }
+
     /// Invokes the handler with `state` + `args` (captures then trailing attachment).
     pub(crate) fn call(&self, state: Value, args: Vec<Value>) -> StepReturn {
         (self.f)(state, args)
