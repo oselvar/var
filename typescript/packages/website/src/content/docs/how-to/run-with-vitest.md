@@ -17,6 +17,21 @@ pnpm add -D @oselvar/var-vitest vitest
 
 Your step definitions keep importing `@oselvar/var` — never the adapter.
 
+> **Strict `node_modules` layouts (pnpm, Yarn PnP):** the plugin dedupes
+> `@oselvar/var` and `@oselvar/var-core` so the whole suite shares one instance
+> of each — without that, steps register against a different module than the one
+> the runner reads and zero steps run. Deduping resolves both packages from
+> **your project root**, and the generated virtual test module (whose id is the
+> spec file's path) pulls `@oselvar/var-core` in through
+> `@oselvar/var-vitest/runtime`. So `@oselvar/var-core` must be resolvable from
+> the package that holds your specs. It is a transitive dependency of both
+> `@oselvar/var` and `@oselvar/var-vitest`, so a hoisting installer surfaces it
+> automatically — but under a strict layout add it explicitly:
+>
+> ```bash
+> pnpm add -D @oselvar/var-core
+> ```
+
 ## 2. Wire the plugin into vitest
 
 In `vitest.config.ts`:
