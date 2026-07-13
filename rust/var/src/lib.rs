@@ -10,6 +10,9 @@
 //! mirroring the Java `var` module: they need both `var-core`'s pipeline and
 //! the author surface every bundle fixture is written against.
 
+mod steps;
+pub use steps::Steps;
+
 pub use var_core::error::HandlerError;
 pub use var_core::handler::{Handler, HandlerReturn, StepReturn};
 pub use var_core::registry::{

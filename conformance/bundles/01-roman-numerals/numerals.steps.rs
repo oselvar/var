@@ -3,7 +3,7 @@
 //! Full-replacement state (ADR 0006): the `{result}` map is the whole state.
 
 use std::collections::BTreeMap;
-use var::{Handler, HandlerError, Registry, StepKind, Value, add_step};
+use var::{Handler, HandlerError, Registry, Steps, Value};
 
 pub const FILE: &str = "numerals.steps.rs";
 
@@ -18,8 +18,8 @@ fn roman(n: i64) -> Option<&'static str> {
 }
 
 pub fn register(r: Registry) -> Registry {
-    let r = add_step(
-        &r,
+    let mut s = Steps::from_registry(r);
+    s.stimulus(
         "I convert {int} to roman numerals",
         FILE,
         1,
@@ -31,11 +31,8 @@ pub fn register(r: Registry) -> Registry {
             }
             Ok(Some(Value::Map(m)))
         }),
-        Some(StepKind::Stimulus),
-    )
-    .unwrap();
-    add_step(
-        &r,
+    );
+    s.sensor(
         "The result is {word}",
         FILE,
         2,
@@ -64,9 +61,8 @@ pub fn register(r: Registry) -> Registry {
             }
             Ok(None)
         }),
-        Some(StepKind::Sensor),
-    )
-    .unwrap()
+    );
+    s.into_registry()
 }
 
 pub fn state() -> Value {

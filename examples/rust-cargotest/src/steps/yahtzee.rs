@@ -2,20 +2,17 @@
 
 use super::{as_str, smap, vmap};
 use crate::yahtzee_example::score;
-use var_core::handler::Handler;
-use var_core::registry::{Registry, add_step};
-use var_core::step_kind::StepKind;
-use var_core::value::Value;
+use var::{Handler, Registry, Steps, Value};
 
 pub const FILE: &str = "yahtzee.steps";
 
 pub fn register(r: Registry) -> Registry {
+    let mut s = Steps::from_registry(r);
     // Header-bound table: the paragraph names every header cell (dice,
     // category, score), so this sensor runs once per row with the row as a map
     // keyed by header. Returning {"score": …} checks that column; the other
     // columns are inputs.
-    add_step(
-        &r,
+    s.sensor(
         "Examples of dice, category and score",
         FILE,
         1,
@@ -31,7 +28,6 @@ pub fn register(r: Registry) -> Registry {
                 Value::Int(score(&dice, &category)),
             )])))
         }),
-        Some(StepKind::Sensor),
-    )
-    .unwrap()
+    );
+    s.into_registry()
 }

@@ -1,7 +1,7 @@
 //! Rust sibling of `counter.steps.ts` (bundle `02-context-isolation`).
 
 use std::collections::BTreeMap;
-use var::{Handler, HandlerError, Registry, StepKind, Value, add_step};
+use var::{Handler, HandlerError, Registry, Steps, Value};
 
 pub const FILE: &str = "counter.steps.rs";
 
@@ -16,8 +16,8 @@ fn count_of(state: &Value) -> i64 {
 }
 
 pub fn register(r: Registry) -> Registry {
-    let r = add_step(
-        &r,
+    let mut s = Steps::from_registry(r);
+    s.stimulus(
         "I increment",
         FILE,
         1,
@@ -28,11 +28,8 @@ pub fn register(r: Registry) -> Registry {
                 Value::Int(next),
             )]))))
         }),
-        Some(StepKind::Stimulus),
-    )
-    .unwrap();
-    add_step(
-        &r,
+    );
+    s.sensor(
         "The count is {int}",
         FILE,
         2,
@@ -46,9 +43,8 @@ pub fn register(r: Registry) -> Registry {
             }
             Ok(None)
         }),
-        Some(StepKind::Sensor),
-    )
-    .unwrap()
+    );
+    s.into_registry()
 }
 
 pub fn state() -> Value {

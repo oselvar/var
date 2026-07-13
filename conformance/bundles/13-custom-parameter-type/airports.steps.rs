@@ -2,20 +2,18 @@
 
 use std::collections::BTreeMap;
 use std::rc::Rc;
-use var::{
-    Handler, HandlerError, ParseFn, Registry, StepKind, Value, add_step, define_parameter_type,
-};
+use var::{Handler, HandlerError, ParseFn, Registry, Steps, Value};
 
 pub const FILE: &str = "airports.steps.rs";
 
 pub fn register(r: Registry) -> Registry {
+    let mut s = Steps::from_registry(r);
     // Custom {airport} parameter type: IATA code, lowercased by parse. The
     // sensor asserts the lowercasing, so an identity parse would fail.
     let parse: ParseFn = Rc::new(|g: &[&str]| Value::from(g[0].to_lowercase()));
-    let r = define_parameter_type(&r, "airport", "[A-Z]{3}", parse);
+    s.param("airport", "[A-Z]{3}", parse);
 
-    let r = add_step(
-        &r,
+    s.stimulus(
         "I fly to {airport}",
         FILE,
         1,
@@ -25,11 +23,8 @@ pub fn register(r: Registry) -> Registry {
                 dest,
             )]))))
         }),
-        Some(StepKind::Stimulus),
-    )
-    .unwrap();
-    add_step(
-        &r,
+    );
+    s.sensor(
         "The destination code is {word}",
         FILE,
         2,
@@ -54,9 +49,8 @@ pub fn register(r: Registry) -> Registry {
             }
             Ok(None)
         }),
-        Some(StepKind::Sensor),
-    )
-    .unwrap()
+    );
+    s.into_registry()
 }
 
 pub fn state() -> Value {

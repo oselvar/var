@@ -4,14 +4,12 @@
 //! back in document notation, so the pinned mismatch reads `£2.60` / `£2.55`.
 
 use std::rc::Rc;
-use var::{
-    FormatFn, Handler, ParseFn, Registry, StepKind, Value, add_step,
-    define_parameter_type_with_format,
-};
+use var::{FormatFn, Handler, ParseFn, Registry, Steps, Value};
 
 pub const FILE: &str = "money.steps.rs";
 
 pub fn register(r: Registry) -> Registry {
+    let mut s = Steps::from_registry(r);
     let parse: ParseFn = Rc::new(|g: &[&str]| {
         let raw = g[0];
         let value = raw
@@ -25,19 +23,17 @@ pub fn register(r: Registry) -> Registry {
         Value::Float(x) => Some(format!("£{x:.2}")),
         _ => None,
     });
-    let r = define_parameter_type_with_format(&r, "money", r"£\d+\.\d{2}", parse, format);
+    s.param_with_format("money", r"£\d+\.\d{2}", parse, format);
 
     // Returns the WRONG money on purpose; the golden pins the formatted actual
     // "£2.60", proving mismatches render through `format`.
-    add_step(
-        &r,
+    s.sensor(
         "The late fee is {money}",
         FILE,
         1,
         Handler::sync1(|_state, _expected| Ok(Some(Value::Float(2.6)))),
-        Some(StepKind::Sensor),
-    )
-    .unwrap()
+    );
+    s.into_registry()
 }
 
 pub fn state() -> Value {

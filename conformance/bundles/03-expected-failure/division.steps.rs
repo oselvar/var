@@ -1,12 +1,12 @@
 //! Rust sibling of `division.steps.ts` (bundle `03-expected-failure`).
 
-use var::{Handler, HandlerError, Registry, StepKind, Value, add_step};
+use var::{Handler, HandlerError, Registry, Steps, Value};
 
 pub const FILE: &str = "division.steps.rs";
 
 pub fn register(r: Registry) -> Registry {
-    add_step(
-        &r,
+    let mut s = Steps::from_registry(r);
+    s.stimulus(
         "I divide {int} by {int}",
         FILE,
         1,
@@ -17,9 +17,8 @@ pub fn register(r: Registry) -> Registry {
             }
             Ok(Some(state))
         }),
-        Some(StepKind::Stimulus),
-    )
-    .unwrap()
+    );
+    s.into_registry()
 }
 
 pub fn state() -> Value {

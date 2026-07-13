@@ -1,17 +1,15 @@
 //! Steps for `hello-var.md`.
 
 use super::{as_int, as_str, smap};
-use var_core::handler::Handler;
-use var_core::registry::{Registry, add_step};
-use var_core::step_kind::StepKind;
-use var_core::value::Value;
+use var::{Handler, Registry, Steps, Value};
 
 pub const FILE: &str = "hello_var.steps";
 
 pub fn register(r: Registry) -> Registry {
+    let mut s = Steps::from_registry(r);
+
     // stimulus: greet a name, storing the greeting.
-    let r = add_step(
-        &r,
+    s.stimulus(
         "I greet {string}",
         FILE,
         1,
@@ -23,24 +21,18 @@ pub fn register(r: Registry) -> Registry {
             );
             Ok(Some(Value::Map(m)))
         }),
-        Some(StepKind::Stimulus),
-    )
-    .unwrap();
+    );
 
     // sensor: the stored greeting.
-    let r = add_step(
-        &r,
+    s.sensor(
         "the greeting should be {string}",
         FILE,
         5,
         Handler::sync1(|state, _expected| Ok(smap(&state).get("greeting").cloned())),
-        Some(StepKind::Sensor),
-    )
-    .unwrap();
+    );
 
     // stimulus: evaluate an integer addition, storing the result.
-    let r = add_step(
-        &r,
+    s.stimulus(
         "expression `{int}+{int}`",
         FILE,
         10,
@@ -49,18 +41,14 @@ pub fn register(r: Registry) -> Registry {
             m.insert("result".to_string(), Value::Int(as_int(&a) + as_int(&b)));
             Ok(Some(Value::Map(m)))
         }),
-        Some(StepKind::Stimulus),
-    )
-    .unwrap();
+    );
 
     // sensor: the stored result.
-    add_step(
-        &r,
+    s.sensor(
         "evaluate to `{int}`",
         FILE,
         15,
         Handler::sync1(|state, _expected| Ok(smap(&state).get("result").cloned())),
-        Some(StepKind::Sensor),
-    )
-    .unwrap()
+    );
+    s.into_registry()
 }
