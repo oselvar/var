@@ -23,6 +23,10 @@
 - [x] Remove @navikt/ds-css
 - [x] Tabs for examples on front page and tutorial
 - [ ] Prerender all editors
+- [ ] Nicer frontpage - inspiration:
+  - [ ] https://www.kaggle.com/
+  - [ ] https://www.val.town/
+  - [ ] https://fly.io/
 
 ## Terminiology
 - [ ] Oath: an .md doc with 1 or more examples
