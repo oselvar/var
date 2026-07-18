@@ -3,7 +3,7 @@
 //! Full-replacement state (ADR 0006): the `{result}` map is the whole state.
 
 use std::collections::BTreeMap;
-use var::{Handler, HandlerError, Registry, Steps, Value};
+use var::{HandlerError, Registry, Steps, Value};
 
 fn roman(n: i64) -> Option<&'static str> {
     match n {
@@ -17,45 +17,39 @@ fn roman(n: i64) -> Option<&'static str> {
 
 pub fn register(r: Registry) -> Registry {
     let mut s = Steps::from_registry(r);
-    s.stimulus(
-        "I convert {int} to roman numerals",
-        Handler::sync1(|_state, n| {
-            let n = if let Value::Int(i) = n { i } else { 0 };
-            let mut m = BTreeMap::new();
-            if let Some(s) = roman(n) {
-                m.insert("result".to_string(), Value::from(s));
-            }
-            Ok(Some(Value::Map(m)))
-        }),
-    );
-    s.sensor(
-        "The result is {word}",
-        Handler::sync1(|state, expected| {
-            // {word} greedily captures trailing punctuation ("I." not "I"); strip
-            // it, then throw on mismatch rather than returning (which would make
-            // the core compare the RAW captured "I." and wrongly fail). Returning
-            // None opts out, matching the .ts/.java sensors.
-            let expected = if let Value::String(s) = expected {
-                s
-            } else {
-                String::new()
-            };
-            let cleaned = expected.trim_end_matches(['.', '!', '?']);
-            let result = match &state {
-                Value::Map(m) => match m.get("result") {
-                    Some(Value::String(s)) => s.clone(),
-                    _ => String::new(),
-                },
+    s.stimulus("I convert {int} to roman numerals", |_state, n| {
+        let n = if let Value::Int(i) = n { i } else { 0 };
+        let mut m = BTreeMap::new();
+        if let Some(s) = roman(n) {
+            m.insert("result".to_string(), Value::from(s));
+        }
+        Ok(Some(Value::Map(m)))
+    });
+    s.sensor("The result is {word}", |state, expected| {
+        // {word} greedily captures trailing punctuation ("I." not "I"); strip
+        // it, then throw on mismatch rather than returning (which would make
+        // the core compare the RAW captured "I." and wrongly fail). Returning
+        // None opts out, matching the .ts/.java sensors.
+        let expected = if let Value::String(s) = expected {
+            s
+        } else {
+            String::new()
+        };
+        let cleaned = expected.trim_end_matches(['.', '!', '?']);
+        let result = match &state {
+            Value::Map(m) => match m.get("result") {
+                Some(Value::String(s)) => s.clone(),
                 _ => String::new(),
-            };
-            if cleaned != result {
-                return Err(HandlerError::new(format!(
-                    "expected {cleaned} but got {result}"
-                )));
-            }
-            Ok(None)
-        }),
-    );
+            },
+            _ => String::new(),
+        };
+        if cleaned != result {
+            return Err(HandlerError::new(format!(
+                "expected {cleaned} but got {result}"
+            )));
+        }
+        Ok(None)
+    });
     s.into_registry()
 }
 

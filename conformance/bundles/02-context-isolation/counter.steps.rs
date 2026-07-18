@@ -1,7 +1,7 @@
 //! Rust sibling of `counter.steps.ts` (bundle `02-context-isolation`).
 
 use std::collections::BTreeMap;
-use var::{Handler, HandlerError, Registry, Steps, Value};
+use var::{HandlerError, Registry, Steps, Value};
 
 fn count_of(state: &Value) -> i64 {
     match state {
@@ -15,29 +15,23 @@ fn count_of(state: &Value) -> i64 {
 
 pub fn register(r: Registry) -> Registry {
     let mut s = Steps::from_registry(r);
-    s.stimulus(
-        "I increment",
-        Handler::sync0(|state| {
-            let next = count_of(&state) + 1;
-            Ok(Some(Value::Map(BTreeMap::from([(
-                "count".to_string(),
-                Value::Int(next),
-            )]))))
-        }),
-    );
-    s.sensor(
-        "The count is {int}",
-        Handler::sync1(|state, n| {
-            let count = count_of(&state);
-            let expected = if let Value::Int(i) = n { i } else { 0 };
-            if count != expected {
-                return Err(HandlerError::new(format!(
-                    "expected {expected} but got {count}"
-                )));
-            }
-            Ok(None)
-        }),
-    );
+    s.stimulus("I increment", |state| {
+        let next = count_of(&state) + 1;
+        Ok(Some(Value::Map(BTreeMap::from([(
+            "count".to_string(),
+            Value::Int(next),
+        )]))))
+    });
+    s.sensor("The count is {int}", |state, n| {
+        let count = count_of(&state);
+        let expected = if let Value::Int(i) = n { i } else { 0 };
+        if count != expected {
+            return Err(HandlerError::new(format!(
+                "expected {expected} but got {count}"
+            )));
+        }
+        Ok(None)
+    });
     s.into_registry()
 }
 

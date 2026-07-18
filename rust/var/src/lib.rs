@@ -11,7 +11,7 @@
 //! the author surface every bundle fixture is written against.
 
 mod steps;
-pub use steps::Steps;
+pub use steps::{IntoHandler, Steps};
 
 pub use var_core::error::HandlerError;
 pub use var_core::handler::{Handler, HandlerReturn, StepReturn};

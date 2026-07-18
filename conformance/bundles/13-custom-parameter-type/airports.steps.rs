@@ -2,7 +2,7 @@
 
 use std::collections::BTreeMap;
 use std::rc::Rc;
-use var::{Handler, HandlerError, ParseFn, Registry, Steps, Value};
+use var::{HandlerError, ParseFn, Registry, Steps, Value};
 
 pub fn register(r: Registry) -> Registry {
     let mut s = Steps::from_registry(r);
@@ -11,39 +11,33 @@ pub fn register(r: Registry) -> Registry {
     let parse: ParseFn = Rc::new(|g: &[&str]| Value::from(g[0].to_lowercase()));
     s.param("airport", "[A-Z]{3}", parse);
 
-    s.stimulus(
-        "I fly to {airport}",
-        Handler::sync1(|_state, dest| {
-            Ok(Some(Value::Map(BTreeMap::from([(
-                "dest".to_string(),
-                dest,
-            )]))))
-        }),
-    );
-    s.sensor(
-        "The destination code is {word}",
-        Handler::sync1(|state, expected| {
-            let expected = if let Value::String(s) = expected {
-                s
-            } else {
-                String::new()
-            };
-            let cleaned = expected.trim_end_matches(['.', '!', '?']);
-            let dest = match &state {
-                Value::Map(m) => match m.get("dest") {
-                    Some(Value::String(s)) => s.clone(),
-                    _ => String::new(),
-                },
+    s.stimulus("I fly to {airport}", |_state, dest| {
+        Ok(Some(Value::Map(BTreeMap::from([(
+            "dest".to_string(),
+            dest,
+        )]))))
+    });
+    s.sensor("The destination code is {word}", |state, expected| {
+        let expected = if let Value::String(s) = expected {
+            s
+        } else {
+            String::new()
+        };
+        let cleaned = expected.trim_end_matches(['.', '!', '?']);
+        let dest = match &state {
+            Value::Map(m) => match m.get("dest") {
+                Some(Value::String(s)) => s.clone(),
                 _ => String::new(),
-            };
-            if cleaned != dest {
-                return Err(HandlerError::new(format!(
-                    "expected {cleaned} but got {dest}"
-                )));
-            }
-            Ok(None)
-        }),
-    );
+            },
+            _ => String::new(),
+        };
+        if cleaned != dest {
+            return Err(HandlerError::new(format!(
+                "expected {cleaned} but got {dest}"
+            )));
+        }
+        Ok(None)
+    });
     s.into_registry()
 }
 

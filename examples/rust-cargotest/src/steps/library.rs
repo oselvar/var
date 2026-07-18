@@ -10,7 +10,7 @@ use crate::library_example::{
     Date, FEE_PER_DAY, format_date, format_money, late_fee, may_borrow, parse_date, parse_money,
 };
 use std::rc::Rc;
-use var::{FormatFn, Handler, ParseFn, Registry, Steps, Value};
+use var::{FormatFn, ParseFn, Registry, Steps, Value};
 
 fn date_value(d: Date) -> Value {
     vmap(vec![
@@ -84,68 +84,54 @@ pub fn register(r: Registry) -> Registry {
 
     s.stimulus(
         "borrowed {title}, due back on {date}",
-        Handler::sync2(|state, title, due| {
+        |state, title, due| {
             let mut m = smap(&state);
             let mut loans = loans_of(&state);
             loans.push(vmap(vec![("title", title), ("due", due)]));
             m.insert("loans".to_string(), Value::List(loans));
             Ok(Some(Value::Map(m)))
-        }),
+        },
     );
 
-    s.stimulus(
-        "returns it on {date}",
-        Handler::sync1(|state, returned_on| {
-            let returned = value_date(&returned_on);
-            let mut fee = 0;
-            for loan in loans_of(&state) {
-                fee += late_fee(loan_due(&loan), returned);
-            }
-            let mut m = smap(&state);
-            m.insert("fee".to_string(), Value::Int(fee));
-            Ok(Some(Value::Map(m)))
-        }),
-    );
+    s.stimulus("returns it on {date}", |state, returned_on| {
+        let returned = value_date(&returned_on);
+        let mut fee = 0;
+        for loan in loans_of(&state) {
+            fee += late_fee(loan_due(&loan), returned);
+        }
+        let mut m = smap(&state);
+        m.insert("fee".to_string(), Value::Int(fee));
+        Ok(Some(Value::Map(m)))
+    });
 
-    s.sensor(
-        "owes a {money} late fee",
-        Handler::sync1(|state, _expected| Ok(smap(&state).get("fee").cloned())),
-    );
+    s.sensor("owes a {money} late fee", |state, _expected| {
+        Ok(smap(&state).get("fee").cloned())
+    });
 
-    s.sensor(
-        "{money} for each day overdue",
-        Handler::sync1(|_state, _expected| Ok(Some(Value::Int(FEE_PER_DAY)))),
-    );
+    s.sensor("{money} for each day overdue", |_state, _expected| {
+        Ok(Some(Value::Int(FEE_PER_DAY)))
+    });
 
-    s.stimulus(
-        "asks to borrow {title} on {date}",
-        Handler::sync2(|state, _title, on| {
-            let on = value_date(&on);
-            let dues: Vec<Date> = loans_of(&state).iter().map(loan_due).collect();
-            let mut m = smap(&state);
-            m.insert("granted".to_string(), Value::Bool(may_borrow(&dues, on)));
-            Ok(Some(Value::Map(m)))
-        }),
-    );
+    s.stimulus("asks to borrow {title} on {date}", |state, _title, on| {
+        let on = value_date(&on);
+        let dues: Vec<Date> = loans_of(&state).iter().map(loan_due).collect();
+        let mut m = smap(&state);
+        m.insert("granted".to_string(), Value::Bool(may_borrow(&dues, on)));
+        Ok(Some(Value::Map(m)))
+    });
 
-    s.sensor(
-        "the library refuses",
-        Handler::sync0(|state| {
-            if matches!(smap(&state).get("granted"), Some(Value::Bool(true))) {
-                panic!("expected the library to refuse");
-            }
-            Ok(None)
-        }),
-    );
+    s.sensor("the library refuses", |state| {
+        if matches!(smap(&state).get("granted"), Some(Value::Bool(true))) {
+            panic!("expected the library to refuse");
+        }
+        Ok(None)
+    });
 
-    s.sensor(
-        "the library agrees",
-        Handler::sync0(|state| {
-            if !matches!(smap(&state).get("granted"), Some(Value::Bool(true))) {
-                panic!("expected the library to agree");
-            }
-            Ok(None)
-        }),
-    );
+    s.sensor("the library agrees", |state| {
+        if !matches!(smap(&state).get("granted"), Some(Value::Bool(true))) {
+            panic!("expected the library to agree");
+        }
+        Ok(None)
+    });
     s.into_registry()
 }

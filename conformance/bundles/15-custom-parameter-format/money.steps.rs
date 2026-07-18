@@ -4,7 +4,7 @@
 //! back in document notation, so the pinned mismatch reads `£2.60` / `£2.55`.
 
 use std::rc::Rc;
-use var::{FormatFn, Handler, ParseFn, Registry, Steps, Value};
+use var::{FormatFn, ParseFn, Registry, Steps, Value};
 
 pub fn register(r: Registry) -> Registry {
     let mut s = Steps::from_registry(r);
@@ -25,10 +25,9 @@ pub fn register(r: Registry) -> Registry {
 
     // Returns the WRONG money on purpose; the golden pins the formatted actual
     // "£2.60", proving mismatches render through `format`.
-    s.sensor(
-        "The late fee is {money}",
-        Handler::sync1(|_state, _expected| Ok(Some(Value::Float(2.6)))),
-    );
+    s.sensor("The late fee is {money}", |_state, _expected| {
+        Ok(Some(Value::Float(2.6)))
+    });
     s.into_registry()
 }
 
