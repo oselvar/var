@@ -17,14 +17,14 @@
     "port": "jvm",
     "label": "Java / Kotlin",
     "lines": {
-      "covered": 2083,
-      "total": 2416,
+      "covered": 2085,
+      "total": 2419,
       "pct": 86.2
     },
     "branches": {
-      "covered": 951,
-      "total": 1239,
-      "pct": 76.8
+      "covered": 958,
+      "total": 1241,
+      "pct": 77.2
     }
   },
   {
@@ -54,5 +54,11 @@
       "total": 0,
       "pct": null
     }
+  },
+  {
+    "port": "rust",
+    "label": "Rust",
+    "lines": null,
+    "branches": null
   }
 ]

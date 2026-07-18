@@ -311,6 +311,13 @@ suite:
 - **Root `Makefile` target** (`make <lang>`) running that port's full gate
   (build + tests + lint + the example projects), threaded into `check:`. Update
   the Makefile header comment.
+- **Repo-root `README.md` build & coverage table** — add the port. The table is
+  **generated** by `scripts/coverage-summary.sh` between the `<!-- coverage:start
+  -->`/`<!-- coverage:end -->` markers, so add the port *there*, not by hand
+  editing the table (a hand edit is overwritten on the next `make coverage`): a
+  `<PORT>_JSON=$(port_json <id> "<Label>" "$(lcov_totals <report>)")` line (add it
+  to the `jq --slurpfile` list too) and a `build_badge` case mapping the id to the
+  port's `.github/workflows/<lang>.yml`. Also bump the "N ports" prose sentence.
 - **`.github/workflows/<lang>.yml`** — triggered on `<lang>/**`,
   `conformance/**`, `examples/**`, and the workflow file; runs the same gate as
   the Makefile target, then the example projects.
