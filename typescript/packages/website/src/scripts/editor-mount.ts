@@ -1,16 +1,11 @@
-import { java } from '@codemirror/lang-java'
-import { javascript } from '@codemirror/lang-javascript'
-import { markdown } from '@codemirror/lang-markdown'
-import { python } from '@codemirror/lang-python'
-import { foldGutter, StreamLanguage } from '@codemirror/language'
-import { kotlin } from '@codemirror/legacy-modes/mode/clike'
-import { ruby } from '@codemirror/legacy-modes/mode/ruby'
+import { foldGutter } from '@codemirror/language'
 import { LSPClient, languageServerExtensions } from '@codemirror/lsp-client'
 import { Annotation, EditorSelection, EditorState, type Extension } from '@codemirror/state'
 import { lineNumbers } from '@codemirror/view'
 import { hashSource } from '@oselvar/var-core'
 import { basicSetup, EditorView, minimalSetup } from 'codemirror'
 import { flashExtension, type GenerateSnippet, stepGenAffordance } from '../lib/cm-generate-step.ts'
+import { CM_LANGUAGE, markdownHighlight } from '../lib/cm-languages.ts'
 import { setDrift, setRunResults, varRunExtension } from '../lib/cm-run.ts'
 import { semanticTokens } from '../lib/cm-semantic-tokens.ts'
 import { varEditorThemeExt } from '../lib/cm-var-theme.ts'
@@ -417,21 +412,12 @@ function mountEditor(editorEl: HTMLElement): void {
     scheduleRun()
   })
 
+  // The language-neutral .md spec (langOfPath → undefined) is Markdown; every
+  // SiteLang resolves through CM_LANGUAGE, which is exhaustive by construction
+  // (a missing port is a type error there and a failing test in the CI gate).
   const languageExt = (uri: string): Extension => {
-    switch (langOfPath(uri)) {
-      case 'ts':
-        return javascript({ typescript: true })
-      case 'java':
-        return java()
-      case 'kotlin':
-        return StreamLanguage.define(kotlin)
-      case 'python':
-        return python()
-      case 'ruby':
-        return StreamLanguage.define(ruby)
-      default:
-        return markdown()
-    }
+    const lang = langOfPath(uri)
+    return lang === undefined ? markdownHighlight() : CM_LANGUAGE[lang]()
   }
 
   for (const file of files) {
