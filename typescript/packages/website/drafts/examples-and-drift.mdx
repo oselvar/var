@@ -1,18 +1,18 @@
 ---
 title: Examples and drift
-description: When a paragraph is an example, when it is just prose, and how Vár refuses to let an example quietly stop being one.
+description: When a paragraph is an example, when it is just prose, and how Varar refuses to let an example quietly stop being one.
 area: reference
 order: 5
 ---
 
-In Vár your Markdown is the source of truth, and not every paragraph is a test.
+In Varar your Markdown is the source of truth, and not every paragraph is a test.
 A paragraph becomes an **example** only when at least one of its sentences
 matches a step definition. A paragraph that matches nothing is just **prose** —
-documentation that Vár reads past.
+documentation that Varar reads past.
 
 ## A paragraph is an example only if a step matches
 
-Vár takes each paragraph, splits it into sentences, and matches those sentences
+Varar takes each paragraph, splits it into sentences, and matches those sentences
 against your registered step definitions (`stimulus` / `sensor`).
 
 - **At least one sentence matches** → the paragraph is an example. Its matching
@@ -32,20 +32,20 @@ typo creeps into the Markdown — and a paragraph that used to be tested silentl
 becomes prose. The suite stays green while testing less than it did. That is the
 worst kind of false confidence: coverage decaying without a single failing test.
 
-Vár treats this transition — **was an example, now matches nothing** — as
+Varar treats this transition — **was an example, now matches nothing** — as
 **drift**, and refuses to let it pass unnoticed.
 
-To detect it, Vár records a fingerprint of each spec's source alongside its run
+To detect it, Varar records a fingerprint of each spec's source alongside its run
 results: an [FNV-1a](https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function)
 hash, written as `fnv1a:…`. It is a tiny, dependency-free change-detector,
-identical across every Vár runtime, so drift is recognised the same way no
+identical across every Varar runtime, so drift is recognised the same way no
 matter which language you run in. When the source changes such that a previously
-matching paragraph no longer matches, Vár sees the fingerprint move and flags the
+matching paragraph no longer matches, Varar sees the fingerprint move and flags the
 drift.
 
 ## Drift must be explicitly acknowledged
 
-Drift is never resolved silently. Vár will not drop the example for you (losing
+Drift is never resolved silently. Varar will not drop the example for you (losing
 coverage), and it will not let the run pass as if nothing happened. Instead you
 must **explicitly mark the drift as OK** — confirming that yes, this paragraph is
 *intentionally* no longer an example.

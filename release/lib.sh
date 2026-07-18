@@ -6,7 +6,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Single source of truth for whether the Rust port ships to crates.io. While it
 # is 0 (parked), two targets stay in lock-step: 65-crates-io.sh reports OK
-# without publishing, AND 70-var-examples.sh omits the rust-* samples (their
+# without publishing, AND 70-varar-examples.sh omits the rust-* samples (their
 # `var-core` path dependency can't resolve in var-examples until the crates are
 # on crates.io — pinning it to an unpublished version would ship a broken
 # sample). Flip to 1 only once the crates are publishable — see the go-live
@@ -38,13 +38,13 @@ stamp_java_samples() {
 }
 
 # Stamp <version> into every Ruby workspace gem: the gemspec version, the
-# gemspec's internal (oselvar-*) dependency pins, the VERSION constants, and the
+# gemspec's internal (varar-*) dependency pins, the VERSION constants, and the
 # lockfile. External dep pins (cucumber, minitest, rspec, ...) are left alone.
 # perl -pi, not sed -i: BSD/GNU-portable in-place.
 stamp_ruby() {
   local version="$1" f
   perl -pi -e "s/^(\s*s\.version\s*=\s*)'[^']*'/\${1}'$version'/" ruby/packages/*/*.gemspec
-  perl -pi -e "s/(add_dependency\s+'oselvar-[a-z0-9-]+',\s*)'[^']*'/\${1}'$version'/" ruby/packages/*/*.gemspec
+  perl -pi -e "s/(add_dependency\s+'varar-[a-z0-9-]+',\s*)'[^']*'/\${1}'$version'/" ruby/packages/*/*.gemspec
   while IFS= read -r f; do
     perl -pi -e "s/(VERSION\s*=\s*)'[^']*'/\${1}'$version'/" "$f"
   done < <(grep -rlE "VERSION\s*=\s*'" ruby/packages/*/lib)
@@ -80,14 +80,14 @@ changelog_body() {
 # Prints the .vsix path on stdout (all build noise goes to stderr).
 build_vsix() {
   local version="$1"
-  local vsix="$REPO_ROOT/release/dist/oselvar-var-$version-$(git -C "$REPO_ROOT" rev-parse --short HEAD).vsix"
+  local vsix="$REPO_ROOT/release/dist/varar-$version-$(git -C "$REPO_ROOT" rev-parse --short HEAD).vsix"
   [[ -f "$vsix" ]] && { echo "$vsix"; return 0; }
   local manifest_version
   manifest_version="$(jq -r .version "$REPO_ROOT/typescript/packages/var-vscode/package.json")"
   [[ "$manifest_version" == "$version" ]] ||
     die "var-vscode/package.json is at $manifest_version, not $version — stamp has not run"
   mkdir -p "$REPO_ROOT/release/dist"
-  (cd "$REPO_ROOT/typescript" && pnpm install --frozen-lockfile >&2 && pnpm --filter oselvar-var build >&2)
+  (cd "$REPO_ROOT/typescript" && pnpm install --frozen-lockfile >&2 && pnpm --filter varar build >&2)
   (cd "$REPO_ROOT/typescript/packages/var-vscode" && vsce package --no-dependencies -o "$vsix" >&2)
   echo "$vsix"
 }

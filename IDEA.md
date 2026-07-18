@@ -72,7 +72,7 @@ using inspiration from https://diataxis.fr/
 
 ## Name
 
-We'll call the tool Vár (@oselvar/var). It's a tongue in cheek because clueless Cucumber adopters would often call the examples or feature files "BDDs". I've written lots of BDDs, which is a sign they didn't quitre get the concept. So we pick this ironic name since it's fun.
+We'll call the tool Varar (@varar/varar). It's a tongue in cheek because clueless Cucumber adopters would often call the examples or feature files "BDDs". I've written lots of BDDs, which is a sign they didn't quitre get the concept. So we pick this ironic name since it's fun.
 
 ## Speed
 

@@ -23,13 +23,18 @@ cd "$REPO_ROOT/ruby"
 
 # Publish in dependency order so a gem's deps exist when it is pushed.
 gems=(
-  oselvar-var-core
-  oselvar-var-config
-  oselvar-var
-  oselvar-var-runner
-  oselvar-var-rspec
-  oselvar-var-minitest
+  varar-core
+  varar-config
+  varar
+  varar-runner
+  varar-rspec
+  varar-minitest
 )
+
+# The gem name no longer shares a prefix with its package directory (gem
+# `varar-core` lives in `packages/var-core`), so locate each package by its
+# gemspec rather than by stripping a name prefix.
+gem_dir() { dirname "$(ls "$REPO_ROOT"/ruby/packages/*/"$1.gemspec")"; }
 
 trap 'rm -f "$REPO_ROOT"/ruby/packages/*/*.gem' EXIT
 
@@ -60,7 +65,7 @@ fi
 # Build every pending gem up front — no credentials needed, so this keeps the
 # OTP-guarded pushes back-to-back and inside one code's validity window.
 for name in "${pending[@]}"; do
-  (cd "packages/${name#oselvar-}" && gem build "$name.gemspec" -o "$name-$VERSION.gem" >/dev/null)
+  (cd "$(gem_dir "$name")" && gem build "$name.gemspec" -o "$name-$VERSION.gem" >/dev/null)
 done
 
 # One OTP for the whole batch. op run pipes our stdio to mask secrets, so read
@@ -75,7 +80,7 @@ export GEM_HOST_OTP_CODE
 
 published=0
 for name in "${pending[@]}"; do
-  (cd "packages/${name#oselvar-}" && gem push "$name-$VERSION.gem")
+  (cd "$(gem_dir "$name")" && gem push "$name-$VERSION.gem")
   log "rubygems: published $name $VERSION"
   published=$((published + 1))
 done

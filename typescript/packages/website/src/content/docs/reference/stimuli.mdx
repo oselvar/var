@@ -6,7 +6,7 @@ description: Step functions that mutate state and drive the system under test.
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 A *stimulus* drives the software: it arranges the state an example starts from
-and acts on it. It is one of Vár's two kinds of step functions. The other is
+and acts on it. It is one of Varar's two kinds of step functions. The other is
 [sensors](/reference/sensors/), the read-only observations. 
 
 The names are a hardware analogy: you put a stimulus into the system, and you read its response
@@ -91,7 +91,7 @@ with sensors.
 </Tabs>
 
 In your prose the stimulus covers both the *context* (arrange) and the *action*
-(act) — Vár never matches keywords; see
+(act) — Varar never matches keywords; see
 [Test anatomy](/explanation/test-anatomy/) for why the concepts and the
 mechanism are decoupled.
 
@@ -99,7 +99,7 @@ mechanism are decoupled.
 
 A stimulus receives the current state as its first argument (deeply readonly)
 followed by the values the expression captured. In TypeScript and Python it
-evolves state by **returning a partial state object**, which Vár shallow-merges
+evolves state by **returning a partial state object**, which Varar shallow-merges
 onto the current state and re-freezes. In Java and Kotlin, where state is an
 immutable record/data class, it returns the **complete new state value** —
 full replacement, same principle: new value out, never mutation.

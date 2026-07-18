@@ -1,17 +1,17 @@
 ---
-title: Vár
+title: Varar
 description: Executable markdown documentation for humans and agents. Turn your docs into tests.
 template: splash # Remove or comment out this line to display the site sidebar on this page.
 hero:
   title: Be honest
-  tagline: Vár ensures your code does what your docs say.<br>Your oaths, enforced.
+  tagline: Varar ensures your code does what your docs say.<br>Your oaths, enforced.
   image:
     file: ../../assets/var-logo.webp
   actions:
     - text: Get started
       link: /tutorials/get-started/
       icon: rocket
-    - text: Try Vár in your browser
+    - text: Try Varar in your browser
       link: /tutorials/try-var/
       icon: laptop
       variant: minimal
@@ -23,12 +23,12 @@ import LibraryEditor from '$components/examples/LibraryEditor.astro';
 import RomanNumeralsEditor from '$components/examples/RomanNumeralsEditor.astro';
 
 Entropy is everywhere. Code and tests tend to drift apart from documentation and specifications in subtle ways that can be hard to discover.
-Vár closes that gap by making your documentation *executable*.
-When a programmer or coding agent breaks the oath, Vár catches it. Every time.
+Varar closes that gap by making your documentation *executable*.
+When a programmer or coding agent breaks the oath, Varar catches it. Every time.
 
 ## Examples
 
-The examples below give a taste of how Vár works. If the markdown disagrees with the code, your tests will fail.
+The examples below give a taste of how Varar works. If the markdown disagrees with the code, your tests will fail.
 
 <Tabs syncKey="example">
   <TabItem label="Deep Thought">
@@ -39,7 +39,7 @@ The examples below give a taste of how Vár works. If the markdown disagrees wit
     <LibraryEditor />
     Each paragraph runs as its own example with fresh state — arrange, act and assert in plain prose. See [stimuli](/reference/stimuli/) for how state evolves.
 
-    Cycle the version button to **Reword (drift)**: the *Ben* paragraph is reworded so it no longer matches any step. Instead of silently dropping to prose (losing that test), Vár flags it as **drift** — an amber marker on the paragraph — and offers **Accept as prose** to acknowledge it. See [Examples › Drift detection](/reference/examples/#drift-detection).
+    Cycle the version button to **Reword (drift)**: the *Ben* paragraph is reworded so it no longer matches any step. Instead of silently dropping to prose (losing that test), Varar flags it as **drift** — an amber marker on the paragraph — and offers **Accept as prose** to acknowledge it. See [Examples › Drift detection](/reference/examples/#drift-detection).
   </TabItem>
   <TabItem label="Roman numerals">
     <RomanNumeralsEditor />
@@ -47,9 +47,11 @@ The examples below give a taste of how Vár works. If the markdown disagrees wit
   </TabItem>
 </Tabs>
 
-## Who is Vár?
+## Why "Varar"?
 
-In Norse mythology, Vár is a goddess who listens to people's oaths and private agreements. 
-She punishes those who break them.[^1]
+**Varar** is Old Norse for *oaths* — and **Vár** is the goddess who guards them.
+In Norse mythology, Vár listens to people's oaths and private agreements, and
+punishes those who break them.[^1] That is exactly what this tool does: your
+documentation is the oath, and Varar makes sure your code keeps it.
 
 [^1]: [Vár on Wikipedia](https://en.wikipedia.org/wiki/V%C3%A1r)

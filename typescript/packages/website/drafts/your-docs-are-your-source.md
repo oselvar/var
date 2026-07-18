@@ -46,11 +46,11 @@ It's usually quiet, but wakes up whenever you mess something up.
 
 Like drift between the documentation and the code. You might as well discard it if it's just a bunch of lies.
 
-Vár ensures you have no drift. She is a norse goddess of oaths and agreements.
+Varar ensures you have no drift. She is a norse goddess of oaths and agreements.
 
-> Níunda Vár, hon hlýðir á eiða manna ok einkamál, er veita sín á milli konur ok karlar. Því heita þau mál várar. Hon hefnir ok þeim, er brigða.
+> Níunda Varar, hon hlýðir á eiða manna ok einkamál, er veita sín á milli konur ok karlar. Því heita þau mál várar. Hon hefnir ok þeim, er brigða.
 
-> The ninth is Vár: she harkens to the oaths and compacts made between men and women; wherefore such covenants are called 'vows.' She also takes vengeance on those who perjure themselves.
+> The ninth is Varar: she harkens to the oaths and compacts made between men and women; wherefore such covenants are called 'vows.' She also takes vengeance on those who perjure themselves.
 
 You get the picture. You don't want her knocking on your door, trust me.
 

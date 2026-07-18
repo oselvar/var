@@ -4,7 +4,7 @@ require 'varar/core'
 
 module Varar
   # The module-scope step-registration accumulator behind the block DSL
-  # `steps(...) do stimulus(...); sensor(...) end`. Mirrors @oselvar/var's
+  # `steps(...) do stimulus(...); sensor(...) end`. Mirrors @varar/varar's
   # internal.ts. A step file, when loaded, calls steps() once; the Builder its
   # block registers into these accumulators. The runner/harness then reads
   # them via build_registry / context_factory.

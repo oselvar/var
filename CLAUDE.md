@@ -6,7 +6,7 @@ Guidance for AI assistants working in this repo.
 
 This is a multi-language monorepo (ADR 0001). Top level:
 
-- `typescript/` — the pnpm workspace (pure core `@oselvar/var`, runtime, vitest
+- `typescript/` — the pnpm workspace (pure core `@varar/varar`, runtime, vitest
   adapter, **and** the shared authoring/LSP/VS Code/website platform). **Run all
   pnpm / vitest / tsc commands from `typescript/`.** Package paths in this file
   (e.g. `packages/var/src/...`) are relative to `typescript/`.
@@ -18,8 +18,8 @@ This is a multi-language monorepo (ADR 0001). Top level:
   golden/*.json}`) read by every language's conformance harness.
 - `doc/` — shared design docs (ADRs, specs, plans, ARCHITECTURE).
 - `examples/` — one standalone sample project per language/test-framework
-  combo, mirroring the `oselvar/var-examples` repo 1:1 (synced there on every
-  release by `release/targets/60-var-examples.sh`). The `.md` specs sit at
+  combo, mirroring the `oselvar/varar-examples` repo 1:1 (synced there on every
+  release by `release/targets/70-varar-examples.sh`). The `.md` specs sit at
   each project's root; `typescript-vitest` holds the originals, the other
   projects symlink their subset (the sync dereferences symlinks).
 
@@ -32,7 +32,7 @@ Decide the quadrant before writing and don't mix them in one page.
 
 - User-facing docs live on the website:
   `typescript/packages/website/src/content/docs/{tutorials,how-to,reference,explanation}`.
-  Published to https://var.oselvar.com.
+  Published to https://varar.dev.
 - Internal/design docs (ADRs, specs, plans, ARCHITECTURE) stay in `doc/` at
   the repo root — they are not part of the Diátaxis structure.
 
@@ -40,7 +40,7 @@ Decide the quadrant before writing and don't mix them in one page.
 
 - **Immutable types.** All data types are `readonly` — no mutable fields, no in-place mutation. Use `ReadonlyArray<T>` and `ReadonlyMap<K, V>`. Updates produce a new value.
 - **Pure functions everywhere they're possible.** Parsing, matching, planning, snippet generation, diagnostics: all pure. Given the same input, return the same output, with no side effects.
-- **Functional core, imperative shell.** The core (`@oselvar/var`) is pure functions over immutable data. The shell — file I/O, module loading, test-runner integration, CLI prompts, terminal output — lives in the adapter packages (`var-vitest`, `var-node`, `var-bun`, `var-cli`) and is the *only* place side effects are allowed.
+- **Functional core, imperative shell.** The core (`@varar/varar`) is pure functions over immutable data. The shell — file I/O, module loading, test-runner integration, CLI prompts, terminal output — lives in the adapter packages (`var-vitest`, `var-node`, `var-bun`, `var-cli`) and is the *only* place side effects are allowed.
 - **Hexagonal architecture.** The core defines ports (interfaces it depends on); adapters implement them. The core never imports from `node:fs`, `vitest`, `bun:test`, etc. — those are wired in at the edges.
 
 Concretely:
@@ -65,10 +65,10 @@ pnpm workspace · biome · vitest (for the core's own tests) · knip · jscpd ·
   `.github/workflows/` (`typescript.yml`, `python.yml`, `java.yml`, `ruby.yml` —
   all also trigger on `conformance/**`).
 - **Trunk-based development.** We commit small, working increments straight to `main` — no long-lived feature branches. Keep each commit self-contained and green (build + tests pass), so trunk is always releasable.
-- **Type-check is a separate gate.** vitest runs source through esbuild/tsx, which strips types without checking them — a fully green suite can still fail `tsc`. Run `pnpm -r build` (exit 0) before calling any change done, especially after touching a shared type, an AST node, or a package's public exports (new required fields and new exports are the usual culprits). Note `pnpm build` and `pnpm check` both exclude the website packages — the Starlight website is built separately via `pnpm --filter @oselvar/website... build`, run in two CI places: the `test` job (a PR gate — its `<Editor>` components assert every port in `languages.json` has example files, so a forgotten port fails the build) and the `deploy-website` job (which also deploys to https://var.oselvar.com). The legacy `packages/website` is never built. To check the website locally: `pnpm --filter @oselvar/website build`.
+- **Type-check is a separate gate.** vitest runs source through esbuild/tsx, which strips types without checking them — a fully green suite can still fail `tsc`. Run `pnpm -r build` (exit 0) before calling any change done, especially after touching a shared type, an AST node, or a package's public exports (new required fields and new exports are the usual culprits). Note `pnpm build` and `pnpm check` both exclude the website packages — the Starlight website is built separately via `pnpm --filter @varar/website... build`, run in two CI places: the `test` job (a PR gate — its `<Editor>` components assert every port in `languages.json` has example files, so a forgotten port fails the build) and the `deploy-website` job (which also deploys to https://varar.dev). The legacy `packages/website` is never built. To check the website locally: `pnpm --filter @varar/website build`.
   - `pnpm -r build` only type-checks each package's `src/` (its `tsconfig.json` emits with `rootDir: src`). **Test files (`tests/**`) are type-checked by `pnpm typecheck`** (root `tsconfig.tests.json`, `noEmit`, covers every non-website package's `tests/`). It's part of `pnpm check`, so run `pnpm check` (or `pnpm typecheck` alone) after touching tests — a green vitest run does *not* mean the tests type-check. Note `expectTypeOf` assertions are validated here by `tsc`, not by vitest (we don't run `vitest --typecheck`).
 - **Dogfood specs**: `examples/typescript-vitest` (package
-  `@oselvar/example-typescript-vitest`, a pnpm workspace member via
+  `@varar/example-typescript-vitest`, a pnpm workspace member via
   `../examples/typescript-vitest`, workspace deps, never released) holds the
   original `.md` specs at its root plus their `steps/*.steps.ts`, and runs in
   the root vitest workspace. The JVM samples consume the SNAPSHOT installed by
@@ -98,7 +98,7 @@ on everything since the last release tag):
 - **The subject is the changelog line, verbatim.** Write it for the consumer
   reading release notes, not the reviewer reading the diff: what changed for
   *them*, not how. "generated modules import runtime helpers from
-  @oselvar/var-vitest/runtime", not "refactor virtual module codegen".
+  @varar/vitest/runtime", not "refactor virtual module codegen".
 - **Breaking changes:** append `!` to the type and add a
   `BREAKING CHANGE: <consumer-facing migration note>` footer — the note is
   rendered in the changelog under the entry.

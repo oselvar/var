@@ -3,7 +3,7 @@
 require 'varar/internal'
 
 module Varar
-  # Adapter/harness glue — mirrors the `@oselvar/var/registry` subpath.
+  # Adapter/harness glue — mirrors the `@varar/varar/registry` subpath.
   # Authors import only `steps` (via varar); runners and the conformance
   # harness reach the accumulator through here.
   module RegistryGlue

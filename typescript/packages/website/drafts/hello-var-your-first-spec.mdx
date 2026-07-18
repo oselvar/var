@@ -1,20 +1,20 @@
 ---
-title: 'Hello Vár: your first spec'
-description: Write your first Vár spec — a plain Markdown file describing a behaviour with a concrete example.
+title: 'Hello Varar: your first spec'
+description: Write your first Varar spec — a plain Markdown file describing a behaviour with a concrete example.
 area: start-here
 order: 1
 ---
 
 import Editor from '$components/Editor.astro'
-import helloSteps from '../../../../../var-examples/hello-var/hello-var.steps.ts?raw'
+import helloSteps from '../../../../../varar-examples/hello-var/hello-var.steps.ts?raw'
 
-# Hello Vár: your first punishment
+# Hello Varar: your first punishment
 
-The best way to understand Vár is to see something *not* working as expected.
+The best way to understand Varar is to see something *not* working as expected.
 Create a new Markdown file with the following text:
 
 <Editor uri="file:///hello.md" chrome lineNumbers>{`
-# Hello, Vár
+# Hello, Varar
 
 I hope this works!
 `}</Editor>
@@ -25,25 +25,25 @@ Then run var:
 var hello.md
 ```
 
-Vár is not good! Because you haven't made any promises at all as far as she can tell.
+Varar is not good! Because you haven't made any promises at all as far as she can tell.
 There are no *examples*. Let's make one. Select the text `this works` in the editor below.
 
 
-A Vár spec is just a Markdown file. You create a file ending in `.md` and
+A Varar spec is just a Markdown file. You create a file ending in `.md` and
 write what you expect to happen in plain English, with concrete examples inline. There is
 no special syntax to learn: you describe a behaviour the way you would explain it to a
-colleague, and Vár turns the examples into runnable tests. Create the file, add some
+colleague, and Varar turns the examples into runnable tests. Create the file, add some
 content, and you have a spec.
 
 Add this to a new file:
 
 <Editor uri="file:///hello.md" chrome lineNumbers folding group="hello-var-tutorial" steps={[{ path: 'hello-var.steps.ts', source: helloSteps }]}>{`
-# Hello, Vár
+# Hello, Varar
 Run \`pnpm test\` and watch this file run as tests.
 
 First I greet "world" okay? I think the greeting should be "Hello, world!"
 
-Try changing to "Hello, Vár!" and watch the test fail.
+Try changing to "Hello, Varar!" and watch the test fail.
 
 ## Another example
 

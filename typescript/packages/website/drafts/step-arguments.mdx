@@ -6,13 +6,13 @@ order: 1
 ---
 
 import Editor from '$components/Editor.astro'
-import helloSteps from '../../../../../var-examples/hello-var/hello-var.steps.ts?raw'
+import helloSteps from '../../../../../varar-examples/hello-var/hello-var.steps.ts?raw'
 
 # Step argument types
 
 A step handler is `(state, ...args) => …`. The first parameter, `state`, is your
 state — its type comes from `defineState`. Everything after it is captured from
-the `{…}` **parameters** in the cucumber expression, and Vár infers those types
+the `{…}` **parameters** in the cucumber expression, and Varar infers those types
 directly from the expression string. **You don't annotate them.**
 
 ```ts
@@ -42,7 +42,7 @@ handler `(state, a, b)` where both `a` and `b` are `number`. Here is the whole
 its spec:
 
 <Editor uri="file:///hello.md" chrome lineNumbers folding group="step-arguments" steps={[{ path: 'hello-var.steps.ts', source: helloSteps }]}>{`
-# Hello, Vár
+# Hello, Varar
 
 First I greet "world" okay? I think the greeting should be "Hello, world!"
 

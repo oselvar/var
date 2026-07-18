@@ -1,11 +1,11 @@
 ---
-title: Drive a feature with Vár and an agent
+title: Drive a feature with Varar and an agent
 description: The per-feature loop — talk in customer language, let the agent specify, then iterate on the spec, not the code.
 ---
 
 This guide shows you the working loop for building one feature with an AI agent
-once Vár is wired into its instructions (see
-[Wire Vár into your AI agent's instructions](/how-to/agent-instructions/)).
+once Varar is wired into its instructions (see
+[Wire Varar into your AI agent's instructions](/how-to/agent-instructions/)).
 
 ## 1. Brief the agent in customer language
 
@@ -27,7 +27,7 @@ If the spec doesn't say what you meant, push back now. "The spec doesn't cover
 a whitespace-only name" is a much cheaper conversation than "the code is wrong
 in production".
 
-## 3. Let the agent run Vár and implement
+## 3. Let the agent run Varar and implement
 
 The agent runs the suite, sees the new example fail, and implements. You don't
 need to watch every step — but do watch for:

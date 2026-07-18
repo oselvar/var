@@ -73,9 +73,9 @@ issue, as above.
 
 ## Security
 
-Vár is a development tool — a testing framework that runs on developer
+Varar is a development tool — a testing framework that runs on developer
 machines and CI, not in production. Its threat model is correspondingly
-simple: a bug in Vár means it might fail to catch a bug in the software you
+simple: a bug in Varar means it might fail to catch a bug in the software you
 test with it. That's it. So there is no embargoed disclosure process —
 report security-relevant bugs (a matcher that passes when it should fail, a
 comparison that silently skips) as ordinary GitHub issues, like any other

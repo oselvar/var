@@ -1,6 +1,6 @@
 ---
 title: Doc strings
-description: How a fenced code block attaches to a step in a Vár spec — passed in as text, and checked against the step's returned string.
+description: How a fenced code block attaches to a step in a Varar spec — passed in as text, and checked against the step's returned string.
 area: reference
 order: 3
 ---
@@ -27,7 +27,7 @@ stimulus('The rendered greeting is:', (state, body) => {
 
 ## Returning a doc string
 
-If the step **returns a string**, Vár compares it against the doc-string content — **exactly**, byte for byte. This turns the fenced block into an assertion: the prose shows the expected output, and the step produces it.
+If the step **returns a string**, Varar compares it against the doc-string content — **exactly**, byte for byte. This turns the fenced block into an assertion: the prose shows the expected output, and the step produces it.
 
 ```ts
 sensor('Greet {word}:', (state, name, body) => {

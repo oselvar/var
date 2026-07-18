@@ -133,7 +133,7 @@ build_badge() {
     rust)   wf=rust ;;
     *)      wf="$1" ;;
   esac
-  printf '[![Build](https://github.com/oselvar/var/actions/workflows/%s.yml/badge.svg?branch=main)](https://github.com/oselvar/var/actions/workflows/%s.yml)' "$wf" "$wf"
+  printf '[![Build](https://github.com/oselvar/varar/actions/workflows/%s.yml/badge.svg?branch=main)](https://github.com/oselvar/varar/actions/workflows/%s.yml)' "$wf" "$wf"
 }
 
 TABLE=$(mktemp)

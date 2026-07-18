@@ -55,8 +55,8 @@
 
 ## Runtime adapters & CI
 
-- [ ] `@oselvar/var-bun` adapter (parallel to `var-vitest`).
-- [ ] `@oselvar/var-deno` adapter.
+- [ ] `@varar/varar-bun` adapter (parallel to `var-vitest`).
+- [ ] `@varar/varar-deno` adapter.
 - [ ] CI matrix: node + bun + deno.
 
 ## CLI

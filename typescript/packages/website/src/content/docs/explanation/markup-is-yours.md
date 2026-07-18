@@ -1,10 +1,10 @@
 ---
 title: The markup is yours
-description: Why Vár never edits inline text, and why document formats are block-structure plugins.
+description: Why Varar never edits inline text, and why document formats are block-structure plugins.
 ---
 
-Vár executes prose. That only stays trustworthy if the prose the matcher
-sees is exactly the prose you wrote — so Vár follows one rule:
+Varar executes prose. That only stays trustworthy if the prose the matcher
+sees is exactly the prose you wrote — so Varar follows one rule:
 
 **Format plugins own block structure. Nobody touches inline text.**
 
@@ -28,7 +28,7 @@ title: {
 ```
 
 The markers are notation, no different from the `£` in `£2.50`. `parse`
-takes the notation apart, `format` puts it back, and neither Vár's core nor
+takes the notation apart, `format` puts it back, and neither Varar's core nor
 your handlers ever see markup they didn't ask for.
 
 An earlier design stripped emphasis before matching, so `*Emma*` invisibly

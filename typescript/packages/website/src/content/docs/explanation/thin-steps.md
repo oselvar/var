@@ -3,7 +3,7 @@ title: Thin steps
 description: Let the steps guide your software design
 ---
 
-The recommended way to work with Vár is to write the documentation *first* and let it *guide* the
+The recommended way to work with Varar is to write the documentation *first* and let it *guide* the
 implementation of the software design.
 
 The documentation is the result of a *conversation* between people and/or agents. 

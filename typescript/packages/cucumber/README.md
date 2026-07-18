@@ -81,7 +81,7 @@ directly, with no test runner in the way — which is most of the gap.
 3. Re-write the step file: replace `Given('expr', fn)` / `When(...)` /
    `Then(...)` with the role function that matches what each step does —
    `context('expr', fn)` to set up state, `action('expr', fn)` to perform an
-   action, `sensor('expr', fn)` to return a value Vár checks — and replace
+   action, `sensor('expr', fn)` to return a value Varar checks — and replace
    `World` + `Before`/`After` with a `steps(() => ({...}))` factory whose
    return value flows into each handler as the first argument.
 4. Data tables arrive as `ReadonlyArray<ReadonlyArray<string>>` (header row

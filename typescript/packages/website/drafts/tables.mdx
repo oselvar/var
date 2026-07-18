@@ -1,18 +1,18 @@
 ---
 title: Tables
-description: How Markdown tables attach to steps in a Vár spec — whole-table mode, and header-bound row iteration.
+description: How Markdown tables attach to steps in a Varar spec — whole-table mode, and header-bound row iteration.
 area: reference
 order: 2
 ---
 
 import Editor from '$components/Editor.astro'
-import yahtzeeSteps from '../../../../../var-examples/yahtzee/yahtzee.steps.ts?raw'
-import yahtzeeLogic from '../../../../../var-examples/yahtzee/yahtzee.ts?raw'
+import yahtzeeSteps from '../../../../../varar-examples/yahtzee/yahtzee.steps.ts?raw'
+import yahtzeeLogic from '../../../../../varar-examples/yahtzee/yahtzee.ts?raw'
 
 # Tables
 
 A Markdown table attaches to the step matched in the paragraph **immediately
-above it**. There are two ways that table reaches your step definition, and Vár
+above it**. There are two ways that table reaches your step definition, and Varar
 chooses between them based on what the paragraph says.
 
 ## Whole-table mode (the default)
@@ -35,7 +35,7 @@ sensor('These users exist:', (state, rows) => {
 })
 ```
 
-The return is **load-bearing**: if a whole-table step returns a table, Vár
+The return is **load-bearing**: if a whole-table step returns a table, Varar
 compares it against the input table cell by cell and fails on any difference.
 Return the full table (every column of every row) — as an array of rows
 (`string[][]`, data rows only) or an array of objects keyed by header. A step

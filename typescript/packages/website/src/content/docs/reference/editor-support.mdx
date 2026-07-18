@@ -1,11 +1,11 @@
 ---
 title: Editor support
-description: The Vár VS Code extension and its language server — matched-step highlighting, go-to step definition, hover, completion, drift and mismatch diagnostics, Generate Step Definition, and cross-file Rename.
+description: The Varar VS Code extension and its language server — matched-step highlighting, go-to step definition, hover, completion, drift and mismatch diagnostics, Generate Step Definition, and cross-file Rename.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-Vár ships an editor integration so that a spec — plain Markdown that happens to
+Varar ships an editor integration so that a spec — plain Markdown that happens to
 be executable — reads and edits like real code: matched steps are highlighted,
 you can jump from a sentence to the function that runs it, and the editor tells
 you when a paragraph has stopped being an example. It comes in two pieces:
@@ -15,7 +15,7 @@ you when a paragraph has stopped being an example. It comes in two pieces:
   holds all the intelligence: parsing, step matching, diagnostics, snippet
   generation, and rename planning. Because it speaks LSP, any editor with an LSP
   client can drive it.
-- **The Vár VS Code extension** (`varar.varar`) — a thin client that
+- **The Varar VS Code extension** (`varar.varar`) — a thin client that
   bundles the language server and wires its features into VS Code menus,
   commands, and the editor surface.
 
@@ -28,7 +28,7 @@ The extension is published to the [Open VSX Registry](https://open-vsx.org), so
 it installs in VS Code and every VS Code–compatible editor — VSCodium, Cursor,
 Windsurf — that resolves extensions from Open VSX:
 
-- **In-editor:** open the Extensions view, search for **Vár**, and install
+- **In-editor:** open the Extensions view, search for **Varar**, and install
   `varar.varar`.
 - **From the CLI:** `code --install-extension varar.varar` (or the
   equivalent `codium` / `cursor` command).
@@ -87,7 +87,7 @@ squiggles. Beyond parse errors, it ingests the results of the last run (the
 `.var/*.json` files the runner writes) and reflects them back onto the source:
 
 - **Drift** — a paragraph that *used to be* an example and now matches nothing.
-  This is the dangerous case Vár refuses to let pass silently; see
+  This is the dangerous case Varar refuses to let pass silently; see
   [Drift detection](/reference/examples/#drift-detection).
 - **Missing steps** — a sentence that looks like it should run but has no
   matching step definition.
@@ -114,7 +114,7 @@ working step.
 ### Cross-file Rename
 
 Press **F2** on a matched step — either on the sentence in the Markdown or on the
-`stimulus()` / `sensor()` expression in a steps file — and Vár renames the step
+`stimulus()` / `sensor()` expression in a steps file — and Varar renames the step
 everywhere at once: it rewrites the step-definition expression and its handler,
 and re-renders every matching sentence across every spec to the new wording. If
 the new form adds a parameter or changes a parameter's type, the editor prompts

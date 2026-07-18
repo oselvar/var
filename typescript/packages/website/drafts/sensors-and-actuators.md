@@ -16,12 +16,12 @@ order: 2
 > Particularly powerful when they produce signals that are optimised for LLM consumption, e.g. custom linter 
 > messages that include instructions for the self-correction - a positive kind of prompt injection.
 
-With Vár, the markdown document is both the guide and the sensor.
+With Varar, the markdown document is both the guide and the sensor.
 
-The guide aspect happens outside of Vár - that's just the agent reading the markdown document and
+The guide aspect happens outside of Varar - that's just the agent reading the markdown document and
 using it to *guide* or *steer* its activities.
 
-The sensor aspect happens when Vár runs the markdown as an automated acceptance test.
+The sensor aspect happens when Varar runs the markdown as an automated acceptance test.
 The sensor is implemented as an *assertion* - a comparison between an expected value (in the markdown)
 and an actual value (from the software). Like a good physical sensor, a good assertion is read-only:
 it observes the software without disturbing it.

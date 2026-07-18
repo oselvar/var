@@ -1,9 +1,9 @@
 ---
-title: Vár
-description: Vár overview.
+title: Varar
+description: Varar overview.
 ---
 
-Vár is an I/O layer that sits between your documentation and your software.
+Varar is an I/O layer that sits between your documentation and your software.
 It connects the two with *cells* (like spreadsheet cells).
 
 A cell can be a number, date, name etc. It can be in a paragraph of text, or in a table.

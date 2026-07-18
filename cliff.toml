@@ -75,7 +75,7 @@ body = """
 # The hand-written first release predates the commit convention and is kept
 # verbatim (generation starts at v0.1.0, see `make changelog`).
 footer = """
-{{ "\n## [0.1.0]\n\n### Added\n\n- First public release of var: Markdown-native BDD for TypeScript (npm), Python (PyPI), and Java/Kotlin (Maven Central), plus the Vár VS Code extension (Marketplace and Open VSX).\n" }}
+{{ "\n## [0.1.0]\n\n### Added\n\n- First public release of var: Markdown-native BDD for TypeScript (npm), Python (PyPI), and Java/Kotlin (Maven Central), plus the Varar VS Code extension (Marketplace and Open VSX).\n" }}
 """
 
 trim = true

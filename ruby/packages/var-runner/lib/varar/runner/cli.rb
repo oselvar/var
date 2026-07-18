@@ -10,7 +10,7 @@ module Varar
     # step definitions, and a framework bridge that turns the specs into
     # RSpec examples or Minitest tests.
     #
-    # The config, spec and steps mirror the TypeScript CLI (`@oselvar/var-cli`)
+    # The config, spec and steps mirror the TypeScript CLI (`@varar/cli`)
     # so a project started with `var init` looks the same in every language;
     # only the bridge is Ruby-specific, because RSpec/Minitest — unlike
     # pytest — need an explicit generator call to discover the specs.

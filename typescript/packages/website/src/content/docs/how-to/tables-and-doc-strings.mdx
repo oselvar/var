@@ -1,12 +1,12 @@
 ---
 title: Check tables and doc strings
-description: Return computed values from a step and let Vár compare them against the Markdown, cell by cell.
+description: Return computed values from a step and let Varar compare them against the Markdown, cell by cell.
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-This guide shows you how to check tabular and multi-line expectations. In Vár a
-step may `return` a value; Vár compares it against what the Markdown claims and
+This guide shows you how to check tabular and multi-line expectations. In Varar a
+step may `return` a value; Varar compares it against what the Markdown claims and
 anchors any mismatch to the exact cell or character span. There are three
 shapes.
 
@@ -174,7 +174,7 @@ Uppercase each one:
   </TabItem>
 </Tabs>
 
-The table is this sensor's only comparable value, so it is returned bare. Vár
+The table is this sensor's only comparable value, so it is returned bare. Varar
 compares every cell of the returned table against the source, as exact strings.
 
 ## Check a doc string

@@ -1,13 +1,13 @@
 ---
 title: Examples
-description: How Vár identifies an example in a Markdown spec — where one begins and ends, how tables, doc strings, headings, and prose fit in, and how drift is detected when an example stops being one.
+description: How Varar identifies an example in a Markdown spec — where one begins and ends, how tables, doc strings, headings, and prose fit in, and how drift is detected when an example stops being one.
 ---
 
-In Vár the Markdown *is* the test. A spec file is ordinary Markdown — prose,
-headings, lists, tables, code blocks — and Vár runs the parts of it that match
+In Varar the Markdown *is* the test. A spec file is ordinary Markdown — prose,
+headings, lists, tables, code blocks — and Varar runs the parts of it that match
 your step definitions. This page is the reference for the unit it runs: the
 **example**. It covers exactly what becomes an example, where one begins and
-ends, how tables and doc strings attach, what role headings play, and how Vár
+ends, how tables and doc strings attach, what role headings play, and how Varar
 notices when something that used to be an example no longer is.
 
 ## What is a spec
@@ -29,18 +29,18 @@ Both `include` and `exclude` are plain globs (no `!` prefix). `include` has no
 default — an empty list discovers nothing; `exclude` removes matches from it.
 There is no special file extension: a plain `.md` file is a spec purely because
 the globs select it. Any Markdown file the globs don't select is invisible to
-Vár.
+Varar.
 
 ## What is an example
 
 Within a spec, the candidate unit is a **paragraph** — or a list item, or a
-blockquote. Vár splits each candidate into sentences and matches those sentences
+blockquote. Varar splits each candidate into sentences and matches those sentences
 against your registered [stimuli](/reference/stimuli/) and
 [sensos](/reference/sensors/).
 
 - **At least one sentence matches a step** → the paragraph is an **example**. Its
   matching sentences run as steps, in order.
-- **No sentence matches** → the paragraph is **prose**. Vár reads past it: no
+- **No sentence matches** → the paragraph is **prose**. Varar reads past it: no
   test, no failure.
 
 This is what lets a single file interleave narrative explanation with executable
@@ -50,7 +50,7 @@ run.
 
 A paragraph that matches at least one step but not every sentence is still one
 example. The unmatched sentences are narration that travels *with* the test —
-they even become part of its name (see [Naming](#naming)). Vár never guesses
+they even become part of its name (see [Naming](#naming)). Varar never guesses
 that an unmatched sentence "should have" been a step; there is no keyword
 sniffing, no "missing step" inference from sentence shape.
 
@@ -182,7 +182,7 @@ terminators inside the sentence (a quoted string, `i.e.`) are left alone.
 
 ## Sentences, emphasis, and formatting
 
-Vár splits a paragraph into sentences on `.`, `!`, `?`, and hard line breaks,
+Varar splits a paragraph into sentences on `.`, `!`, `?`, and hard line breaks,
 with a few guards so real prose doesn't fragment:
 
 - Terminators **inside backtick code spans or double-quoted strings** don't
@@ -197,7 +197,7 @@ matches only an expression that says so. Block markers are different: they
 are structure, not text, so a list item's `- ` bullet and a blockquote's `> `
 prefix never reach the matcher. If a marked-up run is data, make it a
 [custom parameter](/reference/custom-parameters/) whose regexp includes the
-markers and whose `parse` strips them — markup is notation, and Vár never
+markers and whose `parse` strips them — markup is notation, and Varar never
 edits your prose behind your back.
 
 ## Expected-to-fail examples
@@ -226,19 +226,19 @@ creeps into the Markdown — and it silently reverts to prose. The suite stays
 green while testing *less* than it did: coverage decaying without a single
 failing test.
 
-Vár treats this transition — **was an example, now matches nothing** — as
+Varar treats this transition — **was an example, now matches nothing** — as
 **drift**, and refuses to let it pass unnoticed.
 
-To recognise it, Vár records a fingerprint of each spec's source alongside its
+To recognise it, Varar records a fingerprint of each spec's source alongside its
 run results: an
 [FNV-1a](https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function)
 hash written as `fnv1a:…`. It is a tiny, dependency-free change-detector,
-computed identically in every Vár runtime, so drift is recognised the same way
+computed identically in every Varar runtime, so drift is recognised the same way
 whatever language you run in. When a spec changes such that a previously matching
-paragraph no longer matches any step, Vár compares the new source against the
+paragraph no longer matches any step, Varar compares the new source against the
 recorded baseline and reports the drifted example by name and line.
 
-Drift is never resolved silently. Vár will not drop the example for you (losing
+Drift is never resolved silently. Varar will not drop the example for you (losing
 coverage), and it will not let the run pass as if nothing happened. The run
 **fails** until you **explicitly acknowledge** the drift — confirming that yes,
 this paragraph is *intentionally* no longer an example — much as you accept an
@@ -252,7 +252,7 @@ The distinction is deliberate:
 
 ### Why it's important
 
-The whole promise of Vár is that the Markdown is the test. If an example could
+The whole promise of Varar is that the Markdown is the test. If an example could
 quietly stop being a test, that promise leaks: a document that reads like a
 passing specification would actually be verifying nothing, and no one would
 know. Silent coverage loss is the worst failure mode a test system has, because

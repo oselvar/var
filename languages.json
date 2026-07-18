@@ -4,22 +4,22 @@
     "label": "TypeScript",
     "icon": "seti:typescript",
     "ext": ".ts",
-    "stepsGlob": "var-examples/**/*.steps.ts",
+    "stepsGlob": "varar-examples/**/*.steps.ts",
     "hasCli": true,
-    "install": { "lang": "bash", "code": "pnpm add -D @oselvar/var @oselvar/var-cli" },
-    "scaffold": { "lang": "bash", "code": "pnpm exec var init" },
-    "run": { "lang": "bash", "code": "pnpm exec var run" }
+    "install": { "lang": "bash", "code": "pnpm add -D @varar/varar @varar/cli" },
+    "scaffold": { "lang": "bash", "code": "pnpm exec varar init" },
+    "run": { "lang": "bash", "code": "pnpm exec varar run" }
   },
   {
     "id": "java",
     "label": "Java",
     "icon": "seti:java",
     "ext": ".java",
-    "stepsGlob": "var-examples/**/*Steps.java",
+    "stepsGlob": "varar-examples/**/*Steps.java",
     "hasCli": false,
     "install": {
       "lang": "xml",
-      "code": "<!-- pom.xml — use the latest release from Maven Central -->\n<dependency>\n  <groupId>com.oselvar</groupId>\n  <artifactId>var-junit</artifactId>\n  <version>{{version}}</version>\n  <scope>test</scope>\n</dependency>"
+      "code": "<!-- pom.xml — use the latest release from Maven Central -->\n<dependency>\n  <groupId>dev.varar</groupId>\n  <artifactId>junit</artifactId>\n  <version>{{version}}</version>\n  <scope>test</scope>\n</dependency>"
     },
     "scaffold": null,
     "run": { "lang": "bash", "code": "mvn test" }
@@ -29,11 +29,11 @@
     "label": "Kotlin",
     "icon": "seti:kotlin",
     "ext": ".kt",
-    "stepsGlob": "var-examples/**/*.steps.kt",
+    "stepsGlob": "varar-examples/**/*.steps.kt",
     "hasCli": false,
     "install": {
       "lang": "kotlin",
-      "code": "// build.gradle.kts — use the latest release from Maven Central\ntestImplementation(\"com.oselvar:var-kotlin:{{version}}\")\ntestImplementation(\"com.oselvar:var-junit:{{version}}\")"
+      "code": "// build.gradle.kts — use the latest release from Maven Central\ntestImplementation(\"dev.varar:kotlin:{{version}}\")\ntestImplementation(\"dev.varar:junit:{{version}}\")"
     },
     "scaffold": null,
     "run": { "lang": "bash", "code": "./gradlew test" }
@@ -43,10 +43,10 @@
     "label": "Python",
     "icon": "seti:python",
     "ext": ".py",
-    "stepsGlob": "var-examples/**/*.steps.py",
+    "stepsGlob": "varar-examples/**/*.steps.py",
     "hasCli": true,
-    "install": { "lang": "bash", "code": "uv add --dev pytest-var" },
-    "scaffold": { "lang": "bash", "code": "uv run var init" },
+    "install": { "lang": "bash", "code": "uv add --dev pytest-varar" },
+    "scaffold": { "lang": "bash", "code": "uv run varar init" },
     "run": { "lang": "bash", "code": "uv run pytest" }
   },
   {
@@ -54,10 +54,10 @@
     "label": "Ruby",
     "icon": "seti:ruby",
     "ext": ".rb",
-    "stepsGlob": "var-examples/**/*.steps.rb",
+    "stepsGlob": "varar-examples/**/*.steps.rb",
     "hasCli": true,
-    "install": { "lang": "bash", "code": "bundle add oselvar-var-rspec" },
-    "scaffold": { "lang": "bash", "code": "bundle exec var init" },
+    "install": { "lang": "bash", "code": "bundle add varar-rspec" },
+    "scaffold": { "lang": "bash", "code": "bundle exec varar init" },
     "run": { "lang": "bash", "code": "bundle exec rspec" }
   },
   {
@@ -65,9 +65,9 @@
     "label": "Rust",
     "icon": "seti:rust",
     "ext": ".rs",
-    "stepsGlob": "var-examples/**/*.steps.rs",
+    "stepsGlob": "varar-examples/**/*.steps.rs",
     "hasCli": false,
-    "install": { "lang": "bash", "code": "cargo add var-cargotest --dev" },
+    "install": { "lang": "bash", "code": "cargo add varar-cargotest --dev" },
     "scaffold": null,
     "run": { "lang": "bash", "code": "cargo test" }
   }

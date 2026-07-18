@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Publish all com.oselvar artifacts to Maven Central. The Central Portal
+# Publish all dev.varar artifacts to Maven Central. The Central Portal
 # treats a multi-module deploy as one atomic bundle, so this either deploys
 # everything or skips everything; a partial state means a manual mess on the
 # portal and gets a hard error.
@@ -25,7 +25,7 @@ AUTH="Authorization: Bearer $(printf '%s:%s' "$CENTRAL_USERNAME" "$CENTRAL_PASSW
 central_published() {
   local body status
   body="$(curl -sS -w '\n%{http_code}' -H "$AUTH" \
-    "https://central.sonatype.com/api/v1/publisher/published?namespace=com.oselvar&name=$1&version=$VERSION")"
+    "https://central.sonatype.com/api/v1/publisher/published?namespace=dev.varar&name=$1&version=$VERSION")"
   status="${body##*$'\n'}"
   case "$status" in
     401 | 403) die "maven: Central Portal rejected the credentials (HTTP $status) — check the sonatype-central item in 1Password (doc/RELEASING.md §3)" ;;
@@ -35,14 +35,14 @@ central_published() {
   printf '%s' "${body%$'\n'*}" | jq -e '.published == true' >/dev/null
 }
 
-artifacts=(var-parent var-core var-config var var-runner var-junit var-kotlin var-kotest)
+artifacts=(parent core config varar runner junit kotlin kotest)
 missing=()
 for artifact in "${artifacts[@]}"; do
   central_published "$artifact" || missing+=("$artifact")
 done
 
 if [[ ${#missing[@]} -eq 0 ]]; then
-  log "maven: com.oselvar:*:$VERSION already published"
+  log "maven: dev.varar:*:$VERSION already published"
   exit 0
 fi
 if [[ ${#missing[@]} -lt ${#artifacts[@]} ]]; then
@@ -56,4 +56,4 @@ if [[ "${DRY_RUN:-0}" == "1" ]]; then
 fi
 
 mvn --batch-mode -s "$REPO_ROOT/release/maven-settings.xml" -Prelease -DskipTests deploy
-log "maven: deployed com.oselvar:*:$VERSION (waitUntil=published confirmed by the portal)"
+log "maven: deployed dev.varar:*:$VERSION (waitUntil=published confirmed by the portal)"

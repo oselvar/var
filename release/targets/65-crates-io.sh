@@ -2,11 +2,11 @@
 # Publish every Rust workspace crate to crates.io. Idempotent per crate.
 #
 # PARKED until the Rust port is ready to ship (gated by CRATES_IO_ENABLED in
-# release/lib.sh, which keeps this target and the 70-var-examples.sh rust pin in
+# release/lib.sh, which keeps this target and the 70-varar-examples.sh rust pin in
 # lock-step). While parked this simply reports OK. Go-live checklist:
-#   1. Rename the facade crate — `var` is already TAKEN on crates.io (only
-#      var-core/var-config/var-runner/var-cargotest are free). Pick e.g.
-#      `oselvar-var` and update rust/var/Cargo.toml + the `crates` list below.
+#   1. Rename the facade crate — `var` was already TAKEN on crates.io, so the facade ships as `varar`
+#      (verify `varar`/`varar-*` are free before first publish); the crate
+#      names below and rust/varar/Cargo.toml already reflect this.
 #   2. Flip each crate's `publish = false` to publishable and give them real
 #      versions — the release stamper does not version the Rust port yet, so
 #      wire that (they sit at 0.0.0 today).
@@ -14,7 +14,7 @@
 #   4. Add the CARGO_REGISTRY_TOKEN reference to release/release.env (already
 #      done — points at the 1Password `crates` item's `token`).
 #   5. Set CRATES_IO_ENABLED=1 in release/lib.sh (un-parks this target AND the
-#      var-examples rust pin together).
+#      varar-examples rust pin together).
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
 VERSION="$1"
@@ -30,11 +30,11 @@ cd "$REPO_ROOT/rust"
 # pushed. crates.io indexes each publish before the next `cargo publish` can
 # resolve it, so a brief wait between crates may be needed.
 crates=(
-  var-core
-  var-config
-  var
-  var-runner
-  var-cargotest
+  varar-core
+  varar-config
+  varar
+  varar-runner
+  varar-cargotest
 )
 
 for name in "${crates[@]}"; do

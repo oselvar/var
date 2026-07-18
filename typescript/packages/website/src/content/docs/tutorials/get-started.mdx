@@ -1,12 +1,12 @@
 ---
 title: Get started on your computer
-description: Install Vár, scaffold a first spec, run it — and watch it fail on purpose. In TypeScript, Python, Java, Kotlin or Ruby.
+description: Install Varar, scaffold a first spec, run it — and watch it fail on purpose. In TypeScript, Python, Java, Kotlin or Ruby.
 ---
 
 import { Tabs, TabItem, Aside, Steps } from '@astrojs/starlight/components';
 import LangCommand from '$components/LangCommand.astro';
 
-In this tutorial we'll install Vár into a project, scaffold a working example, run
+In this tutorial we'll install Varar into a project, scaffold a working example, run
 it, and then deliberately break it. By the end you will have seen an [oath](/explanation/oaths/)
 pass and fail as a test on your own machine.
 
@@ -19,7 +19,7 @@ Every command and code sample below follows that choice.
 
    <LangCommand kind="install" />
 
-   This adds Vár's author API (the package your step definitions import) and the
+   This adds Varar's author API (the package your step definitions import) and the
    adapter that runs specs in your test framework.
 
 2. Scaffold a first spec
@@ -28,8 +28,8 @@ Every command and code sample below follows that choice.
 
    ```
    created var.config.json
-   created var-examples/deep-thought.md
-   created var-examples/steps/deep-thought.steps.<ext>
+   created varar-examples/deep-thought.md
+   created varar-examples/steps/deep-thought.steps.<ext>
    ```
 
    (`<ext>` is your language's step-file extension — `ts`, `py`, `rb`, and so on.)
@@ -39,8 +39,8 @@ Every command and code sample below follows that choice.
 
    ```json
    {
-     "docs": { "include": ["var-examples/**/*.md"], "exclude": [] },
-     "steps": ["var-examples/**/*.steps.<ext>"]
+     "docs": { "include": ["varar-examples/**/*.md"], "exclude": [] },
+     "steps": ["varar-examples/**/*.steps.<ext>"]
    }
    ```
 
@@ -57,11 +57,11 @@ Every command and code sample below follows that choice.
    ```
 
    Notice there are no keywords and no special syntax — it's ordinary Markdown
-   prose. One sentence makes a checkable claim; Vár matches that phrase, and
+   prose. One sentence makes a checkable claim; Varar matches that phrase, and
    everything around it is just documentation for the reader.
 
    The steps file binds that sentence to code. A **sensor** reads the software and
-   returns what it actually produced, for Vár to compare against the number in the
+   returns what it actually produced, for Varar to compare against the number in the
    Markdown:
 
    <Tabs syncKey="lang">
@@ -170,10 +170,10 @@ Every command and code sample below follows that choice.
 
    <LangCommand kind="run" />
 
-   Vár reports one example passing:
+   Varar reports one example passing:
 
    ```
-   var-examples/deep-thought.md
+   varar-examples/deep-thought.md
      ✓ Deep Thought
 
    1 example, 1 passed, 0 failed
@@ -227,7 +227,7 @@ Every command and code sample below follows that choice.
      </TabItem>
    </Tabs>
 
-   Run Vár again. The example now fails: the spec still says `42`, but the sensor
+   Run Varar again. The example now fails: the spec still says `42`, but the sensor
    observed `43`. The output shows both values and points at the exact `42` in the
    Markdown where the promise broke.
 

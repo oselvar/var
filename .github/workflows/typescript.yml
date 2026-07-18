@@ -47,7 +47,7 @@ jobs:
       # its <Editor> components assert at build time that every port in
       # languages.json has example files, so this is where a forgotten port's
       # missing examples become a red build instead of surfacing only at deploy.
-      - run: pnpm --filter @oselvar/website... build
+      - run: pnpm --filter @varar/website... build
 
   deploy-website:
     needs: test
@@ -74,7 +74,7 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm --filter @oselvar/website... build
+      - run: pnpm --filter @varar/website... build
 
       - uses: cloudflare/wrangler-action@v4
         with:

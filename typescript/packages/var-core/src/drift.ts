@@ -7,8 +7,8 @@ import type { Span } from './span.ts'
 
 // A baseline example is re-identified in the edited source by text: an exact
 // name match, else the most word-similar paragraph at or above this threshold.
-// So you may move a paragraph anywhere and reword up to ~half its words and Vár
-// still recognizes it; edit it past this point and Vár treats it as a fresh
+// So you may move a paragraph anywhere and reword up to ~half its words and Varar
+// still recognizes it; edit it past this point and Varar treats it as a fresh
 // paragraph (remove + add), not drift. Tune here — a single number, ported
 // byte-identically to every language.
 export const DRIFT_SIMILARITY_THRESHOLD = 0.5

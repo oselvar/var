@@ -1,9 +1,9 @@
 ---
-title: Vár for Cucumber users
-description: What Vár keeps from Cucumber, what it drops, and why.
+title: Varar for Cucumber users
+description: What Varar keeps from Cucumber, what it drops, and why.
 ---
 
-Vár is created by Aslak Hellesøy, who also created Cucumber in 2008.
+Varar is created by Aslak Hellesøy, who also created Cucumber in 2008.
 The goal is to keep only the good parts, and align it with agentic coding.
 
 If you've used Cucumber before — whether you
@@ -20,22 +20,22 @@ bound by matching phrases in the text.
 
 ## What changed
 
-| Cucumber | Vár |
+| Cucumber | Varar |
 | --- | --- |
 | `.feature` files in Gherkin | Plain Markdown. No new dialect — a file is a spec iff it matches the globs in `var.config.ts`. |
 | `Given` / `When` / `Then` step types | Two roles — `stimulus` and `sensor` — chosen by what a step *does*, not by a keyword. Keywords in prose are narration for the reader; they're never matched. |
-| Assertions inside step bodies | Steps *return* what the software did; Vár compares it against what the document claims, and failures are anchored to the exact span in the source. |
+| Assertions inside step bodies | Steps *return* what the software did; Varar compares it against what the document claims, and failures are anchored to the exact span in the source. |
 | `DataTable` and doc-string APIs | Native Markdown tables and fenced code blocks, checked by [return-based comparison](/how-to/tables-and-doc-strings/). |
 | `World` and untyped state | `steps` — a typed state factory per spec; every example starts fresh. |
-| `Before` / `After` hooks | None in Vár. Use your test runner's own `beforeEach` / `afterEach`. |
+| `Before` / `After` hooks | None in Varar. Use your test runner's own `beforeEach` / `afterEach`. |
 | Tags | Not in v1. |
 | A separate test-run artefact | The document *is* the test. There is no report that drifts from the docs, because the docs are what ran. |
 
 ## Migration
 
-Our goal is to make Vár capable of running existing `.feature` files without any change to them.
+Our goal is to make Varar capable of running existing `.feature` files without any change to them.
 There will be an adapter API for Cucumber step definitions so that all you need to do is to change
-`import` statements from Cucumber to Vár.
+`import` statements from Cucumber to Varar.
 
 TODO: Finish the adapter implementation and test it extensively
 
@@ -55,8 +55,8 @@ The usual complaints, taken seriously:
 - **"Regex glue and mystery state."** Steps bind with Cucumber Expressions and
   a typed state you declare once with `steps`. No `this`, no untyped
   `World`.
-- **"Extra layer of indirection."** Vár still has that layer (step definitions).
-  Only write a *few* tests in Vár - the ones that *really* matter. Use unit testing tools for the rest.
+- **"Extra layer of indirection."** Varar still has that layer (step definitions).
+  Only write a *few* tests in Varar - the ones that *really* matter. Use unit testing tools for the rest.
 - **"Step definitions became a second implementation."** Steps that return
   values stay thin — a couple of lines delegating to your domain (see
   [Thin steps](/explanation/thin-steps/)). The assertion lives in the document,
@@ -66,4 +66,4 @@ The usual complaints, taken seriously:
 
 ## Next
 
-See it in two minutes: [Try Vár in your browser](/tutorials/try-var/).
+See it in two minutes: [Try Varar in your browser](/tutorials/try-var/).

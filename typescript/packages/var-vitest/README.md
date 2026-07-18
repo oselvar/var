@@ -1,6 +1,6 @@
 # @varar/vitest
 
-The vitest adapter for Vár. Wire the plugin into your `vitest.config.ts` so `.md`
+The vitest adapter for Varar. Wire the plugin into your `vitest.config.ts` so `.md`
 files run as tests, and add the results reporter:
 
 ```ts

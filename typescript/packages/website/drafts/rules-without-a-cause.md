@@ -23,7 +23,7 @@ a 2 a.m. deploy that went sideways. The rule is the scar tissue. The cause is th
 wound. And when teams keep the scar but forget the wound, the rule hardens into
 ceremony: followed because it's followed, defended because it's written down.
 
-Vár is built on the opposite move. The artifact isn't the rule — it's the
+Varar is built on the opposite move. The artifact isn't the rule — it's the
 **example**:
 
 > First I greet "world". The greeting should be "Hello, world!"
@@ -38,7 +38,7 @@ narration — they help you *read* an example, not match it. A rule that polices
 shape of your prose is a rule that lost its cause somewhere around the third
 retro.
 
-It's also why Vár only ever reports **presence**, never absence. We can tell you a
+It's also why Varar only ever reports **presence**, never absence. We can tell you a
 sentence *matches* a step — that's a fact, grounded in an example you wrote. We
 can't tell you a step is *missing*, because "missing" isn't something you can
 observe; it's something you'd have to assume. A diagnostic that flags absence is a

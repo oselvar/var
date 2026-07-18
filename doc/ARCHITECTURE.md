@@ -1,6 +1,6 @@
-# Vár architecture (target state)
+# Varar architecture (target state)
 
-This describes how Vár **should** be structured to support many languages — not
+This describes how Varar **should** be structured to support many languages — not
 how it is laid out today. It is the destination for the prefactoring work that
 precedes the first non-TypeScript language (Python).
 

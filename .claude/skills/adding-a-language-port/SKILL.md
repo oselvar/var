@@ -52,8 +52,8 @@ not four:
 | Package | Depends on | Owns | Never touches |
 |---|---|---|---|
 | `<lang>-core` (e.g. `var-core` / `var_core`) | nothing runtime-ish | pure pipeline: parse → match → plan → execute, diffs, drift, conformance projections | filesystem, network, globals, time, test-framework types |
-| `<lang>` facade (e.g. `@oselvar/var` / `var`) | `<lang>-core` | author API only: `defineState`/`define_state` (context/action/sensor), `registry` glue subpath | pipeline internals directly (goes through core) |
-| `<lang>-config` (e.g. `@oselvar/var-config` / `var_config`) | nothing (pure) | the `var.config.json` reader — strict, fail-loud; its own conformance corpus | filesystem beyond reading the one config file |
+| `<lang>` facade (e.g. `@varar/varar` / `var`) | `<lang>-core` | author API only: `defineState`/`define_state` (context/action/sensor), `registry` glue subpath | pipeline internals directly (goes through core) |
+| `<lang>-config` (e.g. `@varar/config` / `var_config`) | nothing (pure) | the `var.config.json` reader — strict, fail-loud; its own conformance corpus | filesystem beyond reading the one config file |
 | `<lang>-runner` (e.g. `var-runner`) | facade + config + core | imperative shell: spec/step discovery (globs), `load_steps`, `run_spec`/`plan_spec`, failure rendering, the filesystem `BaselineStore` (drift) | any one test framework's types |
 | `<lang>-<framework>` (e.g. `var-vitest`, `var-pytest`) | `<lang>-runner` | one test-framework binding: collection (one test item per example), fixture/DI bridging, reporting, the drift gate | pipeline logic (delegates to runner/core) |
 
@@ -273,7 +273,7 @@ TestEngine (JUnit), a `pytest_collect_file` hook (pytest), a generated
   (plugin name strings, resolved to functions per-language via a name
   registry). The schema lives at `conformance/config/var.config.schema.json`.
   Each port reads the same JSON with its own small config package
-  (`@oselvar/var-config` in TypeScript, `var_config` in Python, `var-config`
+  (`@varar/config` in TypeScript, `var_config` in Python, `var-config`
   in Java) — do not invent an ecosystem-idiomatic surface (no `[tool.var]`
   table, no per-language field names); a new port's reader must reproduce
   the shared conformance corpus at `conformance/config/cases/*/golden.json`
@@ -330,7 +330,7 @@ suite:
   sync dereferences them). Add rows to `examples/README.md`.
 - **`release/targets/NN-<registry>.sh`** publishing the port's packages to its
   registry (npm / PyPI / Maven Central / RubyGems), plus adding the port to the
-  release channels. The `oselvar/var-examples` sync (`60-var-examples.sh`) picks
+  release channels. The `oselvar/varar-examples` sync (`70-varar-examples.sh`) picks
   up new `examples/<lang>-*` projects, but its **version-pinning rewrite is
   per-ecosystem** — add a pin block (and any lockfile exclusion) for a new
   registry, mirroring the npm/PyPI/Maven/RubyGems ones. Also extend the
@@ -356,7 +356,7 @@ suite:
   asserts at build time that every port in `languages.json` has a code tab, so a
   missing one is a hard build error (message names the language). It's caught in
   the PR gate because `make typescript` / the CI `test` job build the website
-  (`pnpm --filter @oselvar/website... build`); run either to surface what you owe.
+  (`pnpm --filter @varar/website... build`); run either to surface what you owe.
 - **CodeMirror editor highlighting**: add the language's syntax highlighter to
   `CM_LANGUAGE` in `typescript/packages/website/src/lib/cm-languages.ts` — an
   official `@codemirror/lang-<lang>` (Lezer, like ts/java/python) if one exists,
@@ -471,7 +471,7 @@ Some ports don't re-port the pipeline at all. The rule, now settled:
 - A new language that **shares a runtime with an existing port** can be a thin
   **facade over that port's engine** — no second pipeline, no full four-artifact
   conformance run. **Kotlin did exactly this over Java**: `var-kotlin`
-  (`com.oselvar.varkt`) is an author-facade + Kotest adapter sitting on the
+  (`dev.varar.kotlin`) is an author-facade + Kotest adapter sitting on the
   compiled Java `var-core`; both are JVM bytecode. Its conformance scope is the
   **registry stage only** (its `*.steps.kt` fixtures prove registration);
   parse/plan/trace stay proven by the Java engine's already-green corpus.

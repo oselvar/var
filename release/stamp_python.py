@@ -11,12 +11,12 @@ import sys
 
 VERSION = sys.argv[1]
 INTERNAL = {
-    "oselvar-var",
-    "oselvar-var-config",
-    "oselvar-var-core",
-    "oselvar-var-runner",
-    "pytest-var",
-    "oselvar-var-unittest",
+    "varar",
+    "varar-config",
+    "varar-core",
+    "varar-runner",
+    "pytest-varar",
+    "varar-unittest",
 }
 
 

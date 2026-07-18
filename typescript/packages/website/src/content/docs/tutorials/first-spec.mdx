@@ -1,6 +1,6 @@
 ---
 title: Your first spec from scratch
-description: Write a Vár spec in a blank Markdown file and bind its steps.
+description: Write a Varar spec in a blank Markdown file and bind its steps.
 ---
 
 import { Steps } from '@astrojs/starlight/components';
@@ -17,7 +17,7 @@ This tutorial continues in the project you set up in
 
 1. Describe the behaviour
 
-   Create `var-examples/calculator.md`:
+   Create `varar-examples/calculator.md`:
 
    ```markdown
    # Calculator
@@ -32,7 +32,7 @@ This tutorial continues in the project you set up in
 2. Bind the steps
 
    Nothing runs yet — no step matches our sentence. Create
-   `var-examples/steps/calculator.steps.ts`:
+   `varar-examples/steps/calculator.steps.ts`:
 
    ```ts
    import { steps } from '@varar/varar'
@@ -51,7 +51,7 @@ This tutorial continues in the project you set up in
    - The **`stimulus`** drives the software. It matches `` expression `1+1` `` in
      the prose, computes, and returns a patch to the state.
    - The **`sensor`** is the read-only observation. It returns what the software
-     actually produced — `state.result` — and Vár compares that against the `2`
+     actually produced — `state.result` — and Varar compares that against the `2`
      written in the Markdown. You never write an assertion; the document *is* the
      assertion.
 
@@ -66,9 +66,9 @@ This tutorial continues in the project you set up in
    ```
 
    ```
-   var-examples/calculator.md
+   varar-examples/calculator.md
      ✓ Calculator (0ms)
-   var-examples/deep-thought.md
+   varar-examples/deep-thought.md
      ✓ Deep Thought (1ms)
 
    2 examples, 2 passed, 0 failed
@@ -81,7 +81,7 @@ This tutorial continues in the project you set up in
    Make it a habit: every new example should be seen failing once. This time,
    break the *document* — claim in `calculator.md` that `1+1` evaluates to `3`.
 
-   Run Vár again. The document demands 3, the software answers 2, and the failure
+   Run Varar again. The document demands 3, the software answers 2, and the failure
    points at the `3` in your Markdown. Revert it, run once more, and you're green.
 </Steps>
 
@@ -91,7 +91,7 @@ This tutorial continues in the project you set up in
 - Steps come in roles chosen by what they *do*: an **action** stimulates the
   system, a **sensor** observes it. (There's also **context**, for setting up
   the starting state — you'll meet it in bigger specs.)
-- A sensor *returns* the observed value instead of asserting; Vár does the
+- A sensor *returns* the observed value instead of asserting; Varar does the
   comparison and anchors failures to the document.
 
 ## Next

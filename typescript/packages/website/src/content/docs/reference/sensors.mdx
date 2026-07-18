@@ -6,9 +6,9 @@ description: The sensor return-value contract — slots, bare values, positional
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 A sensor is a read-only observation. It reads state, returns what the software
-actually produced, and Vár compares that against what the Markdown claims. A
+actually produced, and Varar compares that against what the Markdown claims. A
 sensor never changes state, and you never write an assertion — the document is
-the assertion. It is one of Vár's two step kinds — the other is the
+the assertion. It is one of Varar's two step kinds — the other is the
 [stimulus](/reference/stimuli/), which drives the software.
 
 The word comes from Birgitta Böckeler's
@@ -106,7 +106,7 @@ Kotlin, Python, Ruby).
 
 ## Slots
 
-A sensor's **slots** are the values Vár will compare, in order:
+A sensor's **slots** are the values Varar will compare, in order:
 
 1. each parameter captured by the expression (`{int}`, `{word}`, `{string}`,
    [custom types](/reference/custom-parameters/)), left to right;
@@ -521,7 +521,7 @@ failing characters in the Markdown and show the actual value in place.
 
 ## Why an array at all?
 
-A sensor with several slots has several independent claims to check, and Vár
+A sensor with several slots has several independent claims to check, and Varar
 needs to know which returned value belongs to which claim. Positional mapping —
 same order as the sentence — does that without naming ceremony. When there is
 only one claim, the position is unambiguous, so the wrapper would be pure

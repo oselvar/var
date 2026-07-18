@@ -47,7 +47,7 @@ deploy comes **last**:
    parked; see below.)
 4. **Maven Central** — slow (GPG-signed, atomic multi-module deploy); runs
    unattended at the end.
-5. **var-examples** — a quick git sync of `examples/` to the `oselvar/var-examples`
+5. **varar-examples** — a quick git sync of `examples/` to the `oselvar/varar-examples`
    repo, pinned to the just-published versions.
 
 Idempotent: if a publish fails, fix the cause and re-run `make release` — it
@@ -69,7 +69,7 @@ VS Code Marketplace — **npm, PyPI, Maven Central and Open VSX publish**.
 
 ## Credentials
 
-All secrets live in the 1Password vault **`Vár`** (account `my.1password.com`),
+All secrets live in the 1Password vault **`Varar`** (account `my.1password.com`),
 injected via `op run` from the references in `release/release.env` (the vault
 is referenced by ID because `op://` URIs reject non-ASCII names). One-time
 setup is complete — these notes are for rotating a token or rebuilding a
@@ -90,10 +90,10 @@ and `npm install -g @vscode/vsce ovsx`. Sign in: `op signin`, `gh auth login`.
   wait (hours) and re-run; published packages are skipped.
 - **Sonatype Central Portal (Maven Central)** — user token from
   central.sonatype.com (Account → Generate User Token); namespace
-  `com.oselvar` is DNS-verified (2026-07-04) on that account. If it ever needs
+  `dev.varar` is DNS-verified (2026-07-04) on that account. If it ever needs
   re-verifying, the portal issues a fresh code to publish as a TXT record on
   oselvar.com — a deploy from an account without the verified namespace fails
-  with "Namespace 'com.oselvar' is not allowed". → `sonatype-central`, fields
+  with "Namespace 'dev.varar' is not allowed". → `sonatype-central`, fields
   `username` and `password` (both halves of the generated user token).
 - **GPG** — ed25519 signing key for Oselvar Ltd, public key on
   keyserver.ubuntu.com. → `maven-gpg`, field `passphrase`, with an armored

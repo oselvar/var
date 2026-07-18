@@ -1,20 +1,20 @@
 ---
-title: Install Vár
-description: Install and configure Vár
+title: Install Varar
+description: Install and configure Varar
 area: guides
 order: 1
 ---
 
-# Install Vár
+# Install Varar
 
 This guide covers the TypeScript package, `@varar/varar`. (A Python port,
-`pytest-var`, also exists — dual-language tabs for this guide are coming.)
+`pytest-varar`, also exists — dual-language tabs for this guide are coming.)
 You need Node ≥ 22 LTS. It doesn't matter whether you're installing into an
 existing project or starting one from scratch.
 
 ## Install
 
-Open a terminal and add Vár as a dev dependency:
+Open a terminal and add Varar as a dev dependency:
 
 ```bash
 pnpm add -D @varar/varar
@@ -30,23 +30,23 @@ This creates a config file and a first example, side by side:
 
 ```
 created var.config.json
-created var-examples/hello-var/hello-var.md
-created var-examples/hello-var/hello-var.steps.ts
+created varar-examples/hello-var/hello-var.md
+created varar-examples/hello-var/hello-var.steps.ts
 ```
 
 `var.config.json` says which files are specs and which files bind their steps:
 
 ```json
 {
-  "docs": { "include": ["var-examples/**/*.md"], "exclude": [] },
-  "steps": ["var-examples/**/*.steps.ts"]
+  "docs": { "include": ["varar-examples/**/*.md"], "exclude": [] },
+  "steps": ["varar-examples/**/*.steps.ts"]
 }
 ```
 
 And `hello-var.md` is the spec itself — plain prose with one concrete example:
 
 ```markdown
-# Hello, Vár
+# Hello, Varar
 
 I greet "world". The greeting should be "Hello, world!".
 ```
@@ -60,8 +60,8 @@ pnpm exec var run
 The freshly scaffolded example passes:
 
 ```
-var-examples/hello-var/hello-var.md
-  ✓ Hello, Vár
+varar-examples/hello-var/hello-var.md
+  ✓ Hello, Varar
 
 1 example, 1 passed
 ```
@@ -70,7 +70,7 @@ var-examples/hello-var/hello-var.md
 
 [Never trust a test you haven't seen fail.](/var/docs/concepts/the-oaths-of-var/)
 A passing example you've never seen go red might be testing nothing at all.
-Open `var-examples/hello-var/hello-var.steps.ts` and change the greeting it
+Open `varar-examples/hello-var/hello-var.steps.ts` and change the greeting it
 produces:
 
 ```ts
@@ -87,8 +87,8 @@ Now the oath is *broken* — the spec still says `"Hello, world!"`, but the step
 produces something else:
 
 ```
-var-examples/hello-var/hello-var.md
-  ✗ Hello, Vár
+varar-examples/hello-var/hello-var.md
+  ✗ Hello, Varar
       expected "Hello, world!", actual "Hi, world!"
 
 1 example, 0 passed, 1 failed
@@ -102,5 +102,5 @@ Revert the change and run once more. The oath is *kept* again:
 
 ## Next
 
-- [Hello Vár: your first spec](/var/docs/start-here/hello-var-your-first-spec/) walks through writing a spec from a blank file.
-- [Wire Vár into your AI agent's instructions](/var/docs/guides/wire-var-into-agent-instructions/) so an agent writes specs first.
+- [Hello Varar: your first spec](/var/docs/start-here/hello-var-your-first-spec/) walks through writing a spec from a blank file.
+- [Wire Varar into your AI agent's instructions](/var/docs/guides/wire-var-into-agent-instructions/) so an agent writes specs first.

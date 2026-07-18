@@ -12,9 +12,9 @@ if [[ "$DISABLED" == "1" ]]; then
   exit 0
 fi
 
-listing="$(vsce show oselvar.oselvar-var --json 2>/dev/null || true)"
+listing="$(vsce show varar.varar --json 2>/dev/null || true)"
 if [[ -n "$listing" ]] && jq -e --arg v "$VERSION" '[.versions[]?.version] | index($v) != null' >/dev/null 2>&1 <<<"$listing"; then
-  log "marketplace: oselvar.oselvar-var $VERSION already published"
+  log "marketplace: varar.varar $VERSION already published"
   exit 0
 fi
 if [[ "${DRY_RUN:-0}" == "1" ]]; then
