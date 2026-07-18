@@ -4,6 +4,15 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+# Single source of truth for whether the Rust port ships to crates.io. While it
+# is 0 (parked), two targets stay in lock-step: 65-crates-io.sh reports OK
+# without publishing, AND 70-var-examples.sh omits the rust-* samples (their
+# `var-core` path dependency can't resolve in var-examples until the crates are
+# on crates.io — pinning it to an unpublished version would ship a broken
+# sample). Flip to 1 only once the crates are publishable — see the go-live
+# checklist in release/targets/65-crates-io.sh.
+CRATES_IO_ENABLED="${CRATES_IO_ENABLED:-0}"
+
 log()  { printf '\033[1;34m[release]\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m[release]\033[0m %s\n' "$*" >&2; }
 die()  { printf '\033[1;31m[release]\033[0m ERROR: %s\n' "$*" >&2; exit 1; }
