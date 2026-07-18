@@ -25,7 +25,7 @@ commits:
 	release/lint-commits.sh
 
 typescript:
-	cd typescript && pnpm install && pnpm build && pnpm check
+	cd typescript && pnpm install && pnpm build && pnpm check && pnpm --filter @oselvar/website... build
 
 python:
 	# Drop any .venv left pointing at an old checkout path (e.g. after a repo

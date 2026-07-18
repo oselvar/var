@@ -1,4 +1,6 @@
 ---
+import { langOfPath, SITE_LANGS, type SiteLang } from '../lib/site-lang'
+
 interface Props {
   // Show the line-number gutter for every File tab (default false).
   lineNumbers?: boolean
@@ -10,8 +12,39 @@ interface Props {
   // Milliseconds between keystrokes when a version button replays its edits.
   // Lower is faster. Only relevant for a File with ≥2 <Version> children.
   replayMs?: number
+  // The languages this editor must carry a code <File> for. Defaults to every
+  // site language, so adding a port to languages.json turns any <Editor> that
+  // forgot its files into a build error (see the completeness check below).
+  // Narrow it only for an editor that deliberately shows a subset.
+  langs?: ReadonlyArray<SiteLang>
 }
-const { lineNumbers = false, folding = false, define = true, replayMs = 100 } = Astro.props
+const {
+  lineNumbers = false,
+  folding = false,
+  define = true,
+  replayMs = 100,
+  langs = SITE_LANGS,
+} = Astro.props
+
+// Render the <File> children once so we can both check them and emit them.
+// Every File renders a `data-uri`; its extension maps to a SiteLang (or to
+// undefined for the language-neutral .md spec). A required language with no
+// tab would fall back silently at runtime (see editor-mount.ts) — here it
+// fails `astro build` instead, so a new port can't ship with empty examples.
+const slotHtml = await Astro.slots.render('default')
+const present = new Set<SiteLang>(
+  [...slotHtml.matchAll(/data-uri="([^"]*)"/g)]
+    .map((m) => langOfPath(m[1]))
+    .filter((lang): lang is SiteLang => lang !== undefined),
+)
+const missing = langs.filter((lang) => !present.has(lang))
+if (missing.length > 0) {
+  throw new Error(
+    `<Editor> is missing example files for: ${missing.join(', ')}. ` +
+      'Add a <File uri="…"> whose extension maps to each missing language ' +
+      '(the extensions live in languages.json).',
+  )
+}
 ---
 <!--
   not-content opts the whole subtree out of Starlight's sibling-spacing rule
@@ -30,7 +63,7 @@ const { lineNumbers = false, folding = false, define = true, replayMs = 100 } = 
     data-define={String(define)}
     data-replay-ms={String(replayMs)}
   ></div>
-  <div hidden><slot /></div>
+  <div hidden set:html={slotHtml} />
 </figure>
 <style>
   /*
