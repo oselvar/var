@@ -318,6 +318,17 @@ suite:
   `<Tabs syncKey="lang">` group across `reference/*` and `how-to/*` (and the
   get-started steps tabs), sourcing correct snippets from the new port's example
   and conformance step files. The label must match `languages.json` exactly.
+- **Front-page `<Editor>` examples**: the interactive editors in
+  `typescript/packages/website/src/components/examples/*.astro`
+  (DeepThought/Library/RomanNumerals) hard-code one `<File uri="…">` tab per
+  language, imported `?raw` from the `examples/<lang>-*` project. Add a `<File>`
+  (steps, plus the logic file where the other languages have one) for the new
+  language's `.<ext>` to each editor. This is a *distinct* surface from the docs
+  `<Tabs>` above and is the one most often forgotten — but `Editor.astro` now
+  asserts at build time that every port in `languages.json` has a code tab, so a
+  missing one is a hard build error (message names the language). It's caught in
+  the PR gate because `make typescript` / the CI `test` job build the website
+  (`pnpm --filter @oselvar/website... build`); run either to surface what you owe.
 - **Tree-sitter dialect** (the LSP/editor authoring surface — a *required*
   deliverable now, not deferred): create
   `typescript/packages/var-language/src/tree-sitter-dialects/<lang>.ts`
