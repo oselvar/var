@@ -1,0 +1,83 @@
+{
+  // Renovate config for the polyglot monorepo. Install the Mend "Renovate"
+  // GitHub App on this repo and it reads this file. See doc below and
+  // https://docs.renovatebot.com/configuration-options/
+  //
+  // Control model — you stay in charge of *when*:
+  //   * `dependencyDashboardApproval` means Renovate opens NO pull request on
+  //     its own. It scans, then lists every pending update as checkboxes on a
+  //     single "Dependency Dashboard" issue. A PR appears only after you tick
+  //     its box (or "select all"). That is the "update when I want" switch.
+  //   * `automerge` is off everywhere — every PR waits for you to merge it.
+  //   * `schedule` only limits when Renovate *scans/opens*; it never merges.
+  //
+  // Grouping — one PR per language, by package manager (so the per-port,
+  // path-filtered CI workflow in .github/workflows/ runs the right `make`
+  // gate on it). Matching by manager rather than path also sweeps in the
+  // per-language sample projects under examples/.
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":dependencyDashboardApproval",
+    ":semanticCommits", // PR titles follow Conventional Commits (this repo requires it)
+  ],
+  timezone: "Europe/Oslo",
+  schedule: ["* 0-6 * * 1"], // scan Monday early morning; you approve/merge anytime
+  automerge: false,
+  labels: ["dependencies"],
+  // Keep lockfiles fresh even when no dependency range changes (pnpm-lock,
+  // uv.lock, Gemfile.lock, Cargo.lock), as its own grouped, approval-gated PR.
+  lockFileMaintenance: {
+    enabled: true,
+    commitMessageAction: "refresh lockfiles",
+  },
+  packageRules: [
+    {
+      matchManagers: ["npm"],
+      groupName: "typescript dependencies",
+      commitMessagePrefix: "chore(ts):",
+    },
+    {
+      matchManagers: ["pep621", "pip_requirements", "pip-compile"],
+      groupName: "python dependencies",
+      commitMessagePrefix: "chore(py):",
+    },
+    {
+      matchManagers: ["maven", "gradle", "gradle-wrapper", "maven-wrapper"],
+      groupName: "java dependencies",
+      commitMessagePrefix: "chore(java):",
+    },
+    {
+      matchManagers: ["bundler"],
+      groupName: "ruby dependencies",
+      commitMessagePrefix: "chore(ruby):",
+    },
+    {
+      matchManagers: ["cargo"],
+      groupName: "rust dependencies",
+      commitMessagePrefix: "chore(rust):",
+    },
+    {
+      // Cross-cutting: CI action pins across all six workflows.
+      matchManagers: ["github-actions"],
+      groupName: "ci actions",
+      commitMessagePrefix: "ci:",
+    },
+    {
+      // Toolchain pins for mise: node, ruby, JDK, adr-tools, etc. Renovate's
+      // `asdf` manager reads the asdf-compatible `.tool-versions` files this
+      // repo uses today (mise reads the same format); the `mise` manager
+      // covers a future `mise.toml`. Both are matched so the group survives
+      // either layout.
+      matchManagers: ["asdf", "mise"],
+      groupName: "toolchains",
+      commitMessagePrefix: "chore(build):",
+    },
+  ],
+  // Security fixes still surface promptly and are labelled, but — like
+  // everything else — they wait for your dashboard approval before a PR opens.
+  vulnerabilityAlerts: {
+    labels: ["dependencies", "security"],
+  },
+}

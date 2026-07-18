@@ -12,10 +12,12 @@
 #                   # pinned in ruby/.tool-versions)
 #   make rust       # cargo fmt/clippy/test (var-core) + examples/rust-cargotest
 #   make coverage   # test with coverage in all four ports (reports below)
+#   make update-deps# bump every port's deps locally (Renovate does this as
+#                   # controlled per-language PRs — see renovate.json5)
 #
 # Each target runs the same gate as that port's CI workflow in .github/workflows/.
 
-.PHONY: check commits typescript python java ruby rust coverage changelog prepare release
+.PHONY: check commits typescript python java ruby rust coverage changelog prepare release update-deps
 
 check: commits typescript python java ruby rust
 
@@ -86,3 +88,19 @@ prepare:
 
 release:
 	release/release.sh
+
+# Local "bump everything now" escape hatch, complementing the Renovate app
+# (renovate.json5), which proposes controlled, per-language PRs on your
+# schedule. Use this when you want to upgrade every port in one go on your
+# machine. It only touches manifests/lockfiles — run `make check` afterwards
+# to prove the tree is still green, then commit. Toolchain pins in
+# .tool-versions (managed by mise) are intentionally left to you / Renovate.
+# Notes: pnpm --latest and mvn use-latest-releases cross semver majors; uv,
+# bundler and cargo stay within declared constraints (widen a range by hand
+# for a major). The examples/ sample projects are left to Renovate.
+update-deps:
+	cd typescript && pnpm update -r --latest && pnpm install
+	cd python && uv lock --upgrade
+	cd java && mvn --batch-mode versions:use-latest-releases versions:update-properties -DgenerateBackupPoms=false
+	cd ruby && bundle update
+	cd rust && cargo update
