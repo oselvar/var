@@ -1,6 +1,6 @@
 package com.oselvar.varkt
 
-import com.oselvar.var.junit.ConfigBridge
+import com.oselvar.`var`.junit.ConfigBridge
 import java.nio.file.Files
 import java.nio.file.Path
 import org.junit.jupiter.api.Assertions.assertEquals

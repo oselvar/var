@@ -24,7 +24,7 @@ jobs:
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2'
+          ruby-version: '4.0.6'
 
       # The six-gem workspace: conformance harness (four artifacts × 15 bundles +
       # drift/hash units + the config corpus) + the functional-core purity gate.

@@ -85,8 +85,12 @@ TS_JSON=$(port_json ts     "TypeScript"        "$(lcov_totals typescript/coverag
 JVM_JSON=$(port_json jvm   "Java / Kotlin"     "$(jacoco_totals java/*/target/site/jacoco/jacoco.csv)")
 PY_JSON=$(port_json python "Python"            "$(lcov_totals python/coverage.lcov)")
 RB_JSON=$(port_json ruby   "Ruby"              "$(lcov_totals ruby/coverage/lcov.info)")
+# Rust has no coverage report yet (make coverage doesn't measure it), so this
+# reads a not-yet-existent lcov and renders n/a — the row is still emitted so
+# the port carries its build badge. Wire rust coverage here the day it lands.
+RUST_JSON=$(port_json rust "Rust"              "$(lcov_totals rust/coverage/lcov.info)")
 
-jq -n --slurpfile a <(printf '%s\n%s\n%s\n%s\n' "$TS_JSON" "$JVM_JSON" "$PY_JSON" "$RB_JSON") \
+jq -n --slurpfile a <(printf '%s\n%s\n%s\n%s\n%s\n' "$TS_JSON" "$JVM_JSON" "$PY_JSON" "$RB_JSON" "$RUST_JSON") \
   '$a' > "$JSON_OUT"
 
 echo "Wrote $JSON_OUT"
@@ -116,15 +120,31 @@ badge() {
   fi
 }
 
+# build_badge <port-id> -> a live GitHub Actions status badge for that port's
+# CI workflow (auto-updates from the Actions API; no regeneration needed). Maps
+# the coverage port id to its workflow file in .github/workflows/.
+build_badge() {
+  local wf
+  case "$1" in
+    ts)     wf=typescript ;;
+    jvm)    wf=java ;;
+    python) wf=python ;;
+    ruby)   wf=ruby ;;
+    rust)   wf=rust ;;
+    *)      wf="$1" ;;
+  esac
+  printf '[![Build](https://github.com/oselvar/var/actions/workflows/%s.yml/badge.svg?branch=main)](https://github.com/oselvar/var/actions/workflows/%s.yml)' "$wf" "$wf"
+}
+
 TABLE=$(mktemp)
 {
-  echo '| Port | Line coverage | Branch coverage |'
-  echo '| --- | --- | --- |'
+  echo '| Port | Build | Line coverage | Branch coverage |'
+  echo '| --- | --- | --- | --- |'
   jq -r '.[] | [.port, .label,
                 (.lines.pct    // "null" | tostring),
                 (.branches.pct // "null" | tostring)] | @tsv' "$JSON_OUT" \
   | while IFS=$'\t' read -r _id label lpct bpct; do
-      echo "| $label | $(badge "$lpct") | $(badge "$bpct") |"
+      echo "| $label | $(build_badge "$_id") | $(badge "$lpct") | $(badge "$bpct") |"
     done
 } > "$TABLE"
 

@@ -31,6 +31,10 @@ EXEMPT=(
   970798caee2f4e3d85ff73dd0adc37ad6560e83f # Upgrade, edit links
   d7585cf409b0f9e7076ad0f27e22a3d07d2222ed # format (merged via PR #13)
   9b8d7c6f810340a410db13261ffa9a44c9a5cb31 # Update TODOs (non-CC, already on main)
+  94860c91840f857e958090cf3a015794a5ab55e7 # Fix grammatical error in oaths.md (merged via PR #1)
+  03a584045b20df3e6a7c1cd151911784d9fcb64b # Words (merged via PR #21)
+  e0d3b835e76199fdcacfb422def8a1ee3d8ad524 # Words (merged via PR #21)
+  7c950391b247e135db06ec9d6a723175dff7b9fe # Words (merged via PR #22)
 )
 
 fail=0

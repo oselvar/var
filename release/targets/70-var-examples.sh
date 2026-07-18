@@ -41,6 +41,14 @@ find "$DEST" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
 # project ignores must not be synced. pnpm-workspace.yaml is monorepo-only
 # plumbing (lets `pnpm test` run inside typescript-vitest, see the comment
 # there); in var-examples the deps are real versions and pnpm's defaults work.
+# While crates.io publishing is parked, omit the rust-* samples: var-core isn't
+# on crates.io, so a synced rust sample couldn't resolve it (its path source is
+# monorepo-only). CRATES_IO_ENABLED (lib.sh) flips this and the pin block below
+# together — see 65-crates-io.sh's go-live checklist.
+rust_exclude=()
+if [[ "$CRATES_IO_ENABLED" != "1" ]]; then
+  rust_exclude+=(--exclude 'rust-*/')
+fi
 rsync -a --copy-links \
   --exclude 'node_modules/' \
   --exclude 'pnpm-workspace.yaml' \
@@ -54,6 +62,7 @@ rsync -a --copy-links \
   --exclude 'uv.lock' \
   --exclude 'Gemfile.lock' \
   --exclude 'Cargo.lock' \
+  "${rust_exclude[@]}" \
   examples/ "$DEST"/
 
 # Pin the JVM samples to the released Maven Central artifacts (idempotent even
@@ -86,12 +95,14 @@ perl -pi -e "s/\"(pytest-var|oselvar-var[\\w-]*)\"/\"\$1==$VERSION\"/" \
 perl -pi -e "s|, path: \"\\.\\./\\.\\./ruby/packages/[\\w-]+\"|, \"$VERSION\"|" \
   "$DEST"/ruby-*/Gemfile
 
-# Pin the Rust sample to the released crates.io version: swap the var-core
-# path dependency for a version constraint. Inert until var-core is published
-# to crates.io (the Rust port has no release target yet); kept here so the
-# sync stays correct the moment it is.
-perl -pi -e "s|var-core = \{ path = \"\\.\\./\\.\\./rust/var-core\" \}|var-core = \"$VERSION\"|" \
-  "$DEST"/rust-*/Cargo.toml
+# Pin the Rust sample to the released crates.io version: swap the var-core path
+# dependency for a version constraint. Only runs once crates.io publishing is
+# live (CRATES_IO_ENABLED=1); while parked the rust-* samples aren't synced at
+# all (see the rsync exclude above), so this would have nothing to rewrite.
+if [[ "$CRATES_IO_ENABLED" == "1" ]]; then
+  perl -pi -e "s|var-core = \{ path = \"\\.\\./\\.\\./rust/var-core\" \}|var-core = \"$VERSION\"|" \
+    "$DEST"/rust-*/Cargo.toml
+fi
 
 git -C "$DEST" add -A
 if git -C "$DEST" diff --cached --quiet; then
