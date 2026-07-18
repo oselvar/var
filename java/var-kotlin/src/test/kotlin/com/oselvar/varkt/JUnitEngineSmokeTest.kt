@@ -1,5 +1,6 @@
 package com.oselvar.varkt
 
+import com.oselvar.var.junit.ConfigBridge
 import java.nio.file.Files
 import java.nio.file.Path
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -33,12 +34,9 @@ class JUnitEngineSmokeTest {
                 """
                     .trimIndent(),
             )
-            // "var.config.root" is var-junit's ConfigBridge.CONFIG_ROOT_KEY, package-private
-            // to com.oselvar.var.junit -- this module is a separate JAR, so the literal must be
-            // duplicated here rather than referenced.
             EngineTestKit.engine("var")
                 .selectors(selectFile(spec.toFile()))
-                .configurationParameter("var.config.root", dir.toRealPath().toString())
+                .configurationParameter(ConfigBridge.CONFIG_ROOT_KEY, dir.toRealPath().toString())
                 .execute()
         }
 

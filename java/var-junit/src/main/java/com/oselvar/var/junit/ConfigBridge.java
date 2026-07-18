@@ -14,7 +14,12 @@ import org.junit.platform.engine.ConfigurationParameters;
  */
 public final class ConfigBridge {
 
-    static final String CONFIG_ROOT_KEY = "var.config.root";
+    /**
+     * The JUnit Platform configuration-parameter key naming the directory that holds
+     * {@code var.config.json}. Public so other ports' engines and tests (e.g. var-kotlin,
+     * var-kotest) reference this constant instead of duplicating the literal string.
+     */
+    public static final String CONFIG_ROOT_KEY = "var.config.root";
 
     private ConfigBridge() {}
 
