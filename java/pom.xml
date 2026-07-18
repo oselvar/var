@@ -55,9 +55,9 @@
          Versions confirmed on repo1.maven.org (maven-metadata.xml) 2026-07-01:
          kotlin 2.4.0 = latest stable (2.4.20-Beta1 excluded), coroutines 1.11.0,
          kotest 6.2.1. -->
-    <kotlin.version>2.4.0</kotlin.version>
+    <kotlin.version>2.4.10</kotlin.version>
     <kotlinx-coroutines.version>1.11.0</kotlinx-coroutines.version>
-    <kotest.version>6.2.1</kotest.version>
+    <kotest.version>6.2.2</kotest.version>
     <!-- io.cucumber:cucumber-expressions 20.0.0 — confirmed on Maven Central
          (repo1.maven.org maven-metadata.xml <latest>/<release> both 20.0.0,
          lastUpdated 2026-06-11) via direct repo query, not the search.maven.org
@@ -70,7 +70,7 @@
          is now the PREVIOUS generation — JUnit 6 unifies Platform+Jupiter+Vintage under
          one version stream and requires Java 17+ (this project already targets 21).
          "Latest JUnit system" (the sub-project-2 goal — see ADR 0003) means 6.x. -->
-    <junit.version>6.1.1</junit.version>
+    <junit.version>6.1.2</junit.version>
   </properties>
 
   <dependencyManagement>
@@ -107,7 +107,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.5.2</version>
+          <version>3.5.6</version>
         </plugin>
       </plugins>
     </pluginManagement>
