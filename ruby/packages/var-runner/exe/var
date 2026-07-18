@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'oselvar/var/runner/cli'
+require 'varar/runner/cli'
 
-exit Oselvar::Var::Runner::CLI.main(ARGV)
+exit Varar::Runner::CLI.main(ARGV)

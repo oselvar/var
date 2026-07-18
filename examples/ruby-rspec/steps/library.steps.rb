@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'date'
-require 'oselvar/var'
+require 'varar'
 require_relative '../lib/library'
 
 # June 6, 2026 → Date; and the inverse (no day-padding flags — not portable).

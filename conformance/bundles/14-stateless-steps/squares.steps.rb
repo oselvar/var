@@ -1,4 +1,4 @@
-require "oselvar/var"
+require "varar"
 
 # No initial state: these steps are pure, so steps is called without state and
 # handlers get an empty hash.

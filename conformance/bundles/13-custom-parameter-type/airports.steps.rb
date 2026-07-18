@@ -1,4 +1,4 @@
-require "oselvar/var"
+require "varar"
 
 steps do
   # Custom {airport} parameter type: IATA code, lowercased by the parse function.

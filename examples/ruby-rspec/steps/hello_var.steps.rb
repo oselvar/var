@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'oselvar/var'
+require 'varar'
 
 steps(greeting: '', result: 0) do
   stimulus('I greet {string}') { |_state, name| { greeting: "Hello, #{name}!" } }

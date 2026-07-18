@@ -1,34 +1,32 @@
 # frozen_string_literal: true
 
-module Oselvar
-  module Var
-    # The pure functional core: parse, match, plan, execute, diffs, drift, and
-    # the conformance projections. No filesystem, network, globals, or time.
-    module Core
-      VERSION = '0.4.2'
-    end
+module Varar
+  # The pure functional core: parse, match, plan, execute, diffs, drift, and
+  # the conformance projections. No filesystem, network, globals, or time.
+  module Core
+    VERSION = '0.4.2'
   end
 end
 
-require 'oselvar/var/core/span'
-require 'oselvar/var/core/ast'
-require 'oselvar/var/core/table_cells'
-require 'oselvar/var/core/scanner'
-require 'oselvar/var/core/structurer'
-require 'oselvar/var/core/parse'
-require 'oselvar/var/core/step_role'
-require 'oselvar/var/core/registry'
-require 'oselvar/var/core/sentences'
-require 'oselvar/var/core/diagnostics'
-require 'oselvar/var/core/cell_diff'
-require 'oselvar/var/core/matcher'
-require 'oselvar/var/core/plan'
-require 'oselvar/var/core/deep_freeze'
-require 'oselvar/var/core/doc_string_diff'
-require 'oselvar/var/core/param_diff'
-require 'oselvar/var/core/failure_anchor'
-require 'oselvar/var/core/execute'
-require 'oselvar/var/core/hash'
-require 'oselvar/var/core/drift'
-require 'oselvar/var/core/canonical_json'
-require 'oselvar/var/core/conformance'
+require 'varar/core/span'
+require 'varar/core/ast'
+require 'varar/core/table_cells'
+require 'varar/core/scanner'
+require 'varar/core/structurer'
+require 'varar/core/parse'
+require 'varar/core/step_role'
+require 'varar/core/registry'
+require 'varar/core/sentences'
+require 'varar/core/diagnostics'
+require 'varar/core/cell_diff'
+require 'varar/core/matcher'
+require 'varar/core/plan'
+require 'varar/core/deep_freeze'
+require 'varar/core/doc_string_diff'
+require 'varar/core/param_diff'
+require 'varar/core/failure_anchor'
+require 'varar/core/execute'
+require 'varar/core/hash'
+require 'varar/core/drift'
+require 'varar/core/canonical_json'
+require 'varar/core/conformance'

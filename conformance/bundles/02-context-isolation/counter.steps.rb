@@ -1,4 +1,4 @@
-require "oselvar/var"
+require "varar"
 
 steps(count: 0) do
   stimulus("I increment") { |state| { count: state[:count] + 1 } }

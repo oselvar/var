@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'oselvar/var'
+require 'varar'
 require_relative '../lib/roman_numerals'
 
 steps do

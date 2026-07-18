@@ -1,4 +1,4 @@
-require "oselvar/var"
+require "varar"
 
 roman = { 1 => "I", 4 => "IV", 9 => "IX", 40 => "XL" }
 

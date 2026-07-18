@@ -1,4 +1,4 @@
-require "oselvar/var"
+require "varar"
 
 steps do
   stimulus("I divide {int} by {int}") do |_state, _a, b|

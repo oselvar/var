@@ -1,13 +1,11 @@
 # frozen_string_literal: true
 
-require 'oselvar/var/core'
-require 'oselvar/var/internal'
-require 'oselvar/var/dsl'
+require 'varar/core'
+require 'varar/internal'
+require 'varar/dsl'
 
-module Oselvar
+module Varar
   # The author facade: `steps` (top-level DSL) → [param, stimulus, sensor],
   # backed by the module-scope accumulator in Internal.
-  module Var
-    VERSION = '0.4.2'
-  end
+  VERSION = '0.4.2'
 end

@@ -4,12 +4,12 @@ source 'https://rubygems.org'
 
 # The six workspace gems, wired via path so they resolve against the local
 # source (the release sync rewrites these to published versions).
-gem 'oselvar-var', path: 'packages/var'
-gem 'oselvar-var-config', path: 'packages/var-config'
-gem 'oselvar-var-core', path: 'packages/var-core'
-gem 'oselvar-var-minitest', path: 'packages/var-minitest'
-gem 'oselvar-var-rspec', path: 'packages/var-rspec'
-gem 'oselvar-var-runner', path: 'packages/var-runner'
+gem 'varar', path: 'packages/var'
+gem 'varar-config', path: 'packages/var-config'
+gem 'varar-core', path: 'packages/var-core'
+gem 'varar-minitest', path: 'packages/var-minitest'
+gem 'varar-rspec', path: 'packages/var-rspec'
+gem 'varar-runner', path: 'packages/var-runner'
 
 group :development, :test do
   gem 'minitest', '~> 5.20'

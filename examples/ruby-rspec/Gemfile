@@ -4,11 +4,11 @@ source "https://rubygems.org"
 
 # During development these resolve against the local monorepo build. The release
 # sync (release/targets/60-var-examples.sh) rewrites them to the published
-# versions, e.g. gem "oselvar-var-rspec", "~> 0.3".
-gem "oselvar-var-core", path: "../../ruby/packages/var-core"
-gem "oselvar-var", path: "../../ruby/packages/var"
-gem "oselvar-var-config", path: "../../ruby/packages/var-config"
-gem "oselvar-var-runner", path: "../../ruby/packages/var-runner"
-gem "oselvar-var-rspec", path: "../../ruby/packages/var-rspec"
+# versions, e.g. gem "varar-rspec", "~> 0.3".
+gem "varar-core", path: "../../ruby/packages/var-core"
+gem "varar", path: "../../ruby/packages/var"
+gem "varar-config", path: "../../ruby/packages/var-config"
+gem "varar-runner", path: "../../ruby/packages/var-runner"
+gem "varar-rspec", path: "../../ruby/packages/var-rspec"
 
 gem "rspec", "~> 3.13"

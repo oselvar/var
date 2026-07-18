@@ -1,41 +1,41 @@
 PATH
   remote: packages/var-config
   specs:
-    oselvar-var-config (0.4.2)
+    varar-config (0.4.2)
 
 PATH
   remote: packages/var-core
   specs:
-    oselvar-var-core (0.4.2)
+    varar-core (0.4.2)
       cucumber-cucumber-expressions (= 20.0.0)
 
 PATH
   remote: packages/var-minitest
   specs:
-    oselvar-var-minitest (0.4.2)
+    varar-minitest (0.4.2)
       minitest (~> 5.20)
-      oselvar-var-runner (= 0.4.2)
+      varar-runner (= 0.4.2)
 
 PATH
   remote: packages/var-rspec
   specs:
-    oselvar-var-rspec (0.4.2)
-      oselvar-var-runner (= 0.4.2)
+    varar-rspec (0.4.2)
       rspec-core (~> 3.13)
+      varar-runner (= 0.4.2)
 
 PATH
   remote: packages/var-runner
   specs:
-    oselvar-var-runner (0.4.2)
-      oselvar-var (= 0.4.2)
-      oselvar-var-config (= 0.4.2)
+    varar-runner (0.4.2)
+      varar (= 0.4.2)
+      varar-config (= 0.4.2)
 
 PATH
   remote: packages/var
   specs:
-    oselvar-var (0.4.2)
+    varar (0.4.2)
       cucumber-cucumber-expressions (= 20.0.0)
-      oselvar-var-core (= 0.4.2)
+      varar-core (= 0.4.2)
 
 GEM
   remote: https://rubygems.org/
@@ -111,12 +111,6 @@ PLATFORMS
 
 DEPENDENCIES
   minitest (~> 5.20)
-  oselvar-var!
-  oselvar-var-config!
-  oselvar-var-core!
-  oselvar-var-minitest!
-  oselvar-var-rspec!
-  oselvar-var-runner!
   rake
   rspec (~> 3.13)
   rubocop (~> 1.60)
@@ -124,6 +118,12 @@ DEPENDENCIES
   rubocop-rspec
   simplecov (~> 0.22)
   simplecov-lcov (~> 0.8)
+  varar!
+  varar-config!
+  varar-core!
+  varar-minitest!
+  varar-rspec!
+  varar-runner!
 
 BUNDLED WITH
    2.4.10

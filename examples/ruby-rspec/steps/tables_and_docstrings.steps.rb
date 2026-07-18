@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'oselvar/var'
+require 'varar'
 
 steps do
   # Whole-table mode: the table arrives as an array of rows (header row first).

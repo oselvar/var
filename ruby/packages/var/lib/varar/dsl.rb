@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require 'oselvar/var/internal'
+require 'varar/internal'
 
 # `steps` as a top-level method, available in any step file after
-# `require "oselvar/var"` (idiomatic for BDD step DSLs, like Cucumber-Ruby's
+# `require "varar"` (idiomatic for BDD step DSLs, like Cucumber-Ruby's
 # Given/When/Then). It takes a block in which bare `stimulus`, `sensor` and
 # `param` register the file's steps:
 #
@@ -29,7 +29,7 @@ module Kernel
         state || {}
       end
     factory = initial.is_a?(Proc) ? initial : -> { initial }
-    builder = Oselvar::Var::Internal.register(factory, caller_locations(1, 1).first.path)
+    builder = Varar::Internal.register(factory, caller_locations(1, 1).first.path)
     builder.instance_eval(&block) if block
     nil
   end
