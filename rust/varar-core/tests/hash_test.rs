@@ -1,6 +1,6 @@
 //! Port of the FNV-1a vectors from `DriftTest.java` / `hash.test.ts`.
 
-use var_core::hash::hash_source;
+use varar_core::hash::hash_source;
 
 #[test]
 fn hash_matches_the_typescript_vectors() {

@@ -1,10 +1,10 @@
 //! Port of `MatcherTest.java` / `matcher.test.ts`.
 
-use var_core::handler::Handler;
-use var_core::matcher::{ResolvedSteps, find_hits, resolve_hits};
-use var_core::offsets::{utf16_index, utf16_len, utf16_slice};
-use var_core::registry::{Registry, add_step, create_registry};
-use var_core::value::Value;
+use varar_core::handler::Handler;
+use varar_core::matcher::{ResolvedSteps, find_hits, resolve_hits};
+use varar_core::offsets::{utf16_index, utf16_len, utf16_slice};
+use varar_core::registry::{Registry, add_step, create_registry};
+use varar_core::value::Value;
 
 fn reg() -> Registry {
     let r = create_registry();
@@ -133,7 +133,7 @@ fn param_spans_use_utf16_offsets_across_an_astral_character_no_manual_conversion
 #[test]
 fn a_custom_type_with_capture_groups_passes_each_group_to_parse() {
     use std::rc::Rc;
-    use var_core::registry::define_parameter_type;
+    use varar_core::registry::define_parameter_type;
     let r = define_parameter_type(
         &create_registry(),
         "range",
@@ -154,7 +154,7 @@ fn a_custom_type_with_capture_groups_passes_each_group_to_parse() {
 #[test]
 fn a_custom_type_without_groups_still_receives_the_whole_match() {
     use std::rc::Rc;
-    use var_core::registry::define_parameter_type;
+    use varar_core::registry::define_parameter_type;
     let r = define_parameter_type(
         &create_registry(),
         "airport",

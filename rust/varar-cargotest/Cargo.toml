@@ -1,15 +1,15 @@
 [package]
-name = "var-cargotest"
+name = "varar-cargotest"
 version = "0.0.0"
 edition = "2024"
 publish = false
 
 [dependencies]
-var-core = { path = "../var-core" }
-var-config = { path = "../var-config" }
-var-runner = { path = "../var-runner" }
+varar-core = { path = "../varar-core" }
+varar-config = { path = "../varar-config" }
+varar-runner = { path = "../varar-runner" }
 libtest-mimic = "0.8"
 
 [lib]
-name = "var_cargotest"
+name = "varar_cargotest"
 path = "src/lib.rs"

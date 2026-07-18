@@ -1,7 +1,7 @@
 //! Rust sibling of `counter.steps.ts` (bundle `02-context-isolation`).
 
 use std::collections::BTreeMap;
-use var::{HandlerError, Registry, Steps, Value};
+use varar::{HandlerError, Registry, Steps, Value};
 
 fn count_of(state: &Value) -> i64 {
     match state {

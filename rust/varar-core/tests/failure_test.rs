@@ -3,12 +3,12 @@
 //! regex-escape case becomes an exact path-match check. The "message/stack is a
 //! String" type assertions are dropped (type-level in Rust).
 
-use var_core::cell_diff::CellDiff;
-use var_core::doc_string_diff::DocStringDiff;
-use var_core::error::{FailureLocation, HandlerError, StepError, StepFailure};
-use var_core::failure::to_failure;
-use var_core::result::CellFailure;
-use var_core::span::Span;
+use varar_core::cell_diff::CellDiff;
+use varar_core::doc_string_diff::DocStringDiff;
+use varar_core::error::{FailureLocation, HandlerError, StepError, StepFailure};
+use varar_core::failure::to_failure;
+use varar_core::result::CellFailure;
+use varar_core::span::Span;
 
 fn located(error: StepError, path: &str, line: usize) -> StepFailure {
     StepFailure {

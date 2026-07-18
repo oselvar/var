@@ -3,7 +3,7 @@
 //! and writes the raw text.
 
 use std::path::{Path, PathBuf};
-use var_core::drift::BaselineStore;
+use varar_core::drift::BaselineStore;
 
 pub struct FileBaselineStore {
     path: PathBuf,

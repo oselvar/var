@@ -3,13 +3,13 @@
 mod common;
 
 use common::{vlist, vmap};
-use var_core::ast::{Block, Table};
-use var_core::cell_diff::{CellDiff, RowCheck, compare_row, compare_table};
-use var_core::error::StepError;
-use var_core::offsets::utf16_slice;
-use var_core::parse::parse;
-use var_core::span::Span;
-use var_core::value::Value;
+use varar_core::ast::{Block, Table};
+use varar_core::cell_diff::{CellDiff, RowCheck, compare_row, compare_table};
+use varar_core::error::StepError;
+use varar_core::offsets::utf16_slice;
+use varar_core::parse::parse;
+use varar_core::span::Span;
+use varar_core::value::Value;
 
 const SPAN: Span = Span {
     start_offset: 0,
@@ -85,7 +85,7 @@ fn cell_mismatch_carries_the_cells_and_is_detectable() {
     let err = StepError::CellMismatch(vec![CellDiff::new("score", SPAN, "9", "6", false)]);
     assert!(err.as_cell_mismatch().is_some());
     assert!(
-        StepError::Handler(var_core::error::HandlerError::new("x"))
+        StepError::Handler(varar_core::error::HandlerError::new("x"))
             .as_cell_mismatch()
             .is_none()
     );

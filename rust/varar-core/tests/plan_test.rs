@@ -3,15 +3,15 @@
 mod common;
 
 use common::vmap;
-use var_core::cell_diff::RowCheck;
-use var_core::diagnostics::DiagnosticCode;
-use var_core::handler::Handler;
-use var_core::offsets::utf16_slice;
-use var_core::parse::parse;
-use var_core::plan::plan;
-use var_core::registry::{Registry, add_step, create_registry};
-use var_core::step_kind::StepKind;
-use var_core::value::Value;
+use varar_core::cell_diff::RowCheck;
+use varar_core::diagnostics::DiagnosticCode;
+use varar_core::handler::Handler;
+use varar_core::offsets::utf16_slice;
+use varar_core::parse::parse;
+use varar_core::plan::plan;
+use varar_core::registry::{Registry, add_step, create_registry};
+use varar_core::step_kind::StepKind;
+use varar_core::value::Value;
 
 fn reg() -> Registry {
     let r = create_registry();
@@ -56,7 +56,7 @@ fn step(r: &Registry, expr: &str, file: &str, line: usize) -> Registry {
     .unwrap()
 }
 
-fn step_texts(ex: &var_core::plan::PlannedExample) -> Vec<String> {
+fn step_texts(ex: &varar_core::plan::PlannedExample) -> Vec<String> {
     ex.steps.iter().map(|s| s.text.clone()).collect()
 }
 

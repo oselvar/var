@@ -3,11 +3,11 @@
 //! immutability clause is dropped (Rust values are immutable).
 
 use std::rc::Rc;
-use var_core::error::RegistryError;
-use var_core::handler::Handler;
-use var_core::registry::{CustomParameterType, add_step, create_registry, define_parameter_type};
-use var_core::step_kind::StepKind;
-use var_core::value::Value;
+use varar_core::error::RegistryError;
+use varar_core::handler::Handler;
+use varar_core::registry::{CustomParameterType, add_step, create_registry, define_parameter_type};
+use varar_core::step_kind::StepKind;
+use varar_core::value::Value;
 
 #[test]
 fn create_registry_returns_an_empty_registry_with_default_parameter_types() {

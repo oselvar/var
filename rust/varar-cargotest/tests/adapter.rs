@@ -1,11 +1,11 @@
 //! Unit tests for the adapter's per-example runner (the libtest binding itself
 //! is exercised end-to-end by the sample project in examples/rust-cargotest).
 
-use var_cargotest::run_one;
-use var_core::handler::Handler;
-use var_core::registry::{Registry, add_step, create_registry};
-use var_core::step_kind::StepKind;
-use var_core::value::Value;
+use varar_cargotest::run_one;
+use varar_core::handler::Handler;
+use varar_core::registry::{Registry, add_step, create_registry};
+use varar_core::step_kind::StepKind;
+use varar_core::value::Value;
 
 fn build_registry() -> Registry {
     add_step(

@@ -1,6 +1,6 @@
 //! Rust sibling of `cukes.steps.ts` (bundle `10-error-fence-without-step`).
 
-use var::{Registry, Steps, Value};
+use varar::{Registry, Steps, Value};
 
 pub fn register(r: Registry) -> Registry {
     let mut s = Steps::from_registry(r);

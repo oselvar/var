@@ -1,8 +1,8 @@
 //! Port of `StructurerTest.java` / `structurer.test.ts`.
 
-use var_core::ast::Block;
-use var_core::scanner::scan;
-use var_core::structurer::structure;
+use varar_core::ast::Block;
+use varar_core::scanner::scan;
+use varar_core::structurer::structure;
 
 #[test]
 fn every_paragraph_becomes_a_candidate_example_scoped_by_the_headings_above_it() {
@@ -81,7 +81,7 @@ fn orphan_tables_and_fences_are_recorded_on_the_var_doc() {
     assert_eq!(1, var_doc.orphan_attachments.len());
     assert!(matches!(
         var_doc.orphan_attachments[0],
-        var_core::ast::TableOrFence::Table(_)
+        varar_core::ast::TableOrFence::Table(_)
     ));
 }
 

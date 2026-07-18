@@ -3,10 +3,10 @@
 
 use regex::Regex;
 use std::path::{Path, PathBuf};
-use var_config::VarConfig;
+use varar_config::VarConfig;
 
 /// Translate a glob (`/**/`, `/**`, `**/`, `**`, `*`, `?`) to an anchored regex.
-/// Port of `var_runner.discovery._glob_to_regex`.
+/// Port of `varar_runner.discovery._glob_to_regex`.
 pub fn glob_to_regex(pattern: &str) -> Regex {
     let chars: Vec<char> = pattern.chars().collect();
     let n = chars.len();

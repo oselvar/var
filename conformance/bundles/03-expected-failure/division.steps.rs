@@ -1,6 +1,6 @@
 //! Rust sibling of `division.steps.ts` (bundle `03-expected-failure`).
 
-use var::{HandlerError, Registry, Steps, Value};
+use varar::{HandlerError, Registry, Steps, Value};
 
 pub fn register(r: Registry) -> Registry {
     let mut s = Steps::from_registry(r);

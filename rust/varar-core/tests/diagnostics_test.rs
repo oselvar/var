@@ -1,8 +1,10 @@
 //! Port of `DiagnosticsTest.java`. Java's `assertSame` (identity) becomes value
 //! equality — [`Span`] is a `Copy` value type.
 
-use var_core::diagnostics::{DiagnosticCode, Severity, ambiguous_match, error_fence_without_step};
-use var_core::span::Span;
+use varar_core::diagnostics::{
+    DiagnosticCode, Severity, ambiguous_match, error_fence_without_step,
+};
+use varar_core::span::Span;
 
 const SPAN: Span = Span {
     start_offset: 0,

@@ -1,6 +1,6 @@
-//! `var-config` — the strict, fail-loud reader for `var.config.json`.
+//! `varar-config` — the strict, fail-loud reader for `var.config.json`.
 //!
-//! Port of `@oselvar/var-config` / Python `var_config`. The canonical shape is
+//! Port of `@varar/config` / Python `var_config`. The canonical shape is
 //! `{ docs: { include, exclude }, steps, snippets, scannerPlugins }`; every key
 //! is optional and defaults to empty. A missing file yields the empty config
 //! (tools no-op); malformed JSON, wrong types, or unknown keys fail loudly with

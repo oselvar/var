@@ -1,5 +1,5 @@
 //! Source positions/ranges anchored to UTF-16 code-unit offsets (1-based
-//! line/column). Port of `var-core/src/span.ts` / `Span.java`.
+//! line/column). Port of `varar-core/src/span.ts` / `Span.java`.
 
 /// A source range `[start_offset, end_offset)` in UTF-16 code units, with
 /// 1-based line/column at each end.

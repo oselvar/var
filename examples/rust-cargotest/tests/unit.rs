@@ -4,9 +4,9 @@
 
 use example::steps::{build_registry, context_value};
 use std::path::Path;
-use var_cargotest::run_one;
-use var_config::read_var_config;
-use var_runner::find_specs;
+use varar_cargotest::run_one;
+use varar_config::read_var_config;
+use varar_runner::find_specs;
 
 fn root() -> &'static Path {
     Path::new(env!("CARGO_MANIFEST_DIR"))

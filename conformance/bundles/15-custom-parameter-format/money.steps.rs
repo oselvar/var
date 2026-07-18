@@ -4,7 +4,7 @@
 //! back in document notation, so the pinned mismatch reads `£2.60` / `£2.55`.
 
 use std::rc::Rc;
-use var::{FormatFn, ParseFn, Registry, Steps, Value};
+use varar::{FormatFn, ParseFn, Registry, Steps, Value};
 
 pub fn register(r: Registry) -> Registry {
     let mut s = Steps::from_registry(r);

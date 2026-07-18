@@ -10,7 +10,7 @@ use crate::library_example::{
     Date, FEE_PER_DAY, format_date, format_money, late_fee, may_borrow, parse_date, parse_money,
 };
 use std::rc::Rc;
-use var::{FormatFn, ParseFn, Registry, Steps, Value};
+use varar::{FormatFn, ParseFn, Registry, Steps, Value};
 
 fn date_value(d: Date) -> Value {
     vmap(vec![
@@ -53,7 +53,7 @@ pub fn register(r: Registry) -> Registry {
         date_format,
     );
 
-    // £2.50 and 50p, both as pennies. var-core's matcher compiles with the
+    // £2.50 and 50p, both as pennies. varar-core's matcher compiles with the
     // `regex` crate, which has no lookahead — so this is the corpus-covering
     // subset of cucumber-expressions' float regexp (no scientific notation, no
     // empty-match guards), not the exact Python pattern.

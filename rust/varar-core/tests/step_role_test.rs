@@ -1,7 +1,7 @@
 //! Port of `StepRoleTest.java` / `step-role.test.ts`.
 
-use var_core::step_kind::StepKind;
-use var_core::step_role::{Neighbours, infer_step_role};
+use varar_core::step_kind::StepKind;
+use varar_core::step_role::{Neighbours, infer_step_role};
 
 #[test]
 fn no_step_after_the_selection_means_sensor_expectation_last() {

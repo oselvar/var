@@ -1,6 +1,6 @@
 //! Rust sibling of `boom.steps.ts` (bundle `09-expected-message-mismatch`).
 
-use var::{HandlerError, Registry, Steps, Value};
+use varar::{HandlerError, Registry, Steps, Value};
 
 pub fn register(r: Registry) -> Registry {
     let mut s = Steps::from_registry(r);

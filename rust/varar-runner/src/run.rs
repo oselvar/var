@@ -1,12 +1,12 @@
 //! Planning and running examples, plus the adapter display-name rule.
 
 use std::collections::HashMap;
-use var_core::error::StepFailure;
-use var_core::execute::{ExecutePorts, collect_examples};
-use var_core::parse::parse;
-use var_core::plan::{ExecutionPlan, plan};
-use var_core::registry::Registry;
-use var_core::value::Value;
+use varar_core::error::StepFailure;
+use varar_core::execute::{ExecutePorts, collect_examples};
+use varar_core::parse::parse;
+use varar_core::plan::{ExecutionPlan, plan};
+use varar_core::registry::Registry;
+use varar_core::value::Value;
 
 /// Parse + plan one spec.
 pub fn plan_spec(name: &str, source: &str, registry: &Registry) -> ExecutionPlan {

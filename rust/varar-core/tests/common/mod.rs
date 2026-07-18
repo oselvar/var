@@ -2,7 +2,7 @@
 #![allow(dead_code)]
 
 use std::collections::BTreeMap;
-use var_core::value::Value;
+use varar_core::value::Value;
 
 /// Builds a [`Value::Map`] from `(key, value)` pairs (test ergonomics for Java's
 /// `Map.of(...)`).

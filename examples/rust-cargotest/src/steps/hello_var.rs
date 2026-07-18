@@ -1,7 +1,7 @@
 //! Steps for `hello-var.md`.
 
 use super::{as_int, as_str, smap};
-use var::{Registry, Steps, Value};
+use varar::{Registry, Steps, Value};
 
 pub fn register(r: Registry) -> Registry {
     let mut s = Steps::from_registry(r);

@@ -1,9 +1,9 @@
 //! Port of `DocStringDiffTest.java` / `doc-string-diff.test.ts`.
 
-use var_core::doc_string_diff::{DocStringDiff, compare_doc_string};
-use var_core::error::StepError;
-use var_core::span::Span;
-use var_core::value::Value;
+use varar_core::doc_string_diff::{DocStringDiff, compare_doc_string};
+use varar_core::error::StepError;
+use varar_core::span::Span;
+use varar_core::value::Value;
 
 const SPAN: Span = Span {
     start_offset: 0,
@@ -48,7 +48,7 @@ fn doc_string_mismatch_carries_the_diff_and_is_detectable() {
     let err = StepError::DocStringMismatch(DocStringDiff::new(SPAN, "hello\n", "bye\n"));
     assert!(err.as_doc_string_mismatch().is_some());
     assert!(
-        StepError::Handler(var_core::error::HandlerError::new("x"))
+        StepError::Handler(varar_core::error::HandlerError::new("x"))
             .as_doc_string_mismatch()
             .is_none()
     );

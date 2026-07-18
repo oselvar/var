@@ -1,14 +1,14 @@
 [package]
-name = "var-runner"
+name = "varar-runner"
 version = "0.0.0"
 edition = "2024"
 publish = false
 
 [dependencies]
-var-core = { path = "../var-core" }
-var-config = { path = "../var-config" }
+varar-core = { path = "../varar-core" }
+varar-config = { path = "../varar-config" }
 regex = "1"
 
 [lib]
-name = "var_runner"
+name = "varar_runner"
 path = "src/lib.rs"

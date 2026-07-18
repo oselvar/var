@@ -14,19 +14,19 @@ use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;
 use std::task::{Context, Poll};
-use var_core::diagnostics::{Diagnostic, DiagnosticCode};
-use var_core::error::{HandlerError, StepError};
-use var_core::execute::{
+use varar_core::diagnostics::{Diagnostic, DiagnosticCode};
+use varar_core::error::{HandlerError, StepError};
+use varar_core::execute::{
     ExecutePorts, StepObservation, StepOutcome, collect_examples, execute_plan,
 };
-use var_core::failure::to_failure;
-use var_core::handler::{Handler, HandlerReturn};
-use var_core::offsets::utf16_slice;
-use var_core::parse::parse;
-use var_core::plan::{ExecutionPlan, plan};
-use var_core::registry::{Registry, add_step, create_registry};
-use var_core::step_kind::StepKind;
-use var_core::value::Value;
+use varar_core::failure::to_failure;
+use varar_core::handler::{Handler, HandlerReturn};
+use varar_core::offsets::utf16_slice;
+use varar_core::parse::parse;
+use varar_core::plan::{ExecutionPlan, plan};
+use varar_core::registry::{Registry, add_step, create_registry};
+use varar_core::step_kind::StepKind;
+use varar_core::value::Value;
 
 fn int_of(v: &Value) -> i64 {
     match v {

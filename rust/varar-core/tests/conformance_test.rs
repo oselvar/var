@@ -1,4 +1,4 @@
-//! Port of `ConformanceTest.java` (the var-core half): the var-doc golden gate
+//! Port of `ConformanceTest.java` (the varar-core half): the var-doc golden gate
 //! over every bundle in the shared corpus, plus the registry-projection unit
 //! tests. The registry/plan/trace golden gates need per-bundle Rust step
 //! fixtures and belong to a future `var` facade crate (as in Java, where they
@@ -6,13 +6,13 @@
 
 use std::fs;
 use std::path::{Path, PathBuf};
-use var_core::canonical_json::canonical_stringify;
-use var_core::conformance::{parameter_type_names, to_registry_artifact, to_var_doc_artifact};
-use var_core::handler::Handler;
-use var_core::parse::parse;
-use var_core::registry::{add_step, create_registry, define_parameter_type};
-use var_core::step_kind::StepKind;
-use var_core::value::Value;
+use varar_core::canonical_json::canonical_stringify;
+use varar_core::conformance::{parameter_type_names, to_registry_artifact, to_var_doc_artifact};
+use varar_core::handler::Handler;
+use varar_core::parse::parse;
+use varar_core::registry::{add_step, create_registry, define_parameter_type};
+use varar_core::step_kind::StepKind;
+use varar_core::value::Value;
 
 fn bundles_dir() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../../conformance/bundles")

@@ -379,32 +379,32 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
 
 [[package]]
-name = "var"
+name = "varar"
 version = "0.0.0"
 dependencies = [
- "var-core",
+ "varar-core",
 ]
 
 [[package]]
-name = "var-cargotest"
+name = "varar-cargotest"
 version = "0.0.0"
 dependencies = [
  "libtest-mimic",
- "var-config",
- "var-core",
- "var-runner",
+ "varar-config",
+ "varar-core",
+ "varar-runner",
 ]
 
 [[package]]
-name = "var-config"
+name = "varar-config"
 version = "0.0.0"
 dependencies = [
  "serde_json",
- "var-core",
+ "varar-core",
 ]
 
 [[package]]
-name = "var-core"
+name = "varar-core"
 version = "0.0.0"
 dependencies = [
  "cucumber-expressions",
@@ -412,12 +412,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "var-runner"
+name = "varar-runner"
 version = "0.0.0"
 dependencies = [
  "regex",
- "var-config",
- "var-core",
+ "varar-config",
+ "varar-core",
 ]
 
 [[package]]

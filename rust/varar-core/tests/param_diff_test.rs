@@ -3,9 +3,9 @@
 mod common;
 
 use common::vmap;
-use var_core::param_diff::compare_params;
-use var_core::span::Span;
-use var_core::value::Value;
+use varar_core::param_diff::compare_params;
+use varar_core::span::Span;
+use varar_core::value::Value;
 
 const SOURCE: &str = "I should have 3 cukes in my big belly";
 

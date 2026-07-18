@@ -4,11 +4,11 @@
 //! and unlike TypeScript/Python's module-scope accumulator — each step file
 //! exposes a `register(Registry) -> Registry` that adds its steps explicitly,
 //! and [`build_registry`] chains them. The threaded state is a **full
-//! replacement** value (var-core's model), not a shallow-merged partial: a
+//! replacement** value (varar-core's model), not a shallow-merged partial: a
 //! `stimulus` returns the whole next state.
 
 use std::collections::BTreeMap;
-use var_core::value::Value;
+use varar_core::value::Value;
 
 pub mod deep_thought;
 pub mod hello_var;
@@ -17,7 +17,7 @@ pub mod roman_numerals;
 pub mod tables_and_docstrings;
 pub mod yahtzee;
 
-use var_core::registry::{Registry, create_registry};
+use varar_core::registry::{Registry, create_registry};
 
 /// The combined registry for all specs.
 pub fn build_registry() -> Registry {
@@ -30,7 +30,7 @@ pub fn build_registry() -> Registry {
     library::register(r)
 }
 
-/// Fresh initial state per step file (var-core keys context by a step's source
+/// Fresh initial state per step file (varar-core keys context by a step's source
 /// file — the path captured at each `stimulus`/`sensor` call site). Matched by
 /// filename suffix so it's independent of the path prefix `#[track_caller]`
 /// reports. Files whose steps are pure return [`Value::Null`]. A plain `fn`

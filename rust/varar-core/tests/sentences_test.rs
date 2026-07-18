@@ -1,8 +1,8 @@
 //! Port of `SentencesTest.java` / `sentences.test.ts`. The `resultListIsImmutable`
 //! case is dropped (Rust `Vec` is owned/immutable).
 
-use var_core::offsets::utf16_len;
-use var_core::sentences::{Sentence, split_sentences};
+use varar_core::offsets::utf16_len;
+use varar_core::sentences::{Sentence, split_sentences};
 
 fn texts(sentences: &[Sentence]) -> Vec<String> {
     sentences.iter().map(|s| s.text.clone()).collect()
@@ -99,6 +99,6 @@ fn astral_character_keeps_offsets_correct() {
     assert_eq!(utf16_len("Party time 🎉!"), first.end_offset);
     assert_eq!(
         first.text,
-        var_core::offsets::utf16_slice(text, first.start_offset, first.end_offset)
+        varar_core::offsets::utf16_slice(text, first.start_offset, first.end_offset)
     );
 }

@@ -1,5 +1,5 @@
 [package]
-name = "var-config"
+name = "varar-config"
 version = "0.0.0"
 edition = "2024"
 publish = false
@@ -7,13 +7,13 @@ publish = false
 [dependencies]
 serde_json = "1"
 
-# Test-only: the conformance corpus is compared through var-core's canonical
+# Test-only: the conformance corpus is compared through varar-core's canonical
 # JSON. The reader itself stays pure (serde_json only).
 [dev-dependencies]
-var-core = { path = "../var-core" }
+varar-core = { path = "../varar-core" }
 
 [lib]
-name = "var_config"
+name = "varar_config"
 path = "src/lib.rs"
 
 [[test]]

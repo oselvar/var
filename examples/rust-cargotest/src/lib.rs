@@ -3,7 +3,7 @@
 //! - the domain modules (`*_example`) are the code under test;
 //! - `steps` holds the step definitions plus the registry/context glue.
 //!
-//! `tests/specs.rs` wires it into `cargo test` via the `var-cargotest`
+//! `tests/specs.rs` wires it into `cargo test` via the `varar-cargotest`
 //! adapter — one libtest item per Markdown example. Discovery, planning,
 //! running, rendering, and drift all live in the shared `var-*` crates now, so
 //! the sample carries no runner of its own.

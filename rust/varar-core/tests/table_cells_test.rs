@@ -2,9 +2,9 @@
 //! The `cellsListIsImmutable` case is dropped (Rust `Vec` is owned/immutable by
 //! construction).
 
-use var_core::offsets::utf16_slice;
-use var_core::span::Span;
-use var_core::table_cells::parse_row_cells;
+use varar_core::offsets::utf16_slice;
+use varar_core::span::Span;
+use varar_core::table_cells::parse_row_cells;
 
 fn slice(source: &str, span: Span) -> &str {
     utf16_slice(source, span.start_offset, span.end_offset)

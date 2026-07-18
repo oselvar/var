@@ -1,6 +1,6 @@
 //! Port of `ParseTest.java` / `parse.test.ts`.
 
-use var_core::parse::parse;
+use varar_core::parse::parse;
 
 #[test]
 fn parse_returns_a_var_doc_whose_examples_come_from_paragraphs_and_carry_the_heading_stack() {

@@ -1,5 +1,5 @@
 //! Registry / plan / trace conformance gates — the three stages deferred from
-//! `var-core` (which gates only var-doc). Mirrors the Java `var` module's
+//! `varar-core` (which gates only var-doc). Mirrors the Java `var` module's
 //! `ConformanceTest`: for every bundle in the shared corpus, load its Rust step
 //! fixture, build the registry, and assert the registry/plan/trace artifacts
 //! byte-for-byte against the committed goldens.
@@ -13,12 +13,12 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use var::{Registry, create_registry};
-use var_core::canonical_json::canonical_stringify;
-use var_core::conformance::{run_conformance, to_plan_artifact, to_registry_artifact};
-use var_core::parse::parse;
-use var_core::plan::plan;
-use var_core::value::Value;
+use varar::{Registry, create_registry};
+use varar_core::canonical_json::canonical_stringify;
+use varar_core::conformance::{run_conformance, to_plan_artifact, to_registry_artifact};
+use varar_core::parse::parse;
+use varar_core::plan::plan;
+use varar_core::value::Value;
 
 // Fixtures live in the shared corpus (siblings of every `*.steps.ts`), pulled
 // in by path. Declared at the test's top level so the path base is

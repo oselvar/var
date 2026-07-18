@@ -1,17 +1,17 @@
 //! Port of `DriftTest.java` / `drift.test.ts` (unit-gated; drift has no golden).
 
 use std::collections::BTreeMap;
-use var_core::drift::{
+use varar_core::drift::{
     BaselineExample, BaselineStore, Drifted, SpecBaseline, VarLock, derive_spec_baseline,
     detect_drift, live_examples, message, parse_var_lock, reconcile_drift, stringify_var_lock,
 };
-use var_core::handler::Handler;
-use var_core::hash::hash_source;
-use var_core::parse::parse;
-use var_core::plan::{ExecutionPlan, plan};
-use var_core::registry::{Registry, add_step, create_registry};
-use var_core::span::Span;
-use var_core::step_kind::StepKind;
+use varar_core::handler::Handler;
+use varar_core::hash::hash_source;
+use varar_core::parse::parse;
+use varar_core::plan::{ExecutionPlan, plan};
+use varar_core::registry::{Registry, add_step, create_registry};
+use varar_core::span::Span;
+use varar_core::step_kind::StepKind;
 
 fn reg(with_step: bool) -> Registry {
     let r = create_registry();

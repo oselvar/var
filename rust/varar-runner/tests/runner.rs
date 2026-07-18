@@ -2,15 +2,15 @@
 //! filesystem baseline store driving drift reconciliation.
 
 use std::path::PathBuf;
-use var_config::VarConfig;
-use var_core::drift::{BaselineStore, reconcile_drift};
-use var_core::handler::Handler;
-use var_core::parse::parse;
-use var_core::plan::plan;
-use var_core::registry::{add_step, create_registry};
-use var_core::step_kind::StepKind;
-use var_runner::discovery::glob_to_regex;
-use var_runner::{FileBaselineStore, find_specs};
+use varar_config::VarConfig;
+use varar_core::drift::{BaselineStore, reconcile_drift};
+use varar_core::handler::Handler;
+use varar_core::parse::parse;
+use varar_core::plan::plan;
+use varar_core::registry::{add_step, create_registry};
+use varar_core::step_kind::StepKind;
+use varar_runner::discovery::glob_to_regex;
+use varar_runner::{FileBaselineStore, find_specs};
 
 fn tmp(name: &str) -> PathBuf {
     let dir = std::env::temp_dir().join(format!("var-runner-{}-{name}", std::process::id()));

@@ -3,8 +3,8 @@
 mod common;
 
 use common::vmap;
-use var_core::canonical_json::canonical_stringify;
-use var_core::value::Value;
+use varar_core::canonical_json::canonical_stringify;
+use varar_core::value::Value;
 
 #[test]
 fn sorts_keys_indents_and_trailing_newline() {

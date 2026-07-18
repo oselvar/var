@@ -1,18 +1,18 @@
-//! The ergonomic author API: a `Steps` builder over `var-core`'s registry, so
+//! The ergonomic author API: a `Steps` builder over `varar-core`'s registry, so
 //! step definitions read as `s.stimulus(expr, …)` / `s.sensor(expr, …)` — the
 //! call name IS the kind, matching every other port (and what the LSP/
 //! tree-sitter dialect extracts). Mirrors the JVM `StateBinder`.
 //!
-//! The builder owns a `Registry` and folds each definition in with `var-core`'s
+//! The builder owns a `Registry` and folds each definition in with `varar-core`'s
 //! pure `add_step` / `define_parameter_type*`; nothing global is mutated.
 
-use var_core::handler::{Handler, HandlerReturn};
-use var_core::registry::{
+use varar_core::handler::{Handler, HandlerReturn};
+use varar_core::registry::{
     FormatFn, ParseFn, Registry, add_step, create_registry, define_parameter_type,
     define_parameter_type_with_format,
 };
-use var_core::step_kind::StepKind;
-use var_core::value::Value;
+use varar_core::step_kind::StepKind;
+use varar_core::value::Value;
 
 /// Converts an author's bare closure into a [`Handler`], inferring the arity —
 /// and thus each `Value` parameter — from the closure itself. This is what lets

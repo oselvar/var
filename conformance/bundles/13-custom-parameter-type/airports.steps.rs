@@ -2,7 +2,7 @@
 
 use std::collections::BTreeMap;
 use std::rc::Rc;
-use var::{HandlerError, ParseFn, Registry, Steps, Value};
+use varar::{HandlerError, ParseFn, Registry, Steps, Value};
 
 pub fn register(r: Registry) -> Registry {
     let mut s = Steps::from_registry(r);

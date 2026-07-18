@@ -1,6 +1,6 @@
 //! Rust sibling of `echo.steps.ts` (bundle `06-doc-string-mismatch`).
 
-use var::{Registry, Steps, Value};
+use varar::{Registry, Steps, Value};
 
 pub fn register(r: Registry) -> Registry {
     let mut s = Steps::from_registry(r);

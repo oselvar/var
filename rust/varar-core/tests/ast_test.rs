@@ -4,11 +4,11 @@
 //! (`blockPermitsExactlySevenVariants` / `tableOrFencePermitsExactlyTableAndFence`)
 //! are dropped: the Rust enums *are* the compiler-enforced closed sets.
 
-use var_core::ast::{
+use varar_core::ast::{
     Block, Blockquote, Example, Fence, Heading, ListItem, Paragraph, Row, SegmentOffset, Table,
     TableOrFence, ThematicBreak, VarDoc,
 };
-use var_core::span::Span;
+use varar_core::span::Span;
 
 const SPAN: Span = Span {
     start_offset: 0,

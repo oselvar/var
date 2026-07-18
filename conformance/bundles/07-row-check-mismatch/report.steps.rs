@@ -1,7 +1,7 @@
 //! Rust sibling of `report.steps.ts` (bundle `07-row-check-mismatch`).
 
 use std::collections::BTreeMap;
-use var::{Registry, Steps, Value};
+use varar::{Registry, Steps, Value};
 
 pub fn register(r: Registry) -> Registry {
     let mut s = Steps::from_registry(r);

@@ -2,7 +2,7 @@
 //! the Python port needed. Not a 1:1 of a Java test file; these pin the helpers
 //! the astral conformance cases (bundles 11/12) depend on.
 
-use var_core::offsets::{byte_index, utf16_index, utf16_len, utf16_slice};
+use varar_core::offsets::{byte_index, utf16_index, utf16_len, utf16_slice};
 
 #[test]
 fn utf16_len_counts_code_units_ascii_and_astral() {

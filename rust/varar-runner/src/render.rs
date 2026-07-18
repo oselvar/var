@@ -1,7 +1,7 @@
 //! Pure human-readable rendering of a step failure, anchored to the `.md`.
-//! Port of `var_runner.render.render_failure`; reuses the core diff payloads.
+//! Port of `varar_runner.render.render_failure`; reuses the core diff payloads.
 
-use var_core::error::StepFailure;
+use varar_core::error::StepFailure;
 
 pub fn render_failure(failure: &StepFailure, _source: &str, path: &str) -> String {
     let error = &failure.error;

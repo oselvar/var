@@ -1,7 +1,7 @@
 //! Port of `SpanTest.java` / `span.test.ts`.
 
-use var_core::offsets::utf16_len;
-use var_core::span::Span;
+use varar_core::offsets::utf16_len;
+use varar_core::span::Span;
 
 #[test]
 fn span_from_offsets_computes_line_and_column_for_a_single_line_source() {

@@ -3,7 +3,7 @@
 //! Full-replacement state (ADR 0006): the `{result}` map is the whole state.
 
 use std::collections::BTreeMap;
-use var::{HandlerError, Registry, Steps, Value};
+use varar::{HandlerError, Registry, Steps, Value};
 
 fn roman(n: i64) -> Option<&'static str> {
     match n {

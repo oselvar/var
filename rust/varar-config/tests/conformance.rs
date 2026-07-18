@@ -1,13 +1,13 @@
 //! Config conformance gate: reproduce `conformance/config/cases/*` byte-for-byte.
 //! A case with `expect-error.txt` must fail to load; otherwise the projected
-//! config, serialized with var-core's canonical JSON, must equal `golden.json`.
+//! config, serialized with varar-core's canonical JSON, must equal `golden.json`.
 
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use var_config::{VarConfig, read_var_config};
-use var_core::canonical_json::canonical_stringify;
-use var_core::value::Value;
+use varar_config::{VarConfig, read_var_config};
+use varar_core::canonical_json::canonical_stringify;
+use varar_core::value::Value;
 
 fn cases_dir() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../../conformance/config/cases")

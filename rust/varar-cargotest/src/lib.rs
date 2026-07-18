@@ -1,8 +1,8 @@
-//! `var-cargotest` — the `cargo test` adapter (ADR 0007).
+//! `varar-cargotest` — the `cargo test` adapter (ADR 0007).
 //!
 //! Turns every Markdown example matched by `var.config.json` into one
 //! `libtest-mimic` test, reported/filtered/listed by `cargo test` like a native
-//! `#[test]`. var-core is single-threaded (`Rc`, not `Send`), so each test body
+//! `#[test]`. varar-core is single-threaded (`Rc`, not `Send`), so each test body
 //! captures only owned `Send` data — the spec path/source plus `fn` pointers to
 //! the step registry + context factory — and **re-derives its one example
 //! thread-locally** (re-parse, re-plan, run index `i`). No `Rc` value crosses a
@@ -11,7 +11,7 @@
 //! Usage from a consumer's `tests/specs.rs` (with `harness = false`):
 //! ```ignore
 //! fn main() {
-//!     var_cargotest::run(
+//!     varar_cargotest::run(
 //!         std::path::Path::new(env!("CARGO_MANIFEST_DIR")),
 //!         my_steps::build_registry,   // fn() -> Registry
 //!         my_steps::context_value,    // fn(&str) -> Value
@@ -23,11 +23,11 @@
 use std::path::Path;
 
 use libtest_mimic::{Arguments, Failed, Trial};
-use var_core::drift::{self, reconcile_drift};
-use var_core::parse::parse;
-use var_core::registry::Registry;
-use var_core::value::Value;
-use var_runner::{
+use varar_core::drift::{self, reconcile_drift};
+use varar_core::parse::parse;
+use varar_core::registry::Registry;
+use varar_core::value::Value;
+use varar_runner::{
     FileBaselineStore, example_names, find_specs, plan_spec, render_failure, run_example,
 };
 
@@ -106,6 +106,6 @@ pub fn run(root: &Path, build_registry: BuildRegistry, context: ContextFactory) 
     libtest_mimic::run(&args, trials(root, build_registry, context)).exit();
 }
 
-fn read_config(root: &Path) -> var_config::VarConfig {
-    var_config::read_var_config(root).unwrap_or_else(|e| panic!("{e}"))
+fn read_config(root: &Path) -> varar_config::VarConfig {
+    varar_config::read_var_config(root).unwrap_or_else(|e| panic!("{e}"))
 }

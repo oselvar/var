@@ -1,10 +1,10 @@
 //! Port of `ScannerTest.java` / `scanner.test.ts`.
 
-use var_core::ast::Block;
-use var_core::ast::SegmentOffset;
-use var_core::offsets::{utf16_len, utf16_slice};
-use var_core::scanner::scan;
-use var_core::span::Span;
+use varar_core::ast::Block;
+use varar_core::ast::SegmentOffset;
+use varar_core::offsets::{utf16_len, utf16_slice};
+use varar_core::scanner::scan;
+use varar_core::span::Span;
 
 fn kind_of(b: &Block) -> &'static str {
     match b {
@@ -26,7 +26,7 @@ fn slice(source: &str, span: Span) -> &str {
     utf16_slice(source, span.start_offset, span.end_offset)
 }
 
-fn first_paragraph(blocks: &[Block]) -> &var_core::ast::Paragraph {
+fn first_paragraph(blocks: &[Block]) -> &varar_core::ast::Paragraph {
     blocks
         .iter()
         .find_map(|b| {
@@ -39,7 +39,7 @@ fn first_paragraph(blocks: &[Block]) -> &var_core::ast::Paragraph {
         .unwrap()
 }
 
-fn first_table(blocks: &[Block]) -> &var_core::ast::Table {
+fn first_table(blocks: &[Block]) -> &varar_core::ast::Table {
     blocks
         .iter()
         .find_map(|b| {
@@ -52,7 +52,7 @@ fn first_table(blocks: &[Block]) -> &var_core::ast::Table {
         .unwrap()
 }
 
-fn first_fence(blocks: &[Block]) -> &var_core::ast::Fence {
+fn first_fence(blocks: &[Block]) -> &varar_core::ast::Fence {
     blocks
         .iter()
         .find_map(|b| {
@@ -127,7 +127,7 @@ fn scan_strips_the_optional_trailing_hash_marker() {
 fn scan_groups_consecutive_non_blank_lines_into_a_single_paragraph() {
     let source = "first line\nsecond line\n\nthird line";
     let blocks = scan(source);
-    let paragraphs: Vec<&var_core::ast::Paragraph> = blocks
+    let paragraphs: Vec<&varar_core::ast::Paragraph> = blocks
         .iter()
         .filter_map(|b| {
             if let Block::Paragraph(p) = b {

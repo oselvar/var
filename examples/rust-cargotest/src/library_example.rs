@@ -2,7 +2,7 @@
 //! borrow rule. A port of `examples/python-pytest/src/library_example`.
 //!
 //! Money is carried as whole **pennies** (`i64`) rather than a `Money` value
-//! type: var-core's dynamic [`Value`](var_core::value::Value) is a closed enum,
+//! type: varar-core's dynamic [`Value`](varar_core::value::Value) is a closed enum,
 //! so — unlike the Python/Java ports, which hold a `Money`/`date` object in the
 //! threaded state — the Rust steps encode money as an integer and dates as a
 //! `{year, month, day}` map. The GBP currency is implicit.

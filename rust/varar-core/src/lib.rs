@@ -1,5 +1,5 @@
-//! `var-core` — the pure functional core of var, ported from the Java module
-//! `com.oselvar.var.core`: parse → match → plan → execute, diffs, drift/hash,
+//! `varar-core` — the pure functional core of var, ported from the Java module
+//! `dev.varar.core`: parse → match → plan → execute, diffs, drift/hash,
 //! canonical JSON, and the conformance projections. No filesystem, network,
 //! time, or test-framework dependencies.
 //!

@@ -1,12 +1,12 @@
-//! `var-runner` — the imperative shell shared by var test-runner adapters.
+//! `varar-runner` — the imperative shell shared by var test-runner adapters.
 //!
 //! Spec discovery (the shared glob semantics), planning/running examples,
 //! failure rendering, and the filesystem `var.lock.json` baseline store for
-//! drift. Contains no pipeline logic — it delegates to `var-core`. Steps are
+//! drift. Contains no pipeline logic — it delegates to `varar-core`. Steps are
 //! supplied by the caller (Rust compiles step files in; there is no dynamic
 //! `load_steps`), as a `Registry` plus a context factory.
 //!
-// `run_example` surfaces var-core's `StepFailure` by value, matching that
+// `run_example` surfaces varar-core's `StepFailure` by value, matching that
 // crate's own `#![allow(clippy::result_large_err)]` public-API choice.
 #![allow(clippy::result_large_err)]
 

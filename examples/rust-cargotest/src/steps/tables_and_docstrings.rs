@@ -1,7 +1,7 @@
 //! Steps for `tables-and-docstrings.md`.
 
 use super::{as_str, vmap};
-use var::{Registry, Steps, Value};
+use varar::{Registry, Steps, Value};
 
 pub fn register(r: Registry) -> Registry {
     let mut s = Steps::from_registry(r);
