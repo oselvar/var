@@ -350,6 +350,14 @@ suite:
   missing one is a hard build error (message names the language). It's caught in
   the PR gate because `make typescript` / the CI `test` job build the website
   (`pnpm --filter @oselvar/website... build`); run either to surface what you owe.
+- **CodeMirror editor highlighting**: add the language's syntax highlighter to
+  `CM_LANGUAGE` in `typescript/packages/website/src/lib/cm-languages.ts` — an
+  official `@codemirror/lang-<lang>` (Lezer, like ts/java/python) if one exists,
+  else a `StreamLanguage.define(<legacy-mode>)` from `@codemirror/legacy-modes`
+  (like kotlin/ruby). `CM_LANGUAGE` is a `Record<SiteLang, …>`, so a missing port
+  is a type error; `tests/cm-languages.test.ts` also asserts every `SiteLang` has
+  a working highlighter, so it's a red test in the `pnpm check` gate (the website
+  itself isn't type-checked in CI, so that test — not tsc — is the enforcement).
 - **Tree-sitter dialect** (the LSP/editor authoring surface — a *required*
   deliverable now, not deferred): create
   `typescript/packages/var-language/src/tree-sitter-dialects/<lang>.ts`
