@@ -15,4 +15,11 @@
     <ProjectReference Include="../Varar/Varar.csproj" />
   </ItemGroup>
 
+  <!-- The per-bundle conformance step fixtures live in the shared corpus, not this project dir. -->
+  <ItemGroup>
+    <Compile Include="../../conformance/bundles/**/*.steps.cs">
+      <Link>ConformanceFixtures/%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
+  </ItemGroup>
+
 </Project>

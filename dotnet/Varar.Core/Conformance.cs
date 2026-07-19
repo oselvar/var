@@ -9,6 +9,19 @@ namespace Varar.Core;
 /// </summary>
 public static class Conformance
 {
+    /// <summary>
+    /// Projects a <see cref="Registry"/> to the <c>registry.json</c> shape: each step's expression
+    /// plus its parameter-type names (in source order, from the compiled expression), and the
+    /// custom parameter types as <c>{name, regexp}</c>. Port of <c>toRegistryArtifact</c>.
+    /// </summary>
+    public static Value ToRegistryArtifact(Registry registry) => Map(
+        ("steps", Value.List(registry.Steps.Select(step => Map(
+            ("expression", Value.Of(step.Expression)),
+            ("parameterTypeNames", Value.List(step.Compiled.ParameterTypes.Select(p => Value.Of(p.Name)))))))),
+        ("parameterTypes", Value.List(registry.CustomParameterTypes.Select(custom => Map(
+            ("name", Value.Of(custom.Name)),
+            ("regexp", Value.Of(custom.Regexp)))))));
+
     /// <summary>Projects a <see cref="VarDoc"/> to the <c>var-doc.json</c> shape (<c>source</c> is dropped).</summary>
     public static Value ToVarDocArtifact(VarDoc doc) => Map(
         ("path", Value.Of(doc.Path)),
