@@ -37,11 +37,7 @@ pub fn parse_row_cells(line_text: &str, line_start_offset: usize, source: &str) 
         let trimmed = java_strip(seg);
         let leading = utf16_len(seg) - utf16_len(java_strip_leading(seg));
         let abs_start = line_start_offset + inner_start + cursor + leading;
-        cell_spans.push(Span::from_offsets(
-            source,
-            abs_start,
-            abs_start + utf16_len(trimmed),
-        ));
+        cell_spans.push(Span::from_offsets(source, abs_start, abs_start + utf16_len(trimmed)));
         cells.push(trimmed.to_string());
         cursor += utf16_len(seg) + 1; // +1 for the '|' delimiter
     }

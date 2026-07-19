@@ -185,9 +185,7 @@ fn run_example(
                                 None
                             }
                         }
-                        None => Some(StepError::ReturnShape(
-                            "unknown step kind: null".to_string(),
-                        )),
+                        None => Some(StepError::ReturnShape("unknown step kind: null".to_string())),
                     }
                 }
             };

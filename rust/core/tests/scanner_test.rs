@@ -215,19 +215,10 @@ fn scan_recognizes_a_gfm_table_with_header_delimiter_rows() {
     let source = "| name | age |\n|------|-----|\n| Bob  | 30  |\n| Eve  | 25  |\n";
     let blocks = scan(source);
     let table = first_table(&blocks);
-    assert_eq!(
-        vec!["name".to_string(), "age".to_string()],
-        table.header.cells
-    );
+    assert_eq!(vec!["name".to_string(), "age".to_string()], table.header.cells);
     assert_eq!(2, table.rows.len());
-    assert_eq!(
-        vec!["Bob".to_string(), "30".to_string()],
-        table.rows[0].cells
-    );
-    assert_eq!(
-        vec!["Eve".to_string(), "25".to_string()],
-        table.rows[1].cells
-    );
+    assert_eq!(vec!["Bob".to_string(), "30".to_string()], table.rows[0].cells);
+    assert_eq!(vec!["Eve".to_string(), "25".to_string()], table.rows[1].cells);
 }
 
 #[test]

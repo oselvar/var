@@ -2,20 +2,16 @@
 
 use std::collections::BTreeMap;
 use std::rc::Rc;
-use varar::{HandlerError, ParseFn, Registry, Steps, Value};
+use varar::{HandlerError, ParseFn, Steps, Value};
 
-pub fn register(r: Registry) -> Registry {
-    let mut s = Steps::from_registry(r);
+pub fn register(s: &mut Steps) {
     // Custom {airport} parameter type: IATA code, lowercased by parse. The
     // sensor asserts the lowercasing, so an identity parse would fail.
     let parse: ParseFn = Rc::new(|g: &[&str]| Value::from(g[0].to_lowercase()));
-    s.param("airport", "[A-Z]{3}", parse);
+    s.param("airport", "[A-Z]{3}", parse, None);
 
     s.stimulus("I fly to {airport}", |_state, dest| {
-        Ok(Some(Value::Map(BTreeMap::from([(
-            "dest".to_string(),
-            dest,
-        )]))))
+        Ok(Some(Value::Map(BTreeMap::from([("dest".to_string(), dest)]))))
     });
     s.sensor("The destination code is {word}", |state, expected| {
         let expected = if let Value::String(s) = expected {
@@ -32,13 +28,10 @@ pub fn register(r: Registry) -> Registry {
             _ => String::new(),
         };
         if cleaned != dest {
-            return Err(HandlerError::new(format!(
-                "expected {cleaned} but got {dest}"
-            )));
+            return Err(HandlerError::new(format!("expected {cleaned} but got {dest}")));
         }
         Ok(None)
     });
-    s.into_registry()
 }
 
 pub fn state() -> Value {

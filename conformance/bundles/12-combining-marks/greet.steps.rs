@@ -1,11 +1,9 @@
 //! Rust sibling of `greet.steps.ts` (bundle `12-combining-marks`).
 
-use varar::{Registry, Steps, Value};
+use varar::{Steps, Value};
 
-pub fn register(r: Registry) -> Registry {
-    let mut s = Steps::from_registry(r);
+pub fn register(s: &mut Steps) {
     s.sensor("I greet {string}", |_state, _name| Ok(None));
-    s.into_registry()
 }
 
 pub fn state() -> Value {

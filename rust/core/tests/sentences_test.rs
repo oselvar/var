@@ -11,19 +11,13 @@ fn texts(sentences: &[Sentence]) -> Vec<String> {
 #[test]
 fn splits_a_paragraph_on_periods_question_marks_exclamation_marks() {
     let result = split_sentences("First sentence. Second one? Third one!");
-    assert_eq!(
-        vec!["First sentence.", "Second one?", "Third one!"],
-        texts(&result)
-    );
+    assert_eq!(vec!["First sentence.", "Second one?", "Third one!"], texts(&result));
 }
 
 #[test]
 fn keeps_offsets_relative_to_the_input_text() {
     let result = split_sentences("Alpha. Beta.");
-    assert_eq!(
-        vec![Sentence::new("Alpha.", 0, 6), Sentence::new("Beta.", 7, 12)],
-        result
-    );
+    assert_eq!(vec![Sentence::new("Alpha.", 0, 6), Sentence::new("Beta.", 7, 12)], result);
 }
 
 #[test]
@@ -47,10 +41,7 @@ fn treats_a_blank_line_as_a_sentence_boundary() {
 #[test]
 fn treats_a_backtick_code_span_as_a_single_token() {
     let result = split_sentences("Run `npm test` first. Then `git push`.");
-    assert_eq!(
-        vec!["Run `npm test` first.", "Then `git push`."],
-        texts(&result)
-    );
+    assert_eq!(vec!["Run `npm test` first.", "Then `git push`."], texts(&result));
 }
 
 #[test]
@@ -62,10 +53,7 @@ fn the_final_sentence_does_not_require_a_terminator() {
 #[test]
 fn does_not_split_on_terminators_inside_a_double_quoted_string() {
     let result = split_sentences("Alpha \"with . and ? inside\" beta. Gamma.");
-    assert_eq!(
-        vec!["Alpha \"with . and ? inside\" beta.", "Gamma."],
-        texts(&result)
-    );
+    assert_eq!(vec!["Alpha \"with . and ? inside\" beta.", "Gamma."], texts(&result));
 }
 
 #[test]
@@ -83,10 +71,7 @@ fn splits_on_a_single_newline_gherkin_style_line_per_step() {
 #[test]
 fn splits_between_terminators_outside_quoted_strings_ignoring_those_inside() {
     let result = split_sentences("Alpha \"with ! inside\". Beta \"and ? inside\"!");
-    assert_eq!(
-        vec!["Alpha \"with ! inside\".", "Beta \"and ? inside\"!"],
-        texts(&result)
-    );
+    assert_eq!(vec!["Alpha \"with ! inside\".", "Beta \"and ? inside\"!"], texts(&result));
 }
 
 #[test]

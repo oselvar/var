@@ -3,10 +3,9 @@
 //! Pure steps — nothing to arrange or evolve — so `state()` is the bare
 //! [`Value::Null`] every handler ignores.
 
-use varar::{Registry, Steps, Value};
+use varar::{Steps, Value};
 
-pub fn register(r: Registry) -> Registry {
-    let mut s = Steps::from_registry(r);
+pub fn register(s: &mut Steps) {
     s.stimulus("I warm up my mental math", |_state| Ok(None));
     // Two slots ({int}, {int}); the handler uses only the first and returns
     // both computed columns [n, n*n] for positional comparison.
@@ -14,7 +13,6 @@ pub fn register(r: Registry) -> Registry {
         let n = if let Value::Int(i) = n { i } else { 0 };
         Ok(Some(Value::List(vec![Value::Int(n), Value::Int(n * n)])))
     });
-    s.into_registry()
 }
 
 pub fn state() -> Value {

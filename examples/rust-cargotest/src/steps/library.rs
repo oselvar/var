@@ -3,7 +3,7 @@ use crate::library_example::{
     Date, FEE_PER_DAY, format_date, format_money, late_fee, may_borrow, parse_date, parse_money,
 };
 use std::rc::Rc;
-use varar::{FormatFn, ParseFn, Registry, Steps, Value};
+use varar::{FormatFn, ParseFn, Steps, Value};
 
 fn date_value(d: Date) -> Value {
     vmap(vec![
@@ -33,24 +33,17 @@ fn loans_of(state: &Value) -> Vec<Value> {
     }
 }
 
-pub fn register(r: Registry) -> Registry {
-    let mut s = Steps::from_registry(r);
-
+pub fn register(s: &mut Steps) {
     let date_parse: ParseFn = Rc::new(|g: &[&str]| date_value(parse_date(g[0])));
     let date_format: FormatFn = Rc::new(|v: &Value| Some(format_date(value_date(v))));
-    s.param_with_format(
-        "date",
-        r"[A-Z][a-z]+ \d{1,2}, \d{4}",
-        date_parse,
-        date_format,
-    );
+    s.param("date", r"[A-Z][a-z]+ \d{1,2}, \d{4}", date_parse, Some(date_format));
 
     let money_parse: ParseFn = Rc::new(|g: &[&str]| Value::Int(parse_money(g[0])));
     let money_format: FormatFn = Rc::new(|v: &Value| match v {
         Value::Int(pennies) => Some(format_money(*pennies)),
         _ => None,
     });
-    s.param_with_format("money", r"£\d+(?:\.\d+)?|\d+p", money_parse, money_format);
+    s.param("money", r"£\d+(?:\.\d+)?|\d+p", money_parse, Some(money_format));
 
     let title_parse: ParseFn = Rc::new(|g: &[&str]| {
         let raw = g[0];
@@ -64,18 +57,15 @@ pub fn register(r: Registry) -> Registry {
         Value::String(t) => Some(format!("*{t}*")),
         _ => None,
     });
-    s.param_with_format("title", r"\*[^*]+\*", title_parse, title_format);
+    s.param("title", r"\*[^*]+\*", title_parse, Some(title_format));
 
-    s.stimulus(
-        "borrowed {title}, due back on {date}",
-        |state, title, due| {
-            let mut m = smap(&state);
-            let mut loans = loans_of(&state);
-            loans.push(vmap(vec![("title", title), ("due", due)]));
-            m.insert("loans".to_string(), Value::List(loans));
-            Ok(Some(Value::Map(m)))
-        },
-    );
+    s.stimulus("borrowed {title}, due back on {date}", |state, title, due| {
+        let mut m = smap(&state);
+        let mut loans = loans_of(&state);
+        loans.push(vmap(vec![("title", title), ("due", due)]));
+        m.insert("loans".to_string(), Value::List(loans));
+        Ok(Some(Value::Map(m)))
+    });
 
     s.stimulus("returns it on {date}", |state, returned_on| {
         let returned = value_date(&returned_on);
@@ -88,13 +78,9 @@ pub fn register(r: Registry) -> Registry {
         Ok(Some(Value::Map(m)))
     });
 
-    s.sensor("owes a {money} late fee", |state, _expected| {
-        Ok(smap(&state).get("fee").cloned())
-    });
+    s.sensor("owes a {money} late fee", |state, _expected| Ok(smap(&state).get("fee").cloned()));
 
-    s.sensor("{money} for each day overdue", |_state, _expected| {
-        Ok(Some(Value::Int(FEE_PER_DAY)))
-    });
+    s.sensor("{money} for each day overdue", |_state, _expected| Ok(Some(Value::Int(FEE_PER_DAY))));
 
     s.stimulus("asks to borrow {title} on {date}", |state, _title, on| {
         let on = value_date(&on);
@@ -117,5 +103,4 @@ pub fn register(r: Registry) -> Registry {
         }
         Ok(None)
     });
-    s.into_registry()
 }

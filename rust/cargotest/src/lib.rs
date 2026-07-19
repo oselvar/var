@@ -90,10 +90,9 @@ pub fn trials(root: &Path, build_registry: BuildRegistry, context: ContextFactor
         let doc = parse(&spec_file, &source);
         for drifted in reconcile_drift(&mut store, &rel, &source, &doc, &execution, update) {
             let message = drift::message(&drifted);
-            trials.push(Trial::test(
-                format!("{rel}::var:drift:{}", drifted.line),
-                move || Err(Failed::from(message)),
-            ));
+            trials.push(Trial::test(format!("{rel}::var:drift:{}", drifted.line), move || {
+                Err(Failed::from(message))
+            }));
         }
     }
     trials

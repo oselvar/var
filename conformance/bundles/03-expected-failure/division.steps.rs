@@ -1,9 +1,8 @@
 //! Rust sibling of `division.steps.ts` (bundle `03-expected-failure`).
 
-use varar::{HandlerError, Registry, Steps, Value};
+use varar::{HandlerError, Steps, Value};
 
-pub fn register(r: Registry) -> Registry {
-    let mut s = Steps::from_registry(r);
+pub fn register(s: &mut Steps) {
     s.stimulus("I divide {int} by {int}", |state, _a, b| {
         let b = if let Value::Int(i) = b { i } else { 0 };
         if b == 0 {
@@ -11,7 +10,6 @@ pub fn register(r: Registry) -> Registry {
         }
         Ok(Some(state))
     });
-    s.into_registry()
 }
 
 pub fn state() -> Value {

@@ -60,11 +60,7 @@ fn to_failure_leaves_cells_doc_null_for_a_plain_exception_or_return_shape() {
 
 #[test]
 fn to_failure_reads_the_failing_line_from_an_injected_location_else_falls_back() {
-    let with_frame = located(
-        StepError::Handler(HandlerError::new("boom")),
-        "docs/a.md",
-        12,
-    );
+    let with_frame = located(StepError::Handler(HandlerError::new("boom")), "docs/a.md", 12);
     assert_eq!(12, to_failure(&with_frame, "docs/a.md", 99).line);
 
     let no_frame = StepFailure::bare(StepError::Handler(HandlerError::new("boom")));

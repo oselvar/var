@@ -181,11 +181,7 @@ pub fn reconcile_drift(
     let drifts = if update {
         Vec::new()
     } else {
-        detect_drift(
-            lock.as_ref().and_then(|l| l.specs.get(spec_path)),
-            var_doc,
-            plan,
-        )
+        detect_drift(lock.as_ref().and_then(|l| l.specs.get(spec_path)), var_doc, plan)
     };
     if update || drifts.is_empty() {
         let next = derive_spec_baseline(source, var_doc, plan);

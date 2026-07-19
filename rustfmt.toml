@@ -1,0 +1,7 @@
+# Let a function call use the full line width (default is 60% of max_width = 60)
+# before rustfmt explodes its arguments one-per-line. This keeps the common
+# `s.stimulus("expression", |state, arg| { … })` shape on a single call line
+# with the closure body flowing beneath it, instead of splitting the string and
+# closure onto their own lines. Applies to every Rust crate in the repo (the
+# rust/ workspace and the standalone examples/rust-cargotest consumer).
+fn_call_width = 100

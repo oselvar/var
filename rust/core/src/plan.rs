@@ -410,10 +410,7 @@ pub(crate) fn derive_example_name(body: &[Block]) -> String {
 }
 
 fn is_text_bearing(block: &Block) -> bool {
-    matches!(
-        block,
-        Block::Paragraph(_) | Block::ListItem(_) | Block::Blockquote(_)
-    )
+    matches!(block, Block::Paragraph(_) | Block::ListItem(_) | Block::Blockquote(_))
 }
 
 fn text_of(block: &Block) -> &str {

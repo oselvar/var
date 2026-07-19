@@ -3,7 +3,7 @@
 //! Full-replacement state (ADR 0006): the `{result}` map is the whole state.
 
 use std::collections::BTreeMap;
-use varar::{HandlerError, Registry, Steps, Value};
+use varar::{HandlerError, Steps, Value};
 
 fn roman(n: i64) -> Option<&'static str> {
     match n {
@@ -15,8 +15,7 @@ fn roman(n: i64) -> Option<&'static str> {
     }
 }
 
-pub fn register(r: Registry) -> Registry {
-    let mut s = Steps::from_registry(r);
+pub fn register(s: &mut Steps) {
     s.stimulus("I convert {int} to roman numerals", |_state, n| {
         let n = if let Value::Int(i) = n { i } else { 0 };
         let mut m = BTreeMap::new();
@@ -44,13 +43,10 @@ pub fn register(r: Registry) -> Registry {
             _ => String::new(),
         };
         if cleaned != result {
-            return Err(HandlerError::new(format!(
-                "expected {cleaned} but got {result}"
-            )));
+            return Err(HandlerError::new(format!("expected {cleaned} but got {result}")));
         }
         Ok(None)
     });
-    s.into_registry()
 }
 
 pub fn state() -> Value {

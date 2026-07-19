@@ -86,33 +86,17 @@ fn collect_examples_returns_one_queued_example_per_planned_example_in_document_o
     let ports = ExecutePorts::silent();
     let queued = collect_examples(&p, &ports);
     let names: Vec<String> = queued.iter().map(|q| q.name.clone()).collect();
-    assert_eq!(
-        vec!["I have 5 cukes".to_string(), "I have 9 cukes".to_string()],
-        names
-    );
+    assert_eq!(vec!["I have 5 cukes".to_string(), "I have 9 cukes".to_string()], names);
 }
 
 #[test]
 fn collect_examples_reports_diagnostics_via_reporter() {
     let r = create_registry();
-    let r = add_step(
-        &r,
-        "I have {int} cukes",
-        "a.ts",
-        1,
-        Handler::noop(),
-        Some(StepKind::Stimulus),
-    )
-    .unwrap();
-    let r = add_step(
-        &r,
-        "I have 5 cukes",
-        "a.ts",
-        2,
-        Handler::noop(),
-        Some(StepKind::Stimulus),
-    )
-    .unwrap();
+    let r =
+        add_step(&r, "I have {int} cukes", "a.ts", 1, Handler::noop(), Some(StepKind::Stimulus))
+            .unwrap();
+    let r = add_step(&r, "I have 5 cukes", "a.ts", 2, Handler::noop(), Some(StepKind::Stimulus))
+        .unwrap();
     let p = plan_of("# M\n\nI have 5 cukes", &r);
     let got: Rc<RefCell<Vec<Diagnostic>>> = Rc::new(RefCell::new(Vec::new()));
     let got2 = got.clone();
@@ -190,10 +174,7 @@ fn an_inline_sensor_mismatch_throws_cell_mismatch_at_its_param_span() {
     assert_eq!("42", cells[0].expected);
     assert_eq!("41", cells[0].actual);
     let source = &p.var_doc.source;
-    assert_eq!(
-        "42",
-        utf16_slice(source, cells[0].span.start_offset, cells[0].span.end_offset)
-    );
+    assert_eq!("42", utf16_slice(source, cells[0].span.start_offset, cells[0].span.end_offset));
 }
 
 #[test]
@@ -280,13 +261,8 @@ fn a_zero_slot_sensor_returning_a_value_throws_return_shape() {
 
 #[test]
 fn a_zero_slot_sensor_returning_null_passes() {
-    let r = reg(
-        "the alarm fired",
-        "s.ts",
-        1,
-        Handler::sync0(|_s| Ok(None)),
-        Some(StepKind::Sensor),
-    );
+    let r =
+        reg("the alarm fired", "s.ts", 1, Handler::sync0(|_s| Ok(None)), Some(StepKind::Sensor));
     let p = plan_of("# X\n\nthe alarm fired", &r);
     let ports = ExecutePorts::silent();
     assert!(collect_examples(&p, &ports)[0].run().is_ok());
@@ -326,10 +302,7 @@ fn create_context_is_called_fresh_once_per_example() {
         q.run().unwrap();
     }
     assert_eq!(2, *calls.borrow());
-    assert_eq!(
-        vec![Value::from("init1"), Value::from("init2")],
-        *seen.borrow()
-    );
+    assert_eq!(vec![Value::from("init1"), Value::from("init2")], *seen.borrow());
 }
 
 #[test]
@@ -522,10 +495,7 @@ fn a_mismatching_header_bound_row_throws_cell_mismatch_at_the_cell_span() {
     assert_eq!("50", cells[0].expected);
     assert_eq!("999", cells[0].actual);
     let source = &p.var_doc.source;
-    assert_eq!(
-        "50",
-        utf16_slice(source, cells[0].span.start_offset, cells[0].span.end_offset)
-    );
+    assert_eq!("50", utf16_slice(source, cells[0].span.start_offset, cells[0].span.end_offset));
 }
 
 // -----------------------------------------------------------------------------
@@ -960,13 +930,7 @@ fn execute_plan_propagates_the_first_failure_and_does_not_run_subsequent_example
 
 #[test]
 fn a_null_step_kind_throws_a_return_shape() {
-    let r = reg(
-        "I do a thing",
-        "s.ts",
-        1,
-        Handler::sync0(|state| Ok(Some(state))),
-        None,
-    );
+    let r = reg("I do a thing", "s.ts", 1, Handler::sync0(|state| Ok(Some(state))), None);
     let p = plan_of("# A\n\nI do a thing", &r);
     let ports = ExecutePorts::silent();
     assert!(matches!(
@@ -1048,10 +1012,7 @@ fn an_async_handler_with_parameters_runs_through_async_var() {
         Some(StepKind::Sensor),
     )
     .unwrap();
-    let p = plan_of(
-        "# A\n\nI greet \"world\" asynchronously\nobserve greeting",
-        &r,
-    );
+    let p = plan_of("# A\n\nI greet \"world\" asynchronously\nobserve greeting", &r);
     let ports = ExecutePorts::silent();
     collect_examples(&p, &ports)[0].run().unwrap();
 }

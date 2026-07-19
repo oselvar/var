@@ -1,9 +1,7 @@
 use super::{as_str, vmap};
-use varar::{Registry, Steps, Value};
+use varar::{Steps, Value};
 
-pub fn register(r: Registry) -> Registry {
-    let mut s = Steps::from_registry(r);
-
+pub fn register(s: &mut Steps) {
     s.sensor("Uppercase each one:", |_state, table| {
         let rows = match &table {
             Value::List(rows) => rows,
@@ -34,5 +32,4 @@ pub fn register(r: Registry) -> Registry {
             Value::from(format!("Hello, {name}!\n")),
         ])))
     });
-    s.into_registry()
 }

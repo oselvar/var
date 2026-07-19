@@ -160,10 +160,7 @@ fn example_exposes_fields() {
         span: SPAN,
         body: vec![Block::ThematicBreak(ThematicBreak { span: SPAN })],
     };
-    assert_eq!(
-        vec!["Feature".to_string(), "Scenario".to_string()],
-        example.scope_stack
-    );
+    assert_eq!(vec!["Feature".to_string(), "Scenario".to_string()], example.scope_stack);
     assert_eq!(SPAN, example.span);
     assert_eq!(1, example.body.len());
 }

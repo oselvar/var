@@ -6,14 +6,14 @@
 //!
 //! Fixtures live alongside every other language's `*.steps.*` in
 //! `conformance/bundles/<n>/<stem>.steps.rs`, reached via `#[path]`. Each
-//! exposes `register(Registry) -> Registry` and `state() -> Value` (the
+//! exposes `register(&mut Steps)` and `state() -> Value` (the
 //! per-example initial state). The bundle→fixture map is an explicit,
 //! compiler-checked `match`, like Java's `loadFixture` switch.
 
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use varar::{Registry, create_registry};
+use varar::{Steps, create_registry};
 use varar_core::canonical_json::canonical_stringify;
 use varar_core::conformance::{run_conformance, to_plan_artifact, to_registry_artifact};
 use varar_core::parse::parse;
@@ -54,7 +54,7 @@ mod b14;
 #[path = "../../../conformance/bundles/15-custom-parameter-format/money.steps.rs"]
 mod b15;
 
-type RegisterFn = fn(Registry) -> Registry;
+type RegisterFn = fn(&mut Steps);
 type StateFn = fn() -> Value;
 
 fn fixture(bundle: &str) -> (RegisterFn, StateFn) {
@@ -106,7 +106,9 @@ fn registry_matches_golden() {
     for dir in bundle_dirs() {
         let name = name_of(&dir);
         let (register, _) = fixture(&name);
-        let registry = register(create_registry());
+        let mut s = Steps::from_registry(create_registry());
+        register(&mut s);
+        let registry = s.into_registry();
         let actual = canonical_stringify(&to_registry_artifact(&registry));
         if actual != golden(&dir, "registry.json") {
             fails.push(name);
@@ -121,7 +123,9 @@ fn plan_matches_golden() {
     for dir in bundle_dirs() {
         let name = name_of(&dir);
         let (register, _) = fixture(&name);
-        let registry = register(create_registry());
+        let mut s = Steps::from_registry(create_registry());
+        register(&mut s);
+        let registry = s.into_registry();
         let source = fs::read_to_string(dir.join("example.md")).unwrap();
         let doc = parse("example.md", &source);
         let execution = plan(&doc, &registry);
@@ -139,7 +143,9 @@ fn trace_matches_golden() {
     for dir in bundle_dirs() {
         let name = name_of(&dir);
         let (register, state) = fixture(&name);
-        let registry = register(create_registry());
+        let mut s = Steps::from_registry(create_registry());
+        register(&mut s);
+        let registry = s.into_registry();
         let source = fs::read_to_string(dir.join("example.md")).unwrap();
         let doc = parse("example.md", &source);
         let artifacts = run_conformance(&doc, &registry, &|| state());

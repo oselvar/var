@@ -33,10 +33,7 @@ fn non_ascii_is_emitted_raw() {
 #[test]
 fn empty_containers_render_on_one_line() {
     let value = vmap(vec![("a", Value::list(vec![])), ("b", Value::map(vec![]))]);
-    assert_eq!(
-        "{\n  \"a\": [],\n  \"b\": {}\n}\n",
-        canonical_stringify(&value)
-    );
+    assert_eq!("{\n  \"a\": [],\n  \"b\": {}\n}\n", canonical_stringify(&value));
 }
 
 #[test]
@@ -59,10 +56,7 @@ fn sorts_keys_regardless_of_input_map_iteration_order() {
 #[test]
 fn escapes_quotes_backslashes_and_control_characters() {
     let value = vmap(vec![("s", Value::from("a\"b\\c\nd\te"))]);
-    assert_eq!(
-        "{\n  \"s\": \"a\\\"b\\\\c\\nd\\te\"\n}\n",
-        canonical_stringify(&value)
-    );
+    assert_eq!("{\n  \"s\": \"a\\\"b\\\\c\\nd\\te\"\n}\n", canonical_stringify(&value));
 }
 
 #[test]

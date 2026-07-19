@@ -1,13 +1,11 @@
 //! Rust sibling of `echo.steps.ts` (bundle `04-tables-and-docstrings`).
 
-use varar::{Registry, Steps, Value};
+use varar::{Steps, Value};
 
-pub fn register(r: Registry) -> Registry {
-    let mut s = Steps::from_registry(r);
+pub fn register(s: &mut Steps) {
     // The doc string is this sensor's only slot, so it is returned bare; the
     // core compares it against the input (compareDocString); equal passes.
     s.sensor("I echo the following:", |_state, doc| Ok(Some(doc)));
-    s.into_registry()
 }
 
 pub fn state() -> Value {

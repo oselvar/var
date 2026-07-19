@@ -9,14 +9,8 @@ fn every_paragraph_becomes_a_candidate_example_scoped_by_the_headings_above_it()
     let source = "# Withdrawing cash\n\nGiven I have $100 in my account\n\n# Overdraft\n\nGiven I have $10 in my account";
     let var_doc = structure("test.md", source, scan(source));
     assert_eq!(2, var_doc.examples.len());
-    assert_eq!(
-        vec!["Withdrawing cash".to_string()],
-        var_doc.examples[0].scope_stack
-    );
-    assert_eq!(
-        vec!["Overdraft".to_string()],
-        var_doc.examples[1].scope_stack
-    );
+    assert_eq!(vec!["Withdrawing cash".to_string()], var_doc.examples[0].scope_stack);
+    assert_eq!(vec!["Overdraft".to_string()], var_doc.examples[1].scope_stack);
 }
 
 #[test]
@@ -36,10 +30,7 @@ fn nested_headings_stack_into_an_outer_to_inner_scope_stack() {
     let var_doc = structure("test.md", source, scan(source));
     assert_eq!(2, var_doc.examples.len());
     assert_eq!(vec!["Outer".to_string()], var_doc.examples[0].scope_stack);
-    assert_eq!(
-        vec!["Outer".to_string(), "Inner".to_string()],
-        var_doc.examples[1].scope_stack
-    );
+    assert_eq!(vec!["Outer".to_string(), "Inner".to_string()], var_doc.examples[1].scope_stack);
 }
 
 #[test]
@@ -79,10 +70,7 @@ fn orphan_tables_and_fences_are_recorded_on_the_var_doc() {
     let source = "| name | age |\n|------|-----|\n| Bob  | 30  |";
     let var_doc = structure("o.md", source, scan(source));
     assert_eq!(1, var_doc.orphan_attachments.len());
-    assert!(matches!(
-        var_doc.orphan_attachments[0],
-        varar_core::ast::TableOrFence::Table(_)
-    ));
+    assert!(matches!(var_doc.orphan_attachments[0], varar_core::ast::TableOrFence::Table(_)));
 }
 
 #[test]

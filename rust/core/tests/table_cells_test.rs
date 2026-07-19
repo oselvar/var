@@ -88,10 +88,7 @@ fn astral_cell_shifts_following_span() {
 fn three_column_row() {
     let source = "| name | age | city |";
     let result = parse_row_cells(source, 0, source);
-    assert_eq!(
-        vec!["name".to_string(), "age".to_string(), "city".to_string()],
-        result.cells
-    );
+    assert_eq!(vec!["name".to_string(), "age".to_string(), "city".to_string()], result.cells);
     assert_eq!("name", slice(source, result.cell_spans[0]));
     assert_eq!("age", slice(source, result.cell_spans[1]));
     assert_eq!("city", slice(source, result.cell_spans[2]));

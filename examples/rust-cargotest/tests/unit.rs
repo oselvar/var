@@ -38,15 +38,8 @@ fn a_mutated_expectation_fails_with_a_cell_mismatch() {
     let source = std::fs::read_to_string(root().join("hello-var.md"))
         .unwrap()
         .replace("\"Hello, world!\"", "\"Hello, Vár!\"");
-    let err = run_one(
-        "hello-var.md",
-        &source,
-        "hello-var.md",
-        build_registry,
-        context_value,
-        0,
-    )
-    .expect_err("expected a failure");
+    let err = run_one("hello-var.md", &source, "hello-var.md", build_registry, context_value, 0)
+        .expect_err("expected a failure");
     // Expected column is the source token as written (quotes included); actual
     // is what the sensor returned.
     assert!(

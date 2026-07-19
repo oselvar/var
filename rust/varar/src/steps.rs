@@ -111,22 +111,21 @@ impl Steps {
         self
     }
 
-    /// Declare a custom parameter type.
-    pub fn param(&mut self, name: &str, regexp: &str, parse: ParseFn) -> &mut Steps {
-        self.registry = define_parameter_type(&self.registry, name, regexp, parse);
-        self
-    }
-
-    /// Declare a custom parameter type that also renders values for diffs.
-    pub fn param_with_format(
+    /// Declare a custom parameter type. Pass `Some(format)` to also render values for diffs,
+    /// or `None` for none — the single `param` shape every port shares.
+    pub fn param(
         &mut self,
         name: &str,
         regexp: &str,
         parse: ParseFn,
-        format: FormatFn,
+        format: Option<FormatFn>,
     ) -> &mut Steps {
-        self.registry =
-            define_parameter_type_with_format(&self.registry, name, regexp, parse, format);
+        self.registry = match format {
+            Some(format) => {
+                define_parameter_type_with_format(&self.registry, name, regexp, parse, format)
+            }
+            None => define_parameter_type(&self.registry, name, regexp, parse),
+        };
         self
     }
 

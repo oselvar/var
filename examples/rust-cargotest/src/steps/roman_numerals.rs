@@ -1,9 +1,8 @@
 use super::{as_str, smap, vmap};
 use crate::roman_numerals_example::to_roman;
-use varar::{Registry, Steps, Value};
+use varar::{Steps, Value};
 
-pub fn register(r: Registry) -> Registry {
-    let mut s = Steps::from_registry(r);
+pub fn register(s: &mut Steps) {
     s.sensor("a decimal and a roman number", |_state, row| {
         let m = smap(&row);
         let decimal = as_str(&m["decimal"]);
@@ -13,5 +12,4 @@ pub fn register(r: Registry) -> Registry {
             ("roman", Value::from(roman)),
         ])))
     });
-    s.into_registry()
 }

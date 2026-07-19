@@ -59,10 +59,7 @@ pub fn read_var_config(root: &Path) -> Result<VarConfig, String> {
             .filter(|k| !KNOWN_DOCS_KEYS.contains(k))
             .collect();
         if !unknown_docs.is_empty() {
-            return Err(format!(
-                "{loc}: unknown docs key(s): {}",
-                unknown_docs.join(", ")
-            ));
+            return Err(format!("{loc}: unknown docs key(s): {}", unknown_docs.join(", ")));
         }
         (
             string_array(docs_obj.get("include"), "docs.include", &loc)?,

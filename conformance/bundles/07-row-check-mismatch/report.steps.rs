@@ -1,10 +1,9 @@
 //! Rust sibling of `report.steps.ts` (bundle `07-row-check-mismatch`).
 
 use std::collections::BTreeMap;
-use varar::{Registry, Steps, Value};
+use varar::{Steps, Value};
 
-pub fn register(r: Registry) -> Registry {
-    let mut s = Steps::from_registry(r);
+pub fn register(s: &mut Steps) {
     // Header-bound row step: returns its computed columns; the core diffs them
     // against the row cells (rowChecks). score 99 ≠ 10 → CellMismatchError.
     s.sensor("I report the score and grade", |_state, _row| {
@@ -13,7 +12,6 @@ pub fn register(r: Registry) -> Registry {
             ("grade".to_string(), Value::from("A")),
         ]))))
     });
-    s.into_registry()
 }
 
 pub fn state() -> Value {

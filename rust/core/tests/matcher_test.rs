@@ -8,15 +8,7 @@ use varar_core::value::Value;
 
 fn reg() -> Registry {
     let r = create_registry();
-    let r = add_step(
-        &r,
-        "I have {int} cukes",
-        "steps.ts",
-        1,
-        Handler::noop(),
-        None,
-    )
-    .unwrap();
+    let r = add_step(&r, "I have {int} cukes", "steps.ts", 1, Handler::noop(), None).unwrap();
     add_step(&r, "I withdraw {int}", "steps.ts", 5, Handler::noop(), None).unwrap()
 }
 
@@ -52,15 +44,8 @@ fn find_hits_returns_multiple_hits_when_multiple_expressions_match_non_overlappi
 fn resolve_hits_picks_longest_leftmost_when_ranges_overlap() {
     let r = create_registry();
     let r = add_step(&r, "I have {int} cukes", "s.ts", 1, Handler::noop(), None).unwrap();
-    let r = add_step(
-        &r,
-        "I have {int} cukes in my belly",
-        "s.ts",
-        2,
-        Handler::noop(),
-        None,
-    )
-    .unwrap();
+    let r =
+        add_step(&r, "I have {int} cukes in my belly", "s.ts", 2, Handler::noop(), None).unwrap();
     let result = resolve_hits(find_hits("I have 5 cukes in my belly", &r));
     let ResolvedSteps::Ok(steps) = result else {
         panic!("expected Ok")
@@ -145,10 +130,7 @@ fn a_custom_type_with_capture_groups_passes_each_group_to_parse() {
     let r = add_step(&r, "the range is {range}", "s.rs", 1, Handler::noop(), None).unwrap();
     let hits = find_hits("the range is 10-20", &r);
     assert_eq!(1, hits.len());
-    assert_eq!(
-        vec![Value::list(vec![Value::from("10"), Value::from("20")])],
-        hits[0].args
-    );
+    assert_eq!(vec![Value::list(vec![Value::from("10"), Value::from("20")])], hits[0].args);
 }
 
 #[test]

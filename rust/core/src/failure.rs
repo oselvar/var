@@ -52,13 +52,9 @@ pub fn to_failure(failure: &StepFailure, spec_path: &str, fallback_line: i64) ->
 /// rendered from structural data, not scraped from it).
 fn render_stack(failure: &StepFailure) -> String {
     match &failure.location {
-        Some(l) => format!(
-            "{}\n    at {} ({}:{})",
-            failure.error.message(),
-            l.label,
-            l.path,
-            l.line
-        ),
+        Some(l) => {
+            format!("{}\n    at {} ({}:{})", failure.error.message(), l.label, l.path, l.line)
+        }
         None => failure.error.message(),
     }
 }

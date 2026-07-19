@@ -24,15 +24,9 @@ fn reg() -> Registry {
         Some(StepKind::Stimulus),
     )
     .unwrap();
-    let r = add_step(
-        &r,
-        "I withdraw {int}",
-        "steps.ts",
-        2,
-        Handler::noop(),
-        Some(StepKind::Stimulus),
-    )
-    .unwrap();
+    let r =
+        add_step(&r, "I withdraw {int}", "steps.ts", 2, Handler::noop(), Some(StepKind::Stimulus))
+            .unwrap();
     add_step(
         &r,
         "I should have {int} left",
@@ -45,15 +39,7 @@ fn reg() -> Registry {
 }
 
 fn step(r: &Registry, expr: &str, file: &str, line: usize) -> Registry {
-    add_step(
-        r,
-        expr,
-        file,
-        line,
-        Handler::noop(),
-        Some(StepKind::Stimulus),
-    )
-    .unwrap()
+    add_step(r, expr, file, line, Handler::noop(), Some(StepKind::Stimulus)).unwrap()
 }
 
 fn step_texts(ex: &varar_core::plan::PlannedExample) -> Vec<String> {
@@ -139,10 +125,7 @@ fn a_markdown_table_immediately_following_a_step_bearing_block_attaches_as_data_
     let result = plan(&parse("u.md", source), &r);
     let step0 = &result.examples[0].steps[0];
     let table = step0.data_table.as_ref().expect("data table");
-    assert_eq!(
-        vec!["name".to_string(), "age".to_string()],
-        table.header.cells
-    );
+    assert_eq!(vec!["name".to_string(), "age".to_string()], table.header.cells);
     assert_eq!(2, table.rows.len());
 }
 
@@ -178,10 +161,7 @@ fn a_step_with_no_following_fence_has_no_doc_string() {
 #[test]
 fn a_keyword_led_sentence_with_no_match_does_not_produce_a_diagnostic() {
     let r = create_registry();
-    let result = plan(
-        &parse("m.md", "# Empty\n\nGiven I have 5 cukes in my belly."),
-        &r,
-    );
+    let result = plan(&parse("m.md", "# Empty\n\nGiven I have 5 cukes in my belly."), &r);
     assert_eq!(0, result.diagnostics.len());
 }
 
@@ -197,12 +177,7 @@ const YAHTZEE: &str = "# Yahtzee\n\neach row lists the dice, the category and th
 #[test]
 fn a_header_bound_table_expands_into_one_example_per_row() {
     let r = create_registry();
-    let r = step(
-        &r,
-        "each row lists the dice, the category and the score",
-        "s.ts",
-        1,
-    );
+    let r = step(&r, "each row lists the dice, the category and the score", "s.ts", 1);
     let result = plan(&parse("y.md", YAHTZEE), &r);
     assert_eq!(0, result.diagnostics.len());
     assert_eq!(2, result.examples.len());
@@ -236,10 +211,7 @@ fn a_table_whose_paragraph_names_only_some_header_cells_keeps_whole_table_behavi
     let result = plan(&parse("u.md", source), &r);
     assert_eq!(1, result.examples.len());
     let table = result.examples[0].steps[0].data_table.as_ref().unwrap();
-    assert_eq!(
-        vec!["name".to_string(), "age".to_string()],
-        table.header.cells
-    );
+    assert_eq!(vec!["name".to_string(), "age".to_string()], table.header.cells);
     assert_eq!(2, table.rows.len());
 }
 
@@ -264,12 +236,7 @@ fn header_bound_matching_is_case_sensitive() {
 #[test]
 fn header_bound_rows_are_named_by_their_cells_and_nested_under_the_paragraph() {
     let r = create_registry();
-    let r = step(
-        &r,
-        "each row lists the dice, the category and the score",
-        "s.ts",
-        1,
-    );
+    let r = step(&r, "each row lists the dice, the category and the score", "s.ts", 1);
     let result = plan(&parse("y.md", YAHTZEE), &r);
     let names: Vec<String> = result.examples.iter().map(|e| e.name.clone()).collect();
     assert_eq!(
@@ -305,12 +272,7 @@ fn a_table_not_attached_to_a_step_is_allowed_no_diagnostic() {
 #[test]
 fn a_header_bound_row_example_carries_row_checks() {
     let r = create_registry();
-    let r = step(
-        &r,
-        "each row lists the dice, the category and the score",
-        "s.ts",
-        1,
-    );
+    let r = step(&r, "each row lists the dice, the category and the score", "s.ts", 1);
     let source = "# Yahtzee\n\neach row lists the dice, the category and the score:\n\n| dice          | category   | score |\n| ------------- | ---------- | ----- |\n| 3, 3, 3, 4, 4 | full house | 17    |";
     let result = plan(&parse("y.md", source), &r);
     let checks: &Vec<RowCheck> = result.examples[0]
@@ -338,11 +300,7 @@ fn a_header_bound_row_example_carries_row_checks() {
     let score_check = &checks[2];
     assert_eq!(
         "17",
-        utf16_slice(
-            source,
-            score_check.span.start_offset,
-            score_check.span.end_offset
-        )
+        utf16_slice(source, score_check.span.start_offset, score_check.span.end_offset)
     );
 }
 
@@ -360,10 +318,7 @@ fn an_error_fence_marks_the_example_expected_outcome_fail_with_a_message_substri
     let src = "# Division\n\nI divide 1 by 0.\n\n```error\ndivision by zero\n```\n";
     let ex = plan(&parse("e.md", src), &r).examples.remove(0);
     assert_eq!(Some("fail".to_string()), ex.expected_outcome);
-    assert_eq!(
-        Some("division by zero".to_string()),
-        ex.expected_error_message
-    );
+    assert_eq!(Some("division by zero".to_string()), ex.expected_error_message);
     assert!(ex.steps[0].doc_string.is_none());
 }
 
@@ -399,10 +354,7 @@ fn an_error_fence_with_no_matching_step_emits_an_error_fence_without_step_diagno
     let result = plan(&parse("e.md", src), &r);
     assert_eq!(0, result.examples.len());
     assert_eq!(1, result.diagnostics.len());
-    assert_eq!(
-        DiagnosticCode::ErrorFenceWithoutStep,
-        result.diagnostics[0].code
-    );
+    assert_eq!(DiagnosticCode::ErrorFenceWithoutStep, result.diagnostics[0].code);
 }
 
 #[test]

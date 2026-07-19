@@ -74,10 +74,7 @@ fn a_returned_key_that_is_not_a_column_is_ignored() {
 #[test]
 fn null_non_map_return_checks_nothing() {
     assert_eq!(Vec::<CellDiff>::new(), compare_row(None, &checks()));
-    assert_eq!(
-        Vec::<CellDiff>::new(),
-        compare_row(Some(&Value::Int(42)), &checks())
-    );
+    assert_eq!(Vec::<CellDiff>::new(), compare_row(Some(&Value::Int(42)), &checks()));
 }
 
 #[test]
@@ -144,10 +141,7 @@ fn compare_table_one_wrong_cell_not_ok_with_expected_actual_span() {
     assert_eq!("after", bad[0].column);
     assert_eq!("VAR", bad[0].expected);
     assert_eq!("WRONG", bad[0].actual);
-    assert_eq!(
-        "VAR",
-        utf16_slice(TABLE_SRC, bad[0].span.start_offset, bad[0].span.end_offset)
-    );
+    assert_eq!("VAR", utf16_slice(TABLE_SRC, bad[0].span.start_offset, bad[0].span.end_offset));
 }
 
 #[test]
@@ -194,10 +188,7 @@ fn compare_table_shape_type_errors_throw_return_shape() {
         |r: Result<Vec<CellDiff>, StepError>| matches!(r.unwrap_err(), StepError::ReturnShape(_));
     assert!(is_shape(compare_table(Some(&Value::from("nope")), &table))); // not a list
     assert!(is_shape(compare_table(
-        Some(&vlist(vec![vlist(vec![
-            Value::from("var"),
-            Value::from("VAR")
-        ])])),
+        Some(&vlist(vec![vlist(vec![Value::from("var"), Value::from("VAR")])])),
         &table
     ))); // wrong row count
     assert!(is_shape(compare_table(

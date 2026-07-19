@@ -20,11 +20,7 @@ fn bundles_dir() -> PathBuf {
 
 fn bundle_dirs() -> Vec<PathBuf> {
     let dir = bundles_dir();
-    assert!(
-        dir.is_dir(),
-        "expected conformance corpus at {}",
-        dir.display()
-    );
+    assert!(dir.is_dir(), "expected conformance corpus at {}", dir.display());
     let mut dirs: Vec<PathBuf> = fs::read_dir(&dir)
         .unwrap()
         .filter_map(|e| e.ok().map(|e| e.path()))
@@ -47,23 +43,13 @@ fn var_doc_matches_golden() {
             failures.push(name);
         }
     }
-    assert!(
-        failures.is_empty(),
-        "var-doc.json mismatch in bundles: {failures:?}"
-    );
+    assert!(failures.is_empty(), "var-doc.json mismatch in bundles: {failures:?}");
 }
 
 #[test]
 fn to_registry_artifact_lists_expressions_and_parsed_parameter_type_names() {
-    let r = add_step(
-        &create_registry(),
-        "I have {int} cukes",
-        "s.ts",
-        1,
-        Handler::noop(),
-        None,
-    )
-    .unwrap();
+    let r = add_step(&create_registry(), "I have {int} cukes", "s.ts", 1, Handler::noop(), None)
+        .unwrap();
     let artifact = to_registry_artifact(&r);
     let Value::Map(m) = &artifact else {
         panic!("expected map")
@@ -76,14 +62,8 @@ fn to_registry_artifact_lists_expressions_and_parsed_parameter_type_names() {
     let Value::Map(step0) = &steps[0] else {
         panic!("expected step map")
     };
-    assert_eq!(
-        Some(&Value::from("I have {int} cukes")),
-        step0.get("expression")
-    );
-    assert_eq!(
-        Some(&Value::List(vec![Value::from("int")])),
-        step0.get("parameterTypeNames")
-    );
+    assert_eq!(Some(&Value::from("I have {int} cukes")), step0.get("expression"));
+    assert_eq!(Some(&Value::List(vec![Value::from("int")])), step0.get("parameterTypeNames"));
 }
 
 #[test]
@@ -120,18 +100,12 @@ fn registry_artifact_projects_custom_parameter_types() {
     let mut pt = std::collections::BTreeMap::new();
     pt.insert("name".to_string(), Value::from("airport"));
     pt.insert("regexp".to_string(), Value::from("[A-Z]{3}"));
-    assert_eq!(
-        Some(&Value::List(vec![Value::Map(pt)])),
-        m.get("parameterTypes")
-    );
+    assert_eq!(Some(&Value::List(vec![Value::Map(pt)])), m.get("parameterTypes"));
     let Value::List(steps) = m.get("steps").unwrap() else {
         panic!("expected steps list")
     };
     let Value::Map(step0) = &steps[0] else {
         panic!("expected step map")
     };
-    assert_eq!(
-        Some(&Value::List(vec![Value::from("airport")])),
-        step0.get("parameterTypeNames")
-    );
+    assert_eq!(Some(&Value::List(vec![Value::from("airport")])), step0.get("parameterTypeNames"));
 }

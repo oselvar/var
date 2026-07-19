@@ -1,15 +1,10 @@
 use super::{as_int, as_str, smap};
-use varar::{Registry, Steps, Value};
+use varar::{Steps, Value};
 
-pub fn register(r: Registry) -> Registry {
-    let mut s = Steps::from_registry(r);
-
+pub fn register(s: &mut Steps) {
     s.stimulus("I greet {string}", |state, name| {
         let mut m = smap(&state);
-        m.insert(
-            "greeting".to_string(),
-            Value::from(format!("Hello, {}!", as_str(&name))),
-        );
+        m.insert("greeting".to_string(), Value::from(format!("Hello, {}!", as_str(&name))));
         Ok(Some(Value::Map(m)))
     });
 
@@ -23,8 +18,5 @@ pub fn register(r: Registry) -> Registry {
         Ok(Some(Value::Map(m)))
     });
 
-    s.sensor("evaluate to `{int}`", |state, _expected| {
-        Ok(smap(&state).get("result").cloned())
-    });
-    s.into_registry()
+    s.sensor("evaluate to `{int}`", |state, _expected| Ok(smap(&state).get("result").cloned()));
 }

@@ -16,10 +16,7 @@ const SPAN: Span = Span {
 
 #[test]
 fn compare_doc_string_equal_content_returns_null() {
-    assert_eq!(
-        None,
-        compare_doc_string(Some(&Value::from("hello\n")), "hello\n", SPAN).unwrap()
-    );
+    assert_eq!(None, compare_doc_string(Some(&Value::from("hello\n")), "hello\n", SPAN).unwrap());
 }
 
 #[test]

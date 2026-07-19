@@ -48,10 +48,7 @@ fn vint(n: usize) -> Value {
 pub fn to_var_doc_artifact(doc: &VarDoc) -> Value {
     obj(vec![
         ("path", Value::from(doc.path.as_str())),
-        (
-            "examples",
-            Value::List(doc.examples.iter().map(example).collect()),
-        ),
+        ("examples", Value::List(doc.examples.iter().map(example).collect())),
         (
             "orphanAttachments",
             Value::List(doc.orphan_attachments.iter().map(table_or_fence).collect()),
@@ -83,14 +80,8 @@ fn segment_map(map: &[SegmentOffset]) -> Value {
 
 fn row(r: &Row) -> Value {
     obj(vec![
-        (
-            "cells",
-            Value::List(r.cells.iter().map(|c| Value::from(c.as_str())).collect()),
-        ),
-        (
-            "cellSpans",
-            Value::List(r.cell_spans.iter().map(|s| span(*s)).collect()),
-        ),
+        ("cells", Value::List(r.cells.iter().map(|c| Value::from(c.as_str())).collect())),
+        ("cellSpans", Value::List(r.cell_spans.iter().map(|s| span(*s)).collect())),
         ("span", span(r.span)),
     ])
 }
@@ -251,10 +242,7 @@ pub fn to_plan_artifact(plan: &ExecutionPlan) -> Value {
                     .collect(),
             ),
         ),
-        (
-            "diagnostics",
-            Value::List(plan.diagnostics.iter().map(diagnostic).collect()),
-        ),
+        ("diagnostics", Value::List(plan.diagnostics.iter().map(diagnostic).collect())),
     ])
 }
 
@@ -271,18 +259,12 @@ fn planned_example(source: &str, ex: &PlannedExample) -> Value {
             ),
         ),
         ("span", span(ex.span)),
-        (
-            "expectedOutcome",
-            Value::from(ex.expected_outcome.as_deref().unwrap_or("pass")),
-        ),
+        ("expectedOutcome", Value::from(ex.expected_outcome.as_deref().unwrap_or("pass"))),
     ];
     if let Some(msg) = &ex.expected_error_message {
         pairs.push(("expectedErrorMessage", Value::from(msg.as_str())));
     }
-    pairs.push((
-        "steps",
-        Value::List(ex.steps.iter().map(|s| planned_step(source, s)).collect()),
-    ));
+    pairs.push(("steps", Value::List(ex.steps.iter().map(|s| planned_step(source, s)).collect())));
     obj(pairs)
 }
 
@@ -294,10 +276,7 @@ fn planned_step(source: &str, step: &PlannedStep) -> Value {
         .enumerate()
         .map(|(i, ps)| {
             obj(vec![
-                (
-                    "value",
-                    Value::from(utf16_slice(source, ps.start_offset, ps.end_offset)),
-                ),
+                ("value", Value::from(utf16_slice(source, ps.start_offset, ps.end_offset))),
                 (
                     "parameterType",
                     param_names
@@ -311,14 +290,8 @@ fn planned_step(source: &str, step: &PlannedStep) -> Value {
     let mut pairs = vec![
         ("text", Value::from(step.text.as_str())),
         ("matchSpan", span(step.match_span)),
-        (
-            "paramSpans",
-            Value::List(step.param_spans.iter().map(|s| span(*s)).collect()),
-        ),
-        (
-            "matchedExpression",
-            Value::from(step.step_def.expression.as_str()),
-        ),
+        ("paramSpans", Value::List(step.param_spans.iter().map(|s| span(*s)).collect())),
+        ("matchedExpression", Value::from(step.step_def.expression.as_str())),
         ("args", Value::List(args)),
     ];
     if let Some(t) = &step.data_table {
@@ -497,10 +470,7 @@ pub fn run_conformance(
                 ("exampleName", Value::from(queued.name.as_str())),
                 ("ordinal", vint(ordinal)),
                 ("stepText", Value::from(step.text.as_str())),
-                (
-                    "matchedExpression",
-                    Value::from(step.step_def.expression.as_str()),
-                ),
+                ("matchedExpression", Value::from(step.step_def.expression.as_str())),
                 ("contextKey", context_key),
                 ("outcome", Value::from(step_outcome)),
             ];
