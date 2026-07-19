@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Varar", "Varar\Varar.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Varar.Core.Tests", "Varar.Core.Tests\Varar.Core.Tests.csproj", "{32AD22DA-622A-41AF-A7A8-DD40AB3FF429}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Varar.Tests", "Varar.Tests\Varar.Tests.csproj", "{9FD57FFA-88E3-4402-AC6D-21AF196BAAED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{32AD22DA-622A-41AF-A7A8-DD40AB3FF429}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{32AD22DA-622A-41AF-A7A8-DD40AB3FF429}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{32AD22DA-622A-41AF-A7A8-DD40AB3FF429}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FD57FFA-88E3-4402-AC6D-21AF196BAAED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FD57FFA-88E3-4402-AC6D-21AF196BAAED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FD57FFA-88E3-4402-AC6D-21AF196BAAED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FD57FFA-88E3-4402-AC6D-21AF196BAAED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

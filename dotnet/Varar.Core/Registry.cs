@@ -38,22 +38,37 @@ public sealed record ParameterTypeInput(
     ParameterFormat? Format = null,
     bool UseForSnippets = true);
 
+/// <summary>Produces a fresh initial state for one step file (a fresh context per example).</summary>
+public delegate Value ContextFactory();
+
 /// <summary>
 /// The immutable step/parameter-type registry. Port of <c>registry.ts</c>. <see cref="ParameterTypes"/>
 /// is a shared-mutable cucumber registry (as in the reference); <see cref="Steps"/>,
-/// <see cref="CustomParameterTypes"/>, and <see cref="Formats"/> are copied on each update.
+/// <see cref="CustomParameterTypes"/>, <see cref="Formats"/>, and <see cref="ContextFactories"/>
+/// are copied on each update.
+/// <para>
+/// <see cref="ContextFactories"/> (keyed by the step file's caller path) carries what the
+/// TypeScript facade keeps in its module-scope <c>contextFactoriesByFile</c> — threaded through
+/// the registry here because the .NET port uses the injected-Registrar model (no globals).
+/// </para>
 /// </summary>
 public sealed record Registry(
     ImmutableArray<StepRegistration> Steps,
     ParameterTypeRegistry ParameterTypes,
     ImmutableArray<CustomParameterType> CustomParameterTypes,
-    ImmutableDictionary<string, ParameterFormat> Formats)
+    ImmutableDictionary<string, ParameterFormat> Formats,
+    ImmutableDictionary<string, ContextFactory> ContextFactories)
 {
     public static Registry Create() => new(
         ImmutableArray<StepRegistration>.Empty,
         ParameterTypeRegistry.CreateDefault(),
         ImmutableArray<CustomParameterType>.Empty,
-        ImmutableDictionary<string, ParameterFormat>.Empty);
+        ImmutableDictionary<string, ParameterFormat>.Empty,
+        ImmutableDictionary<string, ContextFactory>.Empty);
+
+    /// <summary>Records the initial-state factory for one step file (keyed by its caller path).</summary>
+    public Registry WithContextFactory(string stepFile, ContextFactory factory) =>
+        this with { ContextFactories = ContextFactories.SetItem(stepFile, factory) };
 
     public static Registry AddStep(Registry registry, StepInput input)
     {
