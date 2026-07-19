@@ -24,7 +24,7 @@ func roman(n int64) (string, bool) {
 	return "", false
 }
 
-func Register(s *varar.Steps) {
+func Register(s *varar.Steps[varar.Value]) {
 	s.Stimulus("I convert {int} to roman numerals", func(state varar.Value, args []varar.Value) (*varar.Value, error) {
 		n, _ := args[0].AsInt()
 		m := map[string]varar.Value{}

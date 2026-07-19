@@ -24,13 +24,13 @@ func (e *HandlerError) Error() string { return e.Message }
 // error) shape:
 //
 //	(nil, nil)  — no assertion / no state change
-//	(&v,  nil)  — a value: for a stimulus the whole next state, for a sensor the
-//	              value compared against the document
+//	(v,   nil)  — a value: for a stimulus the whole next state (any Go value,
+//	              opaque to the core), for a sensor a *Value to compare
 //	(nil, err)  — an author-signalled failure
 //
 // Panicking is equivalent to returning an error: the executor recovers it into
 // the same failure channel, so assertion libraries that panic work unchanged.
-type HandlerFunc func(state Value, args []Value) (*Value, error)
+type HandlerFunc func(state any, args []Value) (any, error)
 
 // Handler is a registered step handler.
 type Handler struct {
@@ -42,14 +42,14 @@ func NewHandler(f HandlerFunc) Handler { return Handler{f: f} }
 
 // NoopHandler is a no-op handler — used where a handler is never invoked.
 func NoopHandler() Handler {
-	return Handler{f: func(Value, []Value) (*Value, error) { return nil, nil }}
+	return Handler{f: func(any, []Value) (any, error) { return nil, nil }}
 }
 
 // Ptr returns a pointer to v — the handler's way to say "this is my value".
 func Ptr(v Value) *Value { return &v }
 
 // call invokes the handler with state + args (captures then trailing attachment).
-func (h Handler) call(state Value, args []Value) (*Value, error) {
+func (h Handler) call(state any, args []Value) (any, error) {
 	if h.f == nil {
 		return nil, nil
 	}

@@ -92,23 +92,33 @@ func primitiveKind(t reflect.Type) bool {
 
 // isRawHandler reports whether fn is the pass-through form
 // func(Value, []Value) (*Value, error).
-func isRawHandler(t reflect.Type) bool {
-	return t.NumIn() == 2 && t.In(0) == valueType && t.In(1) == valueSlice &&
+func isRawHandler(t, ctxType reflect.Type) bool {
+	return t.NumIn() == 2 && t.In(0) == ctxType && t.In(1) == valueSlice &&
 		t.NumOut() == 2 && t.Out(0) == valuePointer && t.Out(1) == errorType
+}
+
+// stateAs reads the opaque state the core threads back as C, yielding C's zero
+// value on the first step of a file (when no factory supplied one).
+func stateAs[C any](state any) C {
+	if c, ok := state.(C); ok {
+		return c
+	}
+	var zero C
+	return zero
 }
 
 // adapt validates handler against kind and returns it as a core HandlerFunc.
 // It panics on a malformed signature — an author wiring error, like a duplicate
 // step expression, surfaced at registration.
-func adapt(handler any, kind core.StepKind, expression string) HandlerFunc {
+func adapt[C any](handler any, kind core.StepKind, expression string) HandlerFunc {
 	if handler == nil {
 		panic(fmt.Sprintf("var: %q: handler must not be nil", expression))
 	}
 	if h, ok := handler.(HandlerFunc); ok {
 		return h
 	}
-	if h, ok := handler.(func(Value, []Value) (*Value, error)); ok {
-		return h
+	if h, ok := handler.(func(C, []Value) (any, error)); ok {
+		return func(state any, args []Value) (any, error) { return h(stateAs[C](state), args) }
 	}
 
 	fn := reflect.ValueOf(handler)
@@ -116,15 +126,34 @@ func adapt(handler any, kind core.StepKind, expression string) HandlerFunc {
 	if t.Kind() != reflect.Func {
 		panic(fmt.Sprintf("var: %q: handler must be a func, got %s", expression, t))
 	}
-	if isRawHandler(t) {
-		return func(state Value, args []Value) (*Value, error) {
-			out := fn.Call([]reflect.Value{reflect.ValueOf(state), reflect.ValueOf(args)})
-			return outValuePointer(out[0]), outError(out[1])
+	if isRawHandler(t, reflect.TypeOf((*C)(nil)).Elem()) {
+		// The raw form's result is a *Value, which is the comparison value for a
+		// sensor but the NEXT STATE for a stimulus — so it only expresses a
+		// stimulus when the state type is Value itself.
+		if kind == core.Stimulus && reflect.TypeOf((*C)(nil)).Elem() != valueType {
+			panic(fmt.Sprintf(
+				"var: %q: the raw []Value form returns *varar.Value, which cannot be the next state of type %s — take and return %s instead",
+				expression, reflect.TypeOf((*C)(nil)).Elem(), reflect.TypeOf((*C)(nil)).Elem()))
+		}
+		return func(state any, args []Value) (any, error) {
+			out := fn.Call([]reflect.Value{reflect.ValueOf(stateAs[C](state)), reflect.ValueOf(args)})
+			p, err := outValuePointer(out[0]), outError(out[1])
+			if err != nil {
+				return nil, err
+			}
+			if kind == core.Stimulus {
+				if p == nil {
+					return NullValue, nil
+				}
+				return *p, nil
+			}
+			return p, nil
 		}
 	}
-	if t.NumIn() < 1 || t.In(0) != valueType {
-		panic(fmt.Sprintf("var: %q: handler's first parameter must be the state (varar.Value), got %s",
-			expression, t))
+	ctxType := reflect.TypeOf((*C)(nil)).Elem()
+	if t.NumIn() < 1 || t.In(0) != ctxType {
+		panic(fmt.Sprintf("var: %q: handler's first parameter must be the state (%s), got %s",
+			expression, ctxType, t))
 	}
 
 	slots := t.NumIn() - 1
@@ -141,13 +170,13 @@ func adapt(handler any, kind core.StepKind, expression string) HandlerFunc {
 
 	if kind == core.Stimulus {
 		// A stimulus returns the whole next state, whatever its arity.
-		if t.NumOut() != 2 || t.Out(0) != valueType {
+		if t.NumOut() != 2 || t.Out(0) != ctxType {
 			panic(fmt.Sprintf(
-				"var: %q: a stimulus must return (varar.Value, error) — the whole next state — got %s",
-				expression, t))
+				"var: %q: a stimulus must return (%s, error) — the whole next state — got %s",
+				expression, ctxType, t))
 		}
-		return func(state Value, args []Value) (*Value, error) {
-			in, err := coerceArgs(fn, t, slots, state, args, expression)
+		return func(state any, args []Value) (any, error) {
+			in, err := coerceArgs[C](fn, t, slots, state, args, expression)
 			if err != nil {
 				return nil, err
 			}
@@ -155,8 +184,7 @@ func adapt(handler any, kind core.StepKind, expression string) HandlerFunc {
 			if err := outError(out[1]); err != nil {
 				return nil, err
 			}
-			next := out[0].Interface().(Value)
-			return core.Ptr(next), nil
+			return out[0].Interface(), nil
 		}
 	}
 
@@ -180,8 +208,8 @@ func adapt(handler any, kind core.StepKind, expression string) HandlerFunc {
 				expression, i+1, t.Out(i), i+1, t.In(i+1)))
 		}
 	}
-	return func(state Value, args []Value) (*Value, error) {
-		in, err := coerceArgs(fn, t, slots, state, args, expression)
+	return func(state any, args []Value) (any, error) {
+		in, err := coerceArgs[C](fn, t, slots, state, args, expression)
 		if err != nil {
 			return nil, err
 		}
@@ -205,13 +233,13 @@ func adapt(handler any, kind core.StepKind, expression string) HandlerFunc {
 
 // coerceArgs builds the reflect call arguments, checking the slot count the
 // expression actually produced against the handler's arity.
-func coerceArgs(fn reflect.Value, t reflect.Type, slots int, state Value, args []Value, expression string) ([]reflect.Value, error) {
+func coerceArgs[C any](fn reflect.Value, t reflect.Type, slots int, state any, args []Value, expression string) ([]reflect.Value, error) {
 	if len(args) != slots {
 		return nil, fmt.Errorf("var: %q has %d slot(s), but the handler takes %d",
 			expression, len(args), slots)
 	}
 	in := make([]reflect.Value, slots+1)
-	in[0] = reflect.ValueOf(state)
+	in[0] = reflect.ValueOf(stateAs[C](state))
 	for i, arg := range args {
 		v, err := toGo(arg, t.In(i+1), i)
 		if err != nil {

@@ -52,24 +52,35 @@ const (
 // definitions read as s.Stimulus(expr, …) / s.Sensor(expr, …) — the call name
 // IS the kind, matching every other port (and what the LSP/tree-sitter dialect
 // extracts).
-type Steps struct {
+// Steps is the author API, parameterised by C — the type of the state threaded
+// through this file's steps. Pick your own struct and handlers speak it
+// directly, never varar.Value:
+//
+//	type Ctx struct{ Loans []Loan; Fee int }
+//
+//	func Register(s *varar.Steps[Ctx]) {
+//	    s.Stimulus("borrowed {title}, due back on {date}",
+//	        func(ctx Ctx, title string, due Date) (Ctx, error) { … })
+//	}
+//
+// Use varar.Value as C for dynamic, schemaless state.
+type Steps[C any] struct {
 	registry core.Registry
 }
 
 // NewSteps is a builder over a fresh registry.
-func NewSteps() *Steps {
-	return &Steps{registry: core.CreateRegistry()}
+func NewSteps[C any]() *Steps[C] {
+	return &Steps[C]{registry: core.CreateRegistry()}
 }
 
 // FromRegistry is a builder that continues folding into an existing registry.
-func FromRegistry(registry core.Registry) *Steps {
-	return &Steps{registry: registry}
+func FromRegistry[C any](registry core.Registry) *Steps[C] {
+	return &Steps[C]{registry: registry}
 }
 
 // addAt registers a step with an explicitly supplied source location, so the
-// generic typed constructors in typed.go (which add a call frame) can pass
-// their own caller rather than reporting this file.
-func (s *Steps) addAt(expression string, handler HandlerFunc, kind core.StepKind, file string, line int) *Steps {
+// exported wrappers can pass their own caller rather than reporting this file.
+func (s *Steps[C]) addAt(expression string, handler HandlerFunc, kind core.StepKind, file string, line int) *Steps[C] {
 	k := kind
 	next, err := core.AddStep(s.registry, expression, file, line, core.NewHandler(handler), &k)
 	if err != nil {
@@ -86,14 +97,14 @@ func (s *Steps) addAt(expression string, handler HandlerFunc, kind core.StepKind
 // state, the rest are the step's slots — returning (Value, error):
 //
 //	s.Stimulus("I greet {string}",
-//	    func(state varar.Value, name string) (varar.Value, error) { … })
+//	    func(ctx Ctx, name string) (Ctx, error) { … })
 //
-// The raw form func(Value, []Value) (*Value, error) is also accepted. The
+// The raw form func(C, []Value) (any, error) is also accepted. The
 // signature is validated at registration; the source file and line are captured
 // from the call site.
-func (s *Steps) Stimulus(expression string, handler any) *Steps {
+func (s *Steps[C]) Stimulus(expression string, handler any) *Steps[C] {
 	_, file, line, _ := runtime.Caller(1)
-	return s.addAt(expression, adapt(handler, core.Stimulus, expression), core.Stimulus, file, line)
+	return s.addAt(expression, adapt[C](handler, core.Stimulus, expression), core.Stimulus, file, line)
 }
 
 // Sensor registers a sensor: the read-only assertion, whose return is compared
@@ -104,19 +115,19 @@ func (s *Steps) Stimulus(expression string, handler any) *Steps {
 // same type as that slot) plus an error:
 //
 //	s.Sensor("The square of {int} is {int}.",
-//	    func(state varar.Value, n, square int) (int, int, error) { return n, n * n, nil })
+//	    func(ctx Ctx, n, square int) (int, int, error) { return n, n * n, nil })
 //
-// The raw form func(Value, []Value) (*Value, error) is also accepted. The
+// The raw form func(C, []Value) (any, error) is also accepted. The
 // signature is validated at registration; the source file and line are captured
 // from the call site.
-func (s *Steps) Sensor(expression string, handler any) *Steps {
+func (s *Steps[C]) Sensor(expression string, handler any) *Steps[C] {
 	_, file, line, _ := runtime.Caller(1)
-	return s.addAt(expression, adapt(handler, core.Sensor, expression), core.Sensor, file, line)
+	return s.addAt(expression, adapt[C](handler, core.Sensor, expression), core.Sensor, file, line)
 }
 
 // Param declares a custom parameter type. Pass a non-nil format to also render
 // values for diffs, or nil for none — the single param shape every port shares.
-func (s *Steps) Param(name, regexp string, parse ParseFn, format FormatFn) *Steps {
+func (s *Steps[C]) Param(name, regexp string, parse ParseFn, format FormatFn) *Steps[C] {
 	if format != nil {
 		s.registry = core.DefineParameterTypeWithFormat(s.registry, name, regexp, parse, format)
 	} else {
@@ -126,6 +137,6 @@ func (s *Steps) Param(name, regexp string, parse ParseFn, format FormatFn) *Step
 }
 
 // Registry yields the accumulated registry.
-func (s *Steps) Registry() core.Registry {
+func (s *Steps[C]) Registry() core.Registry {
 	return s.registry
 }

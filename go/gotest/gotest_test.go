@@ -13,7 +13,7 @@ import (
 func withStep() core.Registry {
 	k := core.Stimulus
 	r, err := core.AddStep(core.CreateRegistry(), "I greet {string}", "s.go", 1,
-		core.NewHandler(func(state core.Value, args []core.Value) (*core.Value, error) { return nil, nil }), &k)
+		core.NewHandler(func(state any, args []core.Value) (any, error) { return nil, nil }), &k)
 	if err != nil {
 		panic(err)
 	}
@@ -22,7 +22,7 @@ func withStep() core.Registry {
 
 func emptyReg() core.Registry { return core.CreateRegistry() }
 
-func nullContext(string) core.Value { return core.NullValue }
+func nullContext(string) any { return core.NullValue }
 
 func setup(t *testing.T) string {
 	t.Helper()

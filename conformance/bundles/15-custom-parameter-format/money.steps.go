@@ -12,7 +12,7 @@ import (
 	"github.com/varar-dev/varar-go/varar"
 )
 
-func Register(s *varar.Steps) {
+func Register(s *varar.Steps[varar.Value]) {
 	parse := func(g []string) varar.Value {
 		raw := strings.TrimPrefix(g[0], "£")
 		value, err := strconv.ParseFloat(raw, 64)

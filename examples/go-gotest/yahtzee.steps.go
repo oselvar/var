@@ -8,12 +8,12 @@ import (
 	"github.com/varar-dev/varar-go/varar"
 )
 
-func registerYahtzee(s *varar.Steps) {
+func registerYahtzee(s *varar.Steps[Ctx]) {
 	// Header-bound row: the row arrives as a map and the return is compared by
 	// COLUMN, not positionally by slot — so the typed form composes but its
 	// (Value) -> (Value) signature says less than the explicit form does.
 	s.Sensor("Examples of dice, category and score",
-		func(state varar.Value, row varar.Value) (varar.Value, error) {
+		func(ctx Ctx, row varar.Value) (varar.Value, error) {
 			m := row.CloneMap()
 			var dice []int64
 			for _, d := range strings.Split(m["dice"].MustString(), ",") {

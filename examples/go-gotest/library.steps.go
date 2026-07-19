@@ -7,34 +7,16 @@ import (
 	"github.com/varar-dev/varar-go/varar"
 )
 
-// Date's own DecodeVarValue/EncodeVarValue (see library_domain.go) are the only
-// place that knows how a {date} maps to a Value, so steps can take a Date
-// directly and these helpers just delegate.
-func valueDate(v varar.Value) Date {
-	var d Date
-	if err := d.DecodeVarValue(v); err != nil {
-		panic(err)
-	}
-	return d
-}
-
-func loanDue(loan varar.Value) Date {
-	return valueDate(loan.CloneMap()["due"])
-}
-
-func loansOf(state varar.Value) []varar.Value {
-	if l, ok := state.CloneMap()["loans"]; ok {
-		if list, ok := l.AsList(); ok {
-			return list
-		}
-	}
-	return nil
-}
-
-func registerLibrary(s *varar.Steps) {
+func registerLibrary(s *varar.Steps[Ctx]) {
 	s.Param("date", `[A-Z][a-z]+ \d{1,2}, \d{4}`,
 		func(g []string) varar.Value { return ParseDate(g[0]).EncodeVarValue() },
-		func(v varar.Value) (string, bool) { return FormatDate(valueDate(v)), true })
+		func(v varar.Value) (string, bool) {
+			var d Date
+			if err := d.DecodeVarValue(v); err != nil {
+				return "", false
+			}
+			return FormatDate(d), true
+		})
 
 	s.Param("money", `£\d+(?:\.\d+)?|\d+p`,
 		func(g []string) varar.Value { return varar.IntValue(ParseMoney(g[0])) },
@@ -47,8 +29,7 @@ func registerLibrary(s *varar.Steps) {
 
 	s.Param("title", `\*[^*]+\*`,
 		func(g []string) varar.Value {
-			inner := strings.TrimSuffix(strings.TrimPrefix(g[0], "*"), "*")
-			return varar.StrValue(inner)
+			return varar.StrValue(strings.TrimSuffix(strings.TrimPrefix(g[0], "*"), "*"))
 		},
 		func(v varar.Value) (string, bool) {
 			if t, ok := v.AsString(); ok {
@@ -57,65 +38,46 @@ func registerLibrary(s *varar.Steps) {
 			return "", false
 		})
 
-	s.Stimulus("borrowed {title}, due back on {date}",
-		func(state varar.Value, title string, due Date) (varar.Value, error) {
-			m := state.CloneMap()
-			loans := append(loansOf(state), varar.MapValue(map[string]varar.Value{
-				"title": varar.StrValue(title),
-				"due":   due.EncodeVarValue(),
-			}))
-			m["loans"] = varar.ListOf(loans)
-			return varar.MapValue(m), nil
-		})
+	s.Stimulus("borrowed {title}, due back on {date}", func(ctx Ctx, title string, due Date) (Ctx, error) {
+		ctx.Loans = append(append([]Loan{}, ctx.Loans...), Loan{Title: title, Due: due})
+		return ctx, nil
+	})
 
-	s.Stimulus("returns it on {date}", func(state varar.Value, returned Date) (varar.Value, error) {
-		var fee int64
-		for _, loan := range loansOf(state) {
-			fee += LateFee(loanDue(loan), returned)
+	s.Stimulus("returns it on {date}", func(ctx Ctx, returned Date) (Ctx, error) {
+		fee := 0
+		for _, loan := range ctx.Loans {
+			fee += int(LateFee(loan.Due, returned))
 		}
-		m := state.CloneMap()
-		m["fee"] = varar.IntValue(fee)
-		return varar.MapValue(m), nil
+		ctx.Fee = fee
+		return ctx, nil
 	})
 
-	// {money} parses to pennies, so the slot has a primitive spelling: the
-	// observed fee goes back out as an int and the core compares it.
-	s.Sensor("owes a {money} late fee", func(state varar.Value, expected int) (int, error) {
-		fee, _ := state.CloneMap()["fee"].AsInt()
-		return int(fee), nil
+	s.Sensor("owes a {money} late fee", func(ctx Ctx, expected int) (int, error) {
+		return ctx.Fee, nil
 	})
 
-	s.Sensor("{money} for each day overdue", func(state varar.Value, expected int) (int, error) {
+	s.Sensor("{money} for each day overdue", func(ctx Ctx, expected int) (int, error) {
 		return int(FeePerDay), nil
 	})
 
-	s.Stimulus("asks to borrow {title} on {date}",
-		func(state varar.Value, title string, on Date) (varar.Value, error) {
-			var dues []Date
-			for _, loan := range loansOf(state) {
-				dues = append(dues, loanDue(loan))
-			}
-			m := state.CloneMap()
-			m["granted"] = varar.BoolValue(MayBorrow(dues, on))
-			return varar.MapValue(m), nil
-		})
+	s.Stimulus("asks to borrow {title} on {date}", func(ctx Ctx, title string, on Date) (Ctx, error) {
+		dues := make([]Date, len(ctx.Loans))
+		for i, loan := range ctx.Loans {
+			dues[i] = loan.Due
+		}
+		ctx.Granted = MayBorrow(dues, on)
+		return ctx, nil
+	})
 
-	s.Sensor("the library refuses", func(state varar.Value) error {
-		if g, ok := state.CloneMap()["granted"]; ok {
-			if b, _ := g.AsBool(); b {
-				return errors.New("expected the library to refuse")
-			}
+	s.Sensor("the library refuses", func(ctx Ctx) error {
+		if ctx.Granted {
+			return errors.New("expected the library to refuse")
 		}
 		return nil
 	})
 
-	s.Sensor("the library agrees", func(state varar.Value) error {
-		g, ok := state.CloneMap()["granted"]
-		granted := false
-		if ok {
-			granted, _ = g.AsBool()
-		}
-		if !granted {
+	s.Sensor("the library agrees", func(ctx Ctx) error {
+		if !ctx.Granted {
 			return errors.New("expected the library to agree")
 		}
 		return nil

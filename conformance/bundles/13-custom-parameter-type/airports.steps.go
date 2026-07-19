@@ -8,7 +8,7 @@ import (
 	"github.com/varar-dev/varar-go/varar"
 )
 
-func Register(s *varar.Steps) {
+func Register(s *varar.Steps[varar.Value]) {
 	// Custom {airport} parameter type: IATA code, lowercased by parse. The
 	// sensor asserts the lowercasing, so an identity parse would fail.
 	s.Param("airport", "[A-Z]{3}", func(g []string) varar.Value {

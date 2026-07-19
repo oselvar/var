@@ -44,19 +44,19 @@ func TestRegistrationRejectsMalformedHandlers(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			mustPanic(t, c.want, func() { adapt(c.handler, core.Sensor, "expr") })
+			mustPanic(t, c.want, func() { adapt[Value](c.handler, core.Sensor, "expr") })
 		})
 	}
-	mustPanic(t, "must return (varar.Value, error)", func() {
-		adapt(func(state Value, n int) (int, error) { return n, nil }, core.Stimulus, "expr")
+	mustPanic(t, "must return (core.Value, error)", func() {
+		adapt[Value](func(state Value, n int) (int, error) { return n, nil }, core.Stimulus, "expr")
 	})
 }
 
 func TestRawHandlerPassesThroughUntouched(t *testing.T) {
-	raw := func(state Value, args []Value) (*Value, error) { return core.Ptr(core.IntValue(1)), nil }
-	h := adapt(raw, core.Sensor, "expr")
+	raw := func(state Value, args []Value) (any, error) { return core.Ptr(core.IntValue(1)), nil }
+	h := adapt[Value](raw, core.Sensor, "expr")
 	got, err := h(core.NullValue, nil)
-	if err != nil || got == nil || !core.ValueEqual(*got, core.IntValue(1)) {
+	if err != nil || !core.ValueEqual(*(got.(*Value)), core.IntValue(1)) {
 		t.Errorf("got %v, %v", got, err)
 	}
 }
@@ -89,7 +89,7 @@ func TestToGoConvertsSupportedTypes(t *testing.T) {
 
 // A slot whose runtime kind does not match the declared type fails the step.
 func TestMismatchedSlotTypeFailsTheStep(t *testing.T) {
-	s := NewSteps()
+	s := NewSteps[Value]()
 	s.Sensor("the result is {word}", func(state Value, n int) (int, error) { return n, nil })
 	plan := core.Plan(core.Parse("t.md", "the result is IV."), s.Registry())
 	failure := core.ExecutePlan(plan, core.ExecutePorts{})
@@ -104,7 +104,7 @@ func TestMismatchedSlotTypeFailsTheStep(t *testing.T) {
 // The slot count is only known from the document, so an arity mismatch fails
 // the step rather than registration.
 func TestSlotCountMismatchFailsTheStep(t *testing.T) {
-	s := NewSteps()
+	s := NewSteps[Value]()
 	s.Sensor("I have {int} cukes", func(state Value, a, b int) (int, int, error) { return a, b, nil })
 	plan := core.Plan(core.Parse("t.md", "I have 5 cukes."), s.Registry())
 	failure := core.ExecutePlan(plan, core.ExecutePorts{})
@@ -170,7 +170,7 @@ func TestNamedPrimitiveSlotConverts(t *testing.T) {
 }
 
 func TestDomainTypeIsAcceptedAtRegistration(t *testing.T) {
-	s := NewSteps()
+	s := NewSteps[Value]()
 	s.Param("date", `[A-Z][a-z]+ \d{1,2}, \d{4}`, func(g []string) Value {
 		return stamp{Year: 2026, Day: 12}.EncodeVarValue()
 	}, nil)
@@ -188,6 +188,6 @@ func TestDomainTypeIsAcceptedAtRegistration(t *testing.T) {
 func TestEncoderlessTypeRejectedAsSensorSlot(t *testing.T) {
 	type opaque struct{ n int }
 	mustPanic(t, "cannot be read from a slot", func() {
-		adapt(func(state Value, o opaque) (opaque, error) { return o, nil }, core.Sensor, "expr")
+		adapt[Value](func(state Value, o opaque) (opaque, error) { return o, nil }, core.Sensor, "expr")
 	})
 }

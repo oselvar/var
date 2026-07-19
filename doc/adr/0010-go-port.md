@@ -46,8 +46,24 @@ reader; drift is unit-gated against the shared FNV-1a / lockfile vectors.
 - **Registration:** injected **Steps builder** (`Register(*varar.Steps)`), like
   Rust/Java/Kotlin/C# — no module-scope accumulator. Go has no clean
   import-for-side-effect story, and the builder keeps registration explicit.
-- **State evolution:** **full-replacement** immutable `Value` (a stimulus returns
-  the whole next state), like Rust/Java/C#.
+- **State evolution:** **full-replacement** (a stimulus returns the whole next
+  state), like Rust/Java/C# — but the state is the author's own type, not a
+  dynamic `Value`. `Steps` is generic in it:
+
+  ```go
+  type Ctx struct{ Loans []Loan; Fee int }
+
+  func Register(s *varar.Steps[Ctx]) {
+      s.Stimulus("returns it on {date}",
+          func(ctx Ctx, returned Date) (Ctx, error) { … })
+  }
+  ```
+
+  `varar-core` therefore treats the state as an opaque `any`: it threads it
+  between a file's steps and replaces it wholesale, but never compares,
+  serializes, or inspects it — no conformance artifact contains the state. Use
+  `Steps[varar.Value]` for dynamic, schemaless state (what the conformance
+  fixtures do).
 - **Step source location:** captured from the call site via `runtime.Caller`
   (Go's `#[track_caller]` analogue); the file's stem (`numerals.steps`) is the
   cross-language trace `stepFile`.

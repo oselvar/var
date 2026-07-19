@@ -35,7 +35,7 @@ func ExampleNames(plan core.ExecutionPlan) []string {
 
 // RunExample runs a single example by index. contextFactory maps a step file to
 // its fresh initial state. Returns nil on pass, the failure on fail.
-func RunExample(plan core.ExecutionPlan, contextFactory func(file string) core.Value, index int) *core.StepFailure {
+func RunExample(plan core.ExecutionPlan, contextFactory func(file string) any, index int) *core.StepFailure {
 	ports := core.ExecutePorts{
 		Reporter:      func(core.Diagnostic) {},
 		CreateContext: contextFactory,

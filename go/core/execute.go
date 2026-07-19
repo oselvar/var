@@ -45,7 +45,7 @@ type StepObservation struct {
 // per-step instrumentation; Reporter receives every planning diagnostic.
 type ExecutePorts struct {
 	Reporter      func(Diagnostic)
-	CreateContext func(file string) Value
+	CreateContext func(file string) any
 	Observer      func(StepObservation)
 }
 
@@ -93,7 +93,7 @@ func runExample(plan ExecutionPlan, ex PlannedExample, exampleIndex int, ports E
 	source := plan.VarDoc.Source
 	steps := ex.Steps
 
-	stateByFile := map[string]Value{}
+	stateByFile := map[string]any{}
 	var lastReturn *Value
 	var thrown *StepFailure
 
@@ -120,21 +120,17 @@ func runExample(plan ExecutionPlan, ex PlannedExample, exampleIndex int, ports E
 			e := handlerStepError(*herr)
 			stepError = &e
 		} else {
-			lastReturn = returned
+			lastReturn = asValuePointer(returned)
 			switch {
 			case step.StepDef.Kind == nil:
 				e := returnShapeError("unknown step kind: null")
 				stepError = &e
 			case *step.StepDef.Kind == Stimulus:
-				if returned != nil {
-					stateByFile[file] = *returned
-				} else {
-					stateByFile[file] = NullValue
-				}
+				stateByFile[file] = returned
 			case *step.StepDef.Kind == Sensor:
 				// Header-bound rows are checked after the loop via RowChecks.
 				if ex.RowChecks == nil {
-					stepError = checkSensorReturn(source, step, returned)
+					stepError = checkSensorReturn(source, step, asValuePointer(returned))
 				}
 			}
 		}
@@ -186,11 +182,26 @@ func runExample(plan ExecutionPlan, ex PlannedExample, exampleIndex int, ports E
 	return thrown
 }
 
-func createContext(ports ExecutePorts, file string) Value {
+func createContext(ports ExecutePorts, file string) any {
 	if ports.CreateContext != nil {
 		return ports.CreateContext(file)
 	}
-	return NullValue
+	return nil
+}
+
+// asValuePointer reads a handler result as a comparable Value. A stimulus's
+// next state may be any Go value and is never read this way; a sensor's result
+// is always a *Value (the facade boxes it), and nil means "no assertion".
+func asValuePointer(result any) *Value {
+	switch v := result.(type) {
+	case nil:
+		return nil
+	case *Value:
+		return v
+	case Value:
+		return &v
+	}
+	return nil
 }
 
 func observe(ports ExecutePorts, observation StepObservation) {
@@ -316,7 +327,7 @@ func checkSensorReturn(source string, step PlannedStep, returned *Value) *StepEr
 // recovering a panic (the assertion-style failure channel) — into a
 // HandlerError. Returns (returned, nil) on success where returned is nil for
 // "no value", or (nil, err) on failure.
-func invokeResolve(handler Handler, state Value, args []Value) (returned *Value, herr *HandlerError) {
+func invokeResolve(handler Handler, state any, args []Value) (returned any, herr *HandlerError) {
 	defer func() {
 		if r := recover(); r != nil {
 			returned = nil

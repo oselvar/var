@@ -73,7 +73,7 @@ func TestBaselineStoreRoundTripsAndReconcileWritesLock(t *testing.T) {
 
 	k := core.Stimulus
 	registry, err := core.AddStep(core.CreateRegistry(), "I greet {string}", "s.go", 1,
-		core.NewHandler(func(state core.Value, args []core.Value) (*core.Value, error) { return core.Ptr(state), nil }), &k)
+		core.NewHandler(func(state any, args []core.Value) (any, error) { return state, nil }), &k)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -7,8 +7,8 @@ import (
 	"github.com/varar-dev/varar-go/varar"
 )
 
-func registerRomanNumerals(s *varar.Steps) {
-	s.Sensor("a decimal and a roman number", func(state varar.Value, args []varar.Value) (*varar.Value, error) {
+func registerRomanNumerals(s *varar.Steps[Ctx]) {
+	s.Sensor("a decimal and a roman number", func(ctx Ctx, args []varar.Value) (any, error) {
 		row := args[0].CloneMap()
 		decimal := row["decimal"].MustString()
 		n, err := strconv.Atoi(decimal)

@@ -7,7 +7,7 @@ import (
 	"github.com/varar-dev/varar-go/varar"
 )
 
-func Register(s *varar.Steps) {
+func Register(s *varar.Steps[varar.Value]) {
 	// Fails with a message that does NOT contain the expected substring
 	// "expected message", so the expected-failure is NOT satisfied → the
 	// example fails.

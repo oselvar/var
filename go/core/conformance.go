@@ -271,13 +271,13 @@ func fileStem(path string) string {
 
 // RunConformance runs one bundle end-to-end: plan, execute (recording
 // observations), and project all four wire artifacts. Port of runConformance.
-func RunConformance(doc VarDoc, registry Registry, stateFactory func() Value) BundleArtifacts {
+func RunConformance(doc VarDoc, registry Registry, stateFactory func() any) BundleArtifacts {
 	execution := Plan(doc, registry)
 
 	observed := map[int][]StepObservation{}
 	ports := ExecutePorts{
 		Reporter:      func(Diagnostic) {},
-		CreateContext: func(string) Value { return stateFactory() },
+		CreateContext: func(string) any { return stateFactory() },
 		Observer: func(o StepObservation) {
 			observed[o.ExampleIndex] = append(observed[o.ExampleIndex], o)
 		},

@@ -14,7 +14,7 @@ func countOf(state varar.Value) int {
 	return 0
 }
 
-func Register(s *varar.Steps) {
+func Register(s *varar.Steps[varar.Value]) {
 	s.Stimulus("I increment", func(state varar.Value) (varar.Value, error) {
 		return varar.MapValue(map[string]varar.Value{"count": varar.IntValue(int64(countOf(state) + 1))}), nil
 	})

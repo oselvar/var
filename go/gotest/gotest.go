@@ -28,7 +28,7 @@ import (
 type BuildRegistry func() core.Registry
 
 // ContextFactory maps a step file to its fresh initial state.
-type ContextFactory func(file string) core.Value
+type ContextFactory func(file string) any
 
 // Case is one enumerated test case: either an example (Run non-nil) or a drift
 // finding (DriftMessage non-empty).

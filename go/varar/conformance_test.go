@@ -35,7 +35,7 @@ import (
 )
 
 type fixture struct {
-	register func(*varar.Steps)
+	register func(*varar.Steps[varar.Value])
 	state    func() varar.Value
 }
 
@@ -90,7 +90,7 @@ func registryFor(t *testing.T, name string) core.Registry {
 	if !ok {
 		t.Fatalf("no Go step fixture for bundle %s", name)
 	}
-	s := varar.NewSteps()
+	s := varar.NewSteps[varar.Value]()
 	f.register(s)
 	return s.Registry()
 }
@@ -134,10 +134,10 @@ func TestTraceMatchesGolden(t *testing.T) {
 	for _, name := range bundleNames(t) {
 		t.Run(name, func(t *testing.T) {
 			f := fixtures[name]
-			s := varar.NewSteps()
+			s := varar.NewSteps[varar.Value]()
 			f.register(s)
 			doc := core.Parse("example.md", sourceOf(t, name))
-			artifacts := core.RunConformance(doc, s.Registry(), f.state)
+			artifacts := core.RunConformance(doc, s.Registry(), func() any { return f.state() })
 			actual := core.CanonicalStringify(artifacts.Trace)
 			if want := golden(t, name, "trace.json"); actual != want {
 				t.Errorf("trace.json mismatch for %s\n--- got ---\n%s\n--- want ---\n%s", name, actual, want)
