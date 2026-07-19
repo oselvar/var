@@ -12,8 +12,8 @@ programmer or coding agent that breaks the oath gets caught, every time.
 
 Varar is a multi-language project with the same behaviour across five ports —
 TypeScript, Java, Kotlin, Python, and Ruby — verified by a shared,
-language-neutral [conformance](conformance/) corpus. Two further ports, Rust and
-C#, are in progress.
+language-neutral [conformance](conformance/) corpus. Three further ports — Rust,
+C#, and Go — are in progress.
 
 ## Build & coverage
 
@@ -30,6 +30,7 @@ workflow on `main`; coverage is distilled from each tool's native report into
 | Ruby | [![Build](https://github.com/varar-dev/varar/actions/workflows/ruby.yml/badge.svg?branch=main)](https://github.com/varar-dev/varar/actions/workflows/ruby.yml) | ![90.9%](https://img.shields.io/badge/coverage-90.9%25-brightgreen) | ![n/a](https://img.shields.io/badge/coverage-n%2Fa-lightgrey) |
 | Rust | [![Build](https://github.com/varar-dev/varar/actions/workflows/rust.yml/badge.svg?branch=main)](https://github.com/varar-dev/varar/actions/workflows/rust.yml) | ![89.8%](https://img.shields.io/badge/coverage-89.8%25-green) | ![n/a](https://img.shields.io/badge/coverage-n%2Fa-lightgrey) |
 | C# | [![Build](https://github.com/varar-dev/varar/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/varar-dev/varar/actions/workflows/dotnet.yml) | ![83.1%](https://img.shields.io/badge/coverage-83.1%25-green) | ![72.8%](https://img.shields.io/badge/coverage-72.8%25-yellowgreen) |
+| Go | [![Build](https://github.com/varar-dev/varar/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/varar-dev/varar/actions/workflows/go.yml) | ![80.4%](https://img.shields.io/badge/coverage-80.4%25-green) | ![n/a](https://img.shields.io/badge/coverage-n%2Fa-lightgrey) |
 <!-- coverage:end -->
 
 ## Development

@@ -96,9 +96,15 @@ func walk(dir string, out *[]string) {
 	}
 	for _, e := range entries {
 		p := filepath.Join(dir, e.Name())
-		if e.IsDir() {
+		// os.Stat follows symlinks, matching the other runners' is_dir/is_file
+		// (a symlinked `.md` spec must be discovered).
+		info, err := os.Stat(p)
+		if err != nil {
+			continue
+		}
+		if info.IsDir() {
 			walk(p, out)
-		} else if e.Type().IsRegular() {
+		} else if info.Mode().IsRegular() {
 			*out = append(*out, p)
 		}
 	}

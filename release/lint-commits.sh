@@ -21,14 +21,19 @@ CC_RE="^($TYPES)(\\(([^)]+)\\))?(!)?: .+$"
 # decides which consumer section the entry lands in, so it must be one of
 # these (optionally `/package`, e.g. ts/var-vitest). Work that ships nothing
 # to a consumer (website, CI, tooling) is a chore/docs/build commit instead.
-CONSUMER_SCOPE='^(ts|py|java|ruby|vscode|spec)(/[a-z0-9._-]+)?$'
+# The always-shipping consumer scopes; parked ports (below) join once live.
+SCOPES=(ts py java ruby vscode spec)
 # .NET is parked (DOTNET_NUGET_ENABLED in lib.sh): `dotnet` becomes a
 # changelog-visible consumer scope only once NuGet publishing goes live, in
 # lock-step with the 68-nuget.sh target and the varar-examples csharp pin.
 # Until then dotnet work must be chore(dotnet): — it ships nothing to a consumer.
-if [[ "${DOTNET_NUGET_ENABLED:-0}" == "1" ]]; then
-  CONSUMER_SCOPE='^(ts|py|java|ruby|vscode|spec|dotnet)(/[a-z0-9._-]+)?$'
-fi
+[[ "${DOTNET_NUGET_ENABLED:-0}" == "1" ]] && SCOPES+=(dotnet)
+# Go is parked (GO_MODULES_ENABLED in lib.sh): `go` becomes a changelog-visible
+# consumer scope only once module tag publishing goes live, in lock-step with
+# the 69-go-modules.sh target and the varar-examples go pin. Until then Go work
+# must be chore(go): — it ships nothing to a consumer.
+[[ "${GO_MODULES_ENABLED:-0}" == "1" ]] && SCOPES+=(go)
+CONSUMER_SCOPE="^($(IFS='|'; echo "${SCOPES[*]}"))(/[a-z0-9._-]+)?\$"
 
 # Non-conventional commits already on main (pre-convention, or slipped in via
 # a merged PR) — exempted because pushed history can't be reworded.

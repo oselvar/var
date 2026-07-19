@@ -14,6 +14,8 @@
 #   Rust        rust/coverage/lcov.info            (cargo-llvm-cov → lcov)
 #   C#          dotnet/coverage/lcov.info          (coverlet Cobertura, both test
 #                                                   projects merged by ReportGenerator)
+#   Go          go/coverage/lcov.info              (go test -coverpkg → lcov via
+#                                                   scripts/gocover-to-lcov.sh)
 #
 # lcov gives LF/LH (lines found/hit) and BRF/BRH (branches); JaCoCo's CSV gives
 # per-class LINE_/BRANCH_ MISSED+COVERED columns we sum. A missing report yields
@@ -96,8 +98,12 @@ RUST_JSON=$(port_json rust "Rust"              "$(lcov_totals rust/coverage/lcov
 # ReportGenerator (see the Makefile coverage target). Absent it, the row renders
 # n/a but still carries its build badge.
 CS_JSON=$(port_json csharp "C#"                "$(lcov_totals dotnet/coverage/lcov.info)")
+# Go: `go test -coverpkg` emits a Go profile, converted to this lcov by
+# scripts/gocover-to-lcov.sh (see the Makefile coverage target). Absent it, the
+# row renders n/a but still carries its build badge.
+GO_JSON=$(port_json go     "Go"                "$(lcov_totals go/coverage/lcov.info)")
 
-jq -n --slurpfile a <(printf '%s\n%s\n%s\n%s\n%s\n%s\n' "$TS_JSON" "$JVM_JSON" "$PY_JSON" "$RB_JSON" "$RUST_JSON" "$CS_JSON") \
+jq -n --slurpfile a <(printf '%s\n%s\n%s\n%s\n%s\n%s\n%s\n' "$TS_JSON" "$JVM_JSON" "$PY_JSON" "$RB_JSON" "$RUST_JSON" "$CS_JSON" "$GO_JSON") \
   '$a' > "$JSON_OUT"
 
 echo "Wrote $JSON_OUT"
@@ -139,6 +145,7 @@ build_badge() {
     ruby)   wf=ruby ;;
     rust)   wf=rust ;;
     csharp) wf=dotnet ;;
+    go)     wf=go ;;
     *)      wf="$1" ;;
   esac
   printf '[![Build](https://github.com/varar-dev/varar/actions/workflows/%s.yml/badge.svg?branch=main)](https://github.com/varar-dev/varar/actions/workflows/%s.yml)' "$wf" "$wf"

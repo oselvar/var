@@ -22,6 +22,7 @@ whole team, and checked against the code on every test run.
 | [`ruby-minitest`](ruby-minitest) | Ruby + Minitest | `bundle exec rake test` | [![ruby-minitest](https://github.com/varar-dev/varar-examples/actions/workflows/ruby-minitest.yml/badge.svg)](https://github.com/varar-dev/varar-examples/actions/workflows/ruby-minitest.yml) |
 | [`rust-cargotest`](rust-cargotest) | Rust + cargo test | `cargo test` | [![rust-cargotest](https://github.com/varar-dev/varar-examples/actions/workflows/rust-cargotest.yml/badge.svg)](https://github.com/varar-dev/varar-examples/actions/workflows/rust-cargotest.yml) |
 | [`csharp-vstest`](csharp-vstest) | C# + dotnet test | `dotnet test` | [![csharp-vstest](https://github.com/varar-dev/varar-examples/actions/workflows/csharp-vstest.yml/badge.svg)](https://github.com/varar-dev/varar-examples/actions/workflows/csharp-vstest.yml) |
+| [`go-gotest`](go-gotest) | Go + go test | `go test` | [![go-gotest](https://github.com/varar-dev/varar-examples/actions/workflows/go-gotest.yml/badge.svg)](https://github.com/varar-dev/varar-examples/actions/workflows/go-gotest.yml) |
 
 `typescript-vitest` implements the full example set; the other projects
 implement a feature-covering subset — `hello-var` (basic steps),

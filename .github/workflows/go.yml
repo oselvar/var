@@ -1,0 +1,46 @@
+name: Go
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'go/**'
+      - 'conformance/**'
+      - 'examples/**'
+      - '.github/workflows/go.yml'
+  pull_request:
+    paths:
+      - 'go/**'
+      - 'conformance/**'
+      - 'examples/**'
+      - '.github/workflows/go.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.26.3'
+
+      # The go/ module: gofmt (no diff), go vet, and the conformance harness
+      # (four artifacts x 15 bundles + config corpus + drift/hash units +
+      # runner + the go test adapter).
+      - name: gofmt
+        working-directory: go
+        run: test -z "$(gofmt -l .)" || { echo 'gofmt needed:'; gofmt -l .; exit 1; }
+      - name: vet
+        working-directory: go
+        run: go vet ./...
+      - name: test
+        working-directory: go
+        run: go test ./...
+
+      # Standalone sample project (see examples/go-gotest): runs the Markdown
+      # specs through the module via `go test`.
+      - name: examples
+        working-directory: examples/go-gotest
+        run: go test ./...

@@ -82,5 +82,19 @@
       "total": 882,
       "pct": 72.8
     }
+  },
+  {
+    "port": "go",
+    "label": "Go",
+    "lines": {
+      "covered": 2389,
+      "total": 2971,
+      "pct": 80.4
+    },
+    "branches": {
+      "covered": 0,
+      "total": 0,
+      "pct": null
+    }
   }
 ]

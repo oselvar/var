@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "specs": {
+    "deep-thought.md": {
+      "sourceHash": "fnv1a:a4027d33",
+      "examples": [
+        {
+          "name": "The answer to the great question of life, the universe and everything is 42",
+          "line": 3
+        }
+      ]
+    },
+    "hello-var.md": {
+      "sourceHash": "fnv1a:bf848cd6",
+      "examples": [
+        {
+          "name": "First I greet \"world\" okay? I think the greeting should be \"Hello, world!\"",
+          "line": 5
+        },
+        {
+          "name": "The expression `1+1` should evaluate to `2`",
+          "line": 11
+        }
+      ]
+    },
+    "library.md": {
+      "sourceHash": "fnv1a:b04b787c",
+      "examples": [
+        {
+          "name": "Maya borrowed *Emma*, due back on June 1, 2026. She returns it on June 6, 2026 and owes a £2.50 late fee — 50p for each day overdue",
+          "line": 3
+        },
+        {
+          "name": "Noor borrowed *Kindred*, due back on June 1, 2026. When she asks to borrow *Beloved* on June 10, 2026, the library refuses: an overdue book blocks new loans",
+          "line": 6
+        },
+        {
+          "name": "Ben borrowed *Dune*, due back on June 12, 2026. When he asks to borrow *Hyperion* on June 10, 2026, the library agrees",
+          "line": 9
+        }
+      ]
+    },
+    "roman-numerals.md": {
+      "sourceHash": "fnv1a:a3b97c9a",
+      "examples": [
+        {
+          "name": "Each row gives an example of a decimal and a roman number:",
+          "line": 3
+        }
+      ]
+    },
+    "tables-and-docstrings.md": {
+      "sourceHash": "fnv1a:e9f7dc76",
+      "examples": [
+        {
+          "name": "Uppercase each one:",
+          "line": 6
+        },
+        {
+          "name": "Greet Bob:",
+          "line": 16
+        }
+      ]
+    },
+    "yahtzee.md": {
+      "sourceHash": "fnv1a:c10cc12e",
+      "examples": [
+        {
+          "name": "Examples of dice, category and score:",
+          "line": 7
+        }
+      ]
+    }
+  }
+}

@@ -21,6 +21,15 @@ CRATES_IO_ENABLED="${CRATES_IO_ENABLED:-0}"
 # checklist in release/targets/68-nuget.sh.
 DOTNET_NUGET_ENABLED="${DOTNET_NUGET_ENABLED:-0}"
 
+# Single source of truth for whether the Go port ships as a tagged Go module.
+# Same parked pattern as CRATES_IO_ENABLED: while 0, 69-go-modules.sh reports OK
+# without tagging AND 70-varar-examples.sh omits the go-* samples (their
+# `replace` directive points at go/ in-repo, which can't resolve in
+# varar-examples until the module is published under a version tag). Flip to 1
+# only once the module is publishable — see the go-live checklist in
+# release/targets/69-go-modules.sh.
+GO_MODULES_ENABLED="${GO_MODULES_ENABLED:-0}"
+
 log()  { printf '\033[1;34m[release]\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m[release]\033[0m %s\n' "$*" >&2; }
 die()  { printf '\033[1;31m[release]\033[0m ERROR: %s\n' "$*" >&2; exit 1; }

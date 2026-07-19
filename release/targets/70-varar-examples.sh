@@ -57,6 +57,14 @@ csharp_exclude=()
 if [[ "$DOTNET_NUGET_ENABLED" != "1" ]]; then
   csharp_exclude+=(--exclude 'csharp-*/')
 fi
+# Same story for the Go sample while module publishing is parked: its go.mod
+# `replace`s the module to go/ in-repo, which a synced copy couldn't resolve
+# until the module is tagged. GO_MODULES_ENABLED (lib.sh) flips this and the pin
+# block below together — see 69-go-modules.sh's go-live checklist.
+go_exclude=()
+if [[ "$GO_MODULES_ENABLED" != "1" ]]; then
+  go_exclude+=(--exclude 'go-*/')
+fi
 rsync -a --copy-links \
   --exclude 'node_modules/' \
   --exclude 'pnpm-workspace.yaml' \
@@ -72,6 +80,7 @@ rsync -a --copy-links \
   --exclude 'Cargo.lock' \
   "${rust_exclude[@]}" \
   "${csharp_exclude[@]}" \
+  "${go_exclude[@]}" \
   examples/ "$DEST"/
 
 # Pin the JVM samples to the released Maven Central artifacts (idempotent even
@@ -121,6 +130,18 @@ fi
 if [[ "$DOTNET_NUGET_ENABLED" == "1" ]]; then
   perl -pi -e "s|<ProjectReference Include=\"\\.\\./\\.\\./dotnet/[\\w.]+/([\\w.]+)\\.csproj\" />|<PackageReference Include=\"\$1\" Version=\"$VERSION\" />|" \
     "$DEST"/csharp-*/*.csproj
+fi
+
+# Pin the Go sample to the released module: drop the `replace ... => ../../go`
+# directive (path source is monorepo-only) and pin the require to the tagged
+# version. Only runs once module publishing is live (GO_MODULES_ENABLED=1);
+# while parked the go-* samples aren't synced at all (see the rsync exclude
+# above), so this finds nothing.
+if [[ "$GO_MODULES_ENABLED" == "1" ]]; then
+  perl -ni -e 'print unless m{^replace github\.com/varar-dev/varar-go => }' \
+    "$DEST"/go-*/go.mod
+  perl -pi -e "s|(github\.com/varar-dev/varar-go) v[0-9][\\w.+-]*|\$1 v$VERSION|" \
+    "$DEST"/go-*/go.mod
 fi
 
 git -C "$DEST" add -A

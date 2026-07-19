@@ -12,7 +12,8 @@
 #                   # pinned in ruby/.tool-versions)
 #   make rust       # cargo fmt/clippy/test (var-core) + examples/rust-cargotest
 #   make dotnet     # dotnet format --verify-no-changes + build + test (net10.0)
-#   make coverage   # test with coverage in all six ports (reports below)
+#   make go         # gofmt + go vet + go test (go/ module) + examples/go-gotest
+#   make coverage   # test with coverage in all seven ports (reports below)
 #   make install-tools # add missing asdf plugins + install every toolchain the
 #                   # root .tool-versions pins (JDK, .NET, Ruby, adr-tools)
 #   make update-deps# bump every port's deps locally (Renovate does this as
@@ -20,9 +21,9 @@
 #
 # Each target runs the same gate as that port's CI workflow in .github/workflows/.
 
-.PHONY: check commits typescript python java ruby rust dotnet coverage changelog prepare release update-deps install-tools
+.PHONY: check commits typescript python java ruby rust dotnet go coverage changelog prepare release update-deps install-tools
 
-check: commits typescript python java ruby rust dotnet
+check: commits typescript python java ruby rust dotnet go
 
 # One-shot local toolchain bootstrap: add any missing asdf plugin, then install
 # every version pinned in the root .tool-versions (including the JDK 21 / Ruby
@@ -74,12 +75,20 @@ dotnet:
 	cd dotnet && dotnet format --verify-no-changes && dotnet test
 	cd examples/csharp-vstest && dotnet test
 
+# Go port: the go/ module (gofmt + vet + the four conformance artifacts x 15
+# bundles + config corpus + drift + runner + the go test adapter), then the
+# standalone sample project (which depends on the module by path and runs the
+# Markdown specs via `go test`).
+go:
+	cd go && test -z "$$(gofmt -l .)" && go vet ./... && go test ./...
+	cd examples/go-gotest && go test ./...
+
 # Coverage reports: typescript/coverage/index.html, python/htmlcov/index.html,
 # java/<module>/target/site/jacoco/index.html (jacoco runs on every verify),
 # ruby/coverage/index.html. lcov files (typescript/coverage/lcov.info,
 # python/coverage.lcov, ruby/coverage/lcov.info, rust/coverage/lcov.info,
-# dotnet/coverage/lcov.info) feed editor gutters and CI integrations.
-# scripts/coverage-summary.sh then distils all six ports into the tracked
+# dotnet/coverage/lcov.info, go/coverage/lcov.info) feed editor gutters and CI
+# integrations. scripts/coverage-summary.sh then distils all seven ports into the tracked
 # coverage.json and refreshes the coverage table in README.md.
 #
 # Rust needs cargo-llvm-cov (`cargo install cargo-llvm-cov` + the
@@ -94,6 +103,8 @@ coverage:
 	cd dotnet && rm -rf coverage && dotnet test --collect:"XPlat Code Coverage" --results-directory coverage/raw \
 	  && dotnet tool restore \
 	  && dotnet reportgenerator -reports:'coverage/raw/**/coverage.cobertura.xml' -targetdir:coverage -reporttypes:lcov "-filefilters:-*/obj/*"
+	cd go && mkdir -p coverage && go test -coverpkg=./... -coverprofile=coverage/cover.out ./... \
+	  && ../scripts/gocover-to-lcov.sh < coverage/cover.out > coverage/lcov.info
 	scripts/coverage-summary.sh
 
 # Preview the changelog that the next release would add (stdout only — the
@@ -130,3 +141,4 @@ update-deps:
 	cd java && mvn --batch-mode versions:use-latest-releases versions:update-properties -DgenerateBackupPoms=false
 	cd ruby && bundle update
 	cd rust && cargo update
+	cd go && go get -u ./... && go mod tidy
