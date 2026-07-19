@@ -1,4 +1,0 @@
-{
-  "docs": { "include": ["*.md"] },
-  "steps": ["*.steps.cs"]
-}

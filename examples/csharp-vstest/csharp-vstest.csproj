@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>Varar.Example</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+  </ItemGroup>
+
+  <!--
+    In this monorepo the Varar packages resolve from source (project references),
+    so the sample gates trunk against the local build. A real project depends on
+    the published NuGet packages instead:
+
+      <PackageReference Include="Varar" Version="x.y.z" />
+      <PackageReference Include="Varar.TestAdapter" Version="x.y.z" />
+  -->
+  <ItemGroup>
+    <ProjectReference Include="../../dotnet/Varar/Varar.csproj" />
+    <ProjectReference Include="../../dotnet/Varar.TestAdapter/Varar.TestAdapter.csproj" />
+  </ItemGroup>
+
+</Project>

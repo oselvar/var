@@ -63,7 +63,7 @@ rust:
 # drift + runner + the VSTest adapter smoke sample).
 dotnet:
 	cd dotnet && dotnet format --verify-no-changes && dotnet test
-	cd dotnet/samples/Varar.Sample && dotnet test
+	cd examples/csharp-vstest && dotnet test
 
 # Coverage reports: typescript/coverage/index.html, python/htmlcov/index.html,
 # java/<module>/target/site/jacoco/index.html (jacoco runs on every verify),

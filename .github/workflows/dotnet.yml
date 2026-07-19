@@ -6,11 +6,13 @@ on:
     paths:
       - 'dotnet/**'
       - 'conformance/**'
+      - 'examples/**'
       - '.github/workflows/dotnet.yml'
   pull_request:
     paths:
       - 'dotnet/**'
       - 'conformance/**'
+      - 'examples/**'
       - '.github/workflows/dotnet.yml'
   workflow_dispatch:
 
@@ -30,7 +32,7 @@ jobs:
       - run: dotnet format --verify-no-changes && dotnet test
         working-directory: dotnet
 
-      # The VSTest adapter smoke sample: dotnet test discovers and runs one test
-      # per Markdown example with no user wiring.
+      # The standalone consumer sample: dotnet test discovers and runs one test per
+      # Markdown example through the VSTest adapter, with no user wiring.
       - run: dotnet test
-        working-directory: dotnet/samples/Varar.Sample
+        working-directory: examples/csharp-vstest

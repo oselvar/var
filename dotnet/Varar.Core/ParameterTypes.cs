@@ -126,6 +126,14 @@ public sealed class ParameterTypeRegistry : IParameterTypeRegistry
     private static Value ParseString(IReadOnlyList<string?> groups)
     {
         var raw = groups.FirstOrDefault(g => g is not null) ?? string.Empty;
+        // The .NET cucumber-expressions build captures {string} WITH its surrounding quotes
+        // (the inner groups are compiled non-capturing), so strip the quotes, then unescape.
+        if (raw.Length >= 2 &&
+            ((raw[0] == '"' && raw[^1] == '"') || (raw[0] == '\'' && raw[^1] == '\'')))
+        {
+            raw = raw[1..^1];
+        }
+
         return Value.Of(raw.Replace("\\\"", "\"").Replace("\\'", "'"));
     }
 }
