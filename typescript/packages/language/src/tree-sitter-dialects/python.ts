@@ -92,7 +92,8 @@ function decodeString(node: Node): string {
   return out
 }
 
-/* jscpd:ignore-start — shared param-extraction shape; per-dialect on purpose (see ruby.ts) */
+// Shared param-extraction shape; per-dialect on purpose (see ruby.ts). The whole
+// tree-sitter-dialects/ folder is exempt from jscpd (see typescript/.jscpd.json).
 function extractHandlerParams(handlerNode: Node): HandlerParams | undefined {
   const parameters = handlerNode.childForFieldName('parameters')
   const params = parameters?.namedChildren.filter((p): p is Node => p !== null) ?? []
@@ -118,7 +119,6 @@ function extractHandlerParams(handlerNode: Node): HandlerParams | undefined {
   // biome-ignore lint/style/noNonNullAssertion: length checked non-zero above
   return { range: toRange(params[0]!, params[params.length - 1]!), params: structured }
 }
-/* jscpd:ignore-end */
 
 export const pythonSpec: LanguageSpec = {
   stepDefQuery: STEP_DEFINITION_QUERY,

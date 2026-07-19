@@ -7,6 +7,7 @@
     "**/tests/**",
     "**/*.test.ts",
     "**/*.json",
+    "packages/language/src/tree-sitter-dialects/**",
     "packages/website/src/content/**",
     "packages/website/src/lib/**",
     "packages/website/src/scripts/editor-mount.ts",
