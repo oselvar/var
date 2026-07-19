@@ -28,6 +28,7 @@
       "project": ["src/**/*.ts", "tests/**/*.ts"],
       "ignoreDependencies": [
         "@tree-sitter-grammars/tree-sitter-kotlin",
+        "tree-sitter-c-sharp",
         "tree-sitter-java",
         "tree-sitter-python",
         "tree-sitter-ruby",
@@ -39,6 +40,7 @@
       "project": ["src/**/*.ts", "tests/**/*.ts"],
       "ignoreDependencies": [
         "@tree-sitter-grammars/tree-sitter-kotlin",
+        "tree-sitter-c-sharp",
         "tree-sitter-java",
         "tree-sitter-python",
         "tree-sitter-ruby",

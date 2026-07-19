@@ -9,6 +9,7 @@ export type LanguageId =
   | 'kotlin'
   | 'ruby'
   | 'rust'
+  | 'csharp'
 
 // One entry per language: the queries plus the three language-specific
 // behaviors (string decoding, handler-param extraction, regexp resolution).

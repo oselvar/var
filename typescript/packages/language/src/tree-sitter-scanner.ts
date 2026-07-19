@@ -3,6 +3,7 @@ import { Language, type Node, Parser, Query, type QueryMatch } from 'web-tree-si
 import type { GrammarLoader } from './grammar-loader.ts'
 import type { StepDefScanner } from './scanner.ts'
 import type { ParameterTypeDef, StepDef } from './step-defs.ts'
+import { csharpSpec } from './tree-sitter-dialects/csharp.ts'
 import { javaSpec } from './tree-sitter-dialects/java.ts'
 import { kotlinSpec } from './tree-sitter-dialects/kotlin.ts'
 import { pythonSpec } from './tree-sitter-dialects/python.ts'
@@ -23,6 +24,7 @@ type Dialect = {
 // typescript spec: the queries and decoding are identical — only the grammar
 // (loaded per languageId) differs, which is why TSX is a separate LanguageId.
 const SPECS: Readonly<Partial<Record<LanguageId, LanguageSpec>>> = {
+  csharp: csharpSpec,
   java: javaSpec,
   kotlin: kotlinSpec,
   python: pythonSpec,
@@ -40,6 +42,7 @@ const EXTENSIONS: ReadonlyArray<readonly [string, LanguageId]> = [
   ['.kt', 'kotlin'],
   ['.rb', 'ruby'],
   ['.rs', 'rust'],
+  ['.cs', 'csharp'],
 ]
 
 export function languageIdForPath(path: string): LanguageId | undefined {
@@ -130,7 +133,7 @@ function discoverStepDefs(dialect: Dialect, file: string, source: string): Reado
     out.push({
       file,
       expression: dialect.spec.decodeString(expressionNode),
-      kind: functionNameNode.text as StepKind,
+      kind: functionNameNode.text.toLowerCase() as StepKind,
       expressionRange: toRange(expressionNode),
       callRange: toRange(rootNode),
       handlerParams: handlerNode ? dialect.spec.extractHandlerParams(handlerNode) : undefined,

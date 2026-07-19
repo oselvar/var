@@ -124,6 +124,9 @@ importers:
       '@tree-sitter-grammars/tree-sitter-kotlin':
         specifier: ^1.1.0
         version: 1.1.0
+      tree-sitter-c-sharp:
+        specifier: ^0.23.5
+        version: 0.23.5
       tree-sitter-java:
         specifier: ^0.23.5
         version: 0.23.5
@@ -154,6 +157,9 @@ importers:
       '@varar/language':
         specifier: workspace:*
         version: link:../language
+      tree-sitter-c-sharp:
+        specifier: ^0.23.5
+        version: 0.23.5
       tree-sitter-java:
         specifier: ^0.23.5
         version: 0.23.5
@@ -3214,6 +3220,14 @@ packages:
 
   toposort@2.0.2:
     resolution: {integrity: sha512-0a5EOkAUp8D4moMi2W8ZF8jcga7BgZd91O/yabJCFY8az+XSzeGyTKs0Aoo897iV1Nj6guFq8orWDS96z91oGg==}
+
+  tree-sitter-c-sharp@0.23.5:
+    resolution: {integrity: sha512-xJGOeXPMmld0nES5+080N/06yY6LQi+KWGWV4LfZaZe6srJPtUtfhIbRSN7EZN6IaauzW28v6W4QHFwmeUW6HQ==}
+    peerDependencies:
+      tree-sitter: ^0.25.0
+    peerDependenciesMeta:
+      tree-sitter:
+        optional: true
 
   tree-sitter-java@0.23.5:
     resolution: {integrity: sha512-Yju7oQ0Xx7GcUT01mUglPP+bYfvqjNCGdxqigTnew9nLGoII42PNVP3bHrYeMxswiCRM0yubWmN5qk+zsg0zMA==}
@@ -7156,6 +7170,11 @@ snapshots:
   tinyrainbow@3.1.0: {}
 
   toposort@2.0.2: {}
+
+  tree-sitter-c-sharp@0.23.5:
+    dependencies:
+      node-addon-api: 8.9.0
+      node-gyp-build: 4.8.4
 
   tree-sitter-java@0.23.5:
     dependencies:

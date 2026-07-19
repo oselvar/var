@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@tree-sitter-grammars/tree-sitter-kotlin": "^1.1.0",
+    "tree-sitter-c-sharp": "^0.23.5",
     "tree-sitter-java": "^0.23.5",
     "tree-sitter-python": "^0.25.0",
     "tree-sitter-ruby": "^0.23.1",
