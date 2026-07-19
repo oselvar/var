@@ -17,7 +17,8 @@
       "project": ["src/**/*.ts", "tests/**/*.ts"]
     },
     "packages/vitest": {
-      "project": ["src/**/*.ts", "tests/**/*.ts"]
+      "project": ["src/**/*.ts", "tests/**/*.ts"],
+      "ignoreDependencies": ["tree-sitter-typescript"]
     },
     "packages/varar": {
       "entry": ["tests/**/*.test.ts", "../../../conformance/bundles/**/*.steps.ts"],

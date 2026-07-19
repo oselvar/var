@@ -55,13 +55,16 @@ language is step-definition *extraction* (Side A) and step-definition
 
 ## 2. The extraction seam (tree-sitter)
 
-The single most important seam. Today `discoverStepDefs(path, source)` is a pure
-function behind the `StepDefScanner` port (`var-language/scanner.ts`) — the
-shape is already right; only the implementation is TypeScript-specific
-(`ts.createSourceFile`).
+The single most important seam. `discoverStepDefs(path, source)` /
+`discoverParameterTypes(path, source)` are pure functions behind the
+`StepDefScanner` port (`var-language/scanner.ts`).
 
-**Target:** one extractor mechanism for *all* languages — **tree-sitter** — with
-a small per-language query set replacing per-language parser code.
+**One extractor mechanism for *all* languages — tree-sitter** — with a small
+per-language query set replacing per-language parser code. TypeScript is no
+exception: it goes through the same tree-sitter scanner as every other
+language (the earlier `ts.createSourceFile`-based scanner has been removed).
+Extraction runs at the async shell edge (`Parser.init` → grammar load →
+parse), and the sync core consumes the immutable result.
 
 ```ts
 interface StepDefScanner {
@@ -209,10 +212,12 @@ native runner (handlers replaced by `stepDefId`s).
 The prefactoring that makes the first language drop in — each step improves trunk
 on TypeScript alone, before any Python exists:
 
-1. **Reimplement the TS `StepDefScanner` on tree-sitter** (web-tree-sitter + TS
-   grammar), keeping the port signature and making existing tests pass unchanged.
-   Dogfood the seam on the language we already have.
-2. **Move extraction to the async shell edge**; add the `GrammarLoader` port.
+1. ✅ **Reimplement the TS `StepDefScanner` on tree-sitter** (web-tree-sitter +
+   TS grammar), keeping the port signature and making existing tests pass
+   unchanged. *Done — TypeScript uses the shared tree-sitter scanner everywhere
+   (Node adapters, the LSP, and the website's browser worker via a `?url`-bundled
+   `GrammarLoader`); the `ts.createSourceFile` scanner is gone.*
+2. ✅ **Move extraction to the async shell edge**; add the `GrammarLoader` port.
 3. **Make `StepDef` neutral** — `typeText` becomes opaque.
 4. **Extract a `SnippetEmitter` port** from the TS-emitting snippet code.
 5. **De-hardcode file patterns** into per-language config (`.md` stays neutral).

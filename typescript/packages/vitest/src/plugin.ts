@@ -82,7 +82,7 @@ export function varVitestPlugin(options: VarVitestPluginOptions = {}): Plugin {
       if (configJsonPath) this.addWatchFile(configJsonPath)
       // Editing the baseline re-transforms so the drift gate reflects it.
       this.addWatchFile(lockPath)
-      const examples = discoverStaticExamples({
+      const examples = await discoverStaticExamples({
         varPath,
         source,
         stepFiles: stepFiles.map((path) => ({ path, source: readFileSync(path, 'utf8') })),

@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "specs": {
+    "features/library.feature": {
+      "sourceHash": "fnv1a:de46f92c",
+      "examples": [
+        {
+          "name": "Scenario: An available book is borrowed and a receipt comes back Given the library has these books:",
+          "line": 3
+        }
+      ]
+    }
+  }
+}

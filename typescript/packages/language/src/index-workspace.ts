@@ -7,7 +7,7 @@ import {
   type Registry,
   type ScannerPlugin,
 } from '@varar/core'
-import { createTypeScriptScanner, type StepDefScanner } from './scanner.ts'
+import type { StepDefScanner } from './scanner.ts'
 import type { Range, StepDef } from './step-defs.ts'
 
 export type WorkspaceInput = {
@@ -16,10 +16,10 @@ export type WorkspaceInput = {
   // Optional: opt-in scanner extensions (e.g. Gherkin tables, Gherkin doc
   // strings) sourced from varar.config.json. Empty/omitted = pure markdown.
   readonly scannerPlugins?: ReadonlyArray<ScannerPlugin>
-  // Optional: inject a custom step-def scanner. Defaults to the TypeScript
-  // compiler-based parser. A lighter browser scanner (e.g. tsgo-wasm) can
-  // implement StepDefScanner and be passed here without any other API change.
-  readonly scanner?: StepDefScanner
+  // The step-def scanner. Always the tree-sitter scanner
+  // (createTreeSitterScanner); callers build it at their async shell edge with
+  // an environment-specific GrammarLoader and pass the resolved instance here.
+  readonly scanner: StepDefScanner
 }
 
 export type MatchRef = {
@@ -60,7 +60,7 @@ export type WorkspaceIndex = {
 const EMPTY_HANDLER = (): void => {}
 
 export function buildWorkspaceIndex(input: WorkspaceInput): WorkspaceIndex {
-  const scanner = input.scanner ?? createTypeScriptScanner()
+  const scanner = input.scanner
   const stepDefs: StepDef[] = []
   let registry = createRegistry()
 

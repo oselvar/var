@@ -31,7 +31,8 @@
     "@varar/config": "workspace:*",
     "@varar/core": "workspace:*",
     "@varar/language": "workspace:*",
-    "@varar/runner": "workspace:*"
+    "@varar/runner": "workspace:*",
+    "tree-sitter-typescript": "^0.23.2"
   },
   "peerDependencies": {
     "vite": "^8.0.0",

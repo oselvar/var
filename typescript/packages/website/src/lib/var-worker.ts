@@ -5,6 +5,7 @@ import {
   BrowserMessageWriter,
   createConnection,
 } from 'vscode-languageserver/browser'
+import { createBrowserGrammarLoader } from './browser-grammar-loader.ts'
 import { createMemoryFileSystem } from './memory-file-system.ts'
 import { createTsDiagnostics } from './ts-diagnostics.ts'
 
@@ -52,8 +53,14 @@ self.onmessage = (e: MessageEvent<{ seed: Record<string, string> }>) => {
     )
   }
 
-  registerHandlers(connection, async () => ({ fs: createMemoryFileSystem(e.data.seed), config }), {
-    onDidChangeDocument,
-  })
+  registerHandlers(
+    connection,
+    async () => ({
+      fs: createMemoryFileSystem(e.data.seed),
+      config,
+      grammarLoader: createBrowserGrammarLoader(),
+    }),
+    { onDidChangeDocument },
+  )
   connection.listen()
 }

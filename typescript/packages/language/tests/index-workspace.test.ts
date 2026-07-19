@@ -1,8 +1,23 @@
-import { expect, test } from 'vitest'
-import { buildWorkspaceIndex } from '../src/index-workspace.ts'
+import { beforeAll, expect, test } from 'vitest'
+import { buildWorkspaceIndex, type WorkspaceInput } from '../src/index-workspace.ts'
+import type { StepDefScanner } from '../src/scanner.ts'
+import { createTreeSitterScanner } from '../src/tree-sitter-scanner.ts'
+import { createTestGrammarLoader } from './test-grammar-loader.ts'
+
+let scanner: StepDefScanner
+
+beforeAll(async () => {
+  scanner = await createTreeSitterScanner(createTestGrammarLoader())
+})
+
+// Every test drives the same tree-sitter scanner — extraction is the shell
+// edge's job, so the index builder just consumes it.
+function build(input: Omit<WorkspaceInput, 'scanner'>) {
+  return buildWorkspaceIndex({ ...input, scanner })
+}
 
 test('cross-references matched substrings in .md to their step defs', () => {
-  const idx = buildWorkspaceIndex({
+  const idx = build({
     stepFiles: [
       {
         path: '/abs/steps/account.steps.ts',
@@ -27,7 +42,7 @@ test('cross-references matched substrings in .md to their step defs', () => {
 })
 
 test('an unmatched keyword-led sentence produces NO diagnostic (no Given/When/Then heuristic)', () => {
-  const idx = buildWorkspaceIndex({
+  const idx = build({
     stepFiles: [],
     varFiles: [{ path: '/m.md', source: '# M\n\nGiven I have 5 cukes' }],
   })
@@ -35,7 +50,7 @@ test('an unmatched keyword-led sentence produces NO diagnostic (no Given/When/Th
 })
 
 test('ambiguous matches surface as ambiguous-match diagnostics', () => {
-  const idx = buildWorkspaceIndex({
+  const idx = build({
     stepFiles: [
       {
         path: '/s.ts',
@@ -51,14 +66,14 @@ stimulus('I have {int} {word}', () => {})
 })
 
 test('the index is empty for an empty workspace', () => {
-  const idx = buildWorkspaceIndex({ stepFiles: [], varFiles: [] })
+  const idx = build({ stepFiles: [], varFiles: [] })
   expect(idx.stepDefs).toEqual([])
   expect(idx.matches).toEqual([])
   expect(idx.diagnostics).toEqual([])
 })
 
 test('a custom parameter type defined in *.steps.ts is registered before step compilation', () => {
-  const idx = buildWorkspaceIndex({
+  const idx = build({
     stepFiles: [
       {
         path: '/airports.steps.ts',
@@ -80,7 +95,7 @@ stimulus('I fly to {airport}', (ctx, code) => {})
 })
 
 test('a header-bound table highlights the binding paragraph with header words as parameters', () => {
-  const idx = buildWorkspaceIndex({
+  const idx = build({
     stepFiles: [
       {
         path: '/yahtzee.steps.ts',
@@ -116,7 +131,7 @@ each row lists the dice, the category and the score:
 })
 
 test('a plain (non-header-bound) match carries no headerCellRanges', () => {
-  const idx = buildWorkspaceIndex({
+  const idx = build({
     stepFiles: [
       { path: '/s.steps.ts', source: `stimulus('I have {int} cukes', (ctx, n) => {})\n` },
     ],

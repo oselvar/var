@@ -27,13 +27,11 @@ export type { FileSystem } from './file-system.ts'
 export type StoreDeps = {
   readonly fs: FileSystem
   readonly config: VarConfig
-  // Optional: when supplied, step-def extraction uses the tree-sitter
-  // scanner. When omitted, buildWorkspaceIndex falls back to its own
-  // default (the TypeScript-compiler-based scanner) — this is how a
-  // consumer without a GrammarLoader for its environment (e.g. the
-  // website's browser worker, which has no wasm-loading story yet) keeps
-  // working unchanged.
-  readonly grammarLoader?: GrammarLoader
+  // Supplies tree-sitter grammar bytes for step-def extraction. Every
+  // environment provides one — Node resolves the `.wasm` from node_modules,
+  // the browser worker fetches bundled URLs — so extraction goes through the
+  // one tree-sitter scanner everywhere.
+  readonly grammarLoader: GrammarLoader
 }
 
 export type Store = {
@@ -138,14 +136,17 @@ export function createStore(deps: StoreDeps): Store {
         .filter((id): id is NonNullable<typeof id> => id !== undefined)
         .sort()
       const key = languages.join(',')
-      if (grammarLoader && key !== scannerKey) {
+      if (key !== scannerKey) {
         scannerKey = key
         scannerPromise = createTreeSitterScanner(
           grammarLoader,
           languages.length > 0 ? languages : undefined,
         )
       }
-      const scanner = grammarLoader ? await scannerPromise : undefined
+      // Always assigned by the first reindex (scannerKey starts undefined, so
+      // the initial key comparison never matches).
+      // biome-ignore lint/style/noNonNullAssertion: set on the first reindex
+      const scanner = await scannerPromise!
       const varPaths = await fs.list(config.docs)
       const stepFiles = await Promise.all(
         stepPaths.map(async (path) => ({ path, source: await fs.read(path) })),
@@ -157,7 +158,7 @@ export function createStore(deps: StoreDeps): Store {
         stepFiles,
         varFiles,
         scannerPlugins: config.scannerPlugins,
-        ...(scanner ? { scanner } : {}),
+        scanner,
       })
       // Drift is a run-result concern, but the LSP surfaces it live: a
       // paragraph the committed varar.lock.json recorded as an example that now

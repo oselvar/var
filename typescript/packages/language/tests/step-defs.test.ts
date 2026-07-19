@@ -1,21 +1,13 @@
 import { beforeAll, describe, expect, test } from 'vitest'
-import { createTypeScriptScanner, type StepDefScanner } from '../src/scanner.ts'
+import type { StepDefScanner } from '../src/scanner.ts'
 import { createTreeSitterScanner } from '../src/tree-sitter-scanner.ts'
 import { createTestGrammarLoader } from './test-grammar-loader.ts'
 
-const scannerFactories: ReadonlyArray<{
-  readonly label: string
-  readonly create: () => Promise<StepDefScanner>
-}> = [
-  { label: 'typescript-compiler', create: async () => createTypeScriptScanner() },
-  { label: 'tree-sitter', create: async () => createTreeSitterScanner(createTestGrammarLoader()) },
-]
-
-describe.each(scannerFactories)('$label scanner', ({ create }) => {
+describe('tree-sitter scanner', () => {
   let scanner: StepDefScanner
 
   beforeAll(async () => {
-    scanner = await create()
+    scanner = await createTreeSitterScanner(createTestGrammarLoader())
   })
 
   test('discovers a single step call with its source range', () => {

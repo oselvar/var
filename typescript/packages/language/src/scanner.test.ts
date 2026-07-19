@@ -3,7 +3,7 @@ import { buildWorkspaceIndex } from './index-workspace.ts'
 import type { StepDefScanner } from './scanner.ts'
 
 describe('buildWorkspaceIndex scanner injection', () => {
-  it('uses the injected scanner instead of the default', () => {
+  it('extracts step defs through the injected scanner', () => {
     const scanner: StepDefScanner = {
       discoverStepDefs: vi.fn(() => [
         {

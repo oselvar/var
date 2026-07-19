@@ -11,5 +11,5 @@ gem "varar-config", path: "../../ruby/packages/config"
 gem "varar-runner", path: "../../ruby/packages/runner"
 gem "varar-minitest", path: "../../ruby/packages/minitest"
 
-gem "minitest", "~> 5.20"
+gem "minitest", "~> 6.0"
 gem "rake", "~> 13.0"

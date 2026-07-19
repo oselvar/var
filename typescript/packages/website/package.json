@@ -40,8 +40,10 @@
     "diff": "^9.0.0",
     "sharp": "^0.35.3",
     "tailwindcss": "^4.3.2",
+    "tree-sitter-typescript": "^0.23.2",
     "typescript": "^6.0.3",
-    "vscode-languageserver": "^10.1.0"
+    "vscode-languageserver": "^10.1.0",
+    "web-tree-sitter": "^0.26.10"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9"

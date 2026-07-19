@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.files = Dir['lib/**/*.rb']
   s.require_paths = ['lib']
 
-  s.add_dependency 'minitest', '~> 5.20'
+  s.add_dependency 'minitest', '~> 6.0'
   s.add_dependency 'varar-runner', '0.4.2'
   s.metadata['rubygems_mfa_required'] = 'true'
 end

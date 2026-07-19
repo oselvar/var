@@ -87,7 +87,10 @@ export async function createTreeSitterScanner(
   grammarLoader: GrammarLoader,
   languages: ReadonlyArray<LanguageId> = ['typescript', 'typescript-tsx'],
 ): Promise<StepDefScanner> {
-  initPromise ??= Parser.init()
+  // The runtime init is global and one-time; the first caller's loader decides
+  // how the emscripten `.wasm` is located (a no-op default on Node, a bundled
+  // URL in the browser). A process only ever uses one environment's loader.
+  initPromise ??= Parser.init(grammarLoader.initOptions)
   await initPromise
   const dialects = new Map<LanguageId, Dialect>()
   for (const id of languages) {
