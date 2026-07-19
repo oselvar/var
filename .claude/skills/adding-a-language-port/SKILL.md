@@ -8,16 +8,23 @@ description: Use when starting or reviewing a new var language port (Java, Kotli
 ## Overview
 
 var is hexagonal + multi-language (ADR 0001). **TypeScript, Python, Java,
-Kotlin, and Ruby are all complete ports at full parity** — there is no single
-reference implementation, so seek inspiration from whichever existing ports are
-closest to your target rather than treating any one language as canonical. The
+Kotlin, Ruby, Rust, and C# are all complete ports at full parity** — there is no
+single reference implementation, so seek inspiration from whichever existing
+ports are closest to your target rather than treating any one language as
+canonical. (Rust and C# are behaviourally complete and conformance-verified but
+their registry publishing is parked — see the release targets.) The
 shared `conformance/bundles/*/golden/*.json` corpus is what every port answers
 to. Python
 and Ruby are the closest precedents for a *full pipeline* port (no runtime
 sharing, like Go would be); Kotlin is the precedent for a *facade over an
-existing engine* (it shares the JVM with Java — see the last section). Ruby is
+existing engine* (it shares the JVM with Java — see the last section). Rust and
+C# are the precedents for a full-pipeline port in a **static language with an
+explicit `Value` model** (a closed value hierarchy replacing TS's raw JS values),
+an **injected registrar** (`register(Registry) -> Registry`, no module-scope
+accumulator), and **full-replacement state** (a stimulus returns the whole next
+state). Ruby is
 also the precedent for a **block-based author DSL** (`steps(...) do stimulus …
-sensor … end`) and, unlike the older ports, shipped with its tree-sitter
+sensor … end`); Ruby, Rust, and C# all shipped with their tree-sitter
 dialect wired from the start (see the repo-integration checklist). Every port follows the
 same package shape and is proven correct by reproducing the shared
 `conformance/bundles/*/golden/*.json` byte-for-byte — never by writing fresh
