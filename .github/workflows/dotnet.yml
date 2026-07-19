@@ -1,0 +1,36 @@
+name: .NET
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'dotnet/**'
+      - 'conformance/**'
+      - '.github/workflows/dotnet.yml'
+  pull_request:
+    paths:
+      - 'dotnet/**'
+      - 'conformance/**'
+      - '.github/workflows/dotnet.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # The solution: format check + build + test (four conformance artifacts x
+      # 15 bundles + the config corpus + drift + runner). The C# step fixtures
+      # for the registry/plan/trace gates live in conformance/bundles.
+      - run: dotnet format --verify-no-changes && dotnet test
+        working-directory: dotnet
+
+      # The VSTest adapter smoke sample: dotnet test discovers and runs one test
+      # per Markdown example with no user wiring.
+      - run: dotnet test
+        working-directory: dotnet/samples/Varar.Sample

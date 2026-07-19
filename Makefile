@@ -11,15 +11,16 @@
 #                   # examples/ruby-rspec and examples/ruby-minitest (Ruby 3.2,
 #                   # pinned in ruby/.tool-versions)
 #   make rust       # cargo fmt/clippy/test (var-core) + examples/rust-cargotest
+#   make dotnet     # dotnet format --verify-no-changes + build + test (net8.0)
 #   make coverage   # test with coverage in all four ports (reports below)
 #   make update-deps# bump every port's deps locally (Renovate does this as
 #                   # controlled per-language PRs — see renovate.json5)
 #
 # Each target runs the same gate as that port's CI workflow in .github/workflows/.
 
-.PHONY: check commits typescript python java ruby rust coverage changelog prepare release update-deps
+.PHONY: check commits typescript python java ruby rust dotnet coverage changelog prepare release update-deps
 
-check: commits typescript python java ruby rust
+check: commits typescript python java ruby rust dotnet
 
 # Commits since the last release tag must be conventional (they drive the
 # changelog and the version bump — see cliff.toml and CLAUDE.md).
@@ -56,6 +57,13 @@ ruby:
 rust:
 	cd rust && cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test
 	cd examples/rust-cargotest && cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test
+
+# .NET port: the dotnet/ solution (net8.0), formatted with dotnet format,
+# built and tested (four conformance artifacts x 15 bundles + config corpus +
+# drift + runner + the VSTest adapter smoke sample).
+dotnet:
+	cd dotnet && dotnet format --verify-no-changes && dotnet test
+	cd dotnet/samples/Varar.Sample && dotnet test
 
 # Coverage reports: typescript/coverage/index.html, python/htmlcov/index.html,
 # java/<module>/target/site/jacoco/index.html (jacoco runs on every verify),
