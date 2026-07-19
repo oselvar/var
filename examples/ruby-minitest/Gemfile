@@ -11,5 +11,5 @@ gem "oselvar-var-config", path: "../../ruby/packages/var-config"
 gem "oselvar-var-runner", path: "../../ruby/packages/var-runner"
 gem "oselvar-var-minitest", path: "../../ruby/packages/var-minitest"
 
-gem "minitest", "~> 5.20"
+gem "minitest", "~> 6.0"
 gem "rake", "~> 13.0"
