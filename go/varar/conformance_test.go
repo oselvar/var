@@ -129,3 +129,19 @@ func TestPlanMatchesGolden(t *testing.T) {
 		})
 	}
 }
+
+func TestTraceMatchesGolden(t *testing.T) {
+	for _, name := range bundleNames(t) {
+		t.Run(name, func(t *testing.T) {
+			f := fixtures[name]
+			s := varar.NewSteps()
+			f.register(s)
+			doc := vc.Parse("example.md", sourceOf(t, name))
+			artifacts := vc.RunConformance(doc, s.Registry(), f.state)
+			actual := vc.CanonicalStringify(artifacts.Trace)
+			if want := golden(t, name, "trace.json"); actual != want {
+				t.Errorf("trace.json mismatch for %s\n--- got ---\n%s\n--- want ---\n%s", name, actual, want)
+			}
+		})
+	}
+}

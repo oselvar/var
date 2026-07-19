@@ -173,6 +173,186 @@ func tableOrFenceValue(b Block) Value {
 	panic("orphan attachment must be table or fence")
 }
 
+// BundleArtifacts are all four projected wire artifacts for one bundle.
+type BundleArtifacts struct {
+	VarDoc   Value
+	Registry Value
+	Plan     Value
+	Trace    Value
+}
+
+// ToFailureArtifact projects a caught step failure to the FailureArtifact wire
+// shape. A nil failure falls through to "thrown".
+func ToFailureArtifact(failure *StepFailure, matchSpan Span) Value {
+	line := matchSpan.StartLine
+	anchorSpan := matchSpan
+	if failure != nil {
+		anchorSpan = anchor(failure.Error, matchSpan)
+	}
+	anchorVal := spanValue(anchorSpan)
+
+	if failure == nil {
+		return kindLineAnchor("thrown", line, anchorVal)
+	}
+	switch failure.Error.Kind {
+	case SECellMismatch:
+		var failing []Value
+		for _, c := range failure.Error.Cells {
+			if !c.Ok {
+				failing = append(failing, failureCell(c))
+			}
+		}
+		return obj(
+			kv("kind", StrValue("cell-mismatch")),
+			kv("line", vint(line)),
+			kv("anchor", anchorVal),
+			kv("cells", ListOf(failing)),
+		)
+	case SEDocStringMismatch:
+		d := obj(
+			kv("expected", StrValue(failure.Error.DocDiff.Expected)),
+			kv("actual", StrValue(failure.Error.DocDiff.Actual)),
+			kv("span", spanValue(failure.Error.DocDiff.Span)),
+		)
+		return obj(
+			kv("kind", StrValue("doc-string-mismatch")),
+			kv("line", vint(line)),
+			kv("anchor", anchorVal),
+			kv("diff", d),
+		)
+	case SEReturnShape:
+		return kindLineAnchor("return-shape", line, anchorVal)
+	case SEUnexpectedPass:
+		return kindLineAnchor("unexpected-pass", line, anchorVal)
+	default:
+		return kindLineAnchor("thrown", line, anchorVal)
+	}
+}
+
+func failureCell(c CellDiff) Value {
+	return obj(
+		kv("column", StrValue(c.Column)),
+		kv("expected", StrValue(c.Expected)),
+		kv("actual", StrValue(c.Actual)),
+		kv("span", spanValue(c.Span)),
+	)
+}
+
+func kindLineAnchor(kind string, line int, anchorVal Value) Value {
+	return obj(
+		kv("kind", StrValue(kind)),
+		kv("line", vint(line)),
+		kv("anchor", anchorVal),
+	)
+}
+
+// fileStem recovers the cross-language-shared step-file stem (strip the last
+// extension), e.g. numerals.steps.go → numerals.steps.
+func fileStem(path string) string {
+	base := path
+	for i := len(path) - 1; i >= 0; i-- {
+		if path[i] == '/' || path[i] == '\\' {
+			base = path[i+1:]
+			break
+		}
+	}
+	dot := -1
+	for i := len(base) - 1; i >= 0; i-- {
+		if base[i] == '.' {
+			dot = i
+			break
+		}
+	}
+	if dot > 0 {
+		return base[:dot]
+	}
+	return base
+}
+
+// RunConformance runs one bundle end-to-end: plan, execute (recording
+// observations), and project all four wire artifacts. Port of runConformance.
+func RunConformance(doc VarDoc, registry Registry, stateFactory func() Value) BundleArtifacts {
+	execution := Plan(doc, registry)
+
+	observed := map[int][]StepObservation{}
+	ports := ExecutePorts{
+		Reporter:      func(Diagnostic) {},
+		CreateContext: func(string) Value { return stateFactory() },
+		Observer: func(o StepObservation) {
+			observed[o.ExampleIndex] = append(observed[o.ExampleIndex], o)
+		},
+	}
+
+	queue := CollectExamples(execution, ports)
+	traceExamples := make([]Value, 0, len(queue))
+	for k, queued := range queue {
+		outcome := "pass"
+		if queued.Run() != nil {
+			outcome = "fail"
+		}
+
+		planned := execution.Examples[k]
+		obs := observed[k]
+
+		steps := make([]Value, 0, len(planned.Steps))
+		for i := range planned.Steps {
+			step := planned.Steps[i]
+			ordinal := i + 1
+			// Prefer the first "fail" observation for this ordinal; else the last.
+			var chosen *StepObservation
+			for j := range obs {
+				if obs[j].Ordinal != ordinal {
+					continue
+				}
+				chosen = &obs[j]
+				if obs[j].Outcome == OutcomeFail {
+					break
+				}
+			}
+			stepOutcome := "skipped"
+			if chosen != nil {
+				stepOutcome = chosen.Outcome.String()
+			}
+
+			contextKey := obj(
+				kv("exampleName", StrValue(queued.Name)),
+				kv("stepFile", StrValue(fileStem(step.StepDef.ExpressionSourceFile))),
+			)
+			m := map[string]Value{
+				"exampleName":       StrValue(queued.Name),
+				"ordinal":           vint(ordinal),
+				"stepText":          StrValue(step.Text),
+				"matchedExpression": StrValue(step.StepDef.Expression),
+				"contextKey":        contextKey,
+				"outcome":           StrValue(stepOutcome),
+			}
+			if stepOutcome == "fail" {
+				var failure *StepFailure
+				if chosen != nil {
+					failure = chosen.Error
+				}
+				m["failure"] = ToFailureArtifact(failure, step.MatchSpan)
+			}
+			steps = append(steps, Value{Kind: KindMap, Map: m})
+		}
+
+		traceExamples = append(traceExamples, obj(
+			kv("name", StrValue(queued.Name)),
+			kv("outcome", StrValue(outcome)),
+			kv("steps", ListOf(steps)),
+		))
+	}
+
+	trace := obj(kv("examples", ListOf(traceExamples)))
+
+	return BundleArtifacts{
+		VarDoc:   ToVarDocArtifact(doc),
+		Registry: ToRegistryArtifact(registry),
+		Plan:     ToPlanArtifact(execution),
+		Trace:    trace,
+	}
+}
+
 // ToRegistryArtifact projects a Registry to the registry wire artifact.
 func ToRegistryArtifact(registry Registry) Value {
 	steps := make([]Value, len(registry.Steps))
