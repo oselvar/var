@@ -45,6 +45,8 @@ python:
 	# rename); uv won't repair a relocated venv on its own. See fresh-venv.sh.
 	scripts/fresh-venv.sh python examples/python-pytest examples/python-unittest
 	cd python && uv sync && uv run coverage run -m pytest && uv run coverage report && uv run ruff check && uv run python scripts/lint_no_reexports.py
+	# The samples are linted with the port's ruff, which they don't depend on.
+	cd python && uv run ruff check ../examples/python-pytest ../examples/python-unittest
 	cd examples/python-pytest && uv run pytest
 	cd examples/python-unittest && uv run python -m unittest
 
@@ -59,6 +61,9 @@ java:
 
 ruby:
 	cd ruby && bundle install && bundle exec rake
+	# The samples are linted with the port's rubocop (and its config, via
+	# examples/.rubocop.yml), which they don't depend on themselves.
+	cd ruby && bundle exec rubocop ../examples/ruby-rspec ../examples/ruby-minitest
 	cd examples/ruby-rspec && bundle install && bundle exec rspec
 	cd examples/ruby-minitest && bundle install && bundle exec rake test
 
@@ -73,7 +78,7 @@ rust:
 # drift + runner + the VSTest adapter smoke sample).
 dotnet:
 	cd dotnet && dotnet format --verify-no-changes && dotnet test
-	cd examples/csharp-vstest && dotnet test
+	cd examples/csharp-vstest && dotnet format --verify-no-changes && dotnet test
 
 # Go port: the go/ module (gofmt + vet + the four conformance artifacts x 15
 # bundles + config corpus + drift + runner + the go test adapter), then the
@@ -81,7 +86,7 @@ dotnet:
 # Markdown specs via `go test`).
 go:
 	cd go && test -z "$$(gofmt -l .)" && go vet ./... && go test ./...
-	cd examples/go-gotest && go test ./...
+	cd examples/go-gotest && test -z "$$(gofmt -l .)" && go vet ./... && go test ./...
 
 # Coverage reports: typescript/coverage/index.html, python/htmlcov/index.html,
 # java/<module>/target/site/jacoco/index.html (jacoco runs on every verify),

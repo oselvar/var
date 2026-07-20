@@ -110,7 +110,12 @@ perl -pi -e "s/\"(pytest-varar|varar[\\w-]*)\"/\"\$1==$VERSION\"/" \
 # Pin the Ruby samples to the released RubyGems version: swap each path source
 # for an exact version constraint. Gemfile.lock is excluded from the sync
 # (above), so `bundle install` regenerates it against the pins.
-perl -pi -e "s|, path: \"\\.\\./\\.\\./ruby/packages/[\\w-]+\"|, \"$VERSION\"|" \
+#
+# Accepts either quote style and emits single, so the substitution cannot be
+# silently defeated by a restyle: matching only double quotes meant a rubocop
+# autocorrect on the sample Gemfiles would leave this a no-op and publish the
+# samples still pointing at local monorepo paths.
+perl -pi -e "s|, path: ['\"]\\.\\./\\.\\./ruby/packages/[\\w-]+['\"]|, '$VERSION'|" \
   "$DEST"/ruby-*/Gemfile
 
 # Pin the Rust sample to the released crates.io version: swap the varar-core path

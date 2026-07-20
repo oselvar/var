@@ -1,0 +1,13 @@
+# The sample projects are linted with the port's own rules. Without this file
+# rubocop resolves its config from the inspected file's directory, finds nothing
+# here, and falls back to defaults — which flags things ruby/.rubocop.yml
+# deliberately turns off (Metrics against a Yahtzee scorer, Documentation on
+# sample classes).
+inherit_from: ../ruby/.rubocop.yml
+
+AllCops:
+  Exclude:
+    # ruby-minitest symlinks lib/ and steps/ to ruby-rspec's, so inspecting both
+    # projects would otherwise report every offence in them twice.
+    - 'ruby-minitest/lib/**/*'
+    - 'ruby-minitest/steps/**/*'

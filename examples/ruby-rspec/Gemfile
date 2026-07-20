@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-source "https://rubygems.org"
+source 'https://rubygems.org'
 
 # During development these resolve against the local monorepo build. The release
 # sync (release/targets/70-varar-examples.sh) rewrites them to the published
-# versions, e.g. gem "varar-rspec", "~> 0.3".
-gem "varar-core", path: "../../ruby/packages/core"
-gem "varar", path: "../../ruby/packages/varar"
-gem "varar-config", path: "../../ruby/packages/config"
-gem "varar-runner", path: "../../ruby/packages/runner"
-gem "varar-rspec", path: "../../ruby/packages/rspec"
+# versions, e.g. gem 'varar-rspec', '~> 0.3'.
+gem 'varar', path: '../../ruby/packages/varar'
+gem 'varar-config', path: '../../ruby/packages/config'
+gem 'varar-core', path: '../../ruby/packages/core'
+gem 'varar-rspec', path: '../../ruby/packages/rspec'
+gem 'varar-runner', path: '../../ruby/packages/runner'
 
-gem "rspec", "~> 3.13"
+gem 'rspec', '~> 3.13'
