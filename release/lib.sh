@@ -55,13 +55,19 @@ stamp_java_samples() {
 }
 
 # Stamp <version> into every Ruby workspace gem: the gemspec version, the
-# gemspec's internal (varar-*) dependency pins, the VERSION constants, and the
-# lockfile. External dep pins (cucumber, minitest, rspec, ...) are left alone.
-# perl -pi, not sed -i: BSD/GNU-portable in-place.
+# gemspec's internal (varar / varar-*) dependency pins, the VERSION constants,
+# and the lockfile. External dep pins (cucumber, minitest, rspec, ...) are left
+# alone. perl -pi, not sed -i: BSD/GNU-portable in-place.
+#
+# The internal-dep pattern matches both the suffixed gems (varar-core,
+# varar-runner, ...) and the bare `varar` gem — the '-...' suffix is optional.
+# varar-runner pins `add_dependency 'varar', '<v>'`; an earlier suffix-only
+# pattern skipped it, leaving runner requiring the previous version and failing
+# the relock.
 stamp_ruby() {
   local version="$1" f
   perl -pi -e "s/^(\s*s\.version\s*=\s*)'[^']*'/\${1}'$version'/" ruby/packages/*/*.gemspec
-  perl -pi -e "s/(add_dependency\s+'varar-[a-z0-9-]+',\s*)'[^']*'/\${1}'$version'/" ruby/packages/*/*.gemspec
+  perl -pi -e "s/(add_dependency\s+'varar(?:-[a-z0-9-]+)?',\s*)'[^']*'/\${1}'$version'/" ruby/packages/*/*.gemspec
   while IFS= read -r f; do
     perl -pi -e "s/(VERSION\s*=\s*)'[^']*'/\${1}'$version'/" "$f"
   done < <(grep -rlE "VERSION\s*=\s*'" ruby/packages/*/lib)
