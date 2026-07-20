@@ -1,7 +1,7 @@
 // Go sibling of greet.steps.ts (bundle 11-emoji-offsets).
 package fixture
 
-import "github.com/varar-dev/varar-go/varar"
+import "github.com/varar-dev/varar/go/varar"
 
 func Register(s *varar.Steps[varar.Value]) {
 	// The list item is followed by a table, appended as a trailing arg, so this

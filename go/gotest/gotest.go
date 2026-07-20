@@ -19,9 +19,9 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/varar-dev/varar-go/config"
-	"github.com/varar-dev/varar-go/core"
-	"github.com/varar-dev/varar-go/runner"
+	"github.com/varar-dev/varar/go/config"
+	"github.com/varar-dev/varar/go/core"
+	"github.com/varar-dev/varar/go/runner"
 )
 
 // BuildRegistry builds the step registry for a run.

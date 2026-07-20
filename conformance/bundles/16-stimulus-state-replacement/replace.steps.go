@@ -6,7 +6,7 @@
 // exactly what this bundle pins.
 package fixture
 
-import "github.com/varar-dev/varar-go/varar"
+import "github.com/varar-dev/varar/go/varar"
 
 func fieldOf(state varar.Value, name string) int {
 	if m, ok := state.AsMap(); ok {

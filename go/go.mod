@@ -1,4 +1,4 @@
-module github.com/varar-dev/varar-go
+module github.com/varar-dev/varar/go
 
 go 1.26
 

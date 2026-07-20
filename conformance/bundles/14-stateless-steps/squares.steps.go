@@ -6,7 +6,7 @@
 // same contract as the .ts sibling's `[n, n * n]` tuple.
 package fixture
 
-import "github.com/varar-dev/varar-go/varar"
+import "github.com/varar-dev/varar/go/varar"
 
 func Register(s *varar.Steps[varar.Value]) {
 	s.Stimulus("I warm up my mental math", func(state varar.Value) (varar.Value, error) {

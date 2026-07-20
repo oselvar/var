@@ -3,7 +3,7 @@ package runner
 import (
 	"fmt"
 
-	"github.com/varar-dev/varar-go/core"
+	"github.com/varar-dev/varar/go/core"
 )
 
 // PlanSpec parses + plans one spec.

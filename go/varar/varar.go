@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/varar-dev/varar-go/core"
+	"github.com/varar-dev/varar/go/core"
 )
 
 // Re-exported core types and constructors, so authors import only this package.

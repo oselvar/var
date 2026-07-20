@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/varar-dev/varar-go/varar"
+	"github.com/varar-dev/varar/go/varar"
 )
 
 // dateLayout is the document's date notation — "June 1, 2026" — in Go's

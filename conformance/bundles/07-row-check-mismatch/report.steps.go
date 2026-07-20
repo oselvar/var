@@ -1,7 +1,7 @@
 // Go sibling of report.steps.ts (bundle 07-row-check-mismatch).
 package fixture
 
-import "github.com/varar-dev/varar-go/varar"
+import "github.com/varar-dev/varar/go/varar"
 
 func Register(s *varar.Steps[varar.Value]) {
 	// Header-bound row step: returns its computed columns; the core diffs them

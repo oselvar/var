@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/varar-dev/varar-go/core"
-	"github.com/varar-dev/varar-go/gotest"
+	"github.com/varar-dev/varar/go/core"
+	"github.com/varar-dev/varar/go/gotest"
 )
 
 func withStep() core.Registry {

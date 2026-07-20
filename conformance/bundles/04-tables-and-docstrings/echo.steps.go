@@ -1,7 +1,7 @@
 // Go sibling of echo.steps.ts (bundle 04-tables-and-docstrings).
 package fixture
 
-import "github.com/varar-dev/varar-go/varar"
+import "github.com/varar-dev/varar/go/varar"
 
 func Register(s *varar.Steps[varar.Value]) {
 	// The doc string is this sensor's only slot, so it arrives as a string and

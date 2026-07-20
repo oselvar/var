@@ -36,7 +36,7 @@ existing engine.
 **Support Go as a full pipeline port**, structured exactly like the other ports:
 `varcore` (pure pipeline), the `varar` author facade, `varconfig`, `varrunner`,
 and the `vargotest` adapter, laid out as packages of a single Go module
-`github.com/varar-dev/varar-go` rooted at `go/`. Correctness is proven by
+`github.com/varar-dev/varar/go` rooted at `go/`. Correctness is proven by
 reproducing `conformance/bundles/*/golden/*.json` byte-for-byte (all four
 artifacts, all 15 bundles) and `conformance/config/cases/*` for the config
 reader; drift is unit-gated against the shared FNV-1a / lockfile vectors.

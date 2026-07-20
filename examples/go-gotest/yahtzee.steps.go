@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/varar-dev/varar-go/varar"
+	"github.com/varar-dev/varar/go/varar"
 )
 
 func registerYahtzee(s *varar.Steps[Ctx]) {

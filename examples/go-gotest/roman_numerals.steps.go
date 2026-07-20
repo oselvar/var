@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/varar-dev/varar-go/varar"
+	"github.com/varar-dev/varar/go/varar"
 )
 
 func registerRomanNumerals(s *varar.Steps[Ctx]) {

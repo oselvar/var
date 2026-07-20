@@ -5,8 +5,8 @@
 package example
 
 import (
-	"github.com/varar-dev/varar-go/core"
-	"github.com/varar-dev/varar-go/varar"
+	"github.com/varar-dev/varar/go/core"
+	"github.com/varar-dev/varar/go/varar"
 )
 
 // BuildRegistry threads one Steps builder through every spec's register func —

@@ -2,7 +2,7 @@ module github.com/varar-dev/varar-examples/go-gotest
 
 go 1.26
 
-require github.com/varar-dev/varar-go v0.0.0
+require github.com/varar-dev/varar/go v0.0.0
 
 require (
 	github.com/cucumber/cucumber-expressions-go v6.2.0+incompatible // indirect
@@ -13,4 +13,4 @@ require (
 
 // This sample depends on the in-repo Go module by path. The release sync
 // (release/targets/70-varar-examples.sh) rewrites this to a published version.
-replace github.com/varar-dev/varar-go => ../../go
+replace github.com/varar-dev/varar/go => ../../go

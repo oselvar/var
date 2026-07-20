@@ -1,7 +1,7 @@
 // Go sibling of echo.steps.ts (bundle 06-doc-string-mismatch).
 package fixture
 
-import "github.com/varar-dev/varar-go/varar"
+import "github.com/varar-dev/varar/go/varar"
 
 func Register(s *varar.Steps[varar.Value]) {
 	// Returns the WRONG string for the doc-string slot; the core compares it to

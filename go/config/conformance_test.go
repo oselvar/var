@@ -6,8 +6,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/varar-dev/varar-go/config"
-	"github.com/varar-dev/varar-go/core"
+	"github.com/varar-dev/varar/go/config"
+	"github.com/varar-dev/varar/go/core"
 )
 
 // The var-config conformance corpus at conformance/config/cases/*: each case has

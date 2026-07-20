@@ -5,7 +5,7 @@
 // no bundle exercised before this one.
 package fixture
 
-import "github.com/varar-dev/varar-go/varar"
+import "github.com/varar-dev/varar/go/varar"
 
 func Register(s *varar.Steps[varar.Value]) {
 	s.Stimulus("I do nothing at all", func(state varar.Value) (varar.Value, error) {

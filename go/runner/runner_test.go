@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/varar-dev/varar-go/config"
-	"github.com/varar-dev/varar-go/core"
-	"github.com/varar-dev/varar-go/runner"
+	"github.com/varar-dev/varar/go/config"
+	"github.com/varar-dev/varar/go/core"
+	"github.com/varar-dev/varar/go/runner"
 )
 
 func TestGlobStarStaysWithinOneSegment(t *testing.T) {

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/varar-dev/varar-go/core"
+	"github.com/varar-dev/varar/go/core"
 )
 
 // The adapter's happy paths are proven by the conformance corpus (bundles

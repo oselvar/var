@@ -1,7 +1,7 @@
 // Go sibling of cukes.steps.ts (bundle 10-error-fence-without-step).
 package fixture
 
-import "github.com/varar-dev/varar-go/varar"
+import "github.com/varar-dev/varar/go/varar"
 
 func Register(s *varar.Steps[varar.Value]) {
 	// The prose matches no step, so the `error` fence has nothing to run →

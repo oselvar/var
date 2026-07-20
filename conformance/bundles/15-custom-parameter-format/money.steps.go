@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/varar-dev/varar-go/varar"
+	"github.com/varar-dev/varar/go/varar"
 )
 
 func Register(s *varar.Steps[varar.Value]) {

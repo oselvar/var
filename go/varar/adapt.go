@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/varar-dev/varar-go/core"
+	"github.com/varar-dev/varar/go/core"
 )
 
 // Handler adaptation — how `s.Sensor(expr, handler)` accepts a handler whose

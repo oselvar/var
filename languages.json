@@ -89,7 +89,7 @@
     "ext": ".go",
     "stepsGlob": "varar-examples/**/*.steps.go",
     "hasCli": false,
-    "install": { "lang": "bash", "code": "go get github.com/varar-dev/varar-go" },
+    "install": { "lang": "bash", "code": "go get github.com/varar-dev/varar/go" },
     "scaffold": null,
     "run": { "lang": "bash", "code": "go test" }
   }

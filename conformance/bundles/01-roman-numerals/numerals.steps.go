@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/varar-dev/varar-go/varar"
+	"github.com/varar-dev/varar/go/varar"
 )
 
 func roman(n int64) (string, bool) {

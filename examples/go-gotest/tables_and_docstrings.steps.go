@@ -3,7 +3,7 @@ package example
 import (
 	"strings"
 
-	"github.com/varar-dev/varar-go/varar"
+	"github.com/varar-dev/varar/go/varar"
 )
 
 func registerTablesAndDocstrings(s *varar.Steps[Ctx]) {

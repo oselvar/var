@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	example "github.com/varar-dev/varar-examples/go-gotest"
-	"github.com/varar-dev/varar-go/gotest"
+	"github.com/varar-dev/varar/go/gotest"
 )
 
 // TestSpecs runs every Markdown spec matched by varar.config.json as a Go

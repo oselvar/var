@@ -1,6 +1,6 @@
 package example
 
-import "github.com/varar-dev/varar-go/varar"
+import "github.com/varar-dev/varar/go/varar"
 
 func registerHelloVar(s *varar.Steps[Ctx]) {
 	s.Stimulus("I greet {string}", func(ctx Ctx, name string) (Ctx, error) {

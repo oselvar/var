@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/varar-dev/varar-go/core"
+	"github.com/varar-dev/varar/go/core"
 )
 
 // RenderFailure is a pure human-readable rendering of a step failure, anchored

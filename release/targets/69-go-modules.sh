@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Publish the Go port as a tagged Go module. Go modules are "published" simply by
-# pushing a version tag on the module path (github.com/varar-dev/varar-go, rooted
+# pushing a version tag on the module path (github.com/varar-dev/varar/go, rooted
 # at go/, so the tag form is `go/vX.Y.Z`); the module proxy indexes it on first
 # fetch. Idempotent — a tag that already exists is left alone.
 #
 # PARKED until the Go port is ready to ship (gated by GO_MODULES_ENABLED in
 # release/lib.sh, which keeps this target and the 70-varar-examples.sh go pin in
 # lock-step). While parked this simply reports OK. Go-live checklist:
-#   1. Confirm the module path github.com/varar-dev/varar-go is the intended one
+#   1. Confirm the module path github.com/varar-dev/varar/go is the intended one
 #      and the repo is public (the proxy only serves public modules).
 #   2. Decide the tag scheme for a module in the go/ subdirectory
 #      (`go/vX.Y.Z`), and wire the release stamper to create it (the Go module

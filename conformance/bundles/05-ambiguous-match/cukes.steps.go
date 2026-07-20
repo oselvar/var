@@ -1,7 +1,7 @@
 // Go sibling of cukes.steps.ts (bundle 05-ambiguous-match).
 package fixture
 
-import "github.com/varar-dev/varar-go/varar"
+import "github.com/varar-dev/varar/go/varar"
 
 func Register(s *varar.Steps[varar.Value]) {
 	// Both expressions match "I have 5 cukes" → ambiguous-match diagnostic.

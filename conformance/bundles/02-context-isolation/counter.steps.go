@@ -1,7 +1,7 @@
 // Go sibling of counter.steps.ts (bundle 02-context-isolation).
 package fixture
 
-import "github.com/varar-dev/varar-go/varar"
+import "github.com/varar-dev/varar/go/varar"
 
 func countOf(state varar.Value) int {
 	if m, ok := state.AsMap(); ok {

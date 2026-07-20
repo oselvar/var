@@ -13,7 +13,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/varar-dev/varar-go/config"
+	"github.com/varar-dev/varar/go/config"
 )
 
 // GlobToRegex translates a glob (`/**/`, `/**`, `**/`, `**`, `*`, `?`) to an
