@@ -4,7 +4,7 @@ module Varar
   # The pure functional core: parse, match, plan, execute, diffs, drift, and
   # the conformance projections. No filesystem, network, globals, or time.
   module Core
-    VERSION = '0.4.2'
+    VERSION = '0.5.0'
   end
 end
 

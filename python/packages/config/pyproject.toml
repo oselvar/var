@@ -1,6 +1,6 @@
 [project]
 name = "varar-config"
-version = "0.4.2"
+version = "0.5.0"
 description = "Reads varar.config.json — the shared config file for all var tools"
 license = "MIT"
 requires-python = ">=3.11"

@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = 'varar-core'
-  s.version = '0.4.2'
+  s.version = '0.5.0'
   s.summary = 'Markdown-native BDD — pure functional core engine'
   s.description = 'The pure functional pipeline (parse, match, plan, execute, drift) behind Vár.'
   s.authors = ['Aslak Hellesøy']

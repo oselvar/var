@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = 'varar-rspec'
-  s.version = '0.4.2'
+  s.version = '0.5.0'
   s.summary = 'Markdown-native BDD — run Markdown specs as RSpec examples'
   s.description = 'RSpec adapter: one selectable example per Markdown example, with a drift gate.'
   s.authors = ['Aslak Hellesøy']
@@ -14,6 +14,6 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
 
   s.add_dependency 'rspec-core', '~> 3.13'
-  s.add_dependency 'varar-runner', '0.4.2'
+  s.add_dependency 'varar-runner', '0.5.0'
   s.metadata['rubygems_mfa_required'] = 'true'
 end

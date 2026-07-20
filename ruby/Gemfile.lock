@@ -1,41 +1,41 @@
 PATH
   remote: packages/config
   specs:
-    varar-config (0.4.2)
+    varar-config (0.5.0)
 
 PATH
   remote: packages/core
   specs:
-    varar-core (0.4.2)
+    varar-core (0.5.0)
       cucumber-cucumber-expressions (= 20.0.0)
 
 PATH
   remote: packages/minitest
   specs:
-    varar-minitest (0.4.2)
+    varar-minitest (0.5.0)
       minitest (~> 6.0)
-      varar-runner (= 0.4.2)
+      varar-runner (= 0.5.0)
 
 PATH
   remote: packages/rspec
   specs:
-    varar-rspec (0.4.2)
+    varar-rspec (0.5.0)
       rspec-core (~> 3.13)
-      varar-runner (= 0.4.2)
+      varar-runner (= 0.5.0)
 
 PATH
   remote: packages/runner
   specs:
-    varar-runner (0.4.2)
-      varar (= 0.4.2)
-      varar-config (= 0.4.2)
+    varar-runner (0.5.0)
+      varar (= 0.5.0)
+      varar-config (= 0.5.0)
 
 PATH
   remote: packages/varar
   specs:
-    varar (0.4.2)
+    varar (0.5.0)
       cucumber-cucumber-expressions (= 20.0.0)
-      varar-core (= 0.4.2)
+      varar-core (= 0.5.0)
 
 GEM
   remote: https://rubygems.org/

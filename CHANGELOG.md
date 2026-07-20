@@ -9,6 +9,64 @@ This file is generated from conventional commit messages by
 [git-cliff](https://git-cliff.org) — do not edit it by hand. It is written at
 release time by `make prepare`; preview the next release with `make changelog`.
 
+## [0.5.0] - 2026-07-20
+
+### TypeScript (npm)
+
+- ⚠️ **Breaking:** Publish the TypeScript port under the @varar npm scope
+  npm packages are renamed from the @oselvar scope to @varar.
+Update imports: `@oselvar/var` -> `@varar/varar`, `@oselvar/var-vitest` ->
+`@varar/vitest`, etc.
+
+### Python (PyPI)
+
+- ⚠️ **Breaking:** Publish the Python port under the varar distribution names
+  PyPI distributions are renamed. Install `varar` /
+`pytest-varar` instead of `oselvar-var` / `pytest-var`, and import `varar*`
+instead of `var*`.
+
+### Java & Kotlin (Maven Central)
+
+- ⚠️ **Breaking:** Publish the JVM port under the dev.varar Maven coordinates
+  Maven coordinates change from com.oselvar:var* to
+- ⚠️ **Breaking:** Steps.defineState is now Steps.state
+  Java's `Steps.defineState(factory)` is now `Steps.state(factory)`
+and .NET's `Steps.DefineState(factory)` is now `Steps.State(factory)`. Rename the
+call in each step file; there is no other change to the API.
+- Fixed: **var-kotlin:** Backtick-escape the `var` keyword in a Kotlin import so ktfmt passes
+
+### Ruby (RubyGems)
+
+- ⚠️ **Breaking:** Publish the Ruby port under the varar gem names
+  RubyGems names change from oselvar-var* to varar*; require
+paths from 'oselvar/var...' to 'varar...'; and the module namespace from
+- ⚠️ **Breaking:** The state factory must be a proc, called fresh per example
+  `steps` no longer accepts a Hash or keyword arguments as the
+initial state — pass a Proc/lambda instead, e.g. `steps(count: 0)` becomes
+`steps(-> { { count: 0 } })`. Omitting the factory entirely, for stateless step
+files, is unchanged. Passing a Hash now raises ArgumentError with the rewrite.
+- Fixed: Update minitest gemspec dependency to ~> 6.0 and regenerate lockfile
+- Fixed: Update minitest to ~> 6.0 in examples/ruby-minitest Gemfile
+
+### Go (Go modules)
+
+- Added: Run your Markdown specs as Go tests with `go get github.com/varar-dev/varar/go`
+
+### Specification (all ports)
+
+- ⚠️ **Breaking:** Rename the config/lock files, CLI command, and scaffold to varar
+  rename var.config.json -> varar.config.json and
+var.lock.json -> varar.lock.json in your project, point "$schema" at
+varar.config.schema.json, and invoke the CLI as `varar` instead of `var`.
+- ⚠️ **Breaking:** A stimulus returns the complete next state, replacing it
+  A stimulus must return the complete next state, not a partial
+one. In TypeScript, Python and Ruby a return that omits a field now drops that
+field instead of preserving it — spread the current state to keep it, e.g.
+`(state) => ({ ...state, count: 1 })`. Returning nothing still leaves state
+unchanged, and is now a no-op in Java, Rust and .NET rather than wiping state.
+- Added: Step handlers accept up to five captures in every port
+- Fixed: Every port words and quotes failure messages identically
+
 ## [0.4.2] - 2026-07-08
 
 ### Java & Kotlin (Maven Central)
@@ -170,5 +228,5 @@ instead of var_runner.
 
 ### Added
 
-- First public release of var: Markdown-native BDD for TypeScript (npm), Python (PyPI), and Java/Kotlin (Maven Central), plus the Vár VS Code extension (Marketplace and Open VSX).
+- First public release of var: Markdown-native BDD for TypeScript (npm), Python (PyPI), and Java/Kotlin (Maven Central), plus the Varar VS Code extension (Marketplace and Open VSX).
 

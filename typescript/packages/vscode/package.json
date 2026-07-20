@@ -3,7 +3,7 @@
   "displayName": "Varar",
   "description": "Markdown-native BDD: highlight matched steps, go-to step definitions, missing-step diagnostics.",
   "publisher": "varar",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "type": "module",
   "engines": {
     "vscode": "^1.105.0",
