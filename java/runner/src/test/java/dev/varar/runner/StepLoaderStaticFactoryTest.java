@@ -32,7 +32,7 @@ class StepLoaderStaticFactoryTest {
     }
 
     @Test
-    void rejectsTwoDefineStateRegistrationsSharingOneSourceFile() {
+    void rejectsTwoStateRegistrationsSharingOneSourceFile() {
         IllegalArgumentException e = assertThrows(
                 IllegalArgumentException.class,
                 () -> StepLoader.loadSteps(List.of("dev.varar.runner.DuplicateStateSteps"), LOADER));

@@ -13,7 +13,7 @@ public final class YahtzeeSteps implements StepDefinitions<YahtzeeSteps.Ctx> {
 
     @Override
     public void register(Steps<Ctx> s) {
-        s.defineState(Ctx::new);
+        s.state(Ctx::new);
 
         s.sensor("Examples of dice, category and score", (Ctx ctx, Map<String, String> row) -> {
             List<Integer> dice = Arrays.stream(row.get("dice").split(","))

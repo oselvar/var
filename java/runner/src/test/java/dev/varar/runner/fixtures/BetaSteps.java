@@ -17,7 +17,7 @@ public final class BetaSteps implements StepDefinitions<BetaSteps.Ctx> {
 
     @Override
     public void register(Steps<Ctx> s) {
-        s.defineState(() -> new Ctx(""));
+        s.state(() -> new Ctx(""));
         s.stimulus("beta sets label to {word}", (Ctx ctx, String label) -> new Ctx(label));
         s.sensor("beta label is {word}", (Ctx ctx, String expected) -> ctx.label());
     }

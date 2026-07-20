@@ -26,7 +26,7 @@ with sensors.
     // inside register(Steps<Ctx> s)
     record Ctx(int total) implements State {}
 
-    s.defineState(() -> new Ctx(0));
+    s.state(() -> new Ctx(0));
 
     s.stimulus("I add {int}", (Ctx ctx, Integer n) -> new Ctx(ctx.total() + n));
     s.sensor("the total is {int}", (Ctx ctx, Integer expected) -> ctx.total());
@@ -88,7 +88,7 @@ with sensors.
   </TabItem>
   <TabItem label="C#">
     ```csharp
-    s.DefineState(() => VMap(("total", Value.Of(0))));
+    s.State(() => VMap(("total", Value.Of(0))));
 
     s.Stimulus("I add {int}", (state, n) =>
         new VMap(SMap(state).SetItem("total", Value.Of(state["total"].AsInt() + n.AsInt()))));
@@ -136,7 +136,7 @@ full replacement, same principle: new value out, never mutation.
     ```java
     record Ctx(String greeting, int count) implements State {}
 
-    s.defineState(() -> new Ctx("", 0));
+    s.state(() -> new Ctx("", 0));
 
     s.stimulus("I greet {string}", (Ctx ctx, String name) -> new Ctx("Hello, " + name + "!", ctx.count()));
     s.stimulus("I add {int}", (Ctx ctx, Integer n) -> new Ctx(ctx.greeting(), ctx.count() + n));
@@ -203,7 +203,7 @@ full replacement, same principle: new value out, never mutation.
   </TabItem>
   <TabItem label="C#">
     ```csharp
-    s.DefineState(() => VMap(("greeting", Value.Of("")), ("count", Value.Of(0))));
+    s.State(() => VMap(("greeting", Value.Of("")), ("count", Value.Of(0))));
 
     // Full replacement: read the current state map, set just the changed key.
     s.Stimulus("I greet {string}", (state, name) =>

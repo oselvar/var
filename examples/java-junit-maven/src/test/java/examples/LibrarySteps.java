@@ -28,7 +28,7 @@ public final class LibrarySteps implements StepDefinitions<LibrarySteps.Ctx> {
 
     @Override
     public void register(Steps<Ctx> s) {
-        s.defineState(() -> new Ctx(List.of(), Library.gbp(0), false));
+        s.state(() -> new Ctx(List.of(), Library.gbp(0), false));
 
         s.param(
                 "date",

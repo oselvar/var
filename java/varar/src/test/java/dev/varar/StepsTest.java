@@ -28,7 +28,7 @@ class StepsTest {
 
         @Override
         public void register(Steps<Ctx> s) {
-            s.defineState(() -> new Ctx(null));
+            s.state(() -> new Ctx(null));
             s.stimulus("I convert {int} to roman numerals", (Ctx ctx, Integer n) -> new Ctx(ROMAN.get(n)));
             s.sensor("The result is {word}", (Ctx ctx, String expected) -> ctx.result());
         }
@@ -64,7 +64,7 @@ class StepsTest {
     void duplicateExpressionRegisteredTwiceInOneRunThrows() {
         record Empty() implements State {}
         Steps<Empty> s = new Steps<>();
-        s.defineState(Empty::new);
+        s.state(Empty::new);
         s.stimulus("I do a thing", (Empty state) -> state);
 
         IllegalArgumentException ex =
@@ -76,7 +76,7 @@ class StepsTest {
     void paramWiresARealCustomTypeThroughToTheRegistry() {
         record Empty() implements State {}
         Steps<Empty> s = new Steps<>();
-        s.defineState(Empty::new);
+        s.state(Empty::new);
         s.param("airport", Pattern.compile("[A-Z]{3}"), groups -> groups[0].toLowerCase());
         s.sensor("I fly to {airport}", (Empty state, String code) -> code);
 

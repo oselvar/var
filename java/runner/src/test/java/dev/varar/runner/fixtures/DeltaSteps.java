@@ -16,7 +16,7 @@ public final class DeltaSteps implements StepDefinitions<DeltaSteps.Ctx> {
 
     @Override
     public void register(Steps<Ctx> s) {
-        s.defineState(() -> new Ctx(""));
+        s.state(() -> new Ctx(""));
         s.param("size", Pattern.compile("small|large"));
         s.stimulus("delta sets size to {size}", (Ctx ctx, String size) -> new Ctx(size));
     }

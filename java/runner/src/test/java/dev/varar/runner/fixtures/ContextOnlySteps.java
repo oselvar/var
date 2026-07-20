@@ -19,6 +19,6 @@ public final class ContextOnlySteps implements StepDefinitions<ContextOnlySteps.
 
     @Override
     public void register(Steps<Ctx> s) {
-        s.defineState(Ctx::new);
+        s.state(Ctx::new);
     }
 }

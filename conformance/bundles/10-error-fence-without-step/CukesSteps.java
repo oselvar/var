@@ -17,7 +17,7 @@ public final class CukesSteps implements StepDefinitions<CukesSteps.Ctx> {
 
     @Override
     public void register(Steps<Ctx> s) {
-        s.defineState(Ctx::new);
+        s.state(Ctx::new);
 
         s.stimulus("I have {int} cukes", (Ctx ctx, Integer n) -> ctx);
     }

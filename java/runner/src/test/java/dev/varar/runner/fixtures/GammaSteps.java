@@ -15,7 +15,7 @@ public final class GammaSteps implements StepDefinitions<GammaSteps.Ctx> {
 
     @Override
     public void register(Steps<Ctx> s) {
-        s.defineState(() -> new Ctx(""));
+        s.state(() -> new Ctx(""));
         s.param("color", Pattern.compile("red|green|blue"));
         s.stimulus("gamma sets color to {color}", (Ctx ctx, String color) -> new Ctx(color));
     }

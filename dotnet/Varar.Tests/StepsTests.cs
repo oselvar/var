@@ -11,7 +11,7 @@ internal static class CounterSteps
 {
     public static void Register(Steps s)
     {
-        s.DefineState(() => Value.Map([new("count", Value.Of(0))]));
+        s.State(() => Value.Map([new("count", Value.Of(0))]));
         s.Stimulus("I increment", state => Value.Map([new("count", Value.Of(state["count"].AsInt() + 1))]));
         s.Sensor("The count is {int}", (state, n) => state["count"]);
     }
@@ -40,7 +40,7 @@ public class StepsTests
     }
 
     [Fact]
-    public void DefineStateRecordsAFactoryKeyedByTheCallerFileThatProducesTheInitialState()
+    public void StateRecordsAFactoryKeyedByTheCallerFileThatProducesTheInitialState()
     {
         var r = BuildCounter();
 

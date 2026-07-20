@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
  * public final class CounterSteps implements StepDefinitions<Ctx> {
  *     @Override
  *     public void register(Steps<Ctx> s) {
- *         s.defineState(Ctx::new);
+ *         s.state(Ctx::new);
  *         s.stimulus("I increment", (Ctx ctx) -> new Ctx(ctx.count() + 1));
  *         s.sensor("The count is {int}", (Ctx ctx, Integer n) -> ctx.count());
  *     }
@@ -103,7 +103,7 @@ public final class Steps<C extends State> {
      * file whose steps are pure need not call this; handlers are then bound to {@link
      * State.Empty}.
      */
-    public Steps<C> defineState(Supplier<C> factory) {
+    public Steps<C> state(Supplier<C> factory) {
         this.stateFactory = factory;
         return this;
     }

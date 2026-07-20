@@ -11,7 +11,7 @@ public final class RomanNumeralsSteps implements StepDefinitions<RomanNumeralsSt
 
     @Override
     public void register(Steps<Ctx> s) {
-        s.defineState(Ctx::new);
+        s.state(Ctx::new);
 
         s.sensor(
                 "a decimal and a roman number",

@@ -10,7 +10,7 @@ public final class DeepThoughtSteps implements StepDefinitions<DeepThoughtSteps.
 
     @Override
     public void register(Steps<Ctx> s) {
-        s.defineState(Ctx::new);
+        s.state(Ctx::new);
 
         s.sensor("life, the universe and everything is {int}", (Ctx ctx, Integer answer) -> 42);
     }

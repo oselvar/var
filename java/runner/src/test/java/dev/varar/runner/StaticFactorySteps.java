@@ -17,7 +17,7 @@ public final class StaticFactorySteps {
 
     public static StepDefinitions<Ctx> steps() {
         return s -> {
-            s.defineState(Ctx::new);
+            s.state(Ctx::new);
             s.stimulus("I do a static-factory thing", (Ctx ctx) -> ctx);
         };
     }

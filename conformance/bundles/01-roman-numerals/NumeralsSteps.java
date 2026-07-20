@@ -28,7 +28,7 @@ public final class NumeralsSteps implements StepDefinitions<NumeralsSteps.Ctx> {
 
     @Override
     public void register(Steps<Ctx> s) {
-        s.defineState(() -> new Ctx(null));
+        s.state(() -> new Ctx(null));
 
         s.stimulus(
                 "I convert {int} to roman numerals",

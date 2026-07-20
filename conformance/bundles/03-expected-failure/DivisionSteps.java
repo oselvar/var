@@ -11,7 +11,7 @@ public final class DivisionSteps implements StepDefinitions<DivisionSteps.Ctx> {
 
     @Override
     public void register(Steps<Ctx> s) {
-        s.defineState(Ctx::new);
+        s.state(Ctx::new);
 
         s.stimulus(
                 "I divide {int} by {int}",

@@ -22,7 +22,7 @@ public final class EchoSteps implements StepDefinitions<EchoSteps.Ctx> {
 
     @Override
     public void register(Steps<Ctx> s) {
-        s.defineState(Ctx::new);
+        s.state(Ctx::new);
 
         s.sensor("I echo the following:", (Ctx ctx, String doc) -> doc);
     }

@@ -19,7 +19,7 @@ public final class CounterSteps implements StepDefinitions<CounterSteps.Ctx> {
 
     @Override
     public void register(Steps<Ctx> s) {
-        s.defineState(() -> new Ctx(0));
+        s.state(() -> new Ctx(0));
         s.stimulus("I add {int} to the counter", (Ctx ctx, Integer n) -> new Ctx(ctx.count() + n));
         s.sensor("the counter should be {int}", (Ctx ctx, Integer expected) -> ctx.count());
     }

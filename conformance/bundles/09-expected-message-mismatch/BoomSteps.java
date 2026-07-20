@@ -16,7 +16,7 @@ public final class BoomSteps implements StepDefinitions<BoomSteps.Ctx> {
 
     @Override
     public void register(Steps<Ctx> s) {
-        s.defineState(Ctx::new);
+        s.state(Ctx::new);
 
         s.stimulus(
                 "I always boom",

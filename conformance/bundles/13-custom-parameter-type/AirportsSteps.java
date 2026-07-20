@@ -20,7 +20,7 @@ public final class AirportsSteps implements StepDefinitions<AirportsSteps.Ctx> {
 
     @Override
     public void register(Steps<Ctx> s) {
-        s.defineState(() -> new Ctx(null));
+        s.state(() -> new Ctx(null));
 
         s.param("airport", Pattern.compile("[A-Z]{3}"), groups -> groups[0].toLowerCase(Locale.ROOT));
 

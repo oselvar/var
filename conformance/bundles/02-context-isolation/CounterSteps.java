@@ -11,7 +11,7 @@ public final class CounterSteps implements StepDefinitions<CounterSteps.Ctx> {
 
     @Override
     public void register(Steps<Ctx> s) {
-        s.defineState(() -> new Ctx(0));
+        s.state(() -> new Ctx(0));
 
         s.stimulus("I increment", (Ctx ctx) -> new Ctx(ctx.count() + 1));
 

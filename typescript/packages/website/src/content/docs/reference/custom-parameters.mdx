@@ -26,7 +26,7 @@ can use it as a `{name}` placeholder.
   <TabItem label="Java">
     ```java
     // inside register(Steps<Ctx> s)
-    s.defineState(Ctx::new);
+    s.state(Ctx::new);
     s.param(
             "money",
             Pattern.compile("£\\d+\\.\\d{2}"),
@@ -100,7 +100,7 @@ can use it as a `{name}` placeholder.
   </TabItem>
   <TabItem label="C#">
     ```csharp
-    s.DefineState(() => VMap(("fee", Value.Of(0.0))));
+    s.State(() => VMap(("fee", Value.Of(0.0))));
 
     s.Param(
         "money",

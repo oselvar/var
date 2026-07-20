@@ -34,7 +34,7 @@ fun <C : Any> steps(
     block: StepsScope<C>.() -> Unit,
 ): StepDefinitions<*> =
     StepDefinitions<StateBox<C>> { steps ->
-        steps.defineState(Supplier { StateBox(factory()) })
+        steps.state(Supplier { StateBox(factory()) })
         StepsScope(steps).block()
     }
 

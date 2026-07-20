@@ -23,7 +23,7 @@ public static class LibrarySteps
 
     public static void Register(Steps s)
     {
-        s.DefineState(() => VMap(("loans", Value.List([])), ("fee", Value.Of(0)), ("granted", Value.Of(false))));
+        s.State(() => VMap(("loans", Value.List([])), ("fee", Value.Of(0)), ("granted", Value.Of(false))));
 
         s.Param(
             "date",

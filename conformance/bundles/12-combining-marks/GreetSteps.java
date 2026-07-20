@@ -15,7 +15,7 @@ public final class GreetSteps implements StepDefinitions<GreetSteps.Ctx> {
 
     @Override
     public void register(Steps<Ctx> s) {
-        s.defineState(Ctx::new);
+        s.state(Ctx::new);
 
         s.sensor("I greet {string}", (Ctx ctx, String name) -> null);
     }

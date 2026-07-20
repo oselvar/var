@@ -27,7 +27,7 @@ class AuthorApiTest {
 
         @Override
         public void register(Steps<Ctx> s) {
-            s.defineState(() -> new Ctx(null));
+            s.state(() -> new Ctx(null));
 
             s.stimulus("I convert {int} to roman numerals", (Ctx ctx, Integer n) -> new Ctx(ROMAN.get(n)));
 
@@ -79,7 +79,7 @@ class AuthorApiTest {
     }
 
     @Test
-    void omittingDefineStateBindsHandlersToEmptyState() {
+    void omittingStateBindsHandlersToEmptyState() {
         Steps.Bound bound = Steps.bind(new SquareSteps());
 
         var steps = bound.registry().steps();

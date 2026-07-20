@@ -17,14 +17,14 @@ public final class DuplicateStateSteps {
 
     public static StepDefinitions<Ctx> first() {
         return s -> {
-            s.defineState(Ctx::new);
+            s.state(Ctx::new);
             s.stimulus("the first duplicate-file step", (Ctx ctx) -> ctx);
         };
     }
 
     public static StepDefinitions<Ctx> second() {
         return s -> {
-            s.defineState(Ctx::new);
+            s.state(Ctx::new);
             s.stimulus("the second duplicate-file step", (Ctx ctx) -> ctx);
         };
     }

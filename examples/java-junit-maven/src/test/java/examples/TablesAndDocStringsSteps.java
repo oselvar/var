@@ -14,7 +14,7 @@ public final class TablesAndDocStringsSteps implements StepDefinitions<TablesAnd
 
     @Override
     public void register(Steps<Ctx> s) {
-        s.defineState(Ctx::new);
+        s.state(Ctx::new);
 
         s.sensor("Uppercase each one:", (Ctx ctx, List<List<String>> rows) -> {
             List<Map<String, String>> out = new ArrayList<>();

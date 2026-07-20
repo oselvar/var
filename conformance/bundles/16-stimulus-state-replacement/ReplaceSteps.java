@@ -17,7 +17,7 @@ public final class ReplaceSteps implements StepDefinitions<ReplaceSteps.Ctx> {
 
     @Override
     public void register(Steps<Ctx> s) {
-        s.defineState(() -> new Ctx(0, 0));
+        s.state(() -> new Ctx(0, 0));
 
         s.stimulus("I set a to 1 and b to 2", (Ctx ctx) -> new Ctx(1, 2));
 

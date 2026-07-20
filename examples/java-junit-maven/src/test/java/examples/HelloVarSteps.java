@@ -10,7 +10,7 @@ public final class HelloVarSteps implements StepDefinitions<HelloVarSteps.Ctx> {
 
     @Override
     public void register(Steps<Ctx> s) {
-        s.defineState(() -> new Ctx("", 0));
+        s.state(() -> new Ctx("", 0));
 
         s.stimulus("I greet {string}", (Ctx ctx, String name) -> new Ctx("Hello, " + name + "!", ctx.result()));
         s.sensor("the greeting should be {string}", (Ctx ctx, String expected) -> ctx.greeting());

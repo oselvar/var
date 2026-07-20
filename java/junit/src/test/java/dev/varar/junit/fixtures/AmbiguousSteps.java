@@ -16,7 +16,7 @@ public final class AmbiguousSteps implements StepDefinitions<AmbiguousSteps.Ctx>
 
     @Override
     public void register(Steps<Ctx> s) {
-        s.defineState(Ctx::new);
+        s.state(Ctx::new);
         s.stimulus("I have {int} cukes", (Ctx ctx, Integer n) -> ctx);
         s.stimulus("I have 5 cukes", (Ctx ctx) -> ctx);
     }

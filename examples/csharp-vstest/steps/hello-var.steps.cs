@@ -8,7 +8,7 @@ public static class HelloVarSteps
 {
     public static void Register(Steps s)
     {
-        s.DefineState(() => VMap(("greeting", Value.Of("")), ("result", Value.Of(0))));
+        s.State(() => VMap(("greeting", Value.Of("")), ("result", Value.Of(0))));
 
         s.Stimulus("I greet {string}", (state, name) =>
             new VMap(SMap(state).SetItem("greeting", Value.Of($"Hello, {name.AsString()}!"))));

@@ -65,7 +65,7 @@ not four:
 | Package | Depends on | Owns | Never touches |
 |---|---|---|---|
 | `<lang>-core` (e.g. `var-core` / `var_core`) | nothing runtime-ish | pure pipeline: parse → match → plan → execute, diffs, drift, conformance projections | filesystem, network, globals, time, test-framework types |
-| `<lang>` facade (e.g. `@varar/varar` / `var`) | `<lang>-core` | author API only: `defineState`/`define_state` (context/action/sensor), `registry` glue subpath | pipeline internals directly (goes through core) |
+| `<lang>` facade (e.g. `@varar/varar` / `var`) | `<lang>-core` | author API only: `steps(factory)` / `Steps.state(factory)` (stimulus/sensor), `registry` glue subpath | pipeline internals directly (goes through core) |
 | `<lang>-config` (e.g. `@varar/config` / `var_config`) | nothing (pure) | the `varar.config.json` reader — strict, fail-loud; its own conformance corpus | filesystem beyond reading the one config file |
 | `<lang>-runner` (e.g. `var-runner`) | facade + config + core | imperative shell: spec/step discovery (globs), `load_steps`, `run_spec`/`plan_spec`, failure rendering, the filesystem `BaselineStore` (drift) | any one test framework's types |
 | `<lang>-<framework>` (e.g. `var-vitest`, `var-pytest`) | `<lang>-runner` | one test-framework binding: collection (one test item per example), fixture/DI bridging, reporting, the drift gate | pipeline logic (delegates to runner/core) |
@@ -207,7 +207,7 @@ convention is, but keep names *parallel* for reviewability):
 step_role, registry, matcher, plan, diagnostics, execute, deep_freeze,
 cell_diff, doc_string_diff, param_diff, failure, result, canonical_json,
 conformance, hash, drift` — plus the `BaselineStore` port interface and the
-facade module (`internal`/`define_state`) holding `defineState` and the
+facade module (`internal`/`state`) holding the state factory and the
 module-scope accumulator. (`hash` + `drift` are the drift feature — see stage
 5; they *are* required, they're just unit-gated rather than golden-gated.)
 
@@ -264,7 +264,7 @@ fork on the target language's idioms. Record your choice in the design doc:
   *facade*. (The 3+-capture and async forms stay explicit — a bare 2-arg closure
   can't disambiguate `(Value,Value)` from `(Value,Vec)`.)
 - **Keep the public API surface minimal.** Expose only what an author actually
-  calls: the builder methods (`defineState`/`stimulus`/`sensor`/`param`), the
+  calls: the builder methods (`state`/`stimulus`/`sensor`/`param`), the
   `Value` model, and the throw-to-fail exception. Everything that merely bridges
   the builder to the registry — constructing a `Registry`, `addStep`,
   `from`/`to`-registry — is plumbing the runner and tests use, **not** authors:

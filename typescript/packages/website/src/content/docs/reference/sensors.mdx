@@ -31,7 +31,7 @@ sensors, rather than reaching inside it.
     // inside register(Steps<Ctx> s)
     record Ctx(int total) implements State {}
 
-    s.defineState(() -> new Ctx(0));
+    s.state(() -> new Ctx(0));
 
     s.stimulus("I add {int}", (Ctx ctx, Integer n) -> new Ctx(ctx.total() + n));
     s.sensor("the total is {int}", (Ctx ctx, Integer expected) -> ctx.total());
@@ -94,7 +94,7 @@ sensors, rather than reaching inside it.
   </TabItem>
   <TabItem label="C#">
     ```csharp
-    s.DefineState(() => VMap(("total", Value.Of(0))));
+    s.State(() => VMap(("total", Value.Of(0))));
 
     // FULL-REPLACEMENT state: return the whole next state.
     s.Stimulus("I add {int}", (state, n) =>
@@ -300,7 +300,7 @@ types whose `parse` produces an array:
   </TabItem>
   <TabItem label="Java">
     ```java
-    s.defineState(() -> new Ctx(List.of(5, 6)));
+    s.state(() -> new Ctx(List.of(5, 6)));
     s.param(
             "numbers",
             Pattern.compile("\\d+(?:, \\d+)*"),
@@ -364,7 +364,7 @@ types whose `parse` produces an array:
   </TabItem>
   <TabItem label="C#">
     ```csharp
-    s.DefineState(() => VMap(("dice", Value.List([Value.Of(5), Value.Of(6)]))));
+    s.State(() => VMap(("dice", Value.List([Value.Of(5), Value.Of(6)]))));
     s.Param("numbers", @"\d+(?:, \d+)*",
         groups => Value.List(groups[0]!.Split(", ").Select(n => Value.Of(long.Parse(n)))));
 
