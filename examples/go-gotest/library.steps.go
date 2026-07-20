@@ -15,43 +15,16 @@ import (
 // reference-time spelling.
 const dateLayout = "January 2, 2006"
 
-// Date carries a time.Time across the slot boundary. The domain speaks plain
-// time.Time (see library.go); a step slot has to survive a round trip through
-// the core's Value, and time.Time has no exported fields, so this thin wrapper
-// says how to encode and decode itself — the only reason it exists.
-type Date struct {
-	time.Time
-}
-
-// EncodeVarValue renders the date in the document's notation.
-func (d Date) EncodeVarValue() varar.Value {
-	return varar.StrValue(d.Format(dateLayout))
-}
-
-// DecodeVarValue reads a date back out of the document's notation.
-func (d *Date) DecodeVarValue(v varar.Value) error {
-	raw, ok := v.AsString()
-	if !ok {
-		return fmt.Errorf("not a date: %s", v.TypeName())
-	}
-	t, err := time.Parse(dateLayout, raw)
-	if err != nil {
-		return err
-	}
-	d.Time = t
-	return nil
-}
-
 func registerLibrary(s *varar.Steps[Ctx]) {
 	s.Param("date", `[A-Z][a-z]+ \d{1,2}, \d{4}`,
-		func(g []string) Date {
+		func(g []string) time.Time {
 			t, err := time.Parse(dateLayout, g[0])
 			if err != nil {
 				panic(err)
 			}
-			return Date{Time: t}
+			return t
 		},
-		func(d Date) (string, bool) { return d.Format(dateLayout), true })
+		func(d time.Time) (string, bool) { return d.Format(dateLayout), true })
 
 	s.Param("money", `£\d+(?:\.\d+)?|\d+p`,
 		func(g []string) Money {
@@ -72,15 +45,15 @@ func registerLibrary(s *varar.Steps[Ctx]) {
 		func(g []string) string { return strings.TrimSuffix(strings.TrimPrefix(g[0], "*"), "*") },
 		func(t string) (string, bool) { return "*" + t + "*", true })
 
-	s.Stimulus("borrowed {title}, due back on {date}", func(ctx Ctx, title string, due Date) (Ctx, error) {
-		ctx.Loans = append(append([]Loan{}, ctx.Loans...), Loan{Title: title, Due: due.Time})
+	s.Stimulus("borrowed {title}, due back on {date}", func(ctx Ctx, title string, due time.Time) (Ctx, error) {
+		ctx.Loans = append(append([]Loan{}, ctx.Loans...), Loan{Title: title, Due: due})
 		return ctx, nil
 	})
 
-	s.Stimulus("returns it on {date}", func(ctx Ctx, returned Date) (Ctx, error) {
+	s.Stimulus("returns it on {date}", func(ctx Ctx, returned time.Time) (Ctx, error) {
 		fee := GBP(0)
 		for _, loan := range ctx.Loans {
-			sum, err := AddMoney(fee, LateFee(loan, returned.Time))
+			sum, err := AddMoney(fee, LateFee(loan, returned))
 			if err != nil {
 				return ctx, err
 			}
@@ -98,8 +71,8 @@ func registerLibrary(s *varar.Steps[Ctx]) {
 		return FeePerDay, nil
 	})
 
-	s.Stimulus("asks to borrow {title} on {date}", func(ctx Ctx, title string, on Date) (Ctx, error) {
-		ctx.Granted = MayBorrow(ctx.Loans, on.Time)
+	s.Stimulus("asks to borrow {title} on {date}", func(ctx Ctx, title string, on time.Time) (Ctx, error) {
+		ctx.Granted = MayBorrow(ctx.Loans, on)
 		return ctx, nil
 	})
 

@@ -1,6 +1,7 @@
 package varar
 
 import (
+	"encoding"
 	"fmt"
 	"reflect"
 
@@ -55,33 +56,57 @@ type ValueEncoder interface {
 }
 
 var (
-	decoderType  = reflect.TypeOf((*ValueDecoder)(nil)).Elem()
-	encoderType  = reflect.TypeOf((*ValueEncoder)(nil)).Elem()
-	valueType    = reflect.TypeOf(Value{})
-	valueSlice   = reflect.TypeOf([]Value{})
-	tableType    = reflect.TypeOf([][]string{})
-	rowType      = reflect.TypeOf(map[string]string{})
-	rowsType     = reflect.TypeOf([]map[string]string{})
-	valuePointer = reflect.TypeOf(&Value{})
-	errorType    = reflect.TypeOf((*error)(nil)).Elem()
+	decoderType   = reflect.TypeOf((*ValueDecoder)(nil)).Elem()
+	encoderType   = reflect.TypeOf((*ValueEncoder)(nil)).Elem()
+	textMarshal   = reflect.TypeOf((*encoding.TextMarshaler)(nil)).Elem()
+	textUnmarshal = reflect.TypeOf((*encoding.TextUnmarshaler)(nil)).Elem()
+	valueType     = reflect.TypeOf(Value{})
+	valueSlice    = reflect.TypeOf([]Value{})
+	tableType     = reflect.TypeOf([][]string{})
+	rowType       = reflect.TypeOf(map[string]string{})
+	rowsType      = reflect.TypeOf([]map[string]string{})
+	valuePointer  = reflect.TypeOf(&Value{})
+	errorType     = reflect.TypeOf((*error)(nil)).Elem()
 )
 
 // decodesFromValue reports whether t can be built from a Value — either it is a
 // Value, a Go primitive kind, or it implements ValueDecoder.
 func decodesFromValue(t reflect.Type) bool {
 	if t == valueType || t == tableType || t == rowType ||
-		reflect.PointerTo(t).Implements(decoderType) || t.Kind() == reflect.Struct {
+		reflect.PointerTo(t).Implements(decoderType) ||
+		reflect.PointerTo(t).Implements(textUnmarshal) {
 		return true
 	}
+	// A plain struct decodes field-by-field, so it needs at least one exported
+	// field. Without one there is nothing to populate and the value would come
+	// back as the zero struct — time.Time is the motivating case, and it is
+	// handled above by TextUnmarshaler. Rejecting here turns a silently wrong
+	// value into a registration-time error.
+	if t.Kind() == reflect.Struct {
+		return hasExportedField(t)
+	}
 	return primitiveKind(t)
+}
+
+// hasExportedField reports whether t has at least one field the adapter can set.
+func hasExportedField(t reflect.Type) bool {
+	for i := 0; i < t.NumField(); i++ {
+		if t.Field(i).IsExported() {
+			return true
+		}
+	}
+	return false
 }
 
 // encodesToValue reports whether t can go back to a Value, which a sensor's
 // results must do so the core can compare them.
 func encodesToValue(t reflect.Type) bool {
 	if t == valueType || t == tableType || t == rowType || t == rowsType ||
-		t.Implements(encoderType) || t.Kind() == reflect.Struct {
+		t.Implements(encoderType) || t.Implements(textMarshal) {
 		return true
+	}
+	if t.Kind() == reflect.Struct {
+		return hasExportedField(t)
 	}
 	return primitiveKind(t)
 }
@@ -279,6 +304,21 @@ func toGo(v Value, t reflect.Type, slot int) (reflect.Value, error) {
 		}
 		return ptr.Elem(), nil
 	}
+	// Any stdlib or third-party type that speaks encoding.TextUnmarshaler reads
+	// itself from a string Value — time.Time, net.IP, uuid.UUID and friends, with
+	// no wrapper and no special case here. Checked after ValueDecoder so an
+	// explicit opt-in still wins.
+	if reflect.PointerTo(t).Implements(textUnmarshal) {
+		str, ok := v.AsString()
+		if !ok {
+			return fail(t.String())
+		}
+		ptr := reflect.New(t)
+		if err := ptr.Interface().(encoding.TextUnmarshaler).UnmarshalText([]byte(str)); err != nil {
+			return reflect.Value{}, fmt.Errorf("var: slot %d: %w", slot+1, err)
+		}
+		return ptr.Elem(), nil
+	}
 	// A whole-table slot is a list of rows of cells; a header-bound row is a
 	// map of column to cell. Both have a natural Go spelling.
 	if t == tableType {
@@ -369,6 +409,15 @@ func toGo(v Value, t reflect.Type, slot int) (reflect.Value, error) {
 func fromGo(rv reflect.Value) Value {
 	if enc, ok := rv.Interface().(ValueEncoder); ok {
 		return enc.EncodeVarValue()
+	}
+	// The inverse of the TextUnmarshaler path in toGo: a type that speaks
+	// encoding.TextMarshaler round-trips through a string Value. This is the
+	// internal representation only — what the document shows is whatever the
+	// parameter type's own format function renders.
+	if m, ok := rv.Interface().(encoding.TextMarshaler); ok {
+		if text, err := m.MarshalText(); err == nil {
+			return StrValue(string(text))
+		}
 	}
 	t := rv.Type()
 	if t == valueType {

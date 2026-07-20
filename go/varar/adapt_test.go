@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/varar-dev/varar-go/core"
 )
@@ -199,4 +200,37 @@ func TestPlainStructSlotRoundTrips(t *testing.T) {
 	if err != nil || got.Interface().(point) != (point{X: 3, Y: 4}) {
 		t.Fatalf("got %v, %v", got, err)
 	}
+}
+
+// time.Time is the motivating case for TextMarshaler support: it is a struct
+// whose fields are ALL unexported, so the field-by-field path could never
+// populate it. Before this was handled it decoded to the zero time and reported
+// no error at all — a silently wrong date rather than a failure. It must work as
+// a slot type directly, with no wrapper in the author's code.
+func TestTimeTimeSlotRoundTripsWithoutAWrapper(t *testing.T) {
+	when := time.Date(2026, time.June, 1, 0, 0, 0, 0, time.UTC)
+
+	encoded := fromGo(reflect.ValueOf(when))
+	if _, ok := encoded.AsString(); !ok {
+		t.Fatalf("expected a string Value, got %s", encoded.TypeName())
+	}
+
+	got, err := toGo(encoded, reflect.TypeOf(time.Time{}), 0)
+	if err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if back := got.Interface().(time.Time); !back.Equal(when) {
+		t.Errorf("round-tripped to %v, want %v", back, when)
+	}
+}
+
+// The regression guard for the silent-zero bug: a struct the adapter cannot
+// populate — no exported fields, no decoder, no TextUnmarshaler — must be
+// rejected when the step is registered, not quietly decoded to its zero value
+// when the step runs.
+func TestFieldlessStructRejectedAtRegistration(t *testing.T) {
+	type opaque struct{ hidden int }
+	mustPanic(t, "cannot be read from a slot", func() {
+		adapt[Value](func(state Value, o opaque) (Value, error) { return state, nil }, core.Stimulus, "expr")
+	})
 }
