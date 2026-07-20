@@ -17,23 +17,56 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  # The six-gem workspace runs on the repo-root pin — the current Ruby the port
+  # itself targets.
+  core:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
 
+      # The Ruby version is never written here — it comes from the repo-root
+      # .tool-versions, the same pin `make install-tools` installs locally, so
+      # CI and a developer machine cannot drift apart.
+      - name: Toolchain pin
+        id: pin
+        run: echo "ruby=$(awk '/^ruby /{print $2; exit}' .tool-versions)" >> "$GITHUB_OUTPUT"
+
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '4.0.6'
+          ruby-version: ${{ steps.pin.outputs.ruby }}
 
-      # The six-gem workspace: conformance harness (four artifacts × 15 bundles +
-      # drift/hash units + the config corpus) + the functional-core purity gate.
+      # Conformance harness (four artifacts × 15 bundles + drift/hash units +
+      # the config corpus) + the functional-core purity gate.
       - run: bundle install && bundle exec rake
         working-directory: ruby
 
-      # Standalone sample projects (see examples/ruby-*).
-      - run: bundle install && bundle exec rspec
-        working-directory: examples/ruby-rspec
+  # The sample projects run on THEIR own pin, not the root one. Each
+  # examples/ruby-*/.tool-versions deliberately names an older LTS, so the
+  # samples double as proof that Varar works on the Ruby consumers are on —
+  # which only holds if CI actually runs them there. A single job could not:
+  # one runner has one active Ruby.
+  examples:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - project: ruby-rspec
+            command: bundle exec rspec
+          - project: ruby-minitest
+            command: bundle exec rake test
+    defaults:
+      run:
+        working-directory: examples/${{ matrix.project }}
+    steps:
+      - uses: actions/checkout@v7
 
-      - run: bundle install && bundle exec rake test
-        working-directory: examples/ruby-minitest
+      - name: Toolchain pin
+        id: pin
+        run: echo "ruby=$(awk '/^ruby /{print $2; exit}' .tool-versions)" >> "$GITHUB_OUTPUT"
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ steps.pin.outputs.ruby }}
+
+      - run: bundle install && ${{ matrix.command }}

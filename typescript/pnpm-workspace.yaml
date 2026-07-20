@@ -1,3 +1,21 @@
 packages:
   - packages/*
   - ../examples/typescript-vitest
+
+# Dependencies allowed to run install scripts. pnpm blocks them by default as a
+# supply-chain measure; every entry here is a package whose install script is
+# the whole point of the package — esbuild fetches its platform binary (vite and
+# vitest are unusable without it) and each tree-sitter grammar compiles a native
+# parser. pnpm 9 ran these silently; pnpm 10+ requires the allowlist, and
+# refuses the install (interactively — in CI it only warns) until it exists.
+allowBuilds:
+  '@tree-sitter-grammars/tree-sitter-kotlin': true
+  esbuild: true
+  tree-sitter-c-sharp: true
+  tree-sitter-go: true
+  tree-sitter-java: true
+  tree-sitter-javascript: true
+  tree-sitter-python: true
+  tree-sitter-ruby: true
+  tree-sitter-rust: true
+  tree-sitter-typescript: true

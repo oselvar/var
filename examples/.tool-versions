@@ -1,1 +1,19 @@
+# Toolchain pins for the sample projects — the single source of truth for both
+# `make check` locally and the per-project workflows in .github/workflows/,
+# which read the versions out of this file rather than hardcoding them.
+#
+# Java and Ruby deliberately sit on an older LTS than the monorepo's own ports
+# (which track the repo-root .tool-versions): the samples double as proof that
+# Varar works on the runtimes consumers are actually on. Ruby is pinned
+# per-project in ruby-*/.tool-versions, since it differs from everything else.
+#
+# Not listed: Rust, pinned by rust-toolchain.toml and read natively by cargo.
+#
+# Node and pnpm are also absent, but they are NOT yet single-sourced the way
+# everything above is — typescript-vitest.yml still names both versions inline,
+# because this project's package.json carries no "packageManager" field for
+# corepack/pnpm-action-setup to read. Adding one would make the workflow's pnpm
+# version redundant; until then the pin genuinely lives in two places.
 java temurin-21.0.5+11.0.LTS
+golang 1.26.3
+dotnet 10.0.302

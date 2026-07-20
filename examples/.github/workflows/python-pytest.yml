@@ -10,7 +10,7 @@ on:
   pull_request:
   workflow_dispatch:
   schedule:
-    # Weekly, to catch bit-rot against the pinned git+tag sources.
+    # Weekly, to catch bit-rot against the released PyPI pins.
     - cron: '0 6 * * 1'
 
 jobs:
@@ -22,9 +22,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: astral-sh/setup-uv@v8.3.0 # no bare v8 alias tag exists (v1-v7 only)
+      - uses: astral-sh/setup-uv@v8.3.2 # no bare v8 alias tag exists (v1-v7 only)
         with:
           enable-cache: true
 
-      # No lockfile is synced — uv resolves fresh from the git+tag pins.
+      # No lockfile is synced — uv resolves fresh from the released PyPI pins.
       - run: uv run pytest

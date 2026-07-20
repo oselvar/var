@@ -22,8 +22,14 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v5
+      # The SDK version is never written here — it comes from the repo-root
+      # .tool-versions, the same pin `make check` uses locally.
+      - name: Toolchain pin
+        id: pin
+        run: echo "dotnet=$(awk '/^dotnet /{print $2; exit}' ../.tool-versions)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: ${{ steps.pin.outputs.dotnet }}
 
       - run: dotnet test

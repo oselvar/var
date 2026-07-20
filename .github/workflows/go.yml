@@ -22,9 +22,16 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/setup-go@v6
+      # The Go version is never written here — it comes from the repo-root
+      # .tool-versions, the same pin `make install-tools` installs locally, so
+      # CI and a developer machine cannot drift apart.
+      - name: Toolchain pin
+        id: pin
+        run: echo "go=$(awk '/^golang /{print $2; exit}' .tool-versions)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-go@v7
         with:
-          go-version: '1.26.3'
+          go-version: ${{ steps.pin.outputs.go }}
 
       # The go/ module: gofmt (no diff), go vet, and the conformance harness
       # (four artifacts x 15 bundles + config corpus + drift/hash units +

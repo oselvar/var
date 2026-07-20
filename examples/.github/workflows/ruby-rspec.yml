@@ -22,9 +22,16 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # The Ruby version is never written here — it comes from this project's
+      # own .tool-versions (Ruby is pinned per-project, below the older LTS the
+      # rest of the samples share), the same pin `make check` uses locally.
+      - name: Toolchain pin
+        id: pin
+        run: echo "ruby=$(awk '/^ruby /{print $2; exit}' .tool-versions)" >> "$GITHUB_OUTPUT"
+
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2'
+          ruby-version: ${{ steps.pin.outputs.ruby }}
 
       # No lockfile is synced — bundler resolves fresh from the released pins.
       - run: bundle install

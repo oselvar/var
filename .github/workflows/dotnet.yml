@@ -22,9 +22,16 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v4
+      # The SDK version is never written here — it comes from the repo-root
+      # .tool-versions, the same pin `make install-tools` installs locally, so
+      # CI and a developer machine cannot drift apart.
+      - name: Toolchain pin
+        id: pin
+        run: echo "dotnet=$(awk '/^dotnet /{print $2; exit}' .tool-versions)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: ${{ steps.pin.outputs.dotnet }}
 
       # The solution: format check + build + test (four conformance artifacts x
       # 15 bundles + the config corpus + drift + runner). The C# step fixtures
