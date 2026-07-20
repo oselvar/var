@@ -4,6 +4,7 @@ import dev.varar.StepDefinitions
 import dev.varar.Steps
 import dev.varar.core.CanonicalJson
 import dev.varar.core.Conformance
+import dev.varar.core.Parse
 import dev.varar.kotlin.conformance.bundle01.steps as bundle01Steps
 import dev.varar.kotlin.conformance.bundle02.steps as bundle02Steps
 import dev.varar.kotlin.conformance.bundle03.steps as bundle03Steps
@@ -31,10 +32,14 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 
 /**
- * The Kotlin facade's conformance gate — registry stage only, per the design doc's
- * interview-settled scope: parse/plan/trace stay proven by the Java engine's own green corpus; what
- * needs proving here is that the Kotlin DSL registers the exact same expressions and parameter
- * types.
+ * The Kotlin facade's conformance gate.
+ *
+ * The registry stage proves the Kotlin DSL registers the exact same expressions and parameter types
+ * as its siblings. The trace stage proves the facade's *executor-facing* surface agrees too:
+ * [StimulusAdapter]/[SensorAdapter], the `runBlocking` coroutine bridge, `StateBox`
+ * boxing/unboxing, and arity-tolerant argument dropping are all Kotlin code the Java engine's own
+ * green corpus never exercises. Parse and plan remain proven by the Java engine — those stages run
+ * on identical inputs here and share the same implementation.
  */
 class ConformanceTest {
 
@@ -52,6 +57,22 @@ class ConformanceTest {
                 StandardCharsets.UTF_8,
             )
         assertEquals(expected, actual) { "${bundle.fileName}/registry.json mismatch" }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("bundleDirs")
+    fun `trace matches golden`(bundle: Path) {
+        val fixture = loadFixture(bundle.fileName.toString())
+        val bound = Steps.bind(fixture)
+
+        val source = Files.readString(bundle.resolve("example.md"), StandardCharsets.UTF_8)
+        val doc = Parse.parse("example.md", source)
+        val artifacts = Conformance.runConformance(doc, bound.registry(), bound.stateFactory())
+
+        val actual = CanonicalJson.canonicalStringify(artifacts.trace())
+        val expected =
+            Files.readString(bundle.resolve("golden").resolve("trace.json"), StandardCharsets.UTF_8)
+        assertEquals(expected, actual) { "${bundle.fileName}/trace.json mismatch" }
     }
 
     companion object {
