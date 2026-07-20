@@ -7,13 +7,11 @@
 # Varar works on the runtimes consumers are actually on. Ruby is pinned
 # per-project in ruby-*/.tool-versions, since it differs from everything else.
 #
-# Not listed: Rust, pinned by rust-toolchain.toml and read natively by cargo.
-#
-# Node and pnpm are also absent, but they are NOT yet single-sourced the way
-# everything above is — typescript-vitest.yml still names both versions inline,
-# because this project's package.json carries no "packageManager" field for
-# corepack/pnpm-action-setup to read. Adding one would make the workflow's pnpm
-# version redundant; until then the pin genuinely lives in two places.
+# Not listed — each is pinned by its own native file, which the workflows read
+# rather than naming a version:
+#   Rust    rust-cargotest/rust-toolchain.toml          (rustup, cargo)
+#   Node    typescript-vitest/.node-version             (setup-node, nvm/fnm)
+#   pnpm    "packageManager" in typescript-vitest/package.json  (corepack)
 java temurin-21.0.5+11.0.LTS
 golang 1.26.3
 dotnet 10.0.302

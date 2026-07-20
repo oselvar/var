@@ -26,9 +26,11 @@ jobs:
       # this project's package.json, the same field corepack uses locally.
       - uses: pnpm/action-setup@v6
 
+      # No version here — .node-version is the pin, read by setup-node and by
+      # nvm/fnm/asdf alike, so CI and a developer machine cannot drift.
       - uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version-file: typescript-vitest/.node-version
 
       # No lockfile is synced — resolve fresh from the released pins.
       - run: pnpm install --no-frozen-lockfile
