@@ -1,114 +1,89 @@
-pub const FEE_PER_DAY: i64 = 50;
+//! The code under test for `library.md`: pure domain logic over `NaiveDate` and
+//! [`Money`]. The document's notation — "June 1, 2026", "50p", "£2.50" — is not
+//! this module's business: parsing and formatting live with the step
+//! definitions (`src/steps/library.steps.rs`), the same split every other port
+//! makes.
 
-const MONTHS: [&str; 12] = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-];
+use chrono::NaiveDate;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub struct Date {
-    pub year: i64,
-    pub month: i64,
-    pub day: i64,
+/// An amount in a single currency — mirrors the TypeScript sample's `Money`.
+/// The currency is a `&'static str` so [`FEE_PER_DAY`] can be a `const`.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Money {
+    pub currency: &'static str,
+    pub value: f64,
 }
 
-impl Date {
-    pub fn serial(self) -> i64 {
-        let (y, m, d) = (self.year, self.month, self.day);
-        let y = if m <= 2 { y - 1 } else { y };
-        let era = (if y >= 0 { y } else { y - 399 }) / 400;
-        let yoe = y - era * 400;
-        let doy = (153 * (if m > 2 { m - 3 } else { m + 9 }) + 2) / 5 + d - 1;
-        let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
-        era * 146097 + doe - 719468
+/// The only currency this sample deals in.
+pub const GBP: &str = "GBP";
+
+/// Pounds sterling.
+pub const fn gbp(value: f64) -> Money {
+    Money {
+        currency: GBP,
+        value,
     }
 }
 
-pub fn parse_date(raw: &str) -> Date {
-    let (month_day, year) = raw
-        .split_once(", ")
-        .unwrap_or_else(|| panic!("not a date: {raw}"));
-    let (month, day) = month_day
-        .split_once(' ')
-        .unwrap_or_else(|| panic!("not a date: {raw}"));
-    let month = MONTHS
-        .iter()
-        .position(|m| *m == month)
-        .unwrap_or_else(|| panic!("not a month: {month}")) as i64
-        + 1;
-    Date {
-        year: year.parse().expect("year"),
-        month,
-        day: day.parse().expect("day"),
+/// The overdue fee: 50p a day.
+pub const FEE_PER_DAY: Money = gbp(0.5);
+
+impl Default for Money {
+    fn default() -> Money {
+        gbp(0.0)
     }
 }
 
-pub fn format_date(d: Date) -> String {
-    format!("{} {}, {}", MONTHS[(d.month - 1) as usize], d.day, d.year)
-}
-
-pub fn parse_money(raw: &str) -> i64 {
-    if let Some(pence) = raw.strip_suffix('p') {
-        pence.parse().expect("pence")
-    } else if let Some(pounds) = raw.strip_prefix('£') {
-        (pounds.parse::<f64>().expect("pounds") * 100.0).round() as i64
-    } else {
-        panic!("not money: {raw}")
+/// Adding across currencies is a domain error, not an arithmetic one.
+pub fn add_money(a: Money, b: Money) -> Result<Money, String> {
+    if a.currency != b.currency {
+        return Err(format!("cannot add {} to {}", b.currency, a.currency));
     }
+    Ok(Money {
+        currency: a.currency,
+        value: a.value + b.value,
+    })
 }
 
-pub fn format_money(pennies: i64) -> String {
-    if pennies < 100 {
-        format!("{pennies}p")
-    } else {
-        format!("£{:.2}", pennies as f64 / 100.0)
-    }
+/// One borrowed title and the day it is due back.
+#[derive(Clone, Debug)]
+pub struct Loan {
+    pub title: String,
+    pub due: NaiveDate,
 }
 
-pub fn late_fee(due: Date, returned_on: Date) -> i64 {
-    let days_late = (returned_on.serial() - due.serial()).max(0);
-    days_late * FEE_PER_DAY
+pub fn late_fee(loan: &Loan, returned_on: NaiveDate) -> Money {
+    let days_late = (returned_on - loan.due).num_days().max(0);
+    gbp(days_late as f64 * FEE_PER_DAY.value)
 }
 
-pub fn may_borrow(dues: &[Date], on: Date) -> bool {
-    dues.iter().all(|due| due.serial() >= on.serial())
+pub fn may_borrow(loans: &[Loan], on: NaiveDate) -> bool {
+    loans.iter().all(|loan| loan.due >= on)
 }
 
-// Slot conversions, so a `Date` can be a step parameter directly — Rust has no
-// reflection, so a domain type says once how it maps to and from a slot.
-impl varar::FromSlot for Date {
-    fn from_slot(value: &varar::Value) -> Result<Date, varar::HandlerError> {
-        let varar::Value::Map(m) = value else {
-            return Err(varar::HandlerError::new("expected a date"));
-        };
-        let field = |k: &str| match m.get(k) {
-            Some(varar::Value::Int(i)) => Ok(*i),
-            _ => Err(varar::HandlerError::new(format!("date is missing {k}"))),
-        };
-        Ok(Date {
-            year: field("year")?,
-            month: field("month")?,
-            day: field("day")?,
-        })
-    }
-}
-
-impl varar::ToSlot for Date {
+// Slot conversions, so a `Money` can be a step parameter and a sensor return
+// directly — Rust has no reflection, so a domain type says once how it maps to
+// and from a slot.
+impl varar::ToSlot for Money {
     fn to_slot(&self) -> varar::Value {
         varar::Value::Map(std::collections::BTreeMap::from([
-            ("year".to_string(), varar::Value::Int(self.year)),
-            ("month".to_string(), varar::Value::Int(self.month)),
-            ("day".to_string(), varar::Value::Int(self.day)),
+            ("currency".to_string(), varar::Value::String(self.currency.to_string())),
+            ("value".to_string(), varar::Value::Float(self.value)),
         ]))
+    }
+}
+
+impl varar::FromSlot for Money {
+    fn from_slot(value: &varar::Value) -> Result<Money, varar::HandlerError> {
+        let varar::Value::Map(m) = value else {
+            return Err(varar::HandlerError::new("expected an amount of money"));
+        };
+        let Some(varar::Value::Float(value)) = m.get("value") else {
+            return Err(varar::HandlerError::new("money is missing a value"));
+        };
+        match m.get("currency") {
+            Some(varar::Value::String(c)) if c == GBP => Ok(gbp(*value)),
+            _ => Err(varar::HandlerError::new("this sample only knows GBP")),
+        }
     }
 }

@@ -1,7 +1,7 @@
-# Vár sample: Rust + cargo test
+# Varar sample: Rust + cargo test
 
 A small, standalone sample project that runs Markdown specs as tests with
-[Vár](https://varar.dev), driven by `cargo test`. Copy it as the starting
+[Varar](https://varar.dev), driven by `cargo test`. Copy it as the starting
 point for your own project.
 
 The `.md` files at the project root are the specs — they run as tests.
@@ -25,29 +25,33 @@ item per example.)
 - **`varar.config.json`** is the single source of truth: `docs.include` globs the
   Markdown specs. (`steps` is carried for parity with the other ports; Rust
   compiles its step files in, so there is nothing to glob at runtime.)
-- **`src/steps/*.rs`** define the steps. Rust has no import-for-side-effect, so
-  — like the Java/Kotlin ports and unlike TypeScript/Python — each file exposes
-  a `register(Registry) -> Registry` that adds its steps explicitly, and
-  `steps::build_registry` chains them. The threaded state is a **full
-  replacement** value (varar-core's model): a stimulus returns the whole next
-  state; a sensor returns a value for Vár to compare against what the Markdown
-  says.
-- **`src/*_example.rs`** are the sample's domain code — ordinary modules the
-  steps call, just like your production code.
-- **`src/runner.rs`** is the small imperative shell (read config, glob specs,
-  plan/run each example, render failures). In a full port this would be a
-  shared `varar-runner` crate; here it lives in the sample to keep it to a single
-  crate depending only on `varar-core`.
+- **`src/steps/*.steps.rs`** define the steps. Rust has no
+  import-for-side-effect, so — like the Java/Kotlin/Go/C# ports and unlike
+  TypeScript/Python — each file exposes a `register(s: &mut Steps<Ctx>)` that
+  adds its steps to the injected builder, and `steps::build_registry` threads one
+  builder through them all. The threaded state is a **full replacement** value
+  (varar-core's model): a stimulus returns the whole next state; a sensor returns
+  a value for Varar to compare against what the Markdown says.
+- **`src/library.rs`**, **`src/roman_numerals.rs`** and **`src/yahtzee.rs`** are
+  the sample's domain code — ordinary modules the steps call, just like your
+  production code.
+- **`tests/specs.rs`** is the whole imperative shell: it hands the project root,
+  the registry and the context factory to `varar-cargotest`. Discovery, planning,
+  running, rendering and drift all live in the shared `varar-*` crates, so the
+  sample carries no runner of its own.
 
 ## Notes for the Rust port
 
-- varar-core's dynamic `Value` is a **closed enum**, so — unlike the Python/Java
-  ports, which hold a `Money`/`date` object in the threaded state — `library`
-  encodes money as pennies (`Value::Int`) and a date as a `{year, month, day}`
-  map, with `parse`/`format` custom parameter types converting at the edge.
+- The `library` sample keeps its domain types — `chrono::NaiveDate` and a
+  `Money` — in the code under test, and does all parsing and formatting of the
+  document's notation in the custom parameter types (`src/steps/library.steps.rs`),
+  exactly like the TypeScript reference. A slot has to survive a round trip
+  through varar-core's `Value`, so each domain type implements `ToSlot`/`FromSlot`
+  once; `NaiveDate` needs a thin newtype for it, because both the type and the
+  trait are foreign to this crate.
 - The `money` parameter type uses a lookahead-free regexp
   (`£\d+(?:\.\d+)?|\d+p`): varar-core's matcher compiles with the `regex` crate,
-  which has no lookahead, so it drops the empty-match guards of the Python
+  which has no lookahead, so it drops the empty-match guards of the TypeScript
   pattern (the covered corpus is identical).
 
 ## Versioning note

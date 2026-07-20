@@ -4,8 +4,8 @@ import File from '$components/File.astro'
 import Version from '$components/Version.astro'
 import libraryLogicCsharp from '$examples/csharp-vstest/src/Library.cs?raw'
 import libraryStepsCsharp from '$examples/csharp-vstest/steps/library.steps.cs?raw'
+import libraryLogicGo from '$examples/go-gotest/library.go?raw'
 import libraryStepsGo from '$examples/go-gotest/library.steps.go?raw'
-import libraryLogicGo from '$examples/go-gotest/library_domain.go?raw'
 import libraryLogicJava from '$examples/java-junit-maven/src/main/java/examples/Library.java?raw'
 import libraryStepsJava from '$examples/java-junit-maven/src/test/java/examples/LibrarySteps.java?raw'
 import libraryLogicKotlin from '$examples/kotlin-junit/src/main/kotlin/examples/Library.kt?raw'
@@ -14,8 +14,8 @@ import libraryLogicPython from '$examples/python-pytest/src/library_example/__in
 import libraryStepsPython from '$examples/python-pytest/steps/library.steps.py?raw'
 import libraryLogicRuby from '$examples/ruby-rspec/lib/library.rb?raw'
 import libraryStepsRuby from '$examples/ruby-rspec/steps/library.steps.rb?raw'
-import libraryLogicRust from '$examples/rust-cargotest/src/library_example.rs?raw'
-import libraryStepsRust from '$examples/rust-cargotest/src/steps/library.rs?raw'
+import libraryLogicRust from '$examples/rust-cargotest/src/library.rs?raw'
+import libraryStepsRust from '$examples/rust-cargotest/src/steps/library.steps.rs?raw'
 import librarySource from '$examples/typescript-vitest/library.md?raw'
 import libraryLogicTypeScript from '$examples/typescript-vitest/src/library.ts?raw'
 import libraryStepsTypeScript from '$examples/typescript-vitest/steps/library.steps.ts?raw'
@@ -40,6 +40,6 @@ import libraryStepsTypeScript from '$examples/typescript-vitest/steps/library.st
   <File uri="file:///library_example.py">{libraryLogicPython}</File>
   <File uri="file:///library.steps.rb">{libraryStepsRuby}</File>
   <File uri="file:///library.rb">{libraryLogicRuby}</File>
-  <File uri="file:///library.rs">{libraryStepsRust}</File>
-  <File uri="file:///library_example.rs">{libraryLogicRust}</File>
+  <File uri="file:///library.steps.rs">{libraryStepsRust}</File>
+  <File uri="file:///library.rs">{libraryLogicRust}</File>
 </Editor>

@@ -3,12 +3,12 @@ import Editor from '$components/Editor.astro'
 import File from '$components/File.astro'
 import Version from '$components/Version.astro'
 import deepThoughtStepsCsharp from '$examples/csharp-vstest/steps/deep-thought.steps.cs?raw'
-import deepThoughtStepsGo from '$examples/go-gotest/deepthought.steps.go?raw'
+import deepThoughtStepsGo from '$examples/go-gotest/deep_thought.steps.go?raw'
 import deepThoughtStepsJava from '$examples/java-junit-maven/src/test/java/examples/DeepThoughtSteps.java?raw'
 import deepThoughtStepsKotlin from '$examples/kotlin-junit/src/test/kotlin/examples/deep-thought.steps.kt?raw'
 import deepThoughtStepsPython from '$examples/python-pytest/steps/deep_thought.steps.py?raw'
 import deepThoughtStepsRuby from '$examples/ruby-rspec/steps/deep_thought.steps.rb?raw'
-import deepThoughtStepsRust from '$examples/rust-cargotest/src/steps/deep_thought.rs?raw'
+import deepThoughtStepsRust from '$examples/rust-cargotest/src/steps/deep_thought.steps.rs?raw'
 import deepThoughtSource from '$examples/typescript-vitest/deep-thought.md?raw'
 import deepThoughtStepsTypeScript from '$examples/typescript-vitest/steps/deep-thought.steps.ts?raw'
 ---
@@ -27,5 +27,5 @@ import deepThoughtStepsTypeScript from '$examples/typescript-vitest/steps/deep-t
   <File uri="file:///deep-thought.steps.kt">{deepThoughtStepsKotlin}</File>
   <File uri="file:///deep_thought.steps.py">{deepThoughtStepsPython}</File>
   <File uri="file:///deep_thought.steps.rb">{deepThoughtStepsRuby}</File>
-  <File uri="file:///deep_thought.rs">{deepThoughtStepsRust}</File>
+  <File uri="file:///deep_thought.steps.rs">{deepThoughtStepsRust}</File>
 </Editor>

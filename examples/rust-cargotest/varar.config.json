@@ -9,6 +9,6 @@
     ]
   },
   "steps": [
-    "src/steps/*.rs"
+    "src/steps/*.steps.rs"
   ]
 }

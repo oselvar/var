@@ -1,5 +1,5 @@
 use super::Ctx;
-use crate::yahtzee_example::score;
+use crate::yahtzee::score;
 use std::collections::BTreeMap;
 use varar::Steps;
 

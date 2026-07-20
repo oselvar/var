@@ -12,14 +12,22 @@
 
 use varar::{Registry, Steps};
 
+// Step files carry the `.steps.` infix every other port's do, which Rust's
+// module resolver does not derive from the module name — hence `#[path]`.
+#[path = "deep_thought.steps.rs"]
 pub mod deep_thought;
+#[path = "hello_var.steps.rs"]
 pub mod hello_var;
+#[path = "library.steps.rs"]
 pub mod library;
+#[path = "roman_numerals.steps.rs"]
 pub mod roman_numerals;
+#[path = "tables_and_docstrings.steps.rs"]
 pub mod tables_and_docstrings;
+#[path = "yahtzee.steps.rs"]
 pub mod yahtzee;
 
-use crate::library_example::Date;
+use crate::library::{Loan, Money};
 
 /// This project's step state. `varar-core` keys it per step file, so each spec
 /// starts from `Ctx::default()`.
@@ -30,15 +38,8 @@ pub struct Ctx {
     pub result: i64,
     // library
     pub loans: Vec<Loan>,
-    pub fee: i64,
+    pub fee: Money,
     pub granted: bool,
-}
-
-/// One borrowed title and its due date.
-#[derive(Clone)]
-pub struct Loan {
-    pub title: String,
-    pub due: Date,
 }
 
 /// The combined registry for all specs.
