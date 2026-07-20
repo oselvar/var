@@ -22,7 +22,7 @@ DRY_RUN="${DRY_RUN:-0}"
 export OP_ACCOUNT="${OP_ACCOUNT:-my.1password.com}"
 
 # ── 1. Preflight ─────────────────────────────────────────────────────────────
-for tool in git node pnpm uv mvn gem gh vsce ovsx op gpg curl jq python3 bundle; do
+for tool in git node pnpm uv mvn gem gh vsce ovsx op gpg curl jq python3 bundle go; do
   require_tool "$tool"
 done
 

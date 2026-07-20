@@ -41,6 +41,19 @@ find "$DEST" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
 # project ignores must not be synced. pnpm-workspace.yaml is monorepo-only
 # plumbing (lets `pnpm test` run inside typescript-vitest, see the comment
 # there); in varar-examples the deps are real versions and pnpm's defaults work.
+# go.sum is excluded for a different reason than the other lockfiles: here it is
+# generated under `replace ... => ../../go`, and a path-replaced module
+# contributes no hash, so the file carries no varar entry at all. Copying it
+# would leave the synced sample failing with "missing go.sum entry". The go pin
+# block below regenerates it with `go mod tidy` against the published module and
+# commits it — unlike uv/bundler/cargo, Go wants go.sum checked in.
+#
+# The three *_exclude arrays below are expanded with the ${a[@]+"${a[@]}"} guard
+# because macOS ships bash 3.2, where `set -u` treats a plain "${a[@]}" on an
+# EMPTY array as an unbound variable. An array is empty exactly when its port is
+# un-parked, so the naive form fails the release on the first go-live rather
+# than while parked — see the same idiom in release.sh's RESULTS loop.
+#
 # While crates.io publishing is parked, omit the rust-* samples: var-core isn't
 # on crates.io, so a synced rust sample couldn't resolve it (its path source is
 # monorepo-only). CRATES_IO_ENABLED (lib.sh) flips this and the pin block below
@@ -78,9 +91,10 @@ rsync -a --copy-links \
   --exclude 'uv.lock' \
   --exclude 'Gemfile.lock' \
   --exclude 'Cargo.lock' \
-  "${rust_exclude[@]}" \
-  "${csharp_exclude[@]}" \
-  "${go_exclude[@]}" \
+  --exclude 'go.sum' \
+  ${rust_exclude[@]+"${rust_exclude[@]}"} \
+  ${csharp_exclude[@]+"${csharp_exclude[@]}"} \
+  ${go_exclude[@]+"${go_exclude[@]}"} \
   examples/ "$DEST"/
 
 # Pin the JVM samples to the released Maven Central artifacts (idempotent even
@@ -100,8 +114,11 @@ perl -pi -e "s/\"workspace:\\*\"/\"^$VERSION\"/g" "$DEST"/typescript-vitest/pack
 
 # Pin the Python samples to the released PyPI version: delete the
 # [tool.uv.sources] path-source table (with its comment block) and pin the
-# adapter dependency. Never rewrite to git sources — this monorepo is
-# private, so anonymous CI in varar-examples cannot fetch git+tag pins.
+# adapter dependency. Never rewrite to git sources: the samples exist to show
+# what a consumer installs, and a git+tag pin would exercise a path no user of
+# `pip install varar` ever takes. (This used to say git sources were impossible
+# because the monorepo was private — it is public now, so the reason is intent,
+# not access.)
 perl -0pi -e 's|(#[^\n]*\n)+\[tool\.uv\.sources\]\n([\w.-]+ = \{ path = [^\n]+\n)+\n||' \
   "$DEST"/python-*/pyproject.toml
 perl -pi -e "s/\"(pytest-varar|varar[\\w-]*)\"/\"\$1==$VERSION\"/" \
@@ -139,14 +156,46 @@ fi
 
 # Pin the Go sample to the released module: drop the `replace ... => ../../go`
 # directive (path source is monorepo-only) and pin the require to the tagged
-# version. Only runs once module publishing is live (GO_MODULES_ENABLED=1);
-# while parked the go-* samples aren't synced at all (see the rsync exclude
-# above), so this finds nothing.
+# version, then regenerate go.sum against the published module and prove the
+# sample actually builds. Only runs once module publishing is live
+# (GO_MODULES_ENABLED=1); while parked the go-* samples aren't synced at all
+# (see the rsync exclude above), so this finds nothing.
+#
+# 69-go-modules.sh runs first (glob order) and has already pushed the `go/vX.Y.Z`
+# tag, so the module is fetchable here — but proxy.golang.org only indexes a
+# version on first request, which can 404 for a few seconds right after the push.
+# Hence the retry around `go mod tidy`.
 if [[ "$GO_MODULES_ENABLED" == "1" ]]; then
-  perl -ni -e 'print unless m{^replace github\.com/varar-dev/varar-go => }' \
+  require_tool go
+  # Drop the replace directive together with the trunk-facing comment above it,
+  # so the published sample carries no dangling note about a path source that is
+  # no longer there (same idea as the JVM comment swaps above).
+  perl -0pi -e 's{// This sample depends on the in-repo Go module by path\. The release sync\n// \(release/targets/70-varar-examples\.sh\) rewrites this to a published version\.\nreplace github\.com/varar-dev/varar/go => \.\./\.\./go\n}{}' \
     "$DEST"/go-*/go.mod
-  perl -pi -e "s|(github\.com/varar-dev/varar-go) v[0-9][\\w.+-]*|\$1 v$VERSION|" \
+  perl -ni -e 'print unless m{^replace github\.com/varar-dev/varar/go => }' \
     "$DEST"/go-*/go.mod
+  perl -pi -e "s|(github\.com/varar-dev/varar/go) v[0-9][\\w.+-]*|\$1 v$VERSION|" \
+    "$DEST"/go-*/go.mod
+
+  for sample in "$DEST"/go-*/; do
+    tidied=0
+    for attempt in 1 2 3 4 5; do
+      if (cd "$sample" && go mod tidy); then
+        tidied=1
+        break
+      fi
+      warn "varar-examples: go mod tidy failed in $(basename "$sample") (attempt $attempt/5) — module proxy may not have indexed go/v$VERSION yet; retrying in 15s"
+      sleep 15
+    done
+    [[ "$tidied" == "1" ]] ||
+      die "varar-examples: go mod tidy never resolved github.com/varar-dev/varar/go v$VERSION in $(basename "$sample")"
+
+    # The sample is about to be published — prove it runs against the released
+    # module rather than discovering it is broken from a bug report.
+    (cd "$sample" && go test ./...) ||
+      die "varar-examples: $(basename "$sample") fails against the released module go/v$VERSION"
+    log "varar-examples: $(basename "$sample") green against go/v$VERSION"
+  done
 fi
 
 git -C "$DEST" add -A
