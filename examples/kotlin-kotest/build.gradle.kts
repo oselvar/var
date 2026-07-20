@@ -16,7 +16,7 @@ dependencies {
     testImplementation("dev.varar:kotlin:$varVersion")
     // Brings the Kotest JUnit Platform runner transitively (VarSpec extends FunSpec).
     testImplementation("dev.varar:kotest:$varVersion")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.2")
 }
 
 kotlin {

@@ -16,7 +16,7 @@ import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
  * junit-platform.properties} file).
  *
  * <p>Reading {@code org.junit.platform.launcher.core.LauncherConfigurationParameters}'s source
- * (6.1.1 sources jar) shows five provider tiers, checked in this order — first match wins:
+ * (6.1.2 sources jar) shows five provider tiers, checked in this order — first match wins:
  * explicit configuration parameters → explicitly-added configuration-parameter classpath
  * resources → a parent {@code ConfigurationParameters} (nested {@code Launcher}) → JVM system
  * properties → the {@code junit-platform.properties} classpath file. <strong>There is no

@@ -61,7 +61,7 @@ class ConfigBridgeTest {
 
     /**
      * Minimal hand-rolled {@link ConfigurationParameters} test double — neither
-     * {@code junit-platform-engine} nor {@code junit-platform-testkit} 6.1.1 ships one (verified
+     * {@code junit-platform-engine} nor {@code junit-platform-testkit} 6.1.2 ships one (verified
      * by decompiling both jars).
      */
     private record FakeConfigurationParameters(Map<String, String> values) implements ConfigurationParameters {

@@ -64,8 +64,8 @@
          index (which was stale and under-reported 18.0.1). Exact version parity
          with @cucumber/cucumber-expressions ^20.0.0 (JS) and ==20.0.0 (Python). -->
     <cucumber-expressions.version>20.0.0</cucumber-expressions.version>
-    <!-- JUnit 6.1.1 — confirmed on Maven Central (repo1.maven.org maven-metadata.xml
-         <latest>/<release> both 6.1.1 for junit-bom/junit-jupiter/junit-platform-engine)
+    <!-- JUnit 6.1.2 — confirmed on Maven Central (repo1.maven.org maven-metadata.xml
+         <latest>/<release> both 6.1.2 for junit-bom/junit-jupiter/junit-platform-engine)
          via direct repo query. JUnit 5.x (the version this was previously pinned to)
          is now the PREVIOUS generation — JUnit 6 unifies Platform+Jupiter+Vintage under
          one version stream and requires Java 17+ (this project already targets 21).

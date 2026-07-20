@@ -173,7 +173,7 @@ final class VarFileSelectorResolver implements SelectorResolver {
      * in one request, with no accompanying file/classpath selector, used to build a brand-new {@link
      * VarFileDescriptor} object on every call. The real {@code
      * EngineDiscoveryRequestResolution.DefaultContext#createAndAdd} (decompiled/read from {@code
-     * junit-platform-engine-6.1.1-sources.jar}) only substitutes a previously-added descriptor for a
+     * junit-platform-engine-6.1.2-sources.jar}) only substitutes a previously-added descriptor for a
      * colliding {@code UniqueId} when that id was already registered via a {@code Resolution}'s
      * {@code Match} — and the {@code Match} this method returns wraps the <em>example</em>
      * descriptor, never the file descriptor itself, so the file's own {@code UniqueId} is never in
