@@ -23,8 +23,12 @@ By opening a PR you're saying all of the following are true:
 
 - **You have read and understood every line of the diff**, and can explain
   any of it when asked in review.
-- **You ran the gates locally** — `make check` (or `make typescript` /
-  `make python` / `make java` for a single port) — and they pass.
+- **You ran the gates locally** — `make check`, or a single port with
+  `make typescript` / `make python` / `make java` / `make ruby` /
+  `make rust` / `make dotnet` / `make go` — and they pass. `make install-tools`
+  installs every toolchain first; versions come from `.tool-versions` (and the
+  native pin files it points to), which CI reads too, so a green local run
+  means the same thing as a green CI run.
 - **You exercised the change by hand** at least once. Green gates are
   necessary, not sufficient.
 - **You answer review comments yourself.** Feel free to consult your agent,
@@ -35,8 +39,9 @@ By opening a PR you're saying all of the following are true:
 Agents produce mistakes at scale, so this repo is fenced accordingly. Your
 PR passes through all of these:
 
-- **`make check`** — the root gate. Builds and tests all three ports with
-  exactly the same commands as CI (`.github/workflows/*.yml`).
+- **`make check`** — the root gate. Builds and tests all seven ports —
+  TypeScript, Python, Java/Kotlin, Ruby, Rust, .NET and Go — with exactly the
+  same commands as that port's CI workflow (`.github/workflows/*.yml`).
 - **Conformance corpus** — `conformance/bundles/` is a language-neutral
   test suite; every port must match the golden files byte-for-byte.
 - **Commit lint** — commits must follow Conventional Commits
@@ -45,11 +50,14 @@ PR passes through all of these:
 - **Type-checking as a separate gate** — vitest strips types without
   checking them, so TypeScript is verified by `pnpm -r build` (src) and
   `pnpm typecheck` (tests). A green test run alone proves nothing.
-- **Static analysis** — biome (lint/format), knip (dead exports), jscpd
-  (copy-paste detection) in TypeScript; ruff in Python.
-- **No cross-package re-exports** — enforced by a lint in every port;
-  packages expose their own API only.
-- **Coverage** — all three ports report test coverage; TypeScript and
+- **Static analysis**, per port — biome, knip (dead exports) and jscpd
+  (copy-paste detection) in TypeScript; ruff in Python; spotless in
+  Java/Kotlin; rubocop in Ruby; `cargo fmt --check` and clippy (warnings are
+  errors) in Rust; `dotnet format --verify-no-changes` in .NET; gofmt and
+  `go vet` in Go.
+- **No cross-package re-exports** — packages expose their own API only,
+  enforced by a lint in Python and Ruby.
+- **Coverage** — `make coverage` reports for all seven ports; TypeScript and
   Python enforce ratcheting floors (raise, never lower).
 - **Dogfooding** — the tool's own specs (the `.md` files in `examples/`,
   run by each language's sample project) run in the test suite, so
@@ -65,7 +73,8 @@ repo — layout, architecture rules, workflow, commit convention. Point your
 agent at it whatever tool you use; with Claude Code it's picked up
 automatically.
 
-**Language ports (Go, Rust, .NET, …) are welcome.** There is a checked-in
+**New language ports are welcome.** TypeScript, Python, Java/Kotlin, Ruby,
+Rust, .NET and Go are done; anything else is open. There is a checked-in
 skill for exactly this: `.claude/skills/adding-a-language-port/` walks an
 agent through porting the pure core, the runner shell, and a test-framework
 adapter against the conformance suite. Start there — and start with an
