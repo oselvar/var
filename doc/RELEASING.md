@@ -39,16 +39,23 @@ its gems stay stamped at the released version).
 
 Targets run in this order, deliberately: the two that need you at the keyboard
 come **first** so you can clear them and walk away, and the slow Maven Central
-deploy comes **last**:
+deploy runs near the end:
 
 1. **npm** — browser 2FA, one round-trip per package.
 2. **RubyGems** — one OTP prompt for all six gems (see below).
 3. **PyPI**, **Open VSX** — token-based, unattended. (VS Code Marketplace is
    parked; see below.)
-4. **Maven Central** — slow (GPG-signed, atomic multi-module deploy); runs
-   unattended at the end.
-5. **varar-examples** — a quick git sync of `examples/` to the `varar-dev/varar-examples`
-   repo, pinned to the just-published versions.
+4. **crates.io**, **NuGet** — parked. NuGet still *packs* every package to
+   `release/dist/nuget/<version>/` and prints the paths, for manual upload.
+5. **Maven Central** — by far the slowest (GPG-signed, atomic multi-module
+   deploy, and the client waits for the portal to finish publishing), so
+   everything quicker is already done by the time it runs.
+6. **Go modules** — pushes the `go/vX.Y.Z` module tag.
+7. **varar-examples** — a git sync of `examples/` to the `varar-dev/varar-examples`
+   repo, pinned to the just-published versions. It runs **last on purpose**: it
+   pins each sample to a released artifact (and runs the Go one against the
+   published module), so every registry above it must have published first.
+   That is why Maven Central sits at 5 rather than truly last.
 
 Idempotent: if a publish fails, fix the cause and re-run `make release` — it
 skips what's already out and picks up where it left off. Because the **tag is

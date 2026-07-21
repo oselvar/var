@@ -33,5 +33,5 @@ jobs:
           go-version: ${{ steps.pin.outputs.go }}
 
       # go.sum is regenerated against the published module by the release sync
-      # (release/targets/70-varar-examples.sh), so it is committed here.
+      # (release/targets/72-varar-examples.sh), so it is committed here.
       - run: go test ./...

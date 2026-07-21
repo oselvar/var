@@ -12,5 +12,5 @@ require (
 )
 
 // This sample depends on the in-repo Go module by path. The release sync
-// (release/targets/70-varar-examples.sh) rewrites this to a published version.
+// (release/targets/72-varar-examples.sh) rewrites this to a published version.
 replace github.com/varar-dev/varar/go => ../../go

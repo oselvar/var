@@ -5,7 +5,7 @@
 # fetch. Idempotent — a tag that already exists is left alone.
 #
 # PARKED until the Go port is ready to ship (gated by GO_MODULES_ENABLED in
-# release/lib.sh, which keeps this target and the 70-varar-examples.sh go pin in
+# release/lib.sh, which keeps this target and the 72-varar-examples.sh go pin in
 # lock-step). While parked this simply reports OK. Go-live checklist:
 #   1. Confirm the module path github.com/varar-dev/varar/go is the intended one
 #      and the repo is public (the proxy only serves public modules).

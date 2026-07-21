@@ -2,7 +2,7 @@
 # Publish every Rust workspace crate to crates.io. Idempotent per crate.
 #
 # PARKED until the Rust port is ready to ship (gated by CRATES_IO_ENABLED in
-# release/lib.sh, which keeps this target and the 70-varar-examples.sh rust pin in
+# release/lib.sh, which keeps this target and the 72-varar-examples.sh rust pin in
 # lock-step). While parked this simply reports OK. Go-live checklist:
 #   1. Rename the facade crate — `var` was already TAKEN on crates.io, so the facade ships as `varar`
 #      (verify `varar`/`varar-*` are free before first publish); the crate

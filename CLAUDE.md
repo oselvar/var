@@ -20,7 +20,7 @@ This is a multi-language monorepo (ADR 0001). Top level:
 - `doc/` — shared design docs (ADRs, specs, plans, ARCHITECTURE).
 - `examples/` — one standalone sample project per language/test-framework
   combo, mirroring the `varar-dev/varar-examples` repo 1:1 (synced there on every
-  release by `release/targets/70-varar-examples.sh`). The `.md` specs sit at
+  release by `release/targets/72-varar-examples.sh`). The `.md` specs sit at
   each project's root; `typescript-vitest` holds the originals, the other
   projects symlink their subset (the sync dereferences symlinks).
 

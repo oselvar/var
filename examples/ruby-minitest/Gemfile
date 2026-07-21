@@ -3,7 +3,7 @@
 source 'https://rubygems.org'
 
 # During development these resolve against the local monorepo build. The release
-# sync (release/targets/70-varar-examples.sh) rewrites them to the published
+# sync (release/targets/72-varar-examples.sh) rewrites them to the published
 # versions, e.g. gem 'varar-minitest', '~> 0.3'.
 gem 'varar', path: '../../ruby/packages/varar'
 gem 'varar-config', path: '../../ruby/packages/config'

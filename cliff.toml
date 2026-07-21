@@ -14,7 +14,7 @@
 # (Go modules) sections stay dormant while those ports' publishing is parked:
 # lint-commits.sh only accepts the `dotnet`/`go` scope once
 # DOTNET_NUGET_ENABLED=1 / GO_MODULES_ENABLED=1 (lib.sh), so no such entry can
-# appear until go-live — see release/targets/68-nuget.sh and 69-go-modules.sh.
+# appear until go-live — see release/targets/68-nuget.sh and 71-go-modules.sh.
 
 [changelog]
 header = """

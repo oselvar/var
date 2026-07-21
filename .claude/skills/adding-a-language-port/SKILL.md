@@ -375,11 +375,11 @@ suite:
   page**, so it silently drifts — it had gone four ports stale (Ruby, Rust, C#,
   Go all missing) before anyone noticed. Point the "Browse →" link at
   `varar-dev/varar-examples` only for ports whose registry publishing is live;
-  a **parked** port (excluded from the `70-varar-examples.sh` sync) must link to
+  a **parked** port (excluded from the `72-varar-examples.sh` sync) must link to
   `varar-dev/varar/tree/main/examples/<project>` instead, or the link 404s.
 - **`release/targets/NN-<registry>.sh`** publishing the port's packages to its
   registry (npm / PyPI / Maven Central / RubyGems), plus adding the port to the
-  release channels. The `varar-dev/varar-examples` sync (`70-varar-examples.sh`) picks
+  release channels. The `varar-dev/varar-examples` sync (`72-varar-examples.sh`) picks
   up new `examples/<lang>-*` projects, but its **version-pinning rewrite is
   per-ecosystem** — add a pin block (and any lockfile exclusion) for a new
   registry, mirroring the npm/PyPI/Maven/RubyGems ones. Also extend the

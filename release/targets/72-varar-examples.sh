@@ -83,7 +83,7 @@ fi
 # Same story for the Go sample while module publishing is parked: its go.mod
 # `replace`s the module to go/ in-repo, which a synced copy couldn't resolve
 # until the module is tagged. GO_MODULES_ENABLED (lib.sh) flips this and the pin
-# block below together — see 69-go-modules.sh's go-live checklist.
+# block below together — see 71-go-modules.sh's go-live checklist.
 go_exclude=()
 if [[ "$GO_MODULES_ENABLED" != "1" ]]; then
   go_exclude+=(--exclude 'go-*/')
@@ -171,7 +171,7 @@ fi
 # (GO_MODULES_ENABLED=1); while parked the go-* samples aren't synced at all
 # (see the rsync exclude above), so this finds nothing.
 #
-# 69-go-modules.sh runs first (glob order) and has already pushed the `go/vX.Y.Z`
+# 71-go-modules.sh runs first (glob order) and has already pushed the `go/vX.Y.Z`
 # tag, so the module is fetchable here — but proxy.golang.org only indexes a
 # version on first request, which can 404 for a few seconds right after the push.
 # Hence the retry around `go mod tidy`.
@@ -180,7 +180,7 @@ if [[ "$GO_MODULES_ENABLED" == "1" ]]; then
   # Drop the replace directive together with the trunk-facing comment above it,
   # so the published sample carries no dangling note about a path source that is
   # no longer there (same idea as the JVM comment swaps above).
-  perl -0pi -e 's{// This sample depends on the in-repo Go module by path\. The release sync\n// \(release/targets/70-varar-examples\.sh\) rewrites this to a published version\.\nreplace github\.com/varar-dev/varar/go => \.\./\.\./go\n}{}' \
+  perl -0pi -e 's{// This sample depends on the in-repo Go module by path\. The release sync\n// \(release/targets/72-varar-examples\.sh\) rewrites this to a published version\.\nreplace github\.com/varar-dev/varar/go => \.\./\.\./go\n}{}' \
     "$DEST"/go-*/go.mod
   perl -ni -e 'print unless m{^replace github\.com/varar-dev/varar/go => }' \
     "$DEST"/go-*/go.mod

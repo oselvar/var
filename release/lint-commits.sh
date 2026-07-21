@@ -30,7 +30,7 @@ SCOPES=(ts py java ruby vscode spec)
 [[ "${DOTNET_NUGET_ENABLED:-0}" == "1" ]] && SCOPES+=(dotnet)
 # Go is parked (GO_MODULES_ENABLED in lib.sh): `go` becomes a changelog-visible
 # consumer scope only once module tag publishing goes live, in lock-step with
-# the 69-go-modules.sh target and the varar-examples go pin. Until then Go work
+# the 71-go-modules.sh target and the varar-examples go pin. Until then Go work
 # must be chore(go): — it ships nothing to a consumer.
 [[ "${GO_MODULES_ENABLED:-0}" == "1" ]] && SCOPES+=(go)
 CONSUMER_SCOPE="^($(IFS='|'; echo "${SCOPES[*]}"))(/[a-z0-9._-]+)?\$"

@@ -6,7 +6,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Single source of truth for whether the Rust port ships to crates.io. While it
 # is 0 (parked), two targets stay in lock-step: 65-crates-io.sh reports OK
-# without publishing, AND 70-varar-examples.sh omits the rust-* samples (their
+# without publishing, AND 72-varar-examples.sh omits the rust-* samples (their
 # `var-core` path dependency can't resolve in varar-examples until the crates are
 # on crates.io — pinning it to an unpublished version would ship a broken
 # sample). Flip to 1 only once the crates are publishable — see the go-live
@@ -15,19 +15,19 @@ CRATES_IO_ENABLED="${CRATES_IO_ENABLED:-0}"
 
 # Single source of truth for whether the .NET port ships to NuGet. Same parked
 # pattern as CRATES_IO_ENABLED: while 0, 68-nuget.sh reports OK without
-# publishing AND 70-varar-examples.sh omits the csharp-* samples (their project
+# publishing AND 72-varar-examples.sh omits the csharp-* samples (their project
 # references to dotnet/ can't resolve in varar-examples until the packages are
 # on NuGet). Flip to 1 only once the packages are publishable — see the go-live
 # checklist in release/targets/68-nuget.sh.
 DOTNET_NUGET_ENABLED="${DOTNET_NUGET_ENABLED:-0}"
 
 # Single source of truth for whether the Go port ships as a tagged Go module.
-# Same parked pattern as CRATES_IO_ENABLED: while 0, 69-go-modules.sh reports OK
-# without tagging AND 70-varar-examples.sh omits the go-* samples (their
+# Same parked pattern as CRATES_IO_ENABLED: while 0, 71-go-modules.sh reports OK
+# without tagging AND 72-varar-examples.sh omits the go-* samples (their
 # `replace` directive points at go/ in-repo, which can't resolve in
 # varar-examples until the module is published under a version tag). Flip to 1
 # only once the module is publishable — see the go-live checklist in
-# release/targets/69-go-modules.sh.
+# release/targets/71-go-modules.sh.
 GO_MODULES_ENABLED="${GO_MODULES_ENABLED:-1}"
 
 log()  { printf '\033[1;34m[release]\033[0m %s\n' "$*"; }
