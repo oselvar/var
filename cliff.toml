@@ -94,7 +94,13 @@ conventional_commits = true
 filter_unconventional = true
 # A breaking change is always released, whatever its type (`refactor!:` too).
 protect_breaking_commits = true
-tag_pattern = "v[0-9]*"
+# Release tags only. ANCHORED deliberately: this is a regex, not a glob, so the
+# unanchored "v[0-9]*" also matched the Go module tag `go/v0.5.0` (it contains
+# "v0") — git-cliff then treated it as a release and filed every commit before
+# it under a bogus "## [go/v0.5.0]" heading, emptying the real release's notes.
+# Any future per-language tag (`go/vX.Y.Z`, and whatever a Rust or .NET module
+# tag looks like) must stay out of the changelog the same way.
+tag_pattern = "^v[0-9]+\\.[0-9]+\\.[0-9]+$"
 sort_commits = "oldest"
 
 # First match wins. Only consumer-visible kinds are kept; chores, docs, CI,

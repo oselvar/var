@@ -11,16 +11,6 @@ release time by `make prepare`; preview the next release with `make changelog`.
 
 ## [0.5.1] - 2026-07-21
 
-### Go (Go modules)
-
-- Fixed: Keep conformance fixtures out of the published module
-
-### VS Code extension (Marketplace & Open VSX)
-
-- Fixed: Align @types/vscode with the supported VS Code floor
-
-## [go/v0.5.0] - 2026-07-20
-
 ### TypeScript (npm)
 
 - ⚠️ **Breaking:** Publish the TypeScript port under the @varar npm scope
@@ -61,6 +51,11 @@ files, is unchanged. Passing a Hash now raises ArgumentError with the rewrite.
 ### Go (Go modules)
 
 - Added: Run your Markdown specs as Go tests with `go get github.com/varar-dev/varar/go`
+- Fixed: Keep conformance fixtures out of the published module
+
+### VS Code extension (Marketplace & Open VSX)
+
+- Fixed: Align @types/vscode with the supported VS Code floor
 
 ### Specification (all ports)
 
