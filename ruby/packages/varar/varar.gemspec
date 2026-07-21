@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = 'varar'
-  s.version = '0.5.0'
+  s.version = '0.5.1'
   s.summary = 'Markdown-native BDD — author API (define_state)'
   s.description = 'The Vár author facade: define_state and the step-registration accumulator.'
   s.authors = ['Aslak Hellesøy']
@@ -14,6 +14,6 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
 
   s.add_dependency 'cucumber-cucumber-expressions', '20.0.0'
-  s.add_dependency 'varar-core', '0.5.0'
+  s.add_dependency 'varar-core', '0.5.1'
   s.metadata['rubygems_mfa_required'] = 'true'
 end

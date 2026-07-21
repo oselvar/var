@@ -7,5 +7,5 @@ require 'varar/dsl'
 module Varar
   # The author facade: `steps` (top-level DSL) → [param, stimulus, sensor],
   # backed by the module-scope accumulator in Internal.
-  VERSION = '0.5.0'
+  VERSION = '0.5.1'
 end

@@ -1,12 +1,12 @@
 [project]
 name = "varar"
-version = "0.5.0"
+version = "0.5.1"
 description = "Markdown-native BDD — pure Python core (port of @varar/varar)"
 requires-python = ">=3.11"
 license = "MIT"
 dependencies = [
     "cucumber-expressions==20.0.0",
-    "varar-core==0.5.0",
+    "varar-core==0.5.1",
 ]
 
 [build-system]

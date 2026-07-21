@@ -5,7 +5,7 @@ plugins {
 // On trunk this is the SNAPSHOT that `mvn install` (run from java/) puts into
 // mavenLocal, so the sample always tests the code in this repo. In your own
 // project: pin the latest release and drop the mavenLocal() repository.
-val varVersion = "0.5.0"
+val varVersion = "0.5.1"
 
 repositories {
     mavenLocal()

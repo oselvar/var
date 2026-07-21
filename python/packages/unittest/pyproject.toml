@@ -1,10 +1,10 @@
 [project]
 name = "varar-unittest"
-version = "0.5.0"
+version = "0.5.1"
 description = "unittest adapter for Markdown-native BDD"
 requires-python = ">=3.11"
 license = "MIT"
-dependencies = ["varar==0.5.0", "varar-config==0.5.0", "varar-core==0.5.0", "varar-runner==0.5.0"]
+dependencies = ["varar==0.5.1", "varar-config==0.5.1", "varar-core==0.5.1", "varar-runner==0.5.1"]
 
 [build-system]
 requires = ["hatchling"]

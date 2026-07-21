@@ -1,10 +1,10 @@
 [project]
 name = "varar-runner"
-version = "0.5.0"
+version = "0.5.1"
 description = "Shared spec discovery + run orchestration for varar runners"
 requires-python = ">=3.11"
 license = "MIT"
-dependencies = ["varar==0.5.0", "varar-config==0.5.0"]
+dependencies = ["varar==0.5.1", "varar-config==0.5.1"]
 
 [project.scripts]
 varar = "varar_runner.cli:main"

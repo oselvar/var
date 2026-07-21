@@ -9,7 +9,17 @@ This file is generated from conventional commit messages by
 [git-cliff](https://git-cliff.org) — do not edit it by hand. It is written at
 release time by `make prepare`; preview the next release with `make changelog`.
 
-## [0.5.0] - 2026-07-20
+## [0.5.1] - 2026-07-21
+
+### Go (Go modules)
+
+- Fixed: Keep conformance fixtures out of the published module
+
+### VS Code extension (Marketplace & Open VSX)
+
+- Fixed: Align @types/vscode with the supported VS Code floor
+
+## [go/v0.5.0] - 2026-07-20
 
 ### TypeScript (npm)
 
