@@ -27,7 +27,17 @@ if [[ ! -d "$DEST/.git" ]]; then
   log "varar-examples: cloning varar-dev/varar-examples to $DEST"
   gh repo clone varar-dev/varar-examples "$DEST" -- --quiet || die "varar-examples: clone failed"
 fi
-[[ -z "$(git -C "$DEST" status --porcelain)" ]] || die "varar-examples: working tree at $DEST not clean"
+# Reset rather than refuse: everything below this line wipes the destination and
+# regenerates it from examples/, so a dirty tree has nothing worth preserving —
+# and refusing made the release non-idempotent, which defeats the whole "fix the
+# cause and re-run make release" contract. A target that dies mid-sync (as the
+# go pin did before the module was publishable) leaves 160+ modified files here;
+# the next run would then fail on the leftovers rather than on the real cause.
+if [[ -n "$(git -C "$DEST" status --porcelain)" ]]; then
+  warn "varar-examples: discarding a dirty tree at $DEST (it is regenerated from examples/ below)"
+  git -C "$DEST" reset --hard --quiet
+  git -C "$DEST" clean -fdq
+fi
 default_branch="$(git -C "$DEST" symbolic-ref --short HEAD)"
 git -C "$DEST" pull --ff-only --quiet || true # empty repo has no upstream yet
 
