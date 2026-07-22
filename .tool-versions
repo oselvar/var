@@ -14,4 +14,4 @@ adr-tools 3.0.0
 dotnet 10.0.302
 java temurin-25.0.3+9.0.LTS temurin-21.0.5+11.0.LTS
 ruby 4.0.6 3.2.2
-golang 1.26.3
+golang 1.26.5
