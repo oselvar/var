@@ -55,7 +55,7 @@
     "vscode-languageclient": "^10.1.0"
   },
   "devDependencies": {
-    "@types/vscode": "~1.105.0",
+    "@types/vscode": "~1.125.0",
     "esbuild": "^0.28.1"
   },
   "license": "MIT",

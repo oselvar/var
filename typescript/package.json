@@ -6,7 +6,7 @@
   "engines": {
     "node": ">=22.18"
   },
-  "packageManager": "pnpm@11.15.0",
+  "packageManager": "pnpm@11.15.1",
   "scripts": {
     "build": "pnpm -r --filter '!@varar/website' --filter '!@varar/website' build",
     "typecheck": "tsc -p tsconfig.tests.json",
