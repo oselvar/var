@@ -4,7 +4,7 @@ Gem::Specification.new do |s|
   s.name = 'varar'
   s.version = '0.6.1'
   s.summary = 'Markdown-native BDD — author API (define_state)'
-  s.description = 'The Vár author facade: define_state and the step-registration accumulator.'
+  s.description = 'The Varar author facade: define_state and the step-registration accumulator.'
   s.authors = ['Aslak Hellesøy']
   s.email = ['aslak@oselvar.com']
   s.homepage = 'https://varar.dev'

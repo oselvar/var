@@ -17,7 +17,7 @@ cd "$REPO_ROOT"
 
 DRY_RUN="${DRY_RUN:-0}"
 
-# The Vár vault lives in this account (several accounts are configured locally);
+# The Varar vault lives in this account (several accounts are configured locally);
 # release.env references the vault by ID — see the comment there.
 export OP_ACCOUNT="${OP_ACCOUNT:-my.1password.com}"
 
@@ -48,7 +48,7 @@ if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
 fi
 
 op run --env-file=release/release.env -- true >/dev/null 2>&1 ||
-  die "cannot resolve secrets in release/release.env (is 'op' signed in? vault 'Vár'?)"
+  die "cannot resolve secrets in release/release.env (is 'op' signed in? vault 'Varar'?)"
 
 [[ -n "$(changelog_body "$VERSION")" ]] ||
   die "CHANGELOG.md has no [$VERSION] section — did prepare run?"

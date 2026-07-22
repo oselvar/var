@@ -190,7 +190,7 @@ These are **external** and block *publishing*, not the code rename:
 - [ ] Cloudflare: add **varar.dev** zone, wire the Worker custom-domain route.
 - [ ] GitHub: rename `oselvar/var` → `oselvar/varar` and `oselvar/var-examples`
       → `oselvar/varar-examples` (301 redirects preserve old URLs).
-- [ ] 1Password (vault `Vár`): new `@varar` npm token, PyPI token; update the
+- [ ] 1Password (vault `Varar`): new `@varar` npm token, PyPI token; update the
       `op://` refs in `release/release.env` if item names change.
 
 ## Progress — COMPLETE (8 commits on `rename-to-varar`)
@@ -211,7 +211,7 @@ All phases done, every port's gate re-run green (807 files changed):
 
 ### Intentionally NOT changed
 - **GitHub org** `oselvar/varar` (varar org is squatted); **email**
-  `aslak@oselvar.com`; **LICENSE** `Oselvar Ltd`; **1Password vault** `Vár`.
+  `aslak@oselvar.com`; **LICENSE** `Oselvar Ltd`; **1Password vault** `Varar`.
 - ~~Package directory names~~ — **also renamed** (drop the `var-` prefix:
   `packages/core`, `packages/config`, …, facade `packages/varar`); published
   names/coordinates are unchanged, only the on-disk dirs moved. `make check`
