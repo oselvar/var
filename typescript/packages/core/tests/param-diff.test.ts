@@ -12,8 +12,8 @@ test('all elements equal → every cell ok', () => {
 
 test('one mismatching element → that cell is not ok with expected/actual', () => {
   const diffs = compareParams([4, 'big'], [3, 'big'], [span(14, 15), span(31, 34)], ['3', 'big'])
-  expect(diffs[0]).toMatchObject({ column: 'arg 1', expected: '3', actual: '4', ok: false })
-  expect(diffs[1]).toMatchObject({ column: 'arg 2', ok: true })
+  expect(diffs[0]).toMatchObject({ column: 'cell 1', expected: '3', actual: '4', ok: false })
+  expect(diffs[1]).toMatchObject({ column: 'cell 2', ok: true })
 })
 
 test('object actuals compare structurally across references', () => {

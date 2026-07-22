@@ -72,7 +72,7 @@ public final class ParamDiff {
                     : renderParamValue(expected.get(i), format).text();
             Rendered actual = renderParamValue(returned.get(i), format);
             diffs.add(new CellDiff(
-                    "arg " + (i + 1),
+                    "cell " + (i + 1),
                     paramSpans.get(i),
                     expectedText,
                     actual.text(),

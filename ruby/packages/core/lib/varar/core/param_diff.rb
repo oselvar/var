@@ -36,7 +36,7 @@ module Varar
                             render_param_value(expected[i], format)[0]
                           end
           CellDiff.new(
-            column: "arg #{i + 1}",
+            column: "cell #{i + 1}",
             span: param_spans[i],
             expected: expected_text,
             actual: actual_text,

@@ -32,11 +32,11 @@ fn one_mismatching_element_that_cell_is_not_ok_with_expected_actual() {
         &[span(14, 15), span(31, 34)],
         &["3".to_string(), "big".to_string()],
     );
-    assert_eq!("arg 1", diffs[0].column);
+    assert_eq!("cell 1", diffs[0].column);
     assert_eq!("3", diffs[0].expected);
     assert_eq!("4", diffs[0].actual);
     assert!(!diffs[0].ok);
-    assert_eq!("arg 2", diffs[1].column);
+    assert_eq!("cell 2", diffs[1].column);
     assert!(diffs[1].ok);
 }
 

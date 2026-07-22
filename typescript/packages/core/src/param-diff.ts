@@ -42,7 +42,7 @@ export function compareParams(
     const format = formats?.[i]
     const actual = renderParamValue(returned[i], format)
     diffs.push({
-      column: `arg ${i + 1}`,
+      column: `cell ${i + 1}`,
       span: paramSpans[i] as Span,
       expected: sourceTexts[i] ?? renderParamValue(expected[i], format).text,
       actual: actual.text,

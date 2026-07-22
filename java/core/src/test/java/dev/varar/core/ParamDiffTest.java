@@ -28,11 +28,11 @@ class ParamDiffTest {
     void oneMismatchingElementThatCellIsNotOkWithExpectedActual() {
         List<CellDiff> diffs = ParamDiff.compareParams(
                 List.of(4, "big"), List.of(3, "big"), List.of(span(14, 15), span(31, 34)), List.of("3", "big"));
-        assertEquals("arg 1", diffs.get(0).column());
+        assertEquals("cell 1", diffs.get(0).column());
         assertEquals("3", diffs.get(0).expected());
         assertEquals("4", diffs.get(0).actual());
         assertFalse(diffs.get(0).ok());
-        assertEquals("arg 2", diffs.get(1).column());
+        assertEquals("cell 2", diffs.get(1).column());
         assertTrue(diffs.get(1).ok());
     }
 

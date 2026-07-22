@@ -22,7 +22,7 @@
             "cells": [
               {
                 "actual": "£2.60",
-                "column": "arg 1",
+                "column": "cell 1",
                 "expected": "£2.55",
                 "span": {
                   "endCol": 22,
@@ -36,7 +36,7 @@
             ],
             "kind": "cell-mismatch",
             "line": 5,
-            "message": "arg 1: expected £2.55 but was £2.60"
+            "message": "cell 1: expected £2.55 but was £2.60"
           },
           "matchedExpression": "The late fee is {money}",
           "ordinal": 1,

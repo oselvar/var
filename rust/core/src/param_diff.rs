@@ -39,7 +39,7 @@ pub fn compare_params_with_formats(
         };
         let (actual_text, via_format) = render_param_value(&returned[i], format);
         diffs.push(CellDiff {
-            column: format!("arg {}", i + 1),
+            column: format!("cell {}", i + 1),
             span: param_spans[i],
             expected: expected_text,
             actual: actual_text,

@@ -28,11 +28,11 @@ def test_one_mismatching_element_cell_not_ok_with_expected_actual() -> None:
         [_span(14, 15), _span(31, 34)],
         ["3", "big"],
     )
-    assert diffs[0].column == "arg 1"
+    assert diffs[0].column == "cell 1"
     assert diffs[0].expected == "3"
     assert diffs[0].actual == "4"
     assert diffs[0].ok is False
-    assert diffs[1].column == "arg 2"
+    assert diffs[1].column == "cell 2"
     assert diffs[1].ok is True
 
 

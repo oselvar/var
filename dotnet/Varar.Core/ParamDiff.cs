@@ -26,7 +26,7 @@ public static class ParamDiff
                 ? sourceTexts[i]
                 : RenderParamValue(expected[i], format).Text;
             diffs.Add(new CellDiff(
-                $"arg {i + 1}",
+                $"cell {i + 1}",
                 paramSpans[i],
                 expectedText,
                 actualText,

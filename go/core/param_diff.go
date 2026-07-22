@@ -28,7 +28,7 @@ func compareParamsWithFormats(returned, expected []Value, paramSpans []Span, sou
 		exp := expected[i]
 		act := returned[i]
 		diffs = append(diffs, CellDiff{
-			Column:        fmt.Sprintf("arg %d", i+1),
+			Column:        fmt.Sprintf("cell %d", i+1),
 			Span:          paramSpans[i],
 			Expected:      expectedText,
 			Actual:        actualText,

@@ -190,13 +190,13 @@ Without `format`, a failure has to fall back to a generic rendering of your
 domain object:
 
 ```text
-CellMismatchError: arg 1: expected £2.55 but was {"currency":"GBP","value":2.6}
+CellMismatchError: cell 1: expected £2.55 but was {"currency":"GBP","value":2.6}
 ```
 
 With `format`, both sides of the diff speak the document's language:
 
 ```text
-CellMismatchError: arg 1: expected £2.55 but was £2.60
+CellMismatchError: cell 1: expected £2.55 but was £2.60
 ```
 
 `format` never affects whether a comparison passes — the verdict is always

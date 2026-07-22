@@ -48,7 +48,7 @@ def compare_params(
         actual_text, via_format = _render_param_value(returned[i], format)
         diffs.append(
             CellDiff(
-                column=f"arg {i + 1}",
+                column=f"cell {i + 1}",
                 span=param_spans[i],
                 expected=(
                     source_texts[i]
