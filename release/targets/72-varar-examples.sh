@@ -157,6 +157,15 @@ allowBuilds:
   tree-sitter-typescript: false
 PNPM_WORKSPACE
 
+# ...and the synced .gitignore must stop ignoring it. In the monorepo that file
+# is a local-only artifact (this project is a workspace member of typescript/),
+# so it is listed there; here it is real content carrying the allowBuilds
+# decision above. Left ignored, `git add -A` silently skipped it and the
+# published sample failed `pnpm install` with ERR_PNPM_IGNORED_BUILDS — the file
+# existed on disk during the sync and simply never reached the repo. pnpm-lock
+# stays ignored: the workflow resolves fresh from the pins.
+perl -ni -e 'print unless /^pnpm-workspace\.yaml$/' "$DEST"/typescript-vitest/.gitignore
+
 # Pin the Python samples to the released PyPI version: delete the
 # [tool.uv.sources] path-source table (with its comment block) and pin the
 # adapter dependency. Never rewrite to git sources: the samples exist to show
