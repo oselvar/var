@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: astral-sh/setup-uv@v8.3.2 # no bare v8 alias tag exists (v1-v7 only)
+      - uses: astral-sh/setup-uv@v9.0.0 # no bare v8 alias tag exists (v1-v7 only)
         with:
           enable-cache: true
 
