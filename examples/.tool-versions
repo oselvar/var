@@ -12,6 +12,6 @@
 #   Rust    rust-cargotest/rust-toolchain.toml          (rustup, cargo)
 #   Node    typescript-vitest/.node-version             (setup-node, nvm/fnm)
 #   pnpm    "packageManager" in typescript-vitest/package.json  (corepack)
-java temurin-21.0.5+11.0.LTS
+java temurin-25.0.3+9.0.LTS
 golang 1.26.3
 dotnet 10.0.302
