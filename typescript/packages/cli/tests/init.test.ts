@@ -57,3 +57,48 @@ test('refuses to overwrite an existing varar.config.json; reports which files we
     rmSync(dir, { recursive: true, force: true })
   }
 })
+
+test('creates a package.json with "type": "module" when the project has none', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'var-init-nopkg-'))
+  try {
+    const captured: string[] = []
+    await runInit({ cwd: dir, writeStdout: (s) => captured.push(s) })
+    const pkg = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8'))
+    expect(pkg.type).toBe('module')
+    expect(captured.join('')).toContain('created package.json')
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('adds "type": "module" to a package.json that declares no type, keeping its other fields', async () => {
+  // The `npm init -y` case: the scaffolded .steps.ts is an ES module, so
+  // without this `varar run` fails with "Cannot use import statement outside a
+  // module".
+  const dir = mkdtempSync(join(tmpdir(), 'var-init-addtype-'))
+  try {
+    writeFileSync(join(dir, 'package.json'), '{ "name": "demo", "version": "1.0.0" }')
+    const captured: string[] = []
+    await runInit({ cwd: dir, writeStdout: (s) => captured.push(s) })
+    const pkg = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8'))
+    expect(pkg).toEqual({ name: 'demo', version: '1.0.0', type: 'module' })
+    expect(captured.join('')).toContain('updated package.json')
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('never rewrites a type the project already chose, and warns when it is not module', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'var-init-cjs-'))
+  try {
+    const original = '{ "name": "demo", "type": "commonjs" }'
+    writeFileSync(join(dir, 'package.json'), original)
+    const captured: string[] = []
+    await runInit({ cwd: dir, writeStdout: (s) => captured.push(s) })
+    expect(readFileSync(join(dir, 'package.json'), 'utf8')).toBe(original)
+    expect(captured.join('')).toContain('warning')
+    expect(captured.join('')).toContain('"commonjs"')
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
