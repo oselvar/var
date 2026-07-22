@@ -22,15 +22,6 @@ pub fn to_failure(failure: &StepFailure, spec_path: &str, fallback_line: i64) ->
         _ => None,
     };
 
-    let doc = match &failure.error {
-        StepError::DocStringMismatch(diff) => Some(CellFailure::new(
-            diff.span.start_offset,
-            diff.span.end_offset,
-            diff.actual.clone(),
-        )),
-        _ => None,
-    };
-
     // Structural path match replaces Java's regex-escaped stack-trace scrape.
     let line = failure
         .location
@@ -44,7 +35,6 @@ pub fn to_failure(failure: &StepFailure, spec_path: &str, fallback_line: i64) ->
         message,
         stack,
         cells,
-        doc,
     }
 }
 

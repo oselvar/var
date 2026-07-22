@@ -11,13 +11,10 @@ augmentation renders it per-runtime, and the conformance trace pins it as
 from __future__ import annotations
 
 from varar_core.cell_diff import is_cell_mismatch_error
-from varar_core.doc_string_diff import is_doc_string_mismatch_error
 from varar_core.span import Span
 
 
 def failure_anchor(error: object, fallback: Span) -> Span:
     if is_cell_mismatch_error(error):
         return next((c.span for c in error.cells if not c.ok), fallback)
-    if is_doc_string_mismatch_error(error):
-        return error.diff.span
     return fallback

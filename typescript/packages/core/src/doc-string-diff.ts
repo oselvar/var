@@ -1,42 +1,32 @@
-import { ReturnShapeError } from './cell-diff.ts'
+import { type CellDiff, ReturnShapeError } from './cell-diff.ts'
 import type { Span } from './span.ts'
 
-// A doc-string content difference: the fence body's source range plus the
-// expected (authored) and actual (returned) strings.
-export type DocStringDiff = {
-  readonly span: Span
-  readonly expected: string
-  readonly actual: string
-}
+// The column label a doc-string cell carries in a CellDiff, so its mismatch
+// message reads `doc string: expected … but was …`.
+export const DOC_STRING_COLUMN = 'doc string'
 
 // Compare a doc-string step's returned string against the fence body content.
-// Exact equality (the body includes its trailing newline). `undefined` → no
-// check (null). A non-string return is an author mistake → ReturnShapeError.
-export function compareDocString(
-  returned: unknown,
-  content: string,
-  span: Span,
-): DocStringDiff | null {
+// A doc string is ONE CELL, compared whole — exact equality, the body's trailing
+// newline included — so a difference is an ordinary CellDiff and the executor
+// throws the same CellMismatchError as any other cell.
+//
+// `expected`/`actual` are JSON-quoted: a doc string routinely differs only in
+// whitespace, and bare text would render a missing trailing newline as no
+// difference at all.
+//
+// `undefined` → no check (null). A non-string return is an author mistake →
+// ReturnShapeError.
+export function compareDocString(returned: unknown, content: string, span: Span): CellDiff | null {
   if (returned === undefined) return null
   if (typeof returned !== 'string') {
     throw new ReturnShapeError(`expected a doc string (string), got ${typeof returned}`)
   }
   if (returned === content) return null
-  return { span, expected: content, actual: returned }
-}
-
-// Thrown by the executor when a doc-string step's returned string differs.
-export class DocStringMismatchError extends Error {
-  readonly diff: DocStringDiff
-  constructor(diff: DocStringDiff) {
-    super(
-      `doc string: expected ${JSON.stringify(diff.expected)} but was ${JSON.stringify(diff.actual)}`,
-    )
-    this.name = 'DocStringMismatchError'
-    this.diff = diff
+  return {
+    column: DOC_STRING_COLUMN,
+    span,
+    expected: JSON.stringify(content),
+    actual: JSON.stringify(returned),
+    ok: false,
   }
-}
-
-export function isDocStringMismatchError(e: unknown): e is DocStringMismatchError {
-  return e instanceof DocStringMismatchError
 }

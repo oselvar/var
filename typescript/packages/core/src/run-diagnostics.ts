@@ -45,12 +45,6 @@ export function runResultDiagnostics(
           message: `expected ${source.slice(c.from, c.to)} but was ${c.actual}`,
         })
       }
-    } else if (f.doc) {
-      out.push({
-        from: f.doc.from,
-        to: f.doc.to,
-        message: `expected ${source.slice(f.doc.from, f.doc.to)} but was ${f.doc.actual}`,
-      })
     } else {
       const { from, to } = lineRange(source, f.line)
       out.push({ from, to, message: f.message })

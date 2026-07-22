@@ -19,10 +19,6 @@ module Varar
                    "expected: #{cell.expected.inspect}, actual: #{cell.actual.inspect}"
         end
         lines.join("\n")
-      when Core::DocStringMismatchError
-        diff = error.diff
-        "Doc string mismatch at line #{diff.span.start_line}:\n  " \
-          "expected: #{diff.expected.inspect}\n  actual:   #{diff.actual.inspect}"
       when Core::ReturnShapeError
         error.message
       else

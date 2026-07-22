@@ -9,7 +9,6 @@ public static class FailureAnchor
     public static Span Anchor(Exception? error, Span fallback) => error switch
     {
         CellMismatchError cm => cm.Cells.FirstOrDefault(c => !c.Ok)?.Span ?? fallback,
-        DocStringMismatchError dm => dm.Diff.Span,
         _ => fallback,
     };
 }

@@ -13,10 +13,9 @@ import (
 type StepErrorKind int
 
 const (
-	// SECellMismatch is a table / header-bound row mismatch (only failing cells).
+	// SECellMismatch is one or more differing cells — an inline capture, a table
+	// cell, a header-bound row's cell, or a doc string (only failing cells).
 	SECellMismatch StepErrorKind = iota
-	// SEDocStringMismatch is a doc-string body mismatch.
-	SEDocStringMismatch
 	// SEReturnShape is a wrong return type/shape — an author mistake.
 	SEReturnShape
 	// SEUnexpectedPass is an error-fenced example that ran without failing.
@@ -29,10 +28,9 @@ const (
 // exception hierarchy.
 type StepError struct {
 	Kind           StepErrorKind
-	Cells          []CellDiff    // SECellMismatch
-	DocDiff        DocStringDiff // SEDocStringMismatch
-	ReturnShapeMsg string        // SEReturnShape
-	Handler        HandlerError  // SEHandler
+	Cells          []CellDiff   // SECellMismatch
+	ReturnShapeMsg string       // SEReturnShape
+	Handler        HandlerError // SEHandler
 }
 
 // Message is the human-readable message (getMessage parity).
@@ -44,8 +42,6 @@ func (e StepError) Message() string {
 			parts[i] = fmt.Sprintf("%s: expected %s but was %s", c.Column, c.Expected, c.Actual)
 		}
 		return strings.Join(parts, "; ")
-	case SEDocStringMismatch:
-		return fmt.Sprintf("doc string: expected %s but was %s", quote(e.DocDiff.Expected), quote(e.DocDiff.Actual))
 	case SEReturnShape:
 		return e.ReturnShapeMsg
 	case SEUnexpectedPass:
@@ -59,10 +55,6 @@ func (e StepError) Message() string {
 // cellMismatchError builds a SECellMismatch StepError.
 func cellMismatchError(cells []CellDiff) StepError {
 	return StepError{Kind: SECellMismatch, Cells: cells}
-}
-
-func docStringMismatchError(diff DocStringDiff) StepError {
-	return StepError{Kind: SEDocStringMismatch, DocDiff: diff}
 }
 
 func returnShapeError(msg string) StepError {

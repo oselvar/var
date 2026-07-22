@@ -3,7 +3,6 @@ import {
   detectDrift,
   driftDiagnostics,
   isCellMismatchError,
-  isDocStringMismatchError,
   type Reporter,
   resolveScannerPlugins,
   type SpecBaseline,
@@ -139,9 +138,6 @@ function attachExpectedActual(error: unknown): void {
     }
     e.expected = renderCells(bad, 'expected')
     e.actual = renderCells(bad, 'actual')
-  } else if (isDocStringMismatchError(error)) {
-    e.expected = error.diff.expected
-    e.actual = error.diff.actual
   }
 }
 

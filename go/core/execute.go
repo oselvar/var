@@ -329,7 +329,7 @@ func checkSensorReturn(source string, step PlannedStep, returned *Value) *StepEr
 			return err
 		}
 		if diff != nil {
-			e := docStringMismatchError(*diff)
+			e := cellMismatchError([]CellDiff{*diff})
 			return &e
 		}
 	}

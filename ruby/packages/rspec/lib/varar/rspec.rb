@@ -57,7 +57,7 @@ module Varar
     end
 
     def var_diff_error?(error)
-      error.is_a?(Core::CellMismatchError) || error.is_a?(Core::DocStringMismatchError) ||
+      error.is_a?(Core::CellMismatchError) ||
         error.is_a?(Core::ReturnShapeError) || error.is_a?(Core::UnexpectedPassError)
     end
   end

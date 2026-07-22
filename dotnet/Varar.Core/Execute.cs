@@ -201,7 +201,7 @@ public static class Execute
             var diff = DocStringDiffs.CompareDocString(slots[argCount], step.DocString.Content, step.DocString.Span);
             if (diff is not null)
             {
-                throw new DocStringMismatchError(diff);
+                throw new CellMismatchError([diff]);
             }
         }
     }

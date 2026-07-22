@@ -4,7 +4,7 @@
 //! String" type assertions are dropped (type-level in Rust).
 
 use varar_core::cell_diff::CellDiff;
-use varar_core::doc_string_diff::DocStringDiff;
+use varar_core::doc_string_diff::compare_doc_string;
 use varar_core::error::{FailureLocation, HandlerError, StepError, StepFailure};
 use varar_core::failure::to_failure;
 use varar_core::result::CellFailure;
@@ -33,27 +33,27 @@ fn to_failure_extracts_cells_from_a_cell_mismatch() {
     )]));
     let f = to_failure(&sf, "spec.md", 3);
     assert_eq!(Some(vec![CellFailure::new(4, 5, "4")]), f.cells);
-    assert_eq!(None, f.doc);
 }
 
 #[test]
-fn to_failure_extracts_doc_from_a_doc_string_mismatch() {
+fn to_failure_extracts_a_doc_string_mismatch_as_a_cell() {
     let source = "Hello!\n";
-    let sf = StepFailure::bare(StepError::DocStringMismatch(DocStringDiff::new(
-        Span::from_offsets(source, 0, 7),
+    let diff = compare_doc_string(
+        Some(&varar_core::value::Value::from("Goodbye!\n")),
         "Hello!\n",
-        "Goodbye!\n",
-    )));
+        Span::from_offsets(source, 0, 7),
+    )
+    .unwrap()
+    .unwrap();
+    let sf = StepFailure::bare(StepError::CellMismatch(vec![diff]));
     let f = to_failure(&sf, "spec.md", 3);
-    assert_eq!(Some(CellFailure::new(0, 7, "Goodbye!\n")), f.doc);
-    assert_eq!(None, f.cells);
+    assert_eq!(Some(vec![CellFailure::new(0, 7, "\"Goodbye!\\n\"")]), f.cells);
 }
 
 #[test]
-fn to_failure_leaves_cells_doc_null_for_a_plain_exception_or_return_shape() {
+fn to_failure_leaves_cells_null_for_a_plain_exception_or_return_shape() {
     let plain = StepFailure::bare(StepError::Handler(HandlerError::new("nope")));
     assert_eq!(None, to_failure(&plain, "spec.md", 3).cells);
-    assert_eq!(None, to_failure(&plain, "spec.md", 3).doc);
     let shape = StepFailure::bare(StepError::ReturnShape("bad".to_string()));
     assert_eq!(None, to_failure(&shape, "spec.md", 3).cells);
 }

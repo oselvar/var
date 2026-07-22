@@ -189,7 +189,7 @@ module Varar
         elsif step.doc_string
           diff = DocStringDiffs.compare_doc_string(slots[step.args.length], step.doc_string.content,
                                                    step.doc_string.span)
-          raise DocStringMismatchError, diff unless diff.nil?
+          raise CellMismatchError, [diff] unless diff.nil?
         end
       end
 

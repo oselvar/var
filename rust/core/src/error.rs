@@ -1,10 +1,9 @@
 //! The error model: the Rust replacement for Java var-core's typed exception
-//! hierarchy (`CellMismatchException`, `DocStringMismatchException`,
+//! hierarchy (`CellMismatchException`,
 //! `ReturnShapeException`, `UnexpectedPassException`, author `AssertionError`).
 //! `Result`/panic-catch replace throw; `instanceof` dispatch becomes `match`.
 
 use crate::cell_diff::CellDiff;
-use crate::doc_string_diff::DocStringDiff;
 use std::any::Any;
 
 /// A handler-signalled failure (author `Err(...)` or a caught panic) — the
@@ -38,10 +37,9 @@ impl HandlerError {
 /// A step failure verdict — the closed union replacing the exception hierarchy.
 #[derive(Clone, Debug, PartialEq)]
 pub enum StepError {
-    /// Table / header-bound row mismatch (only the failing cells).
+    /// One or more compared cells differ — an inline capture, a table cell, a
+    /// header-bound row's cell, or a doc string (only the failing cells).
     CellMismatch(Vec<CellDiff>),
-    /// Doc-string body mismatch.
-    DocStringMismatch(DocStringDiff),
     /// Wrong return type/shape — an author mistake, not a value diff.
     ReturnShape(String),
     /// An `error`-fenced example ran without failing.
@@ -59,13 +57,6 @@ impl StepError {
                 .map(|c| format!("{}: expected {} but was {}", c.column, c.expected, c.actual))
                 .collect::<Vec<_>>()
                 .join("; "),
-            StepError::DocStringMismatch(diff) => {
-                format!(
-                    "doc string: expected {} but was {}",
-                    quote(&diff.expected),
-                    quote(&diff.actual)
-                )
-            }
             StepError::ReturnShape(msg) => msg.clone(),
             StepError::UnexpectedPass => "expected the example to fail, but it passed".to_string(),
             StepError::Handler(e) => e.message.clone(),
@@ -77,14 +68,6 @@ impl StepError {
     pub fn as_cell_mismatch(&self) -> Option<&[CellDiff]> {
         match self {
             StepError::CellMismatch(cells) => Some(cells),
-            _ => None,
-        }
-    }
-
-    /// The diff of a [`StepError::DocStringMismatch`], else `None`.
-    pub fn as_doc_string_mismatch(&self) -> Option<&DocStringDiff> {
-        match self {
-            StepError::DocStringMismatch(diff) => Some(diff),
             _ => None,
         }
     }
@@ -124,7 +107,7 @@ impl StepFailure {
 /// matched by substring in an `error` fence — a port that quotes differently fails
 /// a spec its siblings pass. Escaping only `\\`, `"` and `\n` is not enough: doc
 /// strings routinely carry tab-indented code.
-fn quote(s: &str) -> String {
+pub(crate) fn quote(s: &str) -> String {
     let mut out = String::with_capacity(s.len() + 2);
     out.push('"');
     for c in s.chars() {

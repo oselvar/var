@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -24,22 +23,27 @@ class DocStringDiffTest {
     }
 
     @Test
-    void compareDocStringDifferentContentReturnsDiffWithSpanExpectedActual() {
+    void compareDocStringDifferentContentReturnsACellLabelledDocString() {
+        // A doc string is one cell, compared whole. expected/actual are quoted so a
+        // whitespace-only difference stays visible.
+        CellDiff diff = DocStringDiff.compareDocString("bye\n", "hello\n", SPAN);
+        assertEquals(DocStringDiff.DOC_STRING_COLUMN, diff.column());
+        assertEquals(SPAN, diff.span());
+        assertEquals("\"hello\\n\"", diff.expected());
+        assertEquals("\"bye\\n\"", diff.actual());
+        assertFalse(diff.ok());
+    }
+
+    @Test
+    void aDocStringCellReadsLikeAnyOtherCellMismatch() {
+        CellDiff diff = DocStringDiff.compareDocString("bye\n", "hello\n", SPAN);
         assertEquals(
-                new DocStringDiff(SPAN, "hello\n", "bye\n"), DocStringDiff.compareDocString("bye\n", "hello\n", SPAN));
+                "doc string: expected \"hello\\n\" but was \"bye\\n\"",
+                new CellDiff.CellMismatchException(java.util.List.of(diff)).getMessage());
     }
 
     @Test
     void compareDocStringANonStringReturnThrowsReturnShapeException() {
         assertThrows(CellDiff.ReturnShapeException.class, () -> DocStringDiff.compareDocString(42, "hello\n", SPAN));
-    }
-
-    @Test
-    void docStringMismatchExceptionCarriesTheDiffAndIsDetectable() {
-        DocStringDiff.DocStringMismatchException err =
-                new DocStringDiff.DocStringMismatchException(new DocStringDiff(SPAN, "hello\n", "bye\n"));
-        assertTrue(DocStringDiff.isDocStringMismatchException(err));
-        assertFalse(DocStringDiff.isDocStringMismatchException(new RuntimeException("x")));
-        assertEquals("bye\n", err.diff().actual());
     }
 }

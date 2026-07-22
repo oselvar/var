@@ -6,7 +6,6 @@ from typing import Any
 import pytest
 
 from varar_core.cell_diff import ReturnShapeError, is_cell_mismatch_error
-from varar_core.doc_string_diff import is_doc_string_mismatch_error
 from varar_core.execute import (
     ExecutePorts,
     StepObservation,
@@ -479,8 +478,8 @@ def test_whole_table_sensor_returning_wrong_type_raises_return_shape_error() -> 
         _runs_for(TABLE_DOC, r)[0]()
 
 
-def test_doc_string_sensor_returning_different_string_raises_doc_string_mismatch_error() -> None:
-    """A doc-string sensor returning a different string throws DocStringMismatchError."""
+def test_doc_string_sensor_returning_different_string_raises_cell_mismatch_error() -> None:
+    """A doc-string sensor returning a different string throws CellMismatchError."""
     r = add_step(
         create_registry(),
         expression="the greeting is",
@@ -494,11 +493,13 @@ def test_doc_string_sensor_returning_different_string_raises_doc_string_mismatch
         _runs_for(DOCSTRING_DOC, r)[0]()
     except Exception as e:
         caught = e
-    assert is_doc_string_mismatch_error(caught)
-    diff = caught.diff
-    assert diff.expected == "Hello, world!\n"
-    assert diff.actual == "Goodbye!\n"
-    assert DOCSTRING_DOC[diff.span.start_offset : diff.span.end_offset] == "Hello, world!\n"
+    assert is_cell_mismatch_error(caught)
+    cell = caught.cells[0]
+    assert cell.column == "doc string"
+    # JSON-quoted, so a whitespace-only difference stays visible.
+    assert cell.expected == '"Hello, world!\\n"'
+    assert cell.actual == '"Goodbye!\\n"'
+    assert DOCSTRING_DOC[cell.span.start_offset : cell.span.end_offset] == "Hello, world!\n"
 
 
 def test_whole_table_action_returning_none_passes() -> None:
@@ -1189,8 +1190,8 @@ def test_sensor_with_trailing_doc_string_returning_exact_content_passes() -> Non
     assert caught[0] is None
 
 
-def test_sensor_with_trailing_doc_string_returning_wrong_text_raises_doc_string_mismatch_error() -> None:
-    """a sensor with a trailing doc string returning the wrong text throws DocStringMismatchError."""
+def test_sensor_with_trailing_doc_string_returning_wrong_text_raises_cell_mismatch_error() -> None:
+    """a sensor with a trailing doc string returning the wrong text throws CellMismatchError."""
     source = "# X\n\nthe greeting is:\n\n```text\nHello, world!\n```\n"
     caught = _run_one(
         source,
@@ -1203,7 +1204,8 @@ def test_sensor_with_trailing_doc_string_returning_wrong_text_raises_doc_string_
             handler=lambda _ctx, _body: "Goodbye!\n",
         ),
     )
-    assert is_doc_string_mismatch_error(caught[0])
+    assert is_cell_mismatch_error(caught[0])
+    assert str(caught[0]) == 'doc string: expected "Hello, world!\\n" but was "Goodbye!\\n"'
 
 
 # ---------------------------------------------------------------------------

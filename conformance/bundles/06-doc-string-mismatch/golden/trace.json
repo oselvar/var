@@ -19,19 +19,22 @@
               "startLine": 8,
               "startOffset": 71
             },
-            "diff": {
-              "actual": "goodbye",
-              "expected": "hello\n",
-              "span": {
-                "endCol": 1,
-                "endLine": 9,
-                "endOffset": 77,
-                "startCol": 1,
-                "startLine": 8,
-                "startOffset": 71
+            "cells": [
+              {
+                "actual": "\"goodbye\"",
+                "column": "doc string",
+                "expected": "\"hello\\n\"",
+                "span": {
+                  "endCol": 1,
+                  "endLine": 9,
+                  "endOffset": 77,
+                  "startCol": 1,
+                  "startLine": 8,
+                  "startOffset": 71
+                }
               }
-            },
-            "kind": "doc-string-mismatch",
+            ],
+            "kind": "cell-mismatch",
             "line": 5,
             "message": "doc string: expected \"hello\\n\" but was \"goodbye\""
           },

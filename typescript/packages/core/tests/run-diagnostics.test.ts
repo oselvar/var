@@ -46,14 +46,14 @@ test('whole-table mismatch yields multiple cell diagnostics', () => {
   ])
 })
 
-test('doc mismatch → one diagnostic on the body span', () => {
+test('doc-string cell mismatch → one diagnostic on the body span', () => {
   const source = 'say:\nHello!\n'
   const r = results(source, [
     {
       name: 'd',
       status: 'failed',
       lines: [2],
-      failure: { line: 2, message: 'm', stack: 's', doc: { from: 5, to: 11, actual: 'Bye' } },
+      failure: { line: 2, message: 'm', stack: 's', cells: [{ from: 5, to: 11, actual: 'Bye' }] },
     },
   ])
   expect(runResultDiagnostics(r, source)).toEqual([

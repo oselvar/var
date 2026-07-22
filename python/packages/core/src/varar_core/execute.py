@@ -21,7 +21,7 @@ from varar_core.cell_diff import (
     compare_row,
     compare_table,
 )
-from varar_core.doc_string_diff import DocStringMismatchError, compare_doc_string
+from varar_core.doc_string_diff import compare_doc_string
 from varar_core.failure_anchor import failure_anchor
 from varar_core.param_diff import compare_params
 from varar_core.plan import ExecutionPlan, PlannedStep
@@ -291,7 +291,7 @@ def execute_plan(plan: ExecutionPlan, ports: ExecutePorts) -> None:
                                             step.doc_string.span,
                                         )
                                         if diff is not None:
-                                            raise DocStringMismatchError(diff)
+                                            raise CellMismatchError([diff])
 
                         else:
                             raise ReturnShapeError(f"unknown step kind: {kind}")

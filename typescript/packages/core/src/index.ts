@@ -48,12 +48,7 @@ export type {
   Severity,
 } from './diagnostics.ts'
 export { ambiguousMatch, driftDetected } from './diagnostics.ts'
-export type { DocStringDiff } from './doc-string-diff.ts'
-export {
-  compareDocString,
-  DocStringMismatchError,
-  isDocStringMismatchError,
-} from './doc-string-diff.ts'
+export { compareDocString, DOC_STRING_COLUMN } from './doc-string-diff.ts'
 export type { BaselineExample, Drift, SpecBaseline, VarLock } from './drift.ts'
 export {
   deriveSpecBaseline,

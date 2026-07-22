@@ -1,5 +1,4 @@
 import { isCellMismatchError } from './cell-diff.ts'
-import { isDocStringMismatchError } from './doc-string-diff.ts'
 import type { CellFailure, ExampleResult } from './result.ts'
 
 // Recover the 1-based failing line from the `<specPath>:line:col` frame
@@ -30,19 +29,10 @@ export function toFailure(
         .map((c) => ({ from: c.span.startOffset, to: c.span.endOffset, actual: c.actual }))
     : undefined
 
-  const doc: CellFailure | undefined = isDocStringMismatchError(error)
-    ? {
-        from: error.diff.span.startOffset,
-        to: error.diff.span.endOffset,
-        actual: error.diff.actual,
-      }
-    : undefined
-
   return {
     line: failingLine(stack, specPath) ?? fallbackLine,
     message,
     stack,
     ...(cells && cells.length > 0 ? { cells } : {}),
-    ...(doc ? { doc } : {}),
   }
 }

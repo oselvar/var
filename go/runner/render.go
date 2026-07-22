@@ -29,9 +29,6 @@ func RenderFailure(failure core.StepFailure, _source, path string) string {
 			))
 		}
 		return strings.Join(lines, "\n")
-	case core.SEDocStringMismatch:
-		d := failure.Error.DocDiff
-		return fmt.Sprintf("Doc string mismatch at line %d:\n  expected: %q\n  actual:   %q", d.Span.StartLine, d.Expected, d.Actual)
 	default:
 		return failure.Error.Message()
 	}

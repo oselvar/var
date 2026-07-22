@@ -630,7 +630,7 @@ fn a_whole_table_sensor_returning_the_wrong_type_throws_return_shape() {
 const GREETING_DOC: &str = "# T\n\nthe greeting is:\n\n```text\nHello, world!\n```";
 
 #[test]
-fn a_doc_string_sensor_returning_a_different_string_throws_doc_string_mismatch_at_the_body_span() {
+fn a_doc_string_sensor_returning_a_different_string_throws_cell_mismatch_at_the_body_span() {
     let r = reg(
         "the greeting is",
         "s.ts",
@@ -641,11 +641,14 @@ fn a_doc_string_sensor_returning_a_different_string_throws_doc_string_mismatch_a
     let p = plan_of(GREETING_DOC, &r);
     let ports = ExecutePorts::silent();
     let err = collect_examples(&p, &ports)[0].run().unwrap_err();
-    let StepError::DocStringMismatch(diff) = &err.error else {
-        panic!("expected doc string mismatch")
+    let StepError::CellMismatch(cells) = &err.error else {
+        panic!("expected a cell mismatch")
     };
-    assert_eq!("Hello, world!\n", diff.expected);
-    assert_eq!("Goodbye!\n", diff.actual);
+    let diff = &cells[0];
+    assert_eq!("doc string", diff.column);
+    // Quoted, so a whitespace-only difference stays visible.
+    assert_eq!("\"Hello, world!\\n\"", diff.expected);
+    assert_eq!("\"Goodbye!\\n\"", diff.actual);
 }
 
 #[test]

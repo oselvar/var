@@ -2,7 +2,6 @@ import { type CucumberExpression, type Node, NodeType } from '@cucumber/cucumber
 import type { Fence, Table, VarDoc } from './ast.ts'
 import { isCellMismatchError, ReturnShapeError } from './cell-diff.ts'
 import type { DiagnosticCode, Severity } from './diagnostics.ts'
-import { isDocStringMismatchError } from './doc-string-diff.ts'
 import { collectExamples, isUnexpectedPassError, type StepObservation } from './execute.ts'
 import { failureAnchor } from './failure-anchor.ts'
 import { plan as buildPlan, type ExecutionPlan } from './plan.ts'
@@ -72,13 +71,6 @@ export type FailureArtifact =
         readonly actual: string
         readonly span: Span
       }>
-    }
-  | {
-      readonly kind: 'doc-string-mismatch'
-      readonly line: number
-      readonly anchor: Span
-      readonly message: string
-      readonly diff: { readonly expected: string; readonly actual: string; readonly span: Span }
     }
   | {
       readonly kind: 'return-shape'
@@ -240,15 +232,6 @@ export function toFailureArtifact(error: unknown, matchSpan: Span): FailureArtif
       cells: error.cells
         .filter((c) => !c.ok)
         .map((c) => ({ column: c.column, expected: c.expected, actual: c.actual, span: c.span })),
-    }
-  }
-  if (isDocStringMismatchError(error)) {
-    return {
-      kind: 'doc-string-mismatch',
-      line,
-      anchor,
-      message: error.message,
-      diff: { expected: error.diff.expected, actual: error.diff.actual, span: error.diff.span },
     }
   }
   if (error instanceof ReturnShapeError)

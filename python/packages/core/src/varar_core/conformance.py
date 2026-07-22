@@ -28,7 +28,6 @@ from varar_core.ast import (
     VarDoc,
 )
 from varar_core.cell_diff import ReturnShapeError, is_cell_mismatch_error
-from varar_core.doc_string_diff import is_doc_string_mismatch_error
 from varar_core.execute import CollectPorts, StepObservation, collect_examples, is_unexpected_pass_error
 from varar_core.failure_anchor import failure_anchor
 from varar_core.plan import ExecutionPlan
@@ -297,18 +296,6 @@ def to_failure_artifact(error: object, match_span: Span) -> dict[str, Any]:
                 for c in error.cells
                 if not c.ok
             ],
-        }
-    if is_doc_string_mismatch_error(error):
-        return {
-            "kind": "doc-string-mismatch",
-            "line": line,
-            "anchor": anchor,
-            "message": str(error),
-            "diff": {
-                "expected": error.diff.expected,
-                "actual": error.diff.actual,
-                "span": _span(error.diff.span),
-            },
         }
     if isinstance(error, ReturnShapeError):
         return {"kind": "return-shape", "line": line, "anchor": anchor, "message": str(error)}

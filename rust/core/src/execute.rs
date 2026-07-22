@@ -427,7 +427,7 @@ fn check_sensor_return(
         if let Some(diff) =
             compare_doc_string(Some(&slots[arg_count]), &fence.body, fence.body_span)?
         {
-            return Err(StepError::DocStringMismatch(diff));
+            return Err(StepError::CellMismatch(vec![diff]));
         }
     }
     Ok(())

@@ -15,7 +15,7 @@ from varar_core.conformance import (
     to_registry_artifact,
     to_var_doc_artifact,
 )
-from varar_core.doc_string_diff import DocStringDiff, DocStringMismatchError
+from varar_core.doc_string_diff import compare_doc_string
 from varar_core.execute import UnexpectedPassError
 from varar_core.parse import parse
 from varar_core.plan import plan
@@ -74,15 +74,24 @@ def test_to_failure_artifact_projects_cell_mismatch_error_anchored_at_first_fail
     }
 
 
-def test_to_failure_artifact_projects_doc_string_mismatch_error_anchored_at_fence_body():
-    err = DocStringMismatchError(DocStringDiff(span=_CELL_SPAN, expected="a", actual="b"))
-    assert to_failure_artifact(err, _SPAN) == {
-        "kind": "doc-string-mismatch",
+def test_to_failure_artifact_projects_a_doc_string_cell_as_a_cell_mismatch():
+    diff = compare_doc_string("b", "a", _CELL_SPAN)
+    assert diff is not None
+    assert to_failure_artifact(CellMismatchError([diff]), _SPAN) == {
+        "kind": "cell-mismatch",
         "line": 7,
         "anchor": _CELL_SPAN_DICT,
         "message": 'doc string: expected "a" but was "b"',
-        "diff": {"expected": "a", "actual": "b", "span": _CELL_SPAN_DICT},
+        "cells": [
+            {
+                "column": "doc string",
+                "expected": '"a"',
+                "actual": '"b"',
+                "span": _CELL_SPAN_DICT,
+            }
+        ],
     }
+
 
 
 def test_to_failure_artifact_maps_unexpected_pass_and_opaque_throws():

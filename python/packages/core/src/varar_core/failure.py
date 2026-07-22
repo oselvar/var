@@ -9,7 +9,6 @@ import re
 from typing import Any
 
 from varar_core.cell_diff import is_cell_mismatch_error
-from varar_core.doc_string_diff import is_doc_string_mismatch_error
 from varar_core.result import CellFailure, ExampleFailure
 
 
@@ -27,7 +26,7 @@ def to_failure(
 ) -> ExampleFailure:
     """Convert a thrown step error to an ExampleFailure.
 
-    Checks for ``CellMismatchError`` and ``DocStringMismatchError`` first to
+    Checks for ``CellMismatchError`` first to
     populate structured ``cells``/``doc`` payloads; falls back to a plain
     message + stack for any other exception.
 
@@ -54,14 +53,6 @@ def to_failure(
         if failing:
             cells = failing
 
-    doc: CellFailure | None = None
-    if is_doc_string_mismatch_error(error):
-        doc = CellFailure(
-            from_=error.diff.span.start_offset,
-            to=error.diff.span.end_offset,
-            actual=error.diff.actual,
-        )
-
     line = _failing_line(stack, spec_path) if stack else None
 
     return ExampleFailure(
@@ -69,5 +60,4 @@ def to_failure(
         message=message,
         stack=stack,
         cells=cells,
-        doc=doc,
     )

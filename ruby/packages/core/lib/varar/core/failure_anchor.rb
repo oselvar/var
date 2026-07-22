@@ -17,8 +17,6 @@ module Varar
         when CellMismatchError
           failing = error.cells.find { |c| !c.ok }
           failing ? failing.span : fallback
-        when DocStringMismatchError
-          error.diff.span
         else
           fallback
         end

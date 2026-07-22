@@ -1,11 +1,11 @@
-import { isCellMismatchError, isDocStringMismatchError, ReturnShapeError } from '@varar/core'
+import { isCellMismatchError, ReturnShapeError } from '@varar/core'
 
 /**
  * Render a step failure as a human-readable string, anchored to the source `.md`
  * location when the error carries structured diff information.
  *
- * Structured errors (`CellMismatchError`, `DocStringMismatchError`,
- * `ReturnShapeError`) produce expected/actual output with the `.md` line number.
+ * Structured errors (`CellMismatchError`, `ReturnShapeError`) produce
+ * expected/actual output with the `.md` line number.
  * All other throws fall back to `error.stack` or `String(error)`.
  */
 export function renderFailure(error: unknown, _source: string, path: string): string {
@@ -17,15 +17,6 @@ export function renderFailure(error: unknown, _source: string, path: string): st
       return `  ${path}:${line} col "${c.column}": expected ${JSON.stringify(c.expected)} but was ${JSON.stringify(c.actual)}`
     })
     return `CellMismatchError\n${lines.join('\n')}`
-  }
-
-  if (isDocStringMismatchError(error)) {
-    const line = error.diff.span.startLine
-    return [
-      `DocStringMismatchError at ${path}:${line}`,
-      `  expected: ${JSON.stringify(error.diff.expected)}`,
-      `  actual:   ${JSON.stringify(error.diff.actual)}`,
-    ].join('\n')
   }
 
   if (error instanceof ReturnShapeError) {

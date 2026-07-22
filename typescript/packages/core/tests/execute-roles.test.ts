@@ -1,6 +1,5 @@
 import { expect, test } from 'vitest'
 import { isCellMismatchError } from '../src/cell-diff.ts'
-import { isDocStringMismatchError } from '../src/doc-string-diff.ts'
 import { type ExecutePorts, executePlan } from '../src/execute.ts'
 import { parse } from '../src/parse.ts'
 import { plan } from '../src/plan.ts'
@@ -148,7 +147,7 @@ test('a sensor with a trailing doc string returning the exact content passes', a
   expect(getErr()).toBeUndefined()
 })
 
-test('a sensor with a trailing doc string returning the wrong text throws DocStringMismatchError', async () => {
+test('a sensor with a trailing doc string returning the wrong text throws CellMismatchError', async () => {
   const source = '# X\n\nthe greeting is:\n\n```text\nHello, world!\n```\n'
   const getErr = runOne(source, (r) =>
     addStep(r, {
@@ -160,7 +159,11 @@ test('a sensor with a trailing doc string returning the wrong text throws DocStr
     }),
   )
   await new Promise((res) => setTimeout(res, 0))
-  expect(isDocStringMismatchError(getErr())).toBe(true)
+  const err = getErr()
+  expect(isCellMismatchError(err)).toBe(true)
+  expect((err as Error).message).toBe(
+    'doc string: expected "Hello, world!\\n" but was "Goodbye!\\n"',
+  )
 })
 
 test('a single-parameter sensor returns the bare value, not an array', async () => {

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from varar_core.cell_diff import CellDiff, CellMismatchError, ReturnShapeError
-from varar_core.doc_string_diff import DocStringDiff, DocStringMismatchError
+from varar_core.doc_string_diff import compare_doc_string
 from varar_core.failure import to_failure
 from varar_core.result import CellFailure
 from varar_core.span import span_from_offsets
@@ -15,24 +15,22 @@ def test_to_failure_extracts_cells_from_cell_mismatch_error() -> None:
     )
     f = to_failure(err, "spec.md", 3)
     assert f.cells == (CellFailure(from_=4, to=5, actual="4"),)
-    assert f.doc is None
     assert isinstance(f.message, str)
     assert isinstance(f.stack, str)
 
 
-def test_to_failure_extracts_doc_from_doc_string_mismatch_error() -> None:
+def test_to_failure_extracts_a_doc_string_mismatch_as_a_cell() -> None:
     source = "Hello!\n"
-    err = DocStringMismatchError(
-        DocStringDiff(span=span_from_offsets(source, 0, 7), expected="Hello!\n", actual="Goodbye!\n")
-    )
-    f = to_failure(err, "spec.md", 3)
-    assert f.doc == CellFailure(from_=0, to=7, actual="Goodbye!\n")
-    assert f.cells is None
+    diff = compare_doc_string("Goodbye!\n", "Hello!\n", span_from_offsets(source, 0, 7))
+    assert diff is not None
+    f = to_failure(CellMismatchError([diff]), "spec.md", 3)
+    assert f.cells is not None
+    assert [(c.from_, c.to, c.actual) for c in f.cells] == [(0, 7, '"Goodbye!\\n"')]
 
 
-def test_to_failure_leaves_cells_doc_undefined_for_plain_error_or_return_shape_error() -> None:
+
+def test_to_failure_leaves_cells_undefined_for_plain_error_or_return_shape_error() -> None:
     assert to_failure(Exception("nope"), "spec.md", 3).cells is None
-    assert to_failure(Exception("nope"), "spec.md", 3).doc is None
     assert to_failure(ReturnShapeError("bad"), "spec.md", 3).cells is None
 
 

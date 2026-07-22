@@ -1,8 +1,8 @@
 import {
   type CellDiff,
   CellMismatchError,
+  compareDocString,
   type Diagnostic,
-  DocStringMismatchError,
   type SpecBaseline,
 } from '@varar/core'
 import { steps } from '@varar/varar'
@@ -169,11 +169,10 @@ test('multiple mismatched cells diff as value lists in document order', async ()
 })
 
 test('a doc string mismatch rethrows with the full expected/actual text', async () => {
-  const e = await rethrown(
-    new DocStringMismatchError({ span, expected: 'hello\nworld\n', actual: 'hello\nthere\n' }),
-  )
-  expect(e.expected).toBe('hello\nworld\n')
-  expect(e.actual).toBe('hello\nthere\n')
+  const diff = compareDocString('hello\nthere\n', 'hello\nworld\n', span)
+  const e = await rethrown(new CellMismatchError([diff!]))
+  expect(e.expected).toBe('"hello\\nworld\\n"')
+  expect(e.actual).toBe('"hello\\nthere\\n"')
 })
 
 test('a plain error rethrows without expected/actual', async () => {

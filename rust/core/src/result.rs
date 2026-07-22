@@ -1,7 +1,7 @@
 //! Immutable run-result records — port of `result.ts` / `Result.java`. The
 //! persisted `.var/<spec>.json` file is a serialized [`SpecResults`].
 
-/// A doc-string / cell mismatch as a source-offset range plus the runtime value.
+/// One mismatched CELL as a source-offset range plus the runtime value.
 /// `from`/`to` are absolute UTF-16 source offsets; `to` is exclusive.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct CellFailure {
@@ -27,7 +27,7 @@ pub enum Status {
     Failed,
 }
 
-/// The failure payload of a failed [`ExampleResult`]. `cells`/`doc` are `None`
+/// The failure payload of a failed [`ExampleResult`]. `cells` is `None`
 /// when not applicable. `line` may be a caller-supplied fallback (`-1`).
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ExampleFailure {
@@ -35,7 +35,6 @@ pub struct ExampleFailure {
     pub message: String,
     pub stack: String,
     pub cells: Option<Vec<CellFailure>>,
-    pub doc: Option<CellFailure>,
 }
 
 /// The run result for one BDD example.

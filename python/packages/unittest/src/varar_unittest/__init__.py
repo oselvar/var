@@ -25,7 +25,6 @@ from typing import Any, Callable
 from varar_config import read_varar_config
 from varar_core.cell_diff import ReturnShapeError, is_cell_mismatch_error
 from varar_core.diagnostics import drift_detected
-from varar_core.doc_string_diff import is_doc_string_mismatch_error
 from varar_core.drift import reconcile_drift
 from varar_core.execute import is_unexpected_pass_error
 from varar_runner.baseline_store import create_file_baseline_store
@@ -140,7 +139,6 @@ def _make_drift_method(message: str) -> Callable[[Any], None]:
 def _is_var_diff_error(err: BaseException) -> bool:
     return (
         is_cell_mismatch_error(err)
-        or is_doc_string_mismatch_error(err)
         or isinstance(err, ReturnShapeError)
         or is_unexpected_pass_error(err)
     )

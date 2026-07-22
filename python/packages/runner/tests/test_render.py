@@ -1,6 +1,6 @@
 """Tests for render_failure — pure human-readable rendering of diff errors."""
 from varar_core.cell_diff import CellDiff, CellMismatchError, ReturnShapeError
-from varar_core.doc_string_diff import DocStringDiff, DocStringMismatchError
+from varar_core.doc_string_diff import compare_doc_string
 from varar_core.span import Span
 
 from varar_runner.render import render_failure
@@ -63,14 +63,14 @@ def test_cell_mismatch_multiple_failing():
 
 
 # ---------------------------------------------------------------------------
-# DocStringMismatchError
+# A doc-string cell
 # ---------------------------------------------------------------------------
 
 
-def test_doc_string_mismatch_shows_expected_actual_and_line():
-    diff = DocStringDiff(span=_span(15), expected="hello\n", actual="world\n")
-    error = DocStringMismatchError(diff)
-    result = render_failure(error, "", "doc.md")
+def test_doc_string_cell_shows_expected_actual_and_line():
+    diff = compare_doc_string("world\n", "hello\n", _span(15))
+    assert diff is not None
+    result = render_failure(CellMismatchError([diff]), "", "doc.md")
 
     assert "hello" in result
     assert "world" in result

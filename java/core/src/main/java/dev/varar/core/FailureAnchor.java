@@ -19,9 +19,6 @@ final class FailureAnchor {
             }
             return fallback;
         }
-        if (DocStringDiff.isDocStringMismatchException(error)) {
-            return ((DocStringDiff.DocStringMismatchException) error).diff().span();
-        }
         return fallback;
     }
 }

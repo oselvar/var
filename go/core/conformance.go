@@ -209,19 +209,6 @@ func ToFailureArtifact(failure *StepFailure, matchSpan Span) Value {
 			kv("message", StrValue(failure.Error.Message())),
 			kv("cells", ListOf(failing)),
 		)
-	case SEDocStringMismatch:
-		d := obj(
-			kv("expected", StrValue(failure.Error.DocDiff.Expected)),
-			kv("actual", StrValue(failure.Error.DocDiff.Actual)),
-			kv("span", spanValue(failure.Error.DocDiff.Span)),
-		)
-		return obj(
-			kv("kind", StrValue("doc-string-mismatch")),
-			kv("line", vint(line)),
-			kv("anchor", anchorVal),
-			kv("message", StrValue(failure.Error.Message())),
-			kv("diff", d),
-		)
 	case SEReturnShape:
 		return kindLineAnchorMsg("return-shape", line, anchorVal, failure.Error.Message())
 	case SEUnexpectedPass:

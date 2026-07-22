@@ -13,8 +13,6 @@ func anchor(error StepError, fallback Span) Span {
 			}
 		}
 		return fallback
-	case SEDocStringMismatch:
-		return error.DocDiff.Span
 	default:
 		return fallback
 	}

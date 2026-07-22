@@ -1,23 +1,40 @@
 namespace Varar.Core;
 
-/// <summary>A doc-string content difference: the fence body's span plus expected/actual strings.</summary>
-public sealed record DocStringDiff(Span Span, string Expected, string Actual);
-
-/// <summary>Thrown when a doc-string step's returned string differs. Port of <c>doc-string-diff.ts</c>.</summary>
-public sealed class DocStringMismatchError(DocStringDiff diff)
-    : Exception(FormatMessage(diff))
+public static class DocStringDiffs
 {
-    public DocStringDiff Diff { get; } = diff;
-
-    private static string FormatMessage(DocStringDiff diff) =>
-        $"doc string: expected {Quote(diff.Expected)} but was {Quote(diff.Actual)}";
+    /// <summary>
+    /// The column label a doc-string cell carries in a <see cref="CellDiff"/>, so its mismatch
+    /// message reads <c>doc string: expected … but was …</c>.
+    /// </summary>
+    public const string DocStringColumn = "doc string";
 
     /// <summary>
-    /// Renders <paramref name="s"/> the way <c>JSON.stringify</c> does in the TypeScript port.
-    /// Every port quotes this message identically because the text is matched by substring in an
-    /// <c>error</c> fence — a port that quotes differently fails a spec its siblings pass.
-    /// Interpolating raw would embed a literal newline instead of <c>\n</c>.
+    /// Compare a returned string against the fence body (exact, incl. trailing newline).
+    /// A doc string is ONE CELL, compared whole, so a difference is an ordinary
+    /// <see cref="CellDiff"/> and the executor throws the same <see cref="CellMismatchError"/> as
+    /// any other cell. Expected/Actual are quoted: a doc string routinely differs only in
+    /// whitespace, and bare text would render a missing trailing newline as no difference at all.
     /// </summary>
+    public static CellDiff? CompareDocString(Value? returned, string content, Span span)
+    {
+        if (returned is null)
+        {
+            return null;
+        }
+
+        if (returned is not VString s)
+        {
+            throw new ReturnShapeError($"expected a doc string (string), got {returned.TypeName}");
+        }
+
+        if (s.Str == content)
+        {
+            return null;
+        }
+
+        return new CellDiff(DocStringColumn, span, Quote(content), Quote(s.Str), false);
+    }
+
     private static string Quote(string s)
     {
         var b = new System.Text.StringBuilder(s.Length + 2);
@@ -48,29 +65,5 @@ public sealed class DocStringMismatchError(DocStringDiff diff)
         }
 
         return b.Append('"').ToString();
-    }
-}
-
-public static class DocStringDiffs
-{
-    /// <summary>Compare a returned string against the fence body (exact, incl. trailing newline).</summary>
-    public static DocStringDiff? CompareDocString(Value? returned, string content, Span span)
-    {
-        if (returned is null)
-        {
-            return null;
-        }
-
-        if (returned is not VString s)
-        {
-            throw new ReturnShapeError($"expected a doc string (string), got {returned.TypeName}");
-        }
-
-        if (s.Str == content)
-        {
-            return null;
-        }
-
-        return new DocStringDiff(span, content, s.Str);
     }
 }

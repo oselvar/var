@@ -71,9 +71,6 @@ public static class Runner
                 }
 
                 return string.Join("\n", lines);
-            case DocStringMismatchError dm:
-                return $"Doc string mismatch at line {dm.Diff.Span.StartLine}:\n" +
-                       $"  expected: \"{dm.Diff.Expected}\"\n  actual:   \"{dm.Diff.Actual}\"";
             default:
                 return error.Message;
         }

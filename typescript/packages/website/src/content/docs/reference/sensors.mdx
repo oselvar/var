@@ -557,7 +557,7 @@ last element:
 | ---------- | -------------- | --- |
 | an inline parameter | one | deep equality against the transformed captured value, so `{int}` compares numbers and a custom type compares whatever its parse function produced |
 | a whole table | one per table cell | exact string comparison, cell by cell — see [Check tables and doc strings](/how-to/tables-and-doc-strings/) |
-| a doc string | one | exact string equality of the whole block, trailing newline included |
+| a doc string | one | exact string equality of the whole block, trailing newline included; expected/actual are quoted so a whitespace-only difference stays visible |
 
 Every mismatch is a `CellMismatchError` carrying one diff per failing cell,
 anchored to that cell's span in the Markdown.
@@ -680,8 +680,7 @@ trailing period, say), match the punctuation in the expression itself —
 
 | Error                    | Raised when                                                                     |
 | ------------------------ | ------------------------------------------------------------------------------- |
-| `CellMismatchError`      | a parameter or table cell differs; carries one span-anchored diff per cell      |
-| `DocStringMismatchError` | the returned text differs from the doc string                                   |
+| `CellMismatchError`      | one or more cells differ — an inline capture, a table cell, a header-bound row's cell, or a doc string; carries one span-anchored diff per failing cell |
 | `ReturnShapeError`       | the return doesn't fit the slots: a value from a zero-slot sensor, **nothing from a sensor with slots** (or from a header-bound row step), a non-array or wrong-length array for 2+ slots, or a malformed table |
 
 Because every diff is anchored to a source span, editors highlight exactly the

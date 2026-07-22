@@ -383,7 +383,8 @@ rules.
 - A differing table cell fails with a `CellMismatchError`: each wrong cell gets
   its own `expected` / `actual`, anchored to the cell's source span — editors
   redden exactly the failing characters.
-- A differing doc string fails with a `DocStringMismatchError`.
+- A differing doc string fails with a `CellMismatchError` too: a doc string is one
+  cell, compared whole.
 - Returning a value of the wrong shape is a `ReturnShapeError`.
 - A table or doc string is itself a slot, so returning `undefined` (`None` / `null` /
   `nil`) from one of these steps is a `ReturnShapeError`, not a pass. Throw if you

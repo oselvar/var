@@ -13,7 +13,7 @@ public final class Result {
     private Result() {}
 
     /**
-     * A doc-string / cell mismatch as a source-offset range plus the runtime value. {@code from}/
+     * One mismatched CELL as a source-offset range plus the runtime value. {@code from}/
      * {@code to} are absolute source offsets (== CodeMirror positions); {@code to} is exclusive.
      */
     public record CellFailure(int from, int to, String actual) {}
@@ -33,12 +33,10 @@ public final class Result {
      * anonymous inline object type on {@code ExampleResult.failure}; Java requires a name here —
      * this follows the Python port's naming ({@code ExampleFailure} in {@code result.py}).
      *
-     * @param cells table / header-bound row mismatches; {@code null} when not applicable (TS's
-     *     optional {@code cells?}).
-     * @param doc a doc-string body mismatch (single span); {@code null} when not applicable (TS's
-     *     optional {@code doc?}).
+     * @param cells every mismatched cell — table, header-bound row, inline capture or doc
+     *     string; {@code null} when not applicable (TS's optional {@code cells?}).
      */
-    public record ExampleFailure(int line, String message, String stack, List<CellFailure> cells, CellFailure doc) {
+    public record ExampleFailure(int line, String message, String stack, List<CellFailure> cells) {
         public ExampleFailure {
             cells = cells == null ? null : List.copyOf(cells);
         }

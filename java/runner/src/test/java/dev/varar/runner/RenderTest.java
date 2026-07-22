@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import dev.varar.core.CellDiff;
-import dev.varar.core.DocStringDiff;
 import dev.varar.core.Plan;
 import dev.varar.runner.StepLoader.LoadedSteps;
 import dev.varar.runner.fixtures.BoomSteps;
@@ -61,9 +60,8 @@ class RenderTest {
         Plan.ExecutionPlan plan = Run.planSpec(path, source, loaded.registry());
 
         List<Run.ExampleRun> runs = Run.examplesWithRuns(plan, loaded.createContext(), new Run.RecordingReporter());
-        DocStringDiff.DocStringMismatchException error = assertThrows(
-                DocStringDiff.DocStringMismatchException.class,
-                () -> runs.get(0).run().run());
+        CellDiff.CellMismatchException error = assertThrows(
+                CellDiff.CellMismatchException.class, () -> runs.get(0).run().run());
 
         String rendered = Render.renderFailure(error, source, path);
 

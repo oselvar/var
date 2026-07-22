@@ -5,7 +5,6 @@ Pure function: no I/O, no side effects.
 from __future__ import annotations
 
 from varar_core.cell_diff import ReturnShapeError, is_cell_mismatch_error
-from varar_core.doc_string_diff import is_doc_string_mismatch_error
 
 
 def render_failure(error: BaseException, source: str, path: str) -> str:  # noqa: ARG001
@@ -13,7 +12,6 @@ def render_failure(error: BaseException, source: str, path: str) -> str:  # noqa
 
     Dispatches on the concrete error type:
     - CellMismatchError   → list each failing cell with column/expected/actual/line.
-    - DocStringMismatchError → expected vs actual + line.
     - ReturnShapeError    → its message.
     - Any other exception → ``TypeName: message``.
 
@@ -31,14 +29,6 @@ def render_failure(error: BaseException, source: str, path: str) -> str:  # noqa
                 f" — expected: {cell.expected!r}, actual: {cell.actual!r}"
             )
         return "\n".join(lines)
-
-    if is_doc_string_mismatch_error(error):
-        diff = error.diff  # type: ignore[union-attr]
-        return (
-            f"Doc string mismatch at line {diff.span.start_line}:\n"
-            f"  expected: {diff.expected!r}\n"
-            f"  actual:   {diff.actual!r}"
-        )
 
     if isinstance(error, ReturnShapeError):
         return str(error)

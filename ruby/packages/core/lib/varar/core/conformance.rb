@@ -195,16 +195,6 @@ module Varar
               { 'column' => c.column, 'expected' => c.expected, 'actual' => c.actual, 'span' => span_hash(c.span) }
             end
           }
-        when DocStringMismatchError
-          {
-            'kind' => 'doc-string-mismatch', 'line' => line, 'anchor' => anchor,
-            'message' => error.message,
-            'diff' => {
-              'expected' => error.diff.expected,
-              'actual' => error.diff.actual,
-              'span' => span_hash(error.diff.span)
-            }
-          }
         when ReturnShapeError
           { 'kind' => 'return-shape', 'line' => line, 'anchor' => anchor, 'message' => error.message }
         when UnexpectedPassError

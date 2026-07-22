@@ -52,14 +52,8 @@ public final class Failure {
             if (!failing.isEmpty()) cells = List.copyOf(failing);
         }
 
-        Result.CellFailure doc = null;
-        if (DocStringDiff.isDocStringMismatchException(error)) {
-            DocStringDiff diff = ((DocStringDiff.DocStringMismatchException) error).diff();
-            doc = new Result.CellFailure(diff.span().startOffset(), diff.span().endOffset(), diff.actual());
-        }
-
         Integer line = failingLine(stack, specPath);
-        return new Result.ExampleFailure(line != null ? line : fallbackLine, message, stack, cells, doc);
+        return new Result.ExampleFailure(line != null ? line : fallbackLine, message, stack, cells);
     }
 
     /** Recovers the 1-based failing line from an injected {@code "<specPath>:<line>)"} frame. */

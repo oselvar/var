@@ -21,25 +21,22 @@ class FailureTest {
                 List.of(new CellDiff("n", Span.spanFromOffsets(source, 4, 5), "5", "4", false)));
         Result.ExampleFailure f = Failure.toFailure(err, "spec.md", 3);
         assertEquals(List.of(new Result.CellFailure(4, 5, "4")), f.cells());
-        assertNull(f.doc());
         assertEquals(String.class, f.message().getClass());
         assertEquals(String.class, f.stack().getClass());
     }
 
     @Test
-    void toFailureExtractsDocFromADocStringMismatchException() {
+    void toFailureExtractsADocStringMismatchAsACell() {
         String source = "Hello!\n";
-        DocStringDiff.DocStringMismatchException err = new DocStringDiff.DocStringMismatchException(
-                new DocStringDiff(Span.spanFromOffsets(source, 0, 7), "Hello!\n", "Goodbye!\n"));
-        Result.ExampleFailure f = Failure.toFailure(err, "spec.md", 3);
-        assertEquals(new Result.CellFailure(0, 7, "Goodbye!\n"), f.doc());
-        assertNull(f.cells());
+        CellDiff diff = DocStringDiff.compareDocString("Goodbye!\n", "Hello!\n", Span.spanFromOffsets(source, 0, 7));
+        Result.ExampleFailure f =
+                Failure.toFailure(new CellDiff.CellMismatchException(java.util.List.of(diff)), "spec.md", 3);
+        assertEquals(java.util.List.of(new Result.CellFailure(0, 7, "\"Goodbye!\\n\"")), f.cells());
     }
 
     @Test
-    void toFailureLeavesCellsDocNullForAPlainExceptionOrReturnShapeException() {
+    void toFailureLeavesCellsNullForAPlainExceptionOrReturnShapeException() {
         assertNull(Failure.toFailure(new RuntimeException("nope"), "spec.md", 3).cells());
-        assertNull(Failure.toFailure(new RuntimeException("nope"), "spec.md", 3).doc());
         assertNull(Failure.toFailure(new CellDiff.ReturnShapeException("bad"), "spec.md", 3)
                 .cells());
     }

@@ -19,11 +19,5 @@ pub fn render_failure(failure: &StepFailure, _source: &str, path: &str) -> Strin
         }
         return lines.join("\n");
     }
-    if let Some(diff) = error.as_doc_string_mismatch() {
-        return format!(
-            "Doc string mismatch at line {}:\n  expected: {:?}\n  actual:   {:?}",
-            diff.span.start_line, diff.expected, diff.actual
-        );
-    }
     error.message()
 }

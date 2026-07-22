@@ -387,11 +387,11 @@ public final class Execute {
                     .toList();
             if (!bad.isEmpty()) throw new CellDiff.CellMismatchException(bad);
         } else if (step.docString() != null) {
-            DocStringDiff diff = DocStringDiff.compareDocString(
+            CellDiff diff = DocStringDiff.compareDocString(
                     slots.get(argCount),
                     step.docString().body(),
                     step.docString().bodySpan());
-            if (diff != null) throw new DocStringDiff.DocStringMismatchException(diff);
+            if (diff != null) throw new CellDiff.CellMismatchException(java.util.List.of(diff));
         }
     }
 

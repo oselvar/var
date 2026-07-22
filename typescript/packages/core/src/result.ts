@@ -1,4 +1,4 @@
-// A doc-string / cell mismatch as a source-offset range plus the runtime value.
+// One mismatched CELL as a source-offset range plus the runtime value.
 // `from`/`to` are absolute source offsets (== CodeMirror positions); `to` is
 // exclusive.
 export type CellFailure = {
@@ -16,8 +16,8 @@ export type ExampleResult = {
     readonly line: number
     readonly message: string
     readonly stack: string
-    readonly cells?: ReadonlyArray<CellFailure> // table / header-bound row mismatches
-    readonly doc?: CellFailure // doc-string body mismatch (single span)
+    // every mismatched cell: table, header-bound row, inline capture or doc string
+    readonly cells?: ReadonlyArray<CellFailure>
   }
 }
 

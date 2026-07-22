@@ -10,7 +10,7 @@ from typing import Literal
 
 @dataclass(frozen=True, slots=True)
 class CellFailure:
-    """A doc-string / cell mismatch as a source-offset range plus the runtime value.
+    """One mismatched CELL as a source-offset range plus the runtime value.
 
     ``from_`` maps to the ``from`` field in the wire format (``from`` is a Python
     keyword); ``to`` is exclusive.  Offsets are UTF-16 code units.
@@ -29,7 +29,6 @@ class ExampleFailure:
     message: str
     stack: str
     cells: tuple[CellFailure, ...] | None = None
-    doc: CellFailure | None = None
 
 
 @dataclass(frozen=True, slots=True)

@@ -3,12 +3,8 @@ from __future__ import annotations
 
 import pytest
 
-from varar_core.cell_diff import ReturnShapeError
-from varar_core.doc_string_diff import (
-    DocStringMismatchError,
-    compare_doc_string,
-    is_doc_string_mismatch_error,
-)
+from varar_core.cell_diff import CellMismatchError, ReturnShapeError
+from varar_core.doc_string_diff import DOC_STRING_COLUMN, compare_doc_string
 from varar_core.span import Span
 
 _span = Span(start_offset=0, end_offset=6, start_line=1, start_col=1, end_line=1, end_col=6)
@@ -22,24 +18,24 @@ def test_none_return_returns_none_asserted_nothing() -> None:
     assert compare_doc_string(None, "hello\n", _span) is None
 
 
-def test_different_content_returns_diff_with_span_expected_actual() -> None:
+def test_different_content_returns_a_cell_labelled_doc_string() -> None:
+    # A doc string is one cell, compared whole. expected/actual are JSON-quoted
+    # so a whitespace-only difference stays visible.
     result = compare_doc_string("bye\n", "hello\n", _span)
     assert result is not None
+    assert result.column == DOC_STRING_COLUMN
     assert result.span == _span
-    assert result.expected == "hello\n"
-    assert result.actual == "bye\n"
+    assert result.expected == '"hello\\n"'
+    assert result.actual == '"bye\\n"'
+    assert result.ok is False
+
+
+def test_a_doc_string_cell_reads_like_any_other_cell_mismatch() -> None:
+    diff = compare_doc_string("bye\n", "hello\n", _span)
+    assert diff is not None
+    assert str(CellMismatchError([diff])) == 'doc string: expected "hello\\n" but was "bye\\n"'
 
 
 def test_non_string_return_raises_return_shape_error() -> None:
     with pytest.raises(ReturnShapeError):
         compare_doc_string(42, "hello\n", _span)
-
-
-def test_doc_string_mismatch_error_carries_diff_and_is_detectable() -> None:
-    from varar_core.doc_string_diff import DocStringDiff
-
-    diff = DocStringDiff(span=_span, expected="hello\n", actual="bye\n")
-    err = DocStringMismatchError(diff)
-    assert is_doc_string_mismatch_error(err) is True
-    assert is_doc_string_mismatch_error(Exception("x")) is False
-    assert err.diff.actual == "bye\n"

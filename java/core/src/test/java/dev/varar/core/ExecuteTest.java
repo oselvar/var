@@ -492,14 +492,17 @@ class ExecuteTest {
             ```""";
 
     @Test
-    void aDocStringSensorReturningADifferentStringThrowsDocStringMismatchExceptionAtTheBodySpan() {
+    void aDocStringSensorReturningADifferentStringThrowsCellMismatchExceptionAtTheBodySpan() {
         Registry r = reg("the greeting is", "s.ts", 1, (Fn1) (state, body) -> "Goodbye!\n", StepKind.SENSOR);
         Plan.ExecutionPlan p = planOf(GREETING_DOC, r);
-        DocStringDiff.DocStringMismatchException ex = assertThrows(
-                DocStringDiff.DocStringMismatchException.class,
+        CellDiff.CellMismatchException ex = assertThrows(
+                CellDiff.CellMismatchException.class,
                 () -> Execute.collectExamples(p, silentPorts()).get(0).run().run());
-        assertEquals("Hello, world!\n", ex.diff().expected());
-        assertEquals("Goodbye!\n", ex.diff().actual());
+        CellDiff diff = ex.cells().get(0);
+        assertEquals("doc string", diff.column());
+        // Quoted, so a whitespace-only difference stays visible.
+        assertEquals("\"Hello, world!\\n\"", diff.expected());
+        assertEquals("\"Goodbye!\\n\"", diff.actual());
     }
 
     @Test

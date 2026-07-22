@@ -1,5 +1,5 @@
 import { CellMismatchError, compareRow, compareTable, ReturnShapeError } from './cell-diff.ts'
-import { compareDocString, DocStringMismatchError } from './doc-string-diff.ts'
+import { compareDocString } from './doc-string-diff.ts'
 import { failureAnchor } from './failure-anchor.ts'
 import { compareParams } from './param-diff.ts'
 import type { ExecutionPlan, PlannedStep } from './plan.ts'
@@ -186,7 +186,7 @@ export function executePlan(plan: ExecutionPlan, ports: ExecutePorts): void {
                       step.docString.content,
                       step.docString.span,
                     )
-                    if (diff) throw new DocStringMismatchError(diff)
+                    if (diff) throw new CellMismatchError([diff])
                   }
                 }
               }

@@ -132,7 +132,7 @@ public final class Conformance {
      *
      * <p>Dispatch order mirrors {@code conformance.ts} exactly: {@link
      * CellDiff.CellMismatchException} (filtered to only the failing cells) &rarr; {@link
-     * DocStringDiff.DocStringMismatchException} &rarr; {@link CellDiff.ReturnShapeException}
+     * CellDiff.CellMismatchException} &rarr; {@link CellDiff.ReturnShapeException}
      * &rarr; {@link Execute.UnexpectedPassException} &rarr; anything else falls through to
      * {@code "thrown"}, which — confirmed against real goldens ({@code
      * conformance/bundles/03-expected-failure/golden/trace.json} and {@code
@@ -154,20 +154,6 @@ public final class Conformance {
                 if (!c.ok()) cells.add(failureCell(c));
             }
             out.put("cells", cells);
-            return out;
-        }
-        if (DocStringDiff.isDocStringMismatchException(error)) {
-            DocStringDiff diff = ((DocStringDiff.DocStringMismatchException) error).diff();
-            Map<String, Object> out = new LinkedHashMap<>();
-            out.put("kind", "doc-string-mismatch");
-            out.put("line", line);
-            out.put("anchor", anchor);
-            out.put("message", error.getMessage());
-            Map<String, Object> d = new LinkedHashMap<>();
-            d.put("expected", diff.expected());
-            d.put("actual", diff.actual());
-            d.put("span", span(diff.span()));
-            out.put("diff", d);
             return out;
         }
         if (error instanceof CellDiff.ReturnShapeException)

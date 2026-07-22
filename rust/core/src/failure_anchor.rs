@@ -11,7 +11,6 @@ use crate::span::Span;
 pub(crate) fn anchor(error: &StepError, fallback: Span) -> Span {
     match error {
         StepError::CellMismatch(cells) => cells.iter().find(|c| !c.ok).map_or(fallback, |c| c.span),
-        StepError::DocStringMismatch(diff) => diff.span,
         _ => fallback,
     }
 }

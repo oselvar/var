@@ -1,6 +1,7 @@
 //! Port of `DocStringDiffTest.java` / `doc-string-diff.test.ts`.
 
-use varar_core::doc_string_diff::{DocStringDiff, compare_doc_string};
+use varar_core::cell_diff::CellDiff;
+use varar_core::doc_string_diff::{DOC_STRING_COLUMN, compare_doc_string};
 use varar_core::error::StepError;
 use varar_core::span::Span;
 use varar_core::value::Value;
@@ -25,10 +26,27 @@ fn compare_doc_string_null_return_returns_null_asserted_nothing() {
 }
 
 #[test]
-fn compare_doc_string_different_content_returns_diff_with_span_expected_actual() {
+fn compare_doc_string_different_content_returns_a_cell_labelled_doc_string() {
+    // A doc string is one cell, compared whole. expected/actual are quoted so a
+    // whitespace-only difference stays visible.
+    let diff = compare_doc_string(Some(&Value::from("bye\n")), "hello\n", SPAN)
+        .unwrap()
+        .unwrap();
+    assert_eq!(DOC_STRING_COLUMN, diff.column);
+    assert_eq!(SPAN, diff.span);
+    assert_eq!("\"hello\\n\"", diff.expected);
+    assert_eq!("\"bye\\n\"", diff.actual);
+    assert!(!diff.ok);
+}
+
+#[test]
+fn a_doc_string_cell_reads_like_any_other_cell_mismatch() {
+    let diff: CellDiff = compare_doc_string(Some(&Value::from("bye\n")), "hello\n", SPAN)
+        .unwrap()
+        .unwrap();
     assert_eq!(
-        Some(DocStringDiff::new(SPAN, "hello\n", "bye\n")),
-        compare_doc_string(Some(&Value::from("bye\n")), "hello\n", SPAN).unwrap()
+        "doc string: expected \"hello\\n\" but was \"bye\\n\"",
+        StepError::CellMismatch(vec![diff]).message()
     );
 }
 
@@ -38,16 +56,4 @@ fn compare_doc_string_a_non_string_return_throws_return_shape() {
         compare_doc_string(Some(&Value::Int(42)), "hello\n", SPAN).unwrap_err(),
         StepError::ReturnShape(_)
     ));
-}
-
-#[test]
-fn doc_string_mismatch_carries_the_diff_and_is_detectable() {
-    let err = StepError::DocStringMismatch(DocStringDiff::new(SPAN, "hello\n", "bye\n"));
-    assert!(err.as_doc_string_mismatch().is_some());
-    assert!(
-        StepError::Handler(varar_core::error::HandlerError::new("x"))
-            .as_doc_string_mismatch()
-            .is_none()
-    );
-    assert_eq!("bye\n", err.as_doc_string_mismatch().unwrap().actual);
 }
