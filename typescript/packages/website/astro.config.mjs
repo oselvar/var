@@ -87,6 +87,7 @@ export default defineConfig({
           items: [
             'how-to/tables-and-doc-strings',
             'how-to/run-with-vitest',
+            'how-to/run-existing-feature-files',
             'how-to/agent-instructions',
             'how-to/drive-a-feature-with-an-agent',
           ],
@@ -95,6 +96,7 @@ export default defineConfig({
           label: 'Reference',
           items: [
             'reference/examples',
+            'reference/configuration',
             'reference/stimuli',
             'reference/sensors',
             'reference/custom-parameters',

@@ -33,11 +33,27 @@ bound by matching phrases in the text.
 
 ## Migration
 
-Our goal is to make Varar capable of running existing `.feature` files without any change to them.
-There will be an adapter API for Cucumber step definitions so that all you need to do is to change
-`import` statements from Cucumber to Varar.
+Varar runs existing `.feature` files **unchanged**. That falls out of the model
+rather than being a compatibility layer: a file is a spec because it matches the
+configured globs, not because of its extension, and keywords are narration the
+matcher ignores — so `Feature:` and `Rule:` lines read as prose, `Given`/`When`/
+`Then` are ignored, and each scenario's contiguous step lines are one paragraph,
+which is one Varar example. Two scanner plugins teach the parser Gherkin's
+separator-less tables and `"""` doc strings.
 
-TODO: Finish the adapter implementation and test it extensively
+So a migration ports the step definitions and leaves the features alone — you
+can keep cucumber running against the same files while you do it. The steps are
+in [Run your existing `.feature` files](/how-to/run-existing-feature-files/).
+
+Two habits do not survive the move: `Background:` has no equivalent (it becomes
+its own example with its own state), and an example is named after its whole
+paragraph, which changes name-based test filtering.
+
+There is deliberately no undefined-step report. In Cucumber an unmatched step is
+an error with a generated snippet; in Varar an unmatched sentence is simply
+prose, which is what lets the document be a document. The failure that actually
+matters — a paragraph that *used* to be an example and quietly stopped being one
+— is caught by drift detection, which fails the run.
 
 ## If you loved Cucumber
 
