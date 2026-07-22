@@ -36,7 +36,7 @@ Varar.
 Within a spec, the candidate unit is a **paragraph** — or a list item, or a
 blockquote. Varar splits each candidate into sentences and matches those sentences
 against your registered [stimuli](/reference/stimuli/) and
-[sensos](/reference/sensors/).
+[sensors](/reference/sensors/).
 
 - **At least one sentence matches a step** → the paragraph is an **example**. Its
   matching sentences run as steps, in order.
@@ -229,8 +229,8 @@ failing test.
 Varar treats this transition — **was an example, now matches nothing** — as
 **drift**, and refuses to let it pass unnoticed.
 
-To recognise it, Varar records a fingerprint of each spec's source alongside its
-run results: an
+To recognise it, Varar records a fingerprint of each spec's source in a baseline
+file, **`varar.lock.json`**, at the root of your project: an
 [FNV-1a](https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function)
 hash written as `fnv1a:…`. It is a tiny, dependency-free change-detector,
 computed identically in every Varar runtime, so drift is recognised the same way
@@ -249,6 +249,37 @@ The distinction is deliberate:
 - A paragraph that **never** matched is **prose** — ignored, no ceremony.
 - A paragraph that **stops** matching is **drift** — surfaced, and held until you
   explicitly accept it.
+
+### The baseline file
+
+`varar.lock.json` is written and updated by `varar run` in the directory it runs
+in. **Commit it.** Drift detection needs history to tell intentional prose from a
+regression, and having the baseline in version control is what makes an
+acknowledgment visible in review instead of swallowed.
+
+### Accepting drift
+
+Acknowledging drift re-records the baseline, much as you accept an updated
+snapshot:
+
+| Runner | Accept drift with |
+| ------ | ----------------- |
+| `varar run` | `varar run --update`, or `VARAR_UPDATE=1` |
+| vitest | `VARAR_UPDATE=1` |
+| pytest | `--varar-update`, or `VARAR_UPDATE=1` |
+| unittest, minitest, RSpec, `go test`, `cargo test` | `VARAR_UPDATE=1` |
+| JUnit, Kotest | `-Dvarar.update=true`, or `VARAR_UPDATE=1` |
+
+`VARAR_UPDATE` accepts `1` or `true`.
+
+Every runner records the baseline on a clean run, with one exception: the
+**vitest plugin only reads it**. Under vitest, `VARAR_UPDATE=1` lets the run go
+green but does not re-record — run `varar run --update` to write the new
+baseline, then commit it. Editors can also accept a single drifted example — see
+[Accept as prose](/reference/editor-support/).
+
+An unacknowledged drift never rewrites the baseline: the old entry stays, so the
+run keeps failing until you accept it or restore the step.
 
 ### Why it's important
 

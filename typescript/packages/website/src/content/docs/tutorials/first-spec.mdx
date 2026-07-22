@@ -49,7 +49,8 @@ This tutorial continues in the project you set up in
    - **`steps`** declares the state each example starts from — a fresh
      `{ result: 0 }` every run, so examples never leak into each other.
    - The **`stimulus`** drives the software. It matches `` expression `1+1` `` in
-     the prose, computes, and returns a patch to the state.
+     the prose, computes, and returns the next state — the value it returns *is*
+     the new state, replacing the old one rather than being merged into it.
    - The **`sensor`** is the read-only observation. It returns what the software
      actually produced — `state.result` — and Varar compares that against the `2`
      written in the Markdown. You never write an assertion; the document *is* the
@@ -88,9 +89,9 @@ This tutorial continues in the project you set up in
 ## What you just learned
 
 - A spec is prose with concrete values; no keywords, no special file format.
-- Steps come in roles chosen by what they *do*: an **action** stimulates the
-  system, a **sensor** observes it. (There's also **context**, for setting up
-  the starting state — you'll meet it in bigger specs.)
+- Steps come in exactly two roles, chosen by what they *do*: a **stimulus**
+  drives the system, a **sensor** observes it. Setting up the starting state is
+  a stimulus too — there is no separate role for it.
 - A sensor *returns* the observed value instead of asserting; Varar does the
   comparison and anchors failures to the document.
 

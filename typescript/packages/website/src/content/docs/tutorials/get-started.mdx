@@ -112,7 +112,7 @@ Every command and code sample below follows that choice.
      </TabItem>
      <TabItem label="Python">
        ```python
-       from var import steps
+       from varar import steps
 
        param, stimulus, sensor = steps()
 
@@ -133,15 +133,10 @@ Every command and code sample below follows that choice.
      </TabItem>
      <TabItem label="Rust">
        ```rust
-       use var::{Handler, Steps, Value};
+       use varar::Steps;
 
-       pub fn register(s: &mut Steps) {
-           s.sensor(
-               "life, the universe and everything is {int}",
-               file!(),
-               line!() as usize,
-               Handler::sync1(|_state, _answer| Ok(Some(Value::Int(42)))),
-           );
+       pub fn register(s: &mut Steps<()>) {
+           s.sensor("life, the universe and everything is {int}", |_ctx: (), _answer: i64| Ok(42));
        }
        ```
      </TabItem>

@@ -22,7 +22,7 @@ bound by matching phrases in the text.
 
 | Cucumber | Varar |
 | --- | --- |
-| `.feature` files in Gherkin | Plain Markdown. No new dialect — a file is a spec iff it matches the globs in `var.config.ts`. |
+| `.feature` files in Gherkin | Plain Markdown. No new dialect — a file is a spec iff it matches the globs in `varar.config.json`. |
 | `Given` / `When` / `Then` step types | Two roles — `stimulus` and `sensor` — chosen by what a step *does*, not by a keyword. Keywords in prose are narration for the reader; they're never matched. |
 | Assertions inside step bodies | Steps *return* what the software did; Varar compares it against what the document claims, and failures are anchored to the exact span in the source. |
 | `DataTable` and doc-string APIs | Native Markdown tables and fenced code blocks, checked by [return-based comparison](/how-to/tables-and-doc-strings/). |
