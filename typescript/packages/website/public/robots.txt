@@ -1,0 +1,36 @@
+# Varar docs are public and meant to be read by machines as well as people.
+# Everything here is fair game to crawl, index, and feed to an LLM.
+#
+# NOTE: this file is advisory. It does not override Cloudflare bot enforcement
+# (Bot Fight Mode / "Block AI bots"). If an agent is getting a 403, fix that in
+# the Cloudflare dashboard — see doc/agent-friendly-docs.md.
+
+User-agent: *
+Allow: /
+
+# AI assistants and their crawlers are explicitly welcome. Claude-User is the
+# user-initiated fetcher (a person asked Claude about a page); ClaudeBot is the
+# training crawler. Both are allowed.
+User-agent: Claude-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+# Machine-readable digests of the whole documentation set:
+#   https://varar.dev/llms.txt        (curated index)
+#   https://varar.dev/llms-full.txt   (every page as one Markdown file)
+
+Sitemap: https://varar.dev/sitemap-index.xml

@@ -1,9 +1,11 @@
 // @ts-check
 
 import { fileURLToPath } from 'node:url'
+import sitemap from '@astrojs/sitemap'
 import starlight from '@astrojs/starlight'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'astro/config'
+import starlightLlmsTxt from 'starlight-llms-txt'
 import languages from '../../../languages.json' with { type: 'json' }
 
 // The repo root: pages ?raw-import the language-neutral example specs from
@@ -43,9 +45,27 @@ export default defineConfig({
   site: 'https://varar.dev',
   integrations: [
     restorePrefs(),
+    sitemap(),
     starlight({
       title: 'Varar',
       tableOfContents: true,
+      plugins: [
+        // Generate /llms.txt (a curated index) and /llms-full.txt (every doc
+        // page concatenated as clean Markdown) at build time. Agents are a
+        // first-class audience for these docs; this gives them a single URL to
+        // fetch the whole corpus instead of scraping rendered HTML.
+        starlightLlmsTxt({
+          projectName: 'Varar',
+          description:
+            'Varar turns Markdown documents into executable tests: the prose IS ' +
+            'the source of truth. Steps are matched to two role functions — ' +
+            'stimulus (arrange/act) and sensor (assert) — never to Given/When/Then ' +
+            'keywords. A sensor returns a value and the pure core compares it ' +
+            'against what the Markdown says, failing with span-anchored diffs. ' +
+            'One language-neutral spec corpus runs across every port (TypeScript, ' +
+            'Python, Java, Kotlin, Ruby, Rust, .NET, Go) via test-framework adapters.',
+        }),
+      ],
       customCss: [
         './src/styles/tailwind.css',
         './src/styles/custom.css',
