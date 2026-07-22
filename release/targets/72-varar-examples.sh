@@ -128,6 +128,27 @@ perl -0pi -e 's|<!-- On trunk this is the SNAPSHOT that `mvn install` \(run from
 # Pin the TypeScript sample to the released npm packages.
 perl -pi -e "s/\"workspace:\\*\"/\"^$VERSION\"/g" "$DEST"/typescript-vitest/package.json
 
+# The sample needs its own pnpm-workspace.yaml, written here rather than synced:
+# the monorepo's copy is excluded above because it carries plumbing that would
+# actively harm a cloner (verifyDepsBeforeRun: false), while a published sample
+# still needs the build-script allowlist. pnpm 10+ blocks dependency install
+# scripts until they are allowlisted and FAILS the install — `pnpm install`
+# exits 1 with ERR_PNPM_IGNORED_BUILDS, in CI as much as interactively. The two
+# tree-sitter grammars come in transitively through @varar/vitest and compile a
+# native parser in a postinstall script.
+#
+# The setting only works here: pnpm 11 reads it from pnpm-workspace.yaml alone —
+# neither `pnpm.onlyBuiltDependencies` nor `pnpm.allowBuilds` in package.json is
+# honoured any more (both verified against pnpm 11.15.0).
+cat > "$DEST"/typescript-vitest/pnpm-workspace.yaml <<'PNPM_WORKSPACE'
+# Dependencies allowed to run install scripts. pnpm blocks them by default as a
+# supply-chain measure; these two tree-sitter grammars each compile a native
+# parser, which is the whole point of the package.
+allowBuilds:
+  tree-sitter-javascript: true
+  tree-sitter-typescript: true
+PNPM_WORKSPACE
+
 # Pin the Python samples to the released PyPI version: delete the
 # [tool.uv.sources] path-source table (with its comment block) and pin the
 # adapter dependency. Never rewrite to git sources: the samples exist to show
