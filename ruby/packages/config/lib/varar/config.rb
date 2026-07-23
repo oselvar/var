@@ -7,7 +7,7 @@ module Varar
   # file → empty config; malformed JSON, wrong types, or unknown keys → an
   # error starting with the file path. See conformance/config/README.md.
   module Config
-    VERSION = '0.6.1'
+    VERSION = '0.7.0'
 
     # The parsed config. All fields default to empty.
     VarConfig = Data.define(:docs_include, :docs_exclude, :steps, :snippets) do

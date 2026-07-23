@@ -21,4 +21,4 @@ export {
 export type { ParameterTypeDef, Position, Range, StepDef } from './step-defs.ts'
 export { renderTemplate } from './template.ts'
 export { createTreeSitterScanner, languageIdForPath } from './tree-sitter-scanner.ts'
-export const VERSION = '0.0.0'
+export const VERSION = '0.7.0'

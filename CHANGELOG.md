@@ -9,6 +9,111 @@ This file is generated from conventional commit messages by
 [git-cliff](https://git-cliff.org) — do not edit it by hand. It is written at
 release time by `make prepare`; preview the next release with `make changelog`.
 
+## [0.7.0] - 2026-07-23
+
+### TypeScript (npm)
+
+- ⚠️ **Breaking:** Stimulus handlers are typed to return the complete next state, not a partial
+  A stimulus handler's return type is now `C | void` instead of
+`Partial<C> | void`. The runtime always REPLACED state with what the handler
+returned — there was never a merge — so `Partial<C>` type-checked the one thing
+the semantics forbid: a return that omits a field silently dropped it while
+every later step kept the full `C` type. Returns that were partial now fail to
+type-check; spread the current state to keep the rest, e.g.
+`(state) => ({ ...state, count: 1 })`.
+- ⚠️ **Breaking:** **var-vitest:** Exported names are Varar-prefixed
+  @varar/vitest's exports are renamed to match the product name:
+VarResultsReporter → VararResultsReporter, VarResultsReporterOptions →
+VararResultsReporterOptions, VarVitestPluginOptions → VararVitestPluginOptions,
+varVitestPlugin → vararVitestPlugin (the default export, so `import
+vararPlugin from '@varar/vitest'` needs no change), collectVarExamples →
+collectVararExamples, varTestBody → vararTestBody, isVarSpecId → isVararSpecId.
+The old names are gone. `CollectPorts` keeps its name — it carries no product
+prefix and is parallel to the same type in the other ports.
+- Added: **var-cli:** Varar init makes the project ESM so the scaffolded steps file loads
+- Added: **var-cli:** Varar run explains the two reasons Node refuses a step file
+- Fixed: Commit the generated pnpm-workspace.yaml in the synced sample
+- Fixed: Published packages report their real version in VERSION, not 0.0.0
+
+### Ruby (RubyGems)
+
+- Fixed: Describe the gems as Varar, not Vár
+
+### C# / .NET (NuGet)
+
+- Added: Ship the C# sample in varar-examples
+
+### VS Code extension (Marketplace & Open VSX)
+
+- Fixed: Highlight only the captured value of a step parameter, not its surrounding notation
+
+### Specification (all ports)
+
+- ⚠️ **Breaking:** Steps receive the state your factory made, never frozen or retyped
+  State is no longer deep-frozen at runtime, and TypeScript
+handlers receive `C` instead of `DeepReadonly<C>`. Mutating state no longer
+throws at runtime nor fails to type-check — declare your own state type
+`readonly` if you want the compiler to stop you (in Java and Kotlin the
+record/data class already does). Evolution is still meant to happen by
+returning the next state; the relaxation is what lets state hold live objects
+such as a DB client or a page object, which freezing broke and a mapped
+readonly type made unassignable to its own declared type.
+- ⚠️ **Breaking:** Drift is accepted with VARAR_UPDATE, not VAR_UPDATE
+  The environment variable that accepts drift is now
+VARAR_UPDATE in every adapter (vitest, the varar CLI, pytest, unittest,
+minitest, rspec, junit, kotest, gotest and cargotest); VAR_UPDATE is no longer
+recognized. pytest's flag is now --varar-update and the JUnit/Kotest system
+property is now varar.update. Set VARAR_UPDATE=1 (or true) where you set
+VAR_UPDATE=1 before.
+- ⚠️ **Breaking:** A sensor with slots that returns nothing now fails instead of silently passing
+  A sensor whose expression has parameters — or a trailing data
+table or doc string — must return one value per slot. Returning
+undefined/None/null/nil previously skipped the comparison entirely and the
+example went green, so a typo in a property access turned an assertion into a
+no-op while the document went on claiming something nobody checked. It is now a
+ReturnShapeError ("a sensor with N slot(s) must return one value per slot, got
+nothing"), in every port. The same applies to a header-bound row step, which
+must return its row object.
+
+Zero-slot sensors are unchanged: they must return nothing, and throwing is still
+how they fail. Throwing remains a valid way to fail at any slot count — what is
+no longer allowed is answering nothing at all when the document asked a
+question. Where a greedy {word} capture made the slot awkward to echo back, the
+fix is to match the punctuation in the expression ("The result is {word}.") so
+the slot holds just the value being compared.
+
+Rust drops the `Asserted` IntoSensor impls, which existed only to opt a slotted
+sensor out of the comparison: the type system now rejects at compile time what
+the other ports reject at run time.
+- ⚠️ **Breaking:** A doc-string mismatch is a cell mismatch
+  A doc string is one cell, compared whole, so it no longer has
+an error of its own. DocStringMismatchError / DocStringDiff (and the
+isDocStringMismatchError guard) are gone from every port; a differing doc string
+now throws CellMismatchError carrying a single CellDiff whose column is
+"doc string". The run-result payload drops its `doc` field — a doc-string
+failure appears in `cells` like any other. Conformance traces lose the
+`doc-string-mismatch` failure kind; it is `cell-mismatch` now.
+
+The message is unchanged: expected/actual stay quoted, so a doc string that
+differs only by a trailing newline still shows a visible difference where a bare
+cell would render none.
+- ⚠️ **Breaking:** An inline cell is labelled "cell N", not "arg N"
+  A mismatched value captured from a paragraph is now labelled
+`cell 1`, `cell 2`, … instead of `arg 1`, `arg 2`. It shows up in the message
+(`CellMismatchError: cell 1: expected £2.55 but was £2.60`), in CellDiff.column,
+and in the conformance trace. "arg" named the handler's parameter; what differs
+is a cell in the document.
+- ⚠️ **Breaking:** An example runs until a heading, ---, or a non-matching paragraph (#65)
+  Two step-only examples separated by only a blank line now run
+as a single shared-state example — separate them with a `---` or a heading, and
+keep prose out of the middle of an example (a non-matching paragraph between
+steps ends the example). Additionally, Varar no longer runs Gherkin `.feature`
+files and the `scannerPlugins` config key has been removed (it is now an
+unknown-key error). Migrate `.feature` suites by translating them to Markdown
+specs and porting the step definitions.
+- Added: Add built-in {emph} parameter type for Markdown emphasis
+- Fixed: Sensor return errors name slots and cells consistently
+
 ## [0.6.1] - 2026-07-22
 
 ### Java & Kotlin (Maven Central)

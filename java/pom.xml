@@ -6,7 +6,7 @@
 
   <groupId>dev.varar</groupId>
   <artifactId>parent</artifactId>
-  <version>0.6.2-SNAPSHOT</version>
+  <version>0.7.0</version>
   <packaging>pom</packaging>
 
   <name>var (Java port) — parent</name>

@@ -1,10 +1,10 @@
 [project]
 name = "pytest-varar"
-version = "0.6.1"
+version = "0.7.0"
 description = "pytest plugin for Markdown-native BDD"
 requires-python = ">=3.11"
 license = "MIT"
-dependencies = ["varar==0.6.1", "varar-config==0.6.1", "varar-core==0.6.1", "varar-runner==0.6.1", "pytest>=8"]
+dependencies = ["varar==0.7.0", "varar-config==0.7.0", "varar-core==0.7.0", "varar-runner==0.7.0", "pytest>=8"]
 
 [project.entry-points.pytest11]
 var = "varar_pytest.plugin"

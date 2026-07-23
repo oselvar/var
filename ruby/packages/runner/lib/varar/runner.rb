@@ -9,7 +9,7 @@ module Varar
   # rendering, and the filesystem drift baseline store. Depends on the facade
   # and config; never on a test framework. Port of var-runner.
   module Runner
-    VERSION = '0.6.1'
+    VERSION = '0.7.0'
   end
 end
 

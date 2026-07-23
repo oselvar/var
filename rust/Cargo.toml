@@ -7,7 +7,7 @@ members = ["core", "varar", "config", "runner", "cargotest"]
 # to accept a publish, so each crate supplies its own `description` and
 # inherits the rest from here with `<field>.workspace = true`.
 [workspace.package]
-version = "0.6.1"
+version = "0.7.0"
 edition = "2024"
 license = "MIT"
 authors = ["Aslak Hellesøy"]
@@ -22,6 +22,6 @@ categories = ["development-tools::testing"]
 # the path. Declaring them here means release/stamp.sh rewrites one version per
 # crate instead of hunting through every dependent's manifest.
 [workspace.dependencies]
-varar-core = { path = "core", version = "0.6.1" }
-varar-config = { path = "config", version = "0.6.1" }
-varar-runner = { path = "runner", version = "0.6.1" }
+varar-core = { path = "core", version = "0.7.0" }
+varar-config = { path = "config", version = "0.7.0" }
+varar-runner = { path = "runner", version = "0.7.0" }
