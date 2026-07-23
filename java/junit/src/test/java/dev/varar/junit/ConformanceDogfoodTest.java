@@ -107,11 +107,11 @@ class ConformanceDogfoodTest {
                         new BundleCase("03-expected-failure", "dev.varar.conformance.bundle03.DivisionSteps", 1, 0),
                         // 04-tables-and-docstrings/golden/trace.json: one example, "pass".
                         new BundleCase("04-tables-and-docstrings", "dev.varar.conformance.bundle04.EchoSteps", 1, 0),
-                        // 05-ambiguous-match/golden/trace.json: one example, outcome "pass" with
-                        // zero steps -- the plan stage drops the ambiguous sentence's binding
-                        // (an "ambiguous-match" diagnostic, golden/plan.json) but still produces
-                        // one example with no steps to run, which vacuously passes.
-                        new BundleCase("05-ambiguous-match", "dev.varar.conformance.bundle05.CukesSteps", 1, 0),
+                        // 05-ambiguous-match/golden/trace.json: no examples (ADR 0012) -- the
+                        // plan stage emits an "ambiguous-match" diagnostic (golden/plan.json) and,
+                        // since the ambiguous sentence has no runnable step, treats the paragraph
+                        // as prose (a delimiter), producing no example to run at all.
+                        new BundleCase("05-ambiguous-match", "dev.varar.conformance.bundle05.CukesSteps", 0, 0),
                         // 06-doc-string-mismatch/golden/trace.json: one example, outcome "fail"
                         // -- a genuine doc-string mismatch, no error fence involved.
                         new BundleCase("06-doc-string-mismatch", "dev.varar.conformance.bundle06.EchoSteps", 0, 1),

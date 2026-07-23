@@ -4,7 +4,6 @@ import {
   driftDiagnostics,
   isCellMismatchError,
   type Reporter,
-  resolveScannerPlugins,
   type SpecBaseline,
   toFailure,
 } from '@varar/core'
@@ -18,12 +17,6 @@ export type CollectPorts = {
   // static AST test discovery on the transformed spec never see a phantom
   // `test(...)` callsite — only the real per-example ones.
   readonly reporter?: Reporter
-  // Opt-in scanner-plugin NAMES (e.g. 'gherkinTables') that the var-vitest
-  // plugin forwards from varar.config.json. Resolved here against var-core's
-  // registry: the generated virtual module resolves in the CONSUMER's
-  // project, where pnpm's strict layout only sees direct dependencies — so
-  // it may import @varar/vitest but never @varar/core.
-  readonly scannerPlugins?: ReadonlyArray<string>
   // The number of examples the build-time static plan produced. When the
   // runtime plan disagrees (a step definition the static scanner could not
   // see appeared or vanished), a failing guard test is registered instead of
@@ -61,12 +54,7 @@ export function collectVararExamples(
       }),
   }
   const registry = buildRegistry()
-  const p = planSpec(
-    path,
-    source,
-    registry,
-    ports.scannerPlugins && resolveScannerPlugins(ports.scannerPlugins),
-  )
+  const p = planSpec(path, source, registry)
   // Read-only drift gate: a paragraph the baseline recorded as an example that
   // now matches no step surfaces as a drift diagnostic (a failing test) unless
   // VARAR_UPDATE is set (then re-record via `varar run --update`).

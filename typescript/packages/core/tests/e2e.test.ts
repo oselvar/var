@@ -55,11 +55,13 @@ When I send the payload:
 
   const result = plan(parse('e.md', source), r)
   expect(result.diagnostics).toHaveLength(0)
-  // 3 paragraphs across 2 headings → 3 examples:
+  // 3 paragraphs across 2 headings → 2 examples (ADR 0012):
   //   1. "Withdrawing cash" scope, one paragraph with all 3 banking steps
-  //   2. "Importing users" scope, "these users exist" paragraph + attached table
-  //   3. "Importing users" scope, "send the payload" paragraph + attached fence
-  expect(result.examples).toHaveLength(3)
+  //   2. "Importing users" scope — "these users exist" + table and "send the
+  //      payload" + fence are consecutive matching paragraphs with no delimiter
+  //      between them, so they merge into ONE example (a Given→table→When→fence
+  //      flow sharing one state — the multi-table shape issue #61 asked for).
+  expect(result.examples).toHaveLength(2)
 
   const withdraw = result.examples[0]
   expect(withdraw?.scopeStack).toEqual(['Withdrawing cash'])
@@ -69,13 +71,9 @@ When I send the payload:
     'I should have 60 left',
   ])
 
-  const users = result.examples[1]
-  expect(users?.scopeStack).toEqual(['Importing users'])
-  expect(users?.steps).toHaveLength(1)
-  expect(users?.steps[0]?.dataTable?.rows).toHaveLength(2)
-
-  const payload = result.examples[2]
-  expect(payload?.scopeStack).toEqual(['Importing users'])
-  expect(payload?.steps).toHaveLength(1)
-  expect(payload?.steps[0]?.docString?.contentType).toBe('json')
+  const importing = result.examples[1]
+  expect(importing?.scopeStack).toEqual(['Importing users'])
+  expect(importing?.steps.map((s) => s.text)).toEqual(['these users exist', 'I send the payload'])
+  expect(importing?.steps[0]?.dataTable?.rows).toHaveLength(2)
+  expect(importing?.steps[1]?.docString?.contentType).toBe('json')
 })

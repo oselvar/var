@@ -21,6 +21,7 @@
           "text": "An `error` fence asserts the example fails. When every step passes instead, the\nfence itself is the failure — otherwise a spec could silently stop testing what\nit claims to."
         }
       ],
+      "precededByDelimiter": true,
       "scopeStack": [
         "Unexpected pass"
       ],
@@ -75,6 +76,7 @@
           }
         }
       ],
+      "precededByDelimiter": true,
       "scopeStack": [
         "Unexpected pass",
         "An example expected to fail, that passes, is a failure"

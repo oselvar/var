@@ -79,6 +79,12 @@ export type Example = {
   // appended by the structurer so the planner can attach them to the last
   // matched step.
   readonly body: ReadonlyArray<Block>
+  // True when a heading or thematic break (`---`) sits between this candidate
+  // and the previous one — i.e. a syntactic delimiter separates them (also true
+  // for the first candidate). The planner uses it to decide grouping: a matching
+  // candidate with this false merges into the open example rather than starting
+  // a new one. See ADR 0012.
+  readonly precededByDelimiter: boolean
 }
 
 export type VarDoc = {

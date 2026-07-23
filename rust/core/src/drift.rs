@@ -55,14 +55,22 @@ pub trait BaselineStore {
 
 static TOKEN_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"[\p{L}\p{N}]+").unwrap());
 
-fn within(inner: Span, outer: Span) -> bool {
-    inner.start_offset >= outer.start_offset && inner.end_offset <= outer.end_offset
+// Do the two spans overlap at all (offset ranges intersect)? A candidate
+// paragraph relates to its planned example either way round: a header-bound row
+// sits *inside* its binding paragraph, while a merged example's span *covers*
+// each of the candidates it absorbed (ADR 0012). Overlap catches both.
+fn overlaps(a: Span, b: Span) -> bool {
+    a.start_offset < b.end_offset && b.start_offset < a.end_offset
 }
 
+// A candidate paragraph is "live" (still an example) if it overlaps at least one
+// planned example. A now-prose paragraph — one whose step def was renamed or
+// deleted — overlaps none (it became a delimiter, splitting any example it was
+// part of), so drift catches it.
 fn is_live(candidate_span: Span, plan: &ExecutionPlan) -> bool {
     plan.examples
         .iter()
-        .any(|pe| within(pe.span, candidate_span))
+        .any(|pe| overlaps(pe.span, candidate_span))
 }
 
 fn tokenize(text: &str) -> HashSet<String> {

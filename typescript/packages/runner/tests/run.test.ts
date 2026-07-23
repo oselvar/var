@@ -51,16 +51,10 @@ test('planSpec returns an ExecutionPlan with examples and steps', () => {
   ])
 })
 
-test('planSpec uses an empty scannerPlugins array when not provided', () => {
+test('planSpec parses and plans a spec', () => {
   const source = '# Simple\n\nI have 5 cucumbers.\n'
   const result = planSpec('spec.md', source, makeRegistry())
   expect(result.varDoc.source).toBe(source)
-})
-
-test('planSpec accepts explicit scannerPlugins', () => {
-  const source = '# Simple\n\nI have 5 cucumbers.\n'
-  // Pass an empty plugins array explicitly — should behave identically.
-  const result = planSpec('spec.md', source, makeRegistry(), [])
   expect(result.examples).toHaveLength(1)
 })
 

@@ -1,6 +1,0 @@
-{
-  "$schema": "../../../conformance/config/varar.config.schema.json",
-  "docs": { "include": ["features/**/*.feature"], "exclude": [] },
-  "steps": ["steps/**/*.steps.ts"],
-  "scannerPlugins": ["gherkinTables", "gherkinDocStrings"]
-}

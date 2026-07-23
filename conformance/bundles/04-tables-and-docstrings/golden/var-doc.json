@@ -42,6 +42,7 @@
           }
         }
       ],
+      "precededByDelimiter": true,
       "scopeStack": [
         "Echo",
         "It echoes the doc string"

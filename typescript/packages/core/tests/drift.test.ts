@@ -306,3 +306,48 @@ test('parseVarLock rejects malformed input', () => {
   expect(parseVarLock('{"version":2,"specs":{}}')).toBeNull() // wrong version
   expect(parseVarLock('{"version":1,"specs":{"a.md":{"examples":[]}}}')).toBeNull() // no sourceHash
 })
+
+// ---- Merged examples keep per-paragraph drift granularity (ADR 0012) -------
+
+function depositWithdrawReg(withDeposit = true): Registry {
+  let r = createRegistry()
+  if (withDeposit) {
+    r = addStep(r, {
+      expression: 'I deposit {int}',
+      expressionSourceFile: 'steps.ts',
+      expressionSourceLine: 1,
+      kind: 'stimulus',
+      handler: () => {},
+    })
+  }
+  r = addStep(r, {
+    expression: 'I withdraw {int}',
+    expressionSourceFile: 'steps.ts',
+    expressionSourceLine: 2,
+    kind: 'stimulus',
+    handler: () => {},
+  })
+  return r
+}
+
+test('two paragraphs that merge into one example are each recorded as a live baseline entry', () => {
+  const source = 'I deposit 100.\n\nI withdraw 40.'
+  const varDoc = parse('w.md', source)
+  const plan1 = plan(varDoc, depositWithdrawReg())
+  // One planned example (the two paragraphs merged), but two live entries.
+  expect(plan1.examples).toHaveLength(1)
+  expect(liveExamples(varDoc, plan1)).toEqual([
+    { name: 'I deposit 100', line: 1 },
+    { name: 'I withdraw 40', line: 3 },
+  ])
+})
+
+test('deleting one step def of a merged example drifts only the now-prose paragraph', () => {
+  const source = 'I deposit 100.\n\nI withdraw 40.'
+  const varDoc = parse('w.md', source)
+  const baseline = deriveSpecBaseline(source, varDoc, plan(varDoc, depositWithdrawReg(true)))
+  // The deposit step is gone: its paragraph becomes prose, splitting the
+  // example. The withdraw paragraph is still live; the deposit one drifts.
+  const drift = detectDrift(baseline, varDoc, plan(varDoc, depositWithdrawReg(false)))
+  expect(bare(drift)).toEqual([{ name: 'I deposit 100', line: 1 }])
+})

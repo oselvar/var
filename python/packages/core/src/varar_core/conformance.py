@@ -172,6 +172,7 @@ def _example(ex: Example) -> dict[str, Any]:
         "scopeStack": list(ex.scope_stack),
         "span": _span(ex.span),  # type: ignore[arg-type]
         "body": [_block(b) for b in ex.body],
+        "precededByDelimiter": ex.preceded_by_delimiter,
     }
 
 

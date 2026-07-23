@@ -12,15 +12,13 @@ def test_reads_all_keys(tmp_path):
     root = _write(
         tmp_path,
         '{"docs": {"include": ["a/**/*.md"], "exclude": ["a/wip/**"]},'
-        ' "steps": ["**/*_steps.py"], "snippets": {"python": "P"},'
-        ' "scannerPlugins": ["gherkinTables"]}',
+        ' "steps": ["**/*_steps.py"], "snippets": {"python": "P"}}',
     )
     cfg = read_varar_config(root)
     assert cfg.docs_include == ("a/**/*.md",)
     assert cfg.docs_exclude == ("a/wip/**",)
     assert cfg.steps == ("**/*_steps.py",)
     assert cfg.snippets == {"python": "P"}
-    assert cfg.scanner_plugins == ("gherkinTables",)
 
 
 def test_missing_file_is_empty_config(tmp_path):

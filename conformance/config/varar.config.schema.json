@@ -18,7 +18,6 @@
     "snippets": {
       "type": "object",
       "additionalProperties": { "type": "string" }
-    },
-    "scannerPlugins": { "type": "array", "items": { "type": "string" } }
+    }
   }
 }

@@ -512,5 +512,6 @@ func exampleValue(e Example) Value {
 		kv("scopeStack", ListOf(scope)),
 		kv("span", spanValue(e.Span)),
 		kv("body", ListOf(body)),
+		kv("precededByDelimiter", BoolValue(e.PrecededByDelimiter)),
 	)
 }

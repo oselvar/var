@@ -17,7 +17,7 @@ fn list(strings: &[String]) -> Value {
     Value::List(strings.iter().map(|s| Value::from(s.as_str())).collect())
 }
 
-/// Project to `{ docs: { include, exclude }, steps, snippets, scannerPlugins }`.
+/// Project to `{ docs: { include, exclude }, steps, snippets }`.
 fn artifact(config: &VarConfig) -> Value {
     let docs = Value::map(vec![
         ("include".to_string(), list(&config.docs_include)),
@@ -33,7 +33,6 @@ fn artifact(config: &VarConfig) -> Value {
         ("docs".to_string(), docs),
         ("steps".to_string(), list(&config.steps)),
         ("snippets".to_string(), snippets),
-        ("scannerPlugins".to_string(), list(&config.scanner_plugins)),
     ])
 }
 

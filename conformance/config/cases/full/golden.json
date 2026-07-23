@@ -8,10 +8,6 @@
       "docs/**/*.md"
     ]
   },
-  "scannerPlugins": [
-    "gherkinTables",
-    "gherkinDocStrings"
-  ],
   "snippets": {
     "python": "# {{expression}}",
     "typescript": "// {{expression}}"

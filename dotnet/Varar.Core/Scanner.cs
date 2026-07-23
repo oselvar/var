@@ -4,8 +4,8 @@ using System.Text.RegularExpressions;
 namespace Varar.Core;
 
 /// <summary>
-/// The line-based Markdown block scanner. Port of <c>scanner.ts</c>. Plugins are tried at each
-/// non-blank line before the built-in rules; the built-ins fall through to a paragraph.
+/// The line-based Markdown block scanner. Port of <c>scanner.ts</c>. Built-in rules are tried at
+/// each non-blank line; the built-ins fall through to a paragraph.
 /// </summary>
 public static partial class Scanner
 {
@@ -36,9 +36,8 @@ public static partial class Scanner
     [GeneratedRegex(@"^#{1,6}\s+")]
     private static partial Regex HeadingStartRe();
 
-    public static ImmutableArray<Block> Scan(string source, IReadOnlyList<IScannerPlugin>? plugins = null)
+    public static ImmutableArray<Block> Scan(string source)
     {
-        plugins ??= [];
         var blocks = ImmutableArray.CreateBuilder<Block>();
         var lines = SplitLines(source);
 
@@ -49,14 +48,6 @@ public static partial class Scanner
             if (string.IsNullOrWhiteSpace(line.Text))
             {
                 i++;
-                continue;
-            }
-
-            var matched = RunPlugins(source, lines, i, plugins);
-            if (matched is not null)
-            {
-                blocks.Add(matched.Block);
-                i = matched.Next;
                 continue;
             }
 
@@ -108,30 +99,12 @@ public static partial class Scanner
                 continue;
             }
 
-            var (paragraph, next) = ConsumeParagraph(source, lines, i, plugins);
+            var (paragraph, next) = ConsumeParagraph(source, lines, i);
             blocks.Add(paragraph);
             i = next;
         }
 
         return blocks.ToImmutable();
-    }
-
-    private static PluginMatch? RunPlugins(
-        string source,
-        IReadOnlyList<RawLine> lines,
-        int startIdx,
-        IReadOnlyList<IScannerPlugin> plugins)
-    {
-        foreach (var p in plugins)
-        {
-            var r = p.TryScan(source, lines, startIdx);
-            if (r is not null)
-            {
-                return r;
-            }
-        }
-
-        return null;
     }
 
     private static List<RawLine> SplitLines(string source)
@@ -259,15 +232,13 @@ public static partial class Scanner
     private static (Block Paragraph, int Next) ConsumeParagraph(
         string source,
         IReadOnlyList<RawLine> lines,
-        int startIdx,
-        IReadOnlyList<IScannerPlugin> plugins)
+        int startIdx)
     {
         var first = lines[startIdx];
         int endIdx = startIdx;
         while (endIdx + 1 < lines.Count)
         {
-            int candidateIdx = endIdx + 1;
-            var candidate = lines[candidateIdx];
+            var candidate = lines[endIdx + 1];
             if (string.IsNullOrWhiteSpace(candidate.Text))
             {
                 break;
@@ -304,11 +275,6 @@ public static partial class Scanner
             }
 
             if (ThematicRe().IsMatch(candidate.Text))
-            {
-                break;
-            }
-
-            if (RunPlugins(source, lines, candidateIdx, plugins) is not null)
             {
                 break;
             }

@@ -42,6 +42,7 @@
           }
         }
       ],
+      "precededByDelimiter": true,
       "scopeStack": [
         "Echo mismatch",
         "A wrong echo is caught"

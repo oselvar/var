@@ -1,0 +1,60 @@
+{
+  "examples": [
+    {
+      "name": "Given the following users have been imported:",
+      "outcome": "pass",
+      "steps": [
+        {
+          "contextKey": {
+            "exampleName": "Given the following users have been imported:",
+            "stepFile": "basket.steps"
+          },
+          "exampleName": "Given the following users have been imported:",
+          "matchedExpression": "the following users have been imported",
+          "ordinal": 1,
+          "outcome": "pass",
+          "stepText": "the following users have been imported"
+        },
+        {
+          "contextKey": {
+            "exampleName": "Given the following users have been imported:",
+            "stepFile": "basket.steps"
+          },
+          "exampleName": "Given the following users have been imported:",
+          "matchedExpression": "the following assets have been imported",
+          "ordinal": 2,
+          "outcome": "pass",
+          "stepText": "the following assets have been imported"
+        },
+        {
+          "contextKey": {
+            "exampleName": "Given the following users have been imported:",
+            "stepFile": "basket.steps"
+          },
+          "exampleName": "Given the following users have been imported:",
+          "matchedExpression": "the basket contains {int} user(s) and {int} asset(s)",
+          "ordinal": 3,
+          "outcome": "pass",
+          "stepText": "the basket contains 1 user and 1 asset"
+        }
+      ]
+    },
+    {
+      "name": "Then the basket contains 0 users and 0 assets",
+      "outcome": "pass",
+      "steps": [
+        {
+          "contextKey": {
+            "exampleName": "Then the basket contains 0 users and 0 assets",
+            "stepFile": "basket.steps"
+          },
+          "exampleName": "Then the basket contains 0 users and 0 assets",
+          "matchedExpression": "the basket contains {int} user(s) and {int} asset(s)",
+          "ordinal": 1,
+          "outcome": "pass",
+          "stepText": "the basket contains 0 users and 0 assets"
+        }
+      ]
+    }
+  ]
+}

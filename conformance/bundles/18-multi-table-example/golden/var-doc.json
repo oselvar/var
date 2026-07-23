@@ -1,0 +1,312 @@
+{
+  "examples": [
+    {
+      "body": [
+        {
+          "kind": "paragraph",
+          "segmentMap": [
+            {
+              "sourceOffset": 37,
+              "textOffset": 0
+            }
+          ],
+          "span": {
+            "endCol": 46,
+            "endLine": 3,
+            "endOffset": 82,
+            "startCol": 1,
+            "startLine": 3,
+            "startOffset": 37
+          },
+          "text": "Given the following users have been imported:"
+        },
+        {
+          "header": {
+            "cellSpans": [
+              {
+                "endCol": 8,
+                "endLine": 5,
+                "endOffset": 91,
+                "startCol": 3,
+                "startLine": 5,
+                "startOffset": 86
+              },
+              {
+                "endCol": 15,
+                "endLine": 5,
+                "endOffset": 98,
+                "startCol": 11,
+                "startLine": 5,
+                "startOffset": 94
+              }
+            ],
+            "cells": [
+              "email",
+              "name"
+            ],
+            "span": {
+              "endCol": 17,
+              "endLine": 5,
+              "endOffset": 100,
+              "startCol": 1,
+              "startLine": 5,
+              "startOffset": 84
+            }
+          },
+          "kind": "table",
+          "rows": [
+            {
+              "cellSpans": [
+                {
+                  "endCol": 8,
+                  "endLine": 7,
+                  "endOffset": 125,
+                  "startCol": 3,
+                  "startLine": 7,
+                  "startOffset": 120
+                },
+                {
+                  "endCol": 14,
+                  "endLine": 7,
+                  "endOffset": 131,
+                  "startCol": 11,
+                  "startLine": 7,
+                  "startOffset": 128
+                }
+              ],
+              "cells": [
+                "a@b.c",
+                "Ada"
+              ],
+              "span": {
+                "endCol": 17,
+                "endLine": 7,
+                "endOffset": 134,
+                "startCol": 1,
+                "startLine": 7,
+                "startOffset": 118
+              }
+            }
+          ],
+          "span": {
+            "endCol": 17,
+            "endLine": 7,
+            "endOffset": 134,
+            "startCol": 1,
+            "startLine": 5,
+            "startOffset": 84
+          }
+        }
+      ],
+      "precededByDelimiter": true,
+      "scopeStack": [
+        "A basket imports users and assets"
+      ],
+      "span": {
+        "endCol": 17,
+        "endLine": 7,
+        "endOffset": 134,
+        "startCol": 1,
+        "startLine": 3,
+        "startOffset": 37
+      }
+    },
+    {
+      "body": [
+        {
+          "kind": "paragraph",
+          "segmentMap": [
+            {
+              "sourceOffset": 136,
+              "textOffset": 0
+            }
+          ],
+          "span": {
+            "endCol": 45,
+            "endLine": 9,
+            "endOffset": 180,
+            "startCol": 1,
+            "startLine": 9,
+            "startOffset": 136
+          },
+          "text": "And the following assets have been imported:"
+        },
+        {
+          "header": {
+            "cellSpans": [
+              {
+                "endCol": 7,
+                "endLine": 11,
+                "endOffset": 188,
+                "startCol": 3,
+                "startLine": 11,
+                "startOffset": 184
+              }
+            ],
+            "cells": [
+              "name"
+            ],
+            "span": {
+              "endCol": 10,
+              "endLine": 11,
+              "endOffset": 191,
+              "startCol": 1,
+              "startLine": 11,
+              "startOffset": 182
+            }
+          },
+          "kind": "table",
+          "rows": [
+            {
+              "cellSpans": [
+                {
+                  "endCol": 8,
+                  "endLine": 13,
+                  "endOffset": 209,
+                  "startCol": 3,
+                  "startLine": 13,
+                  "startOffset": 204
+                }
+              ],
+              "cells": [
+                "Moose"
+              ],
+              "span": {
+                "endCol": 10,
+                "endLine": 13,
+                "endOffset": 211,
+                "startCol": 1,
+                "startLine": 13,
+                "startOffset": 202
+              }
+            }
+          ],
+          "span": {
+            "endCol": 10,
+            "endLine": 13,
+            "endOffset": 211,
+            "startCol": 1,
+            "startLine": 11,
+            "startOffset": 182
+          }
+        }
+      ],
+      "precededByDelimiter": false,
+      "scopeStack": [
+        "A basket imports users and assets"
+      ],
+      "span": {
+        "endCol": 10,
+        "endLine": 13,
+        "endOffset": 211,
+        "startCol": 1,
+        "startLine": 9,
+        "startOffset": 136
+      }
+    },
+    {
+      "body": [
+        {
+          "kind": "paragraph",
+          "segmentMap": [
+            {
+              "sourceOffset": 213,
+              "textOffset": 0
+            }
+          ],
+          "span": {
+            "endCol": 45,
+            "endLine": 15,
+            "endOffset": 257,
+            "startCol": 1,
+            "startLine": 15,
+            "startOffset": 213
+          },
+          "text": "Then the basket contains 1 user and 1 asset."
+        }
+      ],
+      "precededByDelimiter": false,
+      "scopeStack": [
+        "A basket imports users and assets"
+      ],
+      "span": {
+        "endCol": 45,
+        "endLine": 15,
+        "endOffset": 257,
+        "startCol": 1,
+        "startLine": 15,
+        "startOffset": 213
+      }
+    },
+    {
+      "body": [
+        {
+          "kind": "paragraph",
+          "segmentMap": [
+            {
+              "sourceOffset": 259,
+              "textOffset": 0
+            }
+          ],
+          "span": {
+            "endCol": 75,
+            "endLine": 17,
+            "endOffset": 333,
+            "startCol": 1,
+            "startLine": 17,
+            "startOffset": 259
+          },
+          "text": "A basket starts empty, and this prose sentence separates the two examples."
+        }
+      ],
+      "precededByDelimiter": false,
+      "scopeStack": [
+        "A basket imports users and assets"
+      ],
+      "span": {
+        "endCol": 75,
+        "endLine": 17,
+        "endOffset": 333,
+        "startCol": 1,
+        "startLine": 17,
+        "startOffset": 259
+      }
+    },
+    {
+      "body": [
+        {
+          "kind": "paragraph",
+          "segmentMap": [
+            {
+              "sourceOffset": 335,
+              "textOffset": 0
+            }
+          ],
+          "span": {
+            "endCol": 47,
+            "endLine": 19,
+            "endOffset": 381,
+            "startCol": 1,
+            "startLine": 19,
+            "startOffset": 335
+          },
+          "text": "Then the basket contains 0 users and 0 assets."
+        }
+      ],
+      "precededByDelimiter": false,
+      "scopeStack": [
+        "A basket imports users and assets"
+      ],
+      "span": {
+        "endCol": 47,
+        "endLine": 19,
+        "endOffset": 381,
+        "startCol": 1,
+        "startLine": 19,
+        "startOffset": 335
+      }
+    }
+  ],
+  "orphanAttachments": [],
+  "path": "example.md"
+}

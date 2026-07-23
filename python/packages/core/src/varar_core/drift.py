@@ -68,12 +68,20 @@ class BaselineStore(Protocol):
     def write(self, contents: str) -> None: ...
 
 
-def _within(inner: Span, outer: Span) -> bool:
-    return inner.start_offset >= outer.start_offset and inner.end_offset <= outer.end_offset
+# Do the two spans overlap at all (offset ranges intersect)? A candidate
+# paragraph relates to its planned example either way round: a header-bound row
+# sits *inside* its binding paragraph, while a merged example's span *covers*
+# each of the candidates it absorbed (ADR 0012). Overlap catches both.
+def _overlaps(a: Span, b: Span) -> bool:
+    return a.start_offset < b.end_offset and b.start_offset < a.end_offset
 
 
+# A candidate paragraph is "live" (still an example) if it overlaps at least one
+# planned example. A now-prose paragraph — one whose step def was renamed or
+# deleted — overlaps none (it became a delimiter, splitting any example it was
+# part of), so drift catches it.
 def _is_live(candidate_span: Span, plan: ExecutionPlan) -> bool:
-    return any(_within(pe.span, candidate_span) for pe in plan.examples)
+    return any(_overlaps(pe.span, candidate_span) for pe in plan.examples)
 
 
 _TOKEN_RE = re.compile(r"[^\W_]+")

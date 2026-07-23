@@ -1,4 +1,3 @@
-import type { ScannerPlugin } from '@varar/core'
 import { buildWorkspaceIndex, createTreeSitterScanner, type StepDefScanner } from '@varar/language'
 import { planSpec } from '@varar/runner'
 import { createNodeGrammarLoader } from './node-grammar-loader.ts'
@@ -27,7 +26,6 @@ export type DiscoverInput = {
   readonly varPath: string
   readonly source: string
   readonly stepFiles: ReadonlyArray<{ readonly path: string; readonly source: string }>
-  readonly scannerPlugins?: ReadonlyArray<ScannerPlugin>
 }
 
 // Build-time twin of the runtime plan: statically scan the step sources
@@ -46,7 +44,7 @@ export async function discoverStaticExamples(
     varFiles: [],
     scanner,
   })
-  const p = planSpec(input.varPath, input.source, registry, input.scannerPlugins)
+  const p = planSpec(input.varPath, input.source, registry)
   return p.examples.map((ex) => ({
     name: ex.name,
     line: ex.span.startLine,

@@ -2,7 +2,6 @@ package dev.varar.core;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * Groups the flat {@link Scanner#scan} output into {@link Ast.Example}s, tracking a heading scope
@@ -14,9 +13,13 @@ import java.util.regex.Pattern;
  * groups at runtime.
  *
  * <p>Tables and fences immediately following a candidate (with no intervening heading or thematic
- * break, and no blank line in the source between them) attach to that candidate's body so the
- * planner can hand them to the last matched step. Otherwise they're orphans, collected into
- * {@link Ast.VarDoc#orphanAttachments}.
+ * break) attach to that candidate's body so the planner can hand them to the last matched step.
+ * Otherwise they're orphans, collected into {@link Ast.VarDoc#orphanAttachments}.
+ *
+ * <p>This is pure syntax — it does NOT decide where one example ends and the next begins. Instead
+ * each candidate records {@link Ast.Example#precededByDelimiter} (a heading or {@code ---} sits
+ * before it), and the planner groups adjacent matching candidates into examples using that flag
+ * plus which candidates match a step. See ADR 0012.
  */
 public final class Structurer {
 
@@ -25,8 +28,6 @@ public final class Structurer {
     /** One entry of the heading scope stack: a heading's level plus its text. */
     private record ScopeEntry(int level, String text) {}
 
-    private static final Pattern BLANK_LINE_RE = Pattern.compile("\\n\\s*\\n");
-
     /** Groups {@code blocks} (as scanned from {@code source}) into a {@link Ast.VarDoc}. */
     public static Ast.VarDoc structure(String path, String source, List<Ast.Block> blocks) {
         List<Ast.Example> examples = new ArrayList<>();
@@ -34,6 +35,10 @@ public final class Structurer {
         List<ScopeEntry> scopeStack = new ArrayList<>();
         int lastExampleIdx = -1;
         boolean attachmentOpen = false;
+        // A heading or thematic break seen since the previous candidate — the next candidate is
+        // then delimiter-preceded. Starts true so the first candidate in the file counts as
+        // delimiter-preceded (nothing to merge into).
+        boolean delimiterPending = true;
 
         for (Ast.Block block : blocks) {
             if (block instanceof Ast.Heading heading) {
@@ -44,33 +49,15 @@ public final class Structurer {
                 }
                 scopeStack.add(new ScopeEntry(heading.level(), heading.text()));
                 attachmentOpen = false;
+                delimiterPending = true;
             } else if (block instanceof Ast.Paragraph
                     || block instanceof Ast.ListItem
                     || block instanceof Ast.Blockquote) {
-                // Gherkin shape: a Given->table->When->fence flow comes out as
-                //   [paragraph, table, paragraph, fence]
-                // and the user wants all four blocks in one example. Merge when the previous
-                // example's last block is an attachment (table/fence) AND there's no blank line
-                // between them.
                 Span blockSpan = spanOf(block);
-                if (attachmentOpen && lastExampleIdx >= 0) {
-                    Ast.Example prev = examples.get(lastExampleIdx);
-                    Ast.Block prevLast = prev.body().get(prev.body().size() - 1);
-                    boolean lastIsAttachment = prevLast instanceof Ast.Table || prevLast instanceof Ast.Fence;
-                    if (lastIsAttachment
-                            && !BLANK_LINE_RE
-                                    .matcher(source.substring(prev.span().endOffset(), blockSpan.startOffset()))
-                                    .find()) {
-                        Span span = Span.spanFromOffsets(source, prev.span().startOffset(), blockSpan.endOffset());
-                        List<Ast.Block> body = new ArrayList<>(prev.body());
-                        body.add(block);
-                        examples.set(lastExampleIdx, new Ast.Example(prev.scopeStack(), span, body));
-                        continue;
-                    }
-                }
-                examples.add(new Ast.Example(scopeTexts(scopeStack), blockSpan, List.of(block)));
+                examples.add(new Ast.Example(scopeTexts(scopeStack), blockSpan, List.of(block), delimiterPending));
                 lastExampleIdx = examples.size() - 1;
                 attachmentOpen = true;
+                delimiterPending = false;
             } else if (block instanceof Ast.TableOrFence attachment) {
                 if (attachmentOpen && lastExampleIdx >= 0) {
                     Ast.Example prev = examples.get(lastExampleIdx);
@@ -78,12 +65,14 @@ public final class Structurer {
                     Span span = Span.spanFromOffsets(source, prev.span().startOffset(), blockSpan.endOffset());
                     List<Ast.Block> body = new ArrayList<>(prev.body());
                     body.add(block);
-                    examples.set(lastExampleIdx, new Ast.Example(prev.scopeStack(), span, body));
+                    examples.set(
+                            lastExampleIdx, new Ast.Example(prev.scopeStack(), span, body, prev.precededByDelimiter()));
                 } else {
                     orphanAttachments.add(attachment);
                 }
             } else if (block instanceof Ast.ThematicBreak) {
                 attachmentOpen = false;
+                delimiterPending = true;
             }
         }
 

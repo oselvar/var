@@ -56,29 +56,52 @@ sniffing, no "missing step" inference from sentence shape.
 
 ## Where an example begins and ends
 
-An example begins at its paragraph (the *primary block*) and, by default, ends
-where that paragraph ends. Because Markdown separates paragraphs with blank
-lines, **each blank-line-separated paragraph is its own example**:
+An example is everything between two **delimiters**. There are exactly three:
+
+- a **heading** (`#`, `##`, …),
+- a **thematic break** (`---`, a horizontal rule), and
+- a **paragraph that matches no step** (prose).
+
+Everything between two delimiters that has at least one matching paragraph is a
+single example. Consecutive matching paragraphs — with the tables and doc
+strings attached to them — merge into that one example, **sharing state across
+every step**:
 
 ```markdown
 I deposit 100.
 
-The balance is 100.
+I withdraw 30.
+
+The balance is 70.
 ```
 
-That is two examples, each a single step. To make several sentences run as one
-example — sharing state across the steps — keep them in one paragraph:
+Three paragraphs, no delimiter between them → one example, three steps, one
+accumulating state. Keeping the sentences in a single paragraph does the same
+thing; a blank line between two matching paragraphs no longer starts a new
+example.
+
+Because prose is a delimiter, narration separates examples with no special
+syntax — an introductory paragraph before an example, or an aside between two of
+them, ends whatever precedes it just by not matching a step.
+
+To keep two **step-only** examples apart — matching paragraphs with nothing but
+blank lines between them — put a delimiter between them, or they run as one
+shared-state example:
 
 ```markdown
-I deposit 100. I withdraw 30. The balance is 70.
+I deposit 100. The balance is 100.
+
+---
+
+I deposit 5. The balance is 5.
 ```
 
-Three sentences, three steps, one example, one accumulating state.
+Two examples, each starting from fresh state.
 
-Two things hard-close an example, so whatever follows starts fresh:
-
-- a **heading** (`#`, `##`, …), and
-- a **thematic break** (`---`, a horizontal rule).
+One edge to know: a prose paragraph placed **between the steps of one example**
+ends it — the steps after the prose start a fresh example and do not see the
+earlier state. Keep narration before or after an example, not in the middle of
+it.
 
 ## Tables and doc strings
 
@@ -108,17 +131,36 @@ These are the accounts:
 
 Attachment is positional and adjacency-based:
 
-- The table/fence must **directly follow** the step-bearing block — no
-  intervening heading or thematic break.
+- The table/fence must **directly follow** the step-bearing block — nothing (no
+  heading, thematic break, or other paragraph) between them.
 - It attaches to the **last matched step** of the block above it (so a paragraph
   with several steps hands the table to the final one).
 - A table or fence that has no step-bearing block above it is just Markdown
   content — not an error, not a test.
 
-A single example can carry a whole Given → table → When → doc string flow. When
-a following step paragraph hugs a table or fence with no blank line between them,
-it merges into the same example rather than starting a new one — so an
-arrange-with-a-table, act-with-a-doc-string sequence stays one test.
+A single example can carry a whole Given → table → When → doc string flow.
+Consecutive matching paragraphs merge into one example (see
+[Where an example begins and ends](#where-an-example-begins-and-ends)), and each
+paragraph's table or doc string attaches to it — so an arrange-with-a-table,
+act-with-a-doc-string sequence stays one test. Separate the paragraphs with
+blank lines, exactly as ordinary Markdown (and every formatter) expects:
+
+````markdown
+Given the following users have been imported:
+
+| email | name |
+| ----- | ---- |
+| a@b.c | Ada  |
+
+And the following assets have been imported:
+
+| name  |
+| ----- |
+| Moose |
+````
+
+Both tables belong to the one example, and the file renders correctly on GitHub
+and survives `prettier`.
 
 For the return-value rules — how a step reproduces a table cell-by-cell, or a
 doc string including its trailing newline — see
@@ -167,8 +209,8 @@ open example, so an example never spans a heading.
 
 ## Naming
 
-An example's name is its **entire primary paragraph**, not a heading and not
-just the matched sentence:
+An example's name is its **first matching paragraph** in full, not a heading and
+not just the matched sentence:
 
 ```markdown
 I deposit 100. I withdraw 30. The balance is 70.
@@ -176,7 +218,8 @@ I deposit 100. I withdraw 30. The balance is 70.
 
 is named `I deposit 100. I withdraw 30. The balance is 70` — the whole
 paragraph, because the narration around the matched sentences is part of what
-the example is *about*. Hard line breaks inside the paragraph collapse to single
+the example is *about*. When an example spans several merged paragraphs, the
+first matching one names it. Hard line breaks inside the paragraph collapse to single
 spaces (a name is one line), and a single trailing `.`, `!`, or `?` is stripped;
 terminators inside the sentence (a quoted string, `i.e.`) are left alone.
 

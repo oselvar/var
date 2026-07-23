@@ -1,4 +1,0 @@
-{
-  "extends": "../core/tsconfig.json",
-  "include": ["src/**/*", "steps/**/*", "cucumber/steps/**/*"]
-}

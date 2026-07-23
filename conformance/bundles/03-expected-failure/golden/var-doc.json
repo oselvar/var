@@ -42,6 +42,7 @@
           }
         }
       ],
+      "precededByDelimiter": true,
       "scopeStack": [
         "Division",
         "Dividing by zero is rejected"

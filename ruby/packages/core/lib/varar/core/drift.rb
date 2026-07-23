@@ -31,12 +31,20 @@ module Varar
 
       module_function
 
-      def within?(inner, outer)
-        inner.start_offset >= outer.start_offset && inner.end_offset <= outer.end_offset
+      # Do the two spans overlap at all (offset ranges intersect)? A candidate
+      # paragraph relates to its planned example either way round: a header-bound
+      # row sits inside its binding paragraph, while a merged example's span
+      # covers each candidate it absorbed (ADR 0012). Overlap catches both.
+      def overlaps?(span_a, span_b)
+        span_a.start_offset < span_b.end_offset && span_b.start_offset < span_a.end_offset
       end
 
+      # A candidate is "live" (still an example) if it overlaps at least one
+      # planned example. A now-prose paragraph — one whose step def was renamed
+      # or deleted — overlaps none (it became a delimiter, splitting any example
+      # it was part of), so drift catches it.
       def live?(candidate_span, plan)
-        plan.examples.any? { |pe| within?(pe.span, candidate_span) }
+        plan.examples.any? { |pe| overlaps?(pe.span, candidate_span) }
       end
 
       # Lower-cased word tokens (letters/digits) — the unit of similarity.

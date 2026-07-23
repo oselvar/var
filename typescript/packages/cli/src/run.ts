@@ -34,7 +34,7 @@ export async function runRun(opts: RunOptions): Promise<RunResult> {
 
   for (const path of varFiles) {
     const source = readFileSync(path, 'utf8')
-    const execution = planSpec(path, source, registry, cfg.scannerPlugins)
+    const execution = planSpec(path, source, registry)
 
     const reporter = {
       diagnostic: (d: Diagnostic) => {

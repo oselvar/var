@@ -1,11 +1,14 @@
 """structurer.py — port of typescript/packages/core/src/structurer.ts.
 
 Groups scanned blocks into Examples, tracking heading scope and orphan attachments.
+
+This is pure syntax — it does NOT decide where one example ends and the next
+begins. Instead each candidate records `preceded_by_delimiter` (a heading or
+`---` sits before it), and the planner groups adjacent matching candidates into
+examples using that flag plus which candidates match a step. See ADR 0012.
 """
 
 from __future__ import annotations
-
-import re
 
 from varar_core.ast import (
     Block,
@@ -14,7 +17,7 @@ from varar_core.ast import (
     Table,
     VarDoc,
 )
-from varar_core.span import span_from_offsets, utf16_slice
+from varar_core.span import span_from_offsets
 
 
 def structure(path: str, source: str, blocks: tuple[Block, ...]) -> VarDoc:
@@ -24,6 +27,10 @@ def structure(path: str, source: str, blocks: tuple[Block, ...]) -> VarDoc:
     scope_stack: list[tuple[int, str]] = []  # (level, text)
     last_example_idx = -1
     attachment_open = False
+    # A heading or thematic break seen since the previous candidate — the next
+    # candidate is then delimiter-preceded. Starts True so the first candidate in
+    # the file counts as delimiter-preceded (nothing to merge into).
+    delimiter_pending = True
 
     for block in blocks:
         kind = block.kind
@@ -34,48 +41,20 @@ def structure(path: str, source: str, blocks: tuple[Block, ...]) -> VarDoc:
                 scope_stack.pop()
             scope_stack.append((block.level, block.text))  # type: ignore[union-attr]
             attachment_open = False
+            delimiter_pending = True
 
         elif kind in ("paragraph", "list_item", "blockquote"):
-            # Gherkin shape: a Given→table→When→fence flow comes out as
-            # [paragraph, table, paragraph, fence]
-            # and the user wants all four blocks in one example. Merge when the
-            # previous example's last block is an attachment (table/fence) AND
-            # there's no blank line between them.
-            if attachment_open and last_example_idx >= 0:
-                prev = examples[last_example_idx]
-                prev_last = prev.body[-1] if prev.body else None
-                last_is_attachment = prev_last is not None and prev_last.kind in (
-                    "table",
-                    "fence",
-                )
-                if last_is_attachment:
-                    between = utf16_slice(
-                        source,
-                        prev.span.end_offset,  # type: ignore[union-attr]
-                        block.span.start_offset,  # type: ignore[union-attr]
-                    )
-                    if not re.search(r"\n\s*\n", between):
-                        new_span = span_from_offsets(
-                            source,
-                            prev.span.start_offset,  # type: ignore[union-attr]
-                            block.span.end_offset,  # type: ignore[union-attr]
-                        )
-                        examples[last_example_idx] = Example(
-                            scope_stack=prev.scope_stack,
-                            span=new_span,
-                            body=prev.body + (block,),
-                        )
-                        continue
-
             examples.append(
                 Example(
                     scope_stack=tuple(text for _, text in scope_stack),
                     span=block.span,
                     body=(block,),
+                    preceded_by_delimiter=delimiter_pending,
                 )
             )
             last_example_idx = len(examples) - 1
             attachment_open = True
+            delimiter_pending = False
 
         elif kind in ("table", "fence"):
             if attachment_open and last_example_idx >= 0:
@@ -89,12 +68,14 @@ def structure(path: str, source: str, blocks: tuple[Block, ...]) -> VarDoc:
                     scope_stack=prev.scope_stack,
                     span=new_span,
                     body=prev.body + (block,),
+                    preceded_by_delimiter=prev.preceded_by_delimiter,
                 )
             else:
                 orphan_attachments.append(block)  # type: ignore[arg-type]
 
         elif kind == "thematic_break":
             attachment_open = False
+            delimiter_pending = True
 
     return VarDoc(
         path=path,

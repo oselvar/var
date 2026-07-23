@@ -183,6 +183,7 @@ fn example(e: &Example) -> Value {
         ),
         ("span", span(e.span)),
         ("body", Value::List(e.body.iter().map(block).collect())),
+        ("precededByDelimiter", Value::Bool(e.preceded_by_delimiter)),
     ])
 }
 

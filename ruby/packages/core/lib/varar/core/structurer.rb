@@ -5,8 +5,12 @@ require 'varar/core/ast'
 
 module Varar
   module Core
-    # Group scanned blocks into Examples, tracking heading scope and orphan
-    # attachments. Port of structurer.ts.
+    # Group scanned blocks into candidate Examples, tracking heading scope and
+    # orphan attachments. This is pure syntax — it does NOT decide where one
+    # example ends and the next begins. Each candidate records
+    # +preceded_by_delimiter+ (a heading or `---` sits before it) and the planner
+    # groups adjacent matching candidates into examples. Port of structurer.ts.
+    # See ADR 0012.
     module Structurer
       module_function
 
@@ -16,6 +20,11 @@ module Varar
         scope_stack = [] # [[level, text], ...]
         last_example_idx = -1
         attachment_open = false
+        # A heading or thematic break seen since the previous candidate — the
+        # next candidate is then delimiter-preceded. Starts true so the first
+        # candidate in the file counts as delimiter-preceded (nothing to merge
+        # into).
+        delimiter_pending = true
 
         blocks.each do |block|
           case block.kind
@@ -24,35 +33,18 @@ module Varar
             scope_stack.pop while !scope_stack.empty? && scope_stack.last[0] >= block.level
             scope_stack << [block.level, block.text]
             attachment_open = false
+            delimiter_pending = true
 
           when 'paragraph', 'list_item', 'blockquote'
-            # Merge a block into the previous example when that example's last
-            # block is an attachment (table/fence) with no blank line between.
-            if attachment_open && last_example_idx >= 0
-              prev = examples[last_example_idx]
-              prev_last = prev.body.last
-              last_is_attachment = !prev_last.nil? && %w[table fence].include?(prev_last.kind)
-              if last_is_attachment
-                between = Offsets.utf16_slice(source, prev.span.end_offset, block.span.start_offset)
-                unless between.match?(/\n\s*\n/)
-                  new_span = Offsets.span_from_offsets(source, prev.span.start_offset, block.span.end_offset)
-                  examples[last_example_idx] = Example.new(
-                    scope_stack: prev.scope_stack,
-                    span: new_span,
-                    body: prev.body + [block]
-                  )
-                  next
-                end
-              end
-            end
-
             examples << Example.new(
               scope_stack: scope_stack.map { |(_, text)| text },
               span: block.span,
-              body: [block]
+              body: [block],
+              preceded_by_delimiter: delimiter_pending
             )
             last_example_idx = examples.length - 1
             attachment_open = true
+            delimiter_pending = false
 
           when 'table', 'fence'
             if attachment_open && last_example_idx >= 0
@@ -61,7 +53,8 @@ module Varar
               examples[last_example_idx] = Example.new(
                 scope_stack: prev.scope_stack,
                 span: new_span,
-                body: prev.body + [block]
+                body: prev.body + [block],
+                preceded_by_delimiter: prev.preceded_by_delimiter
               )
             else
               orphan_attachments << block
@@ -69,6 +62,7 @@ module Varar
 
           when 'thematic_break'
             attachment_open = false
+            delimiter_pending = true
           end
         end
 

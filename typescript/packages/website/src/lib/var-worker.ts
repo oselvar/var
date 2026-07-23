@@ -13,8 +13,6 @@ const config = {
   docs: { include: ['**/*.md'], exclude: [] },
   steps: ['**/*.steps.ts'],
   snippets: { typescript: DEFAULT_SNIPPET_TEMPLATE },
-  scannerPlugins: [],
-  scannerPluginNames: [],
 }
 
 // One-time handshake on the worker's default channel: the main thread sends

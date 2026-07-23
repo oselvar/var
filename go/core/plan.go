@@ -56,189 +56,313 @@ var (
 )
 
 // Plan plans doc against registry. Port of plan().
+//
+// Two phases (ADR 0012). Phase 1 plans each candidate paragraph independently
+// into a "unit" (ambiguity / error-fence diagnostics, header-bound rows,
+// attachments, final steps). Phase 2 groups adjacent candidates into examples: a
+// matching candidate with precededByDelimiter false merges into the open
+// example; a matching candidate after a delimiter (or the first) starts a new
+// one; a non-matching candidate (prose) is a delimiter that closes the open
+// example and is dropped; a header-bound candidate stays standalone.
 func Plan(doc VarDoc, registry Registry) ExecutionPlan {
 	source := doc.Source
-	var examples []PlannedExample
 	diagnostics := []Diagnostic{}
 
-	for _, ex := range doc.Examples {
-		hadAmbiguous := false
-		body := ex.Body
-
-		// Pass 1: plan each text-bearing block, collecting steps per body index.
-		stepsByBlock := map[int][]PlannedStep{}
-		for idx, block := range body {
-			if !isTextBearing(block) {
-				continue
-			}
-			text := textOf(block)
-			blockHits, ambiguities := planBlock(text, registry)
-			for _, collision := range ambiguities {
-				span := liftSpan(source, block, collision.matchStart, collision.matchEnd)
-				diagnostics = append(diagnostics, ambiguousMatch(span))
-				hadAmbiguous = true
-			}
-			if !hadAmbiguous && len(blockHits) > 0 {
-				blockSteps := make([]PlannedStep, 0, len(blockHits))
-				for _, h := range blockHits {
-					paramSpans := make([]Span, len(h.paramSpans))
-					for i, p := range h.paramSpans {
-						paramSpans[i] = liftSpan(source, block, p.start, p.end)
-					}
-					blockSteps = append(blockSteps, PlannedStep{
-						Text:       utf16Slice(text, h.matchStart, h.matchEnd),
-						MatchSpan:  liftSpan(source, block, h.matchStart, h.matchEnd),
-						ParamSpans: paramSpans,
-						StepDef:    h.stepDef,
-						Args:       h.args,
-						Formats:    h.formats,
-					})
-				}
-				stepsByBlock[idx] = blockSteps
-			}
-		}
-
-		// Header-bound table: iterate row by row.
-		var bound *headerBoundResult
-		if !hadAmbiguous {
-			bound = detectHeaderBound(body, stepsByBlock, source)
-		}
-		if bound != nil {
-			headerCells := bound.table.Header.Cells
-			for _, row := range bound.table.Rows {
-				rowObject := map[string]Value{}
-				for i, header := range headerCells {
-					rowObject[header] = StrValue(cellAt(row, i))
-				}
-				rowArgs := append(append([]Value{}, bound.step.Args...), MapValue(rowObject))
-				rowStep := PlannedStep{
-					Text:       bound.step.Text,
-					MatchSpan:  row.Span,
-					ParamSpans: bound.step.ParamSpans,
-					StepDef:    bound.step.StepDef,
-					Args:       rowArgs,
-					Formats:    bound.step.Formats,
-				}
-				rowChecks := make([]RowCheck, len(headerCells))
-				for i, header := range headerCells {
-					rowChecks[i] = NewRowCheck(header, cellAt(row, i), cellSpanAt(row, i))
-				}
-				nestedScope := append(append([]string{}, ex.ScopeStack...), bound.step.Text)
-				examples = append(examples, PlannedExample{
-					Name:       strings.Join(row.Cells, " / "),
-					ScopeStack: nestedScope,
-					Span:       row.Span,
-					Steps:      []PlannedStep{rowStep},
-					HeaderBinding: &HeaderBinding{
-						MatchSpan:  bound.step.MatchSpan,
-						ParamSpans: bound.headerSpans,
-						StepDef:    bound.step.StepDef,
-					},
-					RowChecks: rowChecks,
-				})
-			}
-			continue
-		}
-
-		// An ```error fence anywhere marks the example expected-to-fail.
-		var errorFence *Fence
-		for i := range body {
-			if f, ok := body[i].(Fence); ok && f.Info == "error" {
-				fc := f
-				errorFence = &fc
-				break
-			}
-		}
-
-		// Pass 2: table/fence immediately after a step-bearing block.
-		type attachment struct {
-			table *Table
-			fence *Fence
-		}
-		attachments := map[int]*attachment{}
-		for idx := 1; idx < len(body); idx++ {
-			switch here := body[idx].(type) {
-			case Table:
-				if _, ok := stepsByBlock[idx-1]; ok {
-					if attachments[idx-1] == nil {
-						attachments[idx-1] = &attachment{}
-					}
-					tc := here
-					attachments[idx-1].table = &tc
-				}
-			case Fence:
-				if here.Info != "error" {
-					if _, ok := stepsByBlock[idx-1]; ok {
-						if attachments[idx-1] == nil {
-							attachments[idx-1] = &attachment{}
-						}
-						fc := here
-						attachments[idx-1].fence = &fc
-					}
-				}
-			}
-		}
-
-		// Pass 3: rebuild the final step list, applying attachments to the last
-		// step of each block.
-		var finalSteps []PlannedStep
-		for idx := 0; idx < len(body); idx++ {
-			stepsAtIdx, ok := stepsByBlock[idx]
-			if !ok {
-				continue
-			}
-			attach := attachments[idx]
-			last := len(stepsAtIdx) - 1
-			for s, step := range stepsAtIdx {
-				if s == last && attach != nil {
-					withAttach := step
-					withAttach.DataTable = attach.table
-					withAttach.DocString = attach.fence
-					finalSteps = append(finalSteps, withAttach)
-					continue
-				}
-				finalSteps = append(finalSteps, step)
-			}
-		}
-
-		var runnableSteps []PlannedStep
-		if !hadAmbiguous {
-			runnableSteps = finalSteps
-		}
-
-		if errorFence != nil && len(runnableSteps) == 0 {
-			diagnostics = append(diagnostics, errorFenceWithoutStep(errorFence.Span))
-		}
-
-		if len(finalSteps) == 0 && !hadAmbiguous {
-			continue
-		}
-
-		var expectedOutcome, expectedErrorMessage *string
-		if errorFence != nil {
-			fail := "fail"
-			expectedOutcome = &fail
-			trimmed := javaTrim(errorFence.Body)
-			if trimmed != "" {
-				msg := trimmed
-				expectedErrorMessage = &msg
-			}
-		}
-
-		examples = append(examples, PlannedExample{
-			Name:                 deriveExampleName(body),
-			ScopeStack:           ex.ScopeStack,
-			Span:                 ex.Span,
-			Steps:                runnableSteps,
-			ExpectedOutcome:      expectedOutcome,
-			ExpectedErrorMessage: expectedErrorMessage,
-		})
+	// Phase 1: plan each candidate paragraph independently.
+	units := make([]candidateUnit, len(doc.Examples))
+	for i, ex := range doc.Examples {
+		units[i] = planCandidate(ex, doc, registry, &diagnostics)
 	}
+
+	// Phase 2: group adjacent candidates into examples.
+	var examples []PlannedExample
+	var open *mergedExample
+	flush := func() {
+		if open != nil {
+			examples = append(examples, finishMerged(open, source))
+			open = nil
+		}
+	}
+	for _, unit := range units {
+		if unit.headerBound {
+			flush()
+			examples = append(examples, unit.rows...)
+			continue
+		}
+		if !unit.matched {
+			// Prose paragraph — a delimiter. Drop it and end the open example.
+			flush()
+			continue
+		}
+		if open != nil && !unit.precededByDelimiter {
+			mergeInto(open, unit)
+		} else {
+			flush()
+			open = startMerged(unit)
+		}
+	}
+	flush()
+
+	// A table or fence that doesn't attach to a step is just Markdown content,
+	// not a mistake — it produces no diagnostic.
 
 	return ExecutionPlan{
 		VarDoc:      doc,
 		Examples:    examples,
 		Diagnostics: diagnostics,
+	}
+}
+
+// mergedExample is a step-bearing candidate accumulating into one example while
+// adjacent matching candidates keep merging in.
+type mergedExample struct {
+	name                 string
+	scopeStack           []string
+	startOffset          int
+	endOffset            int
+	steps                []PlannedStep
+	expectedOutcome      *string
+	expectedErrorMessage *string
+}
+
+// candidateUnit is one candidate paragraph, planned in isolation. When
+// headerBound is true it carries standalone per-row examples in rows; otherwise
+// it is a steps unit described by the remaining fields.
+type candidateUnit struct {
+	headerBound bool
+	rows        []PlannedExample
+
+	matched              bool
+	precededByDelimiter  bool
+	name                 string
+	scopeStack           []string
+	span                 Span
+	steps                []PlannedStep
+	expectedOutcome      *string
+	expectedErrorMessage *string
+}
+
+func startMerged(unit candidateUnit) *mergedExample {
+	m := &mergedExample{
+		name:        unit.name,
+		scopeStack:  unit.scopeStack,
+		startOffset: unit.span.StartOffset,
+		endOffset:   unit.span.EndOffset,
+		steps:       append([]PlannedStep{}, unit.steps...),
+	}
+	if unit.expectedOutcome != nil {
+		v := *unit.expectedOutcome
+		m.expectedOutcome = &v
+	}
+	if unit.expectedErrorMessage != nil {
+		v := *unit.expectedErrorMessage
+		m.expectedErrorMessage = &v
+	}
+	return m
+}
+
+func mergeInto(open *mergedExample, unit candidateUnit) {
+	open.endOffset = unit.span.EndOffset
+	open.steps = append(open.steps, unit.steps...)
+	// Any error fence in a merged part marks the whole example expected-to-fail;
+	// keep the first message we see.
+	if unit.expectedOutcome != nil && *unit.expectedOutcome == "fail" {
+		fail := "fail"
+		open.expectedOutcome = &fail
+		if open.expectedErrorMessage == nil && unit.expectedErrorMessage != nil {
+			v := *unit.expectedErrorMessage
+			open.expectedErrorMessage = &v
+		}
+	}
+}
+
+func finishMerged(open *mergedExample, source string) PlannedExample {
+	return PlannedExample{
+		Name:                 open.name,
+		ScopeStack:           open.scopeStack,
+		Span:                 spanFromOffsets(source, open.startOffset, open.endOffset),
+		Steps:                open.steps,
+		ExpectedOutcome:      open.expectedOutcome,
+		ExpectedErrorMessage: open.expectedErrorMessage,
+	}
+}
+
+// planCandidate plans a single candidate paragraph (plus its attached
+// tables/fences) in isolation, appending any ambiguity / error-fence diagnostics.
+func planCandidate(ex Example, doc VarDoc, registry Registry, diagnostics *[]Diagnostic) candidateUnit {
+	source := doc.Source
+	hadAmbiguous := false
+	body := ex.Body
+
+	// Pass 1: plan each text-bearing block, collecting steps per body index.
+	stepsByBlock := map[int][]PlannedStep{}
+	for idx, block := range body {
+		if !isTextBearing(block) {
+			continue
+		}
+		text := textOf(block)
+		blockHits, ambiguities := planBlock(text, registry)
+		for _, collision := range ambiguities {
+			span := liftSpan(source, block, collision.matchStart, collision.matchEnd)
+			*diagnostics = append(*diagnostics, ambiguousMatch(span))
+			hadAmbiguous = true
+		}
+		if !hadAmbiguous && len(blockHits) > 0 {
+			blockSteps := make([]PlannedStep, 0, len(blockHits))
+			for _, h := range blockHits {
+				paramSpans := make([]Span, len(h.paramSpans))
+				for i, p := range h.paramSpans {
+					paramSpans[i] = liftSpan(source, block, p.start, p.end)
+				}
+				blockSteps = append(blockSteps, PlannedStep{
+					Text:       utf16Slice(text, h.matchStart, h.matchEnd),
+					MatchSpan:  liftSpan(source, block, h.matchStart, h.matchEnd),
+					ParamSpans: paramSpans,
+					StepDef:    h.stepDef,
+					Args:       h.args,
+					Formats:    h.formats,
+				})
+			}
+			stepsByBlock[idx] = blockSteps
+		}
+	}
+
+	// Header-bound table: iterate row by row.
+	var bound *headerBoundResult
+	if !hadAmbiguous {
+		bound = detectHeaderBound(body, stepsByBlock, source)
+	}
+	if bound != nil {
+		headerCells := bound.table.Header.Cells
+		var rows []PlannedExample
+		for _, row := range bound.table.Rows {
+			rowObject := map[string]Value{}
+			for i, header := range headerCells {
+				rowObject[header] = StrValue(cellAt(row, i))
+			}
+			rowArgs := append(append([]Value{}, bound.step.Args...), MapValue(rowObject))
+			rowStep := PlannedStep{
+				Text:       bound.step.Text,
+				MatchSpan:  row.Span,
+				ParamSpans: bound.step.ParamSpans,
+				StepDef:    bound.step.StepDef,
+				Args:       rowArgs,
+				Formats:    bound.step.Formats,
+			}
+			rowChecks := make([]RowCheck, len(headerCells))
+			for i, header := range headerCells {
+				rowChecks[i] = NewRowCheck(header, cellAt(row, i), cellSpanAt(row, i))
+			}
+			nestedScope := append(append([]string{}, ex.ScopeStack...), bound.step.Text)
+			rows = append(rows, PlannedExample{
+				Name:       strings.Join(row.Cells, " / "),
+				ScopeStack: nestedScope,
+				Span:       row.Span,
+				Steps:      []PlannedStep{rowStep},
+				HeaderBinding: &HeaderBinding{
+					MatchSpan:  bound.step.MatchSpan,
+					ParamSpans: bound.headerSpans,
+					StepDef:    bound.step.StepDef,
+				},
+				RowChecks: rowChecks,
+			})
+		}
+		return candidateUnit{headerBound: true, rows: rows}
+	}
+
+	// An ```error fence anywhere marks the candidate expected-to-fail.
+	var errorFence *Fence
+	for i := range body {
+		if f, ok := body[i].(Fence); ok && f.Info == "error" {
+			fc := f
+			errorFence = &fc
+			break
+		}
+	}
+
+	// Pass 2: table/fence immediately after a step-bearing block.
+	type attachment struct {
+		table *Table
+		fence *Fence
+	}
+	attachments := map[int]*attachment{}
+	for idx := 1; idx < len(body); idx++ {
+		switch here := body[idx].(type) {
+		case Table:
+			if _, ok := stepsByBlock[idx-1]; ok {
+				if attachments[idx-1] == nil {
+					attachments[idx-1] = &attachment{}
+				}
+				tc := here
+				attachments[idx-1].table = &tc
+			}
+		case Fence:
+			if here.Info != "error" {
+				if _, ok := stepsByBlock[idx-1]; ok {
+					if attachments[idx-1] == nil {
+						attachments[idx-1] = &attachment{}
+					}
+					fc := here
+					attachments[idx-1].fence = &fc
+				}
+			}
+		}
+	}
+
+	// Pass 3: rebuild the final step list, applying attachments to the last
+	// step of each block.
+	var finalSteps []PlannedStep
+	for idx := 0; idx < len(body); idx++ {
+		stepsAtIdx, ok := stepsByBlock[idx]
+		if !ok {
+			continue
+		}
+		attach := attachments[idx]
+		last := len(stepsAtIdx) - 1
+		for s, step := range stepsAtIdx {
+			if s == last && attach != nil {
+				withAttach := step
+				withAttach.DataTable = attach.table
+				withAttach.DocString = attach.fence
+				finalSteps = append(finalSteps, withAttach)
+				continue
+			}
+			finalSteps = append(finalSteps, step)
+		}
+	}
+
+	var runnableSteps []PlannedStep
+	if !hadAmbiguous {
+		runnableSteps = finalSteps
+	}
+
+	// An `error` fence declares the candidate expected-to-fail, but here there's
+	// no runnable step to produce that failure (nothing matched, or the match was
+	// ambiguous). That's an author mistake, not silent Markdown — flag it.
+	if errorFence != nil && len(runnableSteps) == 0 {
+		*diagnostics = append(*diagnostics, errorFenceWithoutStep(errorFence.Span))
+	}
+
+	var expectedOutcome, expectedErrorMessage *string
+	if errorFence != nil {
+		fail := "fail"
+		expectedOutcome = &fail
+		trimmed := javaTrim(errorFence.Body)
+		if trimmed != "" {
+			msg := trimmed
+			expectedErrorMessage = &msg
+		}
+	}
+
+	return candidateUnit{
+		matched:              len(runnableSteps) > 0,
+		precededByDelimiter:  ex.PrecededByDelimiter,
+		name:                 deriveExampleName(body),
+		scopeStack:           ex.ScopeStack,
+		span:                 ex.Span,
+		steps:                runnableSteps,
+		expectedOutcome:      expectedOutcome,
+		expectedErrorMessage: expectedErrorMessage,
 	}
 }
 

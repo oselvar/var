@@ -42,6 +42,18 @@ public class DriftTests
         return r;
     }
 
+    private static Registry DepositWithdrawReg(bool withDeposit = true)
+    {
+        var r = Registry.Create();
+        if (withDeposit)
+        {
+            r = Registry.AddStep(r, new StepInput("I deposit {int}", "steps.cs", 1, (_, _) => null, StepKind.Stimulus));
+        }
+
+        r = Registry.AddStep(r, new StepInput("I withdraw {int}", "steps.cs", 2, (_, _) => null, StepKind.Stimulus));
+        return r;
+    }
+
     private static (string Name, int Line)[] Bare(ImmutableArray<Drift> drifts) =>
         drifts.Select(d => (d.Name, d.Line)).ToArray();
 
@@ -255,6 +267,35 @@ public class DriftTests
         var text = DriftDetection.StringifyVarLock(lockFile);
         Assert.True(text.IndexOf("alpha.md", StringComparison.Ordinal) < text.IndexOf("zebra.md", StringComparison.Ordinal));
         Assert.EndsWith("}\n", text);
+    }
+
+    // ---- Merged examples keep per-paragraph drift granularity (ADR 0012) ----
+
+    [Fact]
+    public void TwoParagraphsThatMergeIntoOneExampleAreEachRecordedAsALiveBaselineEntry()
+    {
+        const string source = "I deposit 100.\n\nI withdraw 40.";
+        var doc = Parse.Run("w.md", source);
+        var plan = Plan.Run(doc, DepositWithdrawReg());
+
+        // One planned example (the two paragraphs merged), but two live entries.
+        Assert.Single(plan.Examples);
+        Assert.Equal(
+            new[] { new BaselineExample("I deposit 100", 1), new BaselineExample("I withdraw 40", 3) },
+            DriftDetection.LiveExamples(doc, plan));
+    }
+
+    [Fact]
+    public void DeletingOneStepDefOfAMergedExampleDriftsOnlyTheNowProseParagraph()
+    {
+        const string source = "I deposit 100.\n\nI withdraw 40.";
+        var doc = Parse.Run("w.md", source);
+        var baseline = DriftDetection.DeriveSpecBaseline(source, doc, Plan.Run(doc, DepositWithdrawReg(true)));
+
+        // The deposit step is gone: its paragraph becomes prose, splitting the example. The withdraw
+        // paragraph is still live; the deposit one drifts.
+        var drift = DriftDetection.DetectDrift(baseline, doc, Plan.Run(doc, DepositWithdrawReg(false)));
+        Assert.Equal(new[] { ("I deposit 100", 1) }, Bare(drift));
     }
 
     [Fact]

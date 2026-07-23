@@ -265,3 +265,50 @@ def test_parse_rejects_malformed_input() -> None:
     assert parse_var_lock("{}") is None
     assert parse_var_lock('{"version":2,"specs":{}}') is None
     assert parse_var_lock('{"version":1,"specs":{"a.md":{"examples":[]}}}') is None
+
+
+# ---- Merged examples keep per-paragraph drift granularity (ADR 0012) -------
+
+
+def _deposit_withdraw_reg(with_deposit: bool = True):
+    r = create_registry()
+    if with_deposit:
+        r = add_step(
+            r,
+            expression="I deposit {int}",
+            expression_source_file="steps.ts",
+            expression_source_line=1,
+            handler=_noop,
+            kind="stimulus",
+        )
+    r = add_step(
+        r,
+        expression="I withdraw {int}",
+        expression_source_file="steps.ts",
+        expression_source_line=2,
+        handler=_noop,
+        kind="stimulus",
+    )
+    return r
+
+
+def test_two_paragraphs_that_merge_are_each_recorded_as_a_live_baseline_entry() -> None:
+    source = "I deposit 100.\n\nI withdraw 40."
+    var_doc = parse("w.md", source)
+    plan1 = plan(var_doc, _deposit_withdraw_reg())
+    # One planned example (the two paragraphs merged), but two live entries.
+    assert len(plan1.examples) == 1
+    assert live_examples(var_doc, plan1) == (
+        BaselineExample(name="I deposit 100", line=1),
+        BaselineExample(name="I withdraw 40", line=3),
+    )
+
+
+def test_deleting_one_step_def_of_a_merged_example_drifts_only_the_now_prose_paragraph() -> None:
+    source = "I deposit 100.\n\nI withdraw 40."
+    var_doc = parse("w.md", source)
+    baseline = derive_spec_baseline(source, var_doc, plan(var_doc, _deposit_withdraw_reg(True)))
+    # The deposit step is gone: its paragraph becomes prose, splitting the
+    # example. The withdraw paragraph is still live; the deposit one drifts.
+    drift = detect_drift(baseline, var_doc, plan(var_doc, _deposit_withdraw_reg(False)))
+    assert _bare(drift) == [("I deposit 100", 1)]

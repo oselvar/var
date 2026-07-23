@@ -25,9 +25,9 @@ import org.junit.platform.testkit.engine.EngineTestKit;
  *
  * <p>{@code examplefixture/ambiguous.md} paired with {@link AmbiguousSteps} mirrors conformance
  * bundle {@code 05-ambiguous-match}: two step expressions both match "I have 5 cukes", so {@code
- * Plan.plan} emits one {@code ambiguous-match} diagnostic and the affected example still plans
- * (with zero steps) and passes vacuously — per bundle 05's own {@code golden/trace.json} — the
- * diagnostic is the only signal something's wrong.
+ * Plan.plan} emits one {@code ambiguous-match} diagnostic and — since the ambiguous paragraph has
+ * no runnable step, it is prose (a delimiter), producing no example at all (ADR 0012), per bundle
+ * 05's own {@code golden/trace.json} — the diagnostic is the only signal something's wrong.
  */
 class VarDiagnosticsReportingTest {
 
@@ -38,9 +38,9 @@ class VarDiagnosticsReportingTest {
         EngineExecutionResults results = executeAmbiguous(workspace);
 
         assertEquals(
-                1,
+                0,
                 results.testEvents().succeeded().count(),
-                "the ambiguous example still plans (zero steps) and passes vacuously");
+                "the ambiguous paragraph is prose (a delimiter), so it produces no example (ADR 0012)");
         assertEquals(
                 1,
                 results.containerEvents().reportingEntryPublished().count(),

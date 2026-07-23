@@ -79,3 +79,14 @@ test('a heading between a paragraph and a fence makes the fence an orphan', () =
   expect(varDoc.orphanAttachments).toHaveLength(1)
   expect(varDoc.examples[0]?.body.some((b) => b.kind === 'fence')).toBe(false)
 })
+
+test('precededByDelimiter marks candidates after a heading or thematic break (ADR 0012)', () => {
+  const source = 'First para.\n\nSecond para.\n\n---\n\nThird para.\n\n## H\n\nFourth para.'
+  const varDoc = structure('d.md', source, scan(source))
+  expect(varDoc.examples.map((e) => e.precededByDelimiter)).toEqual([
+    true, // first candidate in the file
+    false, // adjacent paragraph, no delimiter between
+    true, // after `---`
+    true, // after a heading
+  ])
+})

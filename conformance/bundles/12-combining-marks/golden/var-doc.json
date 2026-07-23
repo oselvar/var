@@ -21,6 +21,7 @@
           "text": "I greet \"éwörld\"."
         }
       ],
+      "precededByDelimiter": true,
       "scopeStack": [
         "🎉 Café World",
         "It greets with combining marks"

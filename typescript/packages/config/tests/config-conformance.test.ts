@@ -9,7 +9,7 @@ import { parseVarConfig } from '../src/config.ts'
 // not __dirname — this is an ESM package and vitest runs test files as ESM.)
 const CASES_DIR = fileURLToPath(new URL('../../../../conformance/config/cases', import.meta.url))
 
-const EMPTY = { docs: { include: [], exclude: [] }, steps: [], snippets: {}, scannerPlugins: [] }
+const EMPTY = { docs: { include: [], exclude: [] }, steps: [], snippets: {} }
 
 for (const name of readdirSync(CASES_DIR).sort()) {
   const dir = join(CASES_DIR, name)
@@ -27,7 +27,6 @@ for (const name of readdirSync(CASES_DIR).sort()) {
         docs: { include: parsed.docs.include, exclude: parsed.docs.exclude },
         steps: parsed.steps,
         snippets: parsed.snippets,
-        scannerPlugins: parsed.scannerPlugins,
       })
       expect(actual).toBe(readFileSync(join(dir, 'golden.json'), 'utf8'))
     })

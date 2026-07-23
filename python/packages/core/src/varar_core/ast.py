@@ -127,6 +127,12 @@ class Example:
     scope_stack: tuple[str, ...] = ()
     span: Span | None = None
     body: tuple[Block, ...] = ()
+    # True when a heading or thematic break (`---`) sits between this candidate
+    # and the previous one — i.e. a syntactic delimiter separates them (also true
+    # for the first candidate). The planner uses it to decide grouping: a matching
+    # candidate with this false merges into the open example rather than starting
+    # a new one. See ADR 0012.
+    preceded_by_delimiter: bool = True
 
     def __post_init__(self) -> None:
         if self.span is None:

@@ -42,8 +42,7 @@ class ConfigBridgeTest {
                         List.of("features/**/*.md", "more/**/*.md"),
                         List.of("features/wip/**/*.md"),
                         List.of("steps/**/*.steps.ts"),
-                        Map.of(),
-                        List.of()),
+                        Map.of()),
                 config);
     }
 

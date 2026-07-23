@@ -21,6 +21,7 @@
           "text": "I convert 1 to roman numerals. The result is I."
         }
       ],
+      "precededByDelimiter": true,
       "scopeStack": [
         "Roman numerals",
         "Converting 1"

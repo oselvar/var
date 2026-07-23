@@ -13,22 +13,5 @@
       }
     }
   ],
-  "examples": [
-    {
-      "expectedOutcome": "pass",
-      "name": "I have 5 cukes",
-      "scopeStack": [
-        "Cukes"
-      ],
-      "span": {
-        "endCol": 16,
-        "endLine": 3,
-        "endOffset": 24,
-        "startCol": 1,
-        "startLine": 3,
-        "startOffset": 9
-      },
-      "steps": []
-    }
-  ]
+  "examples": []
 }

@@ -21,15 +21,13 @@ class VarConfigTest {
                 {
                   "docs": { "include": ["specs/**/*.md"], "exclude": ["specs/wip/**"] },
                   "steps": ["**/*Steps.java"],
-                  "snippets": { "java": "J" },
-                  "scannerPlugins": ["gherkinTables"]
+                  "snippets": { "java": "J" }
                 }
                 """, "varar.config.json");
         assertEquals(List.of("specs/**/*.md"), config.docsInclude());
         assertEquals(List.of("specs/wip/**"), config.docsExclude());
         assertEquals(List.of("**/*Steps.java"), config.steps());
         assertEquals(Map.of("java", "J"), config.snippets());
-        assertEquals(List.of("gherkinTables"), config.scannerPlugins());
     }
 
     @Test

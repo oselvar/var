@@ -21,6 +21,7 @@
           "text": "I increment. The count is 1."
         }
       ],
+      "precededByDelimiter": true,
       "scopeStack": [
         "Counter",
         "First example starts fresh"
@@ -55,6 +56,7 @@
           "text": "I increment the count. The count is 1."
         }
       ],
+      "precededByDelimiter": true,
       "scopeStack": [
         "Counter",
         "Second example starts fresh"

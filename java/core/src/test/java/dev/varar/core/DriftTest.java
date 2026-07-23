@@ -245,4 +245,39 @@ class DriftTest {
         assertTrue(Drift.message(d).contains("I withdraw 40"));
         assertFalse(Drift.message(d).isBlank());
     }
+
+    // ---- Merged examples keep per-paragraph drift granularity (ADR 0012) -------
+
+    private static Registry depositWithdrawReg(boolean withDeposit) {
+        Registry r = Registry.createRegistry();
+        if (withDeposit) {
+            r = Registry.addStep(r, "I deposit {int}", "steps.ts", 1, NOOP_HANDLER, StepKind.STIMULUS);
+        }
+        r = Registry.addStep(r, "I withdraw {int}", "steps.ts", 2, NOOP_HANDLER, StepKind.STIMULUS);
+        return r;
+    }
+
+    @Test
+    void twoParagraphsThatMergeIntoOneExampleAreEachRecordedAsALiveBaselineEntry() {
+        String source = "I deposit 100.\n\nI withdraw 40.";
+        Ast.VarDoc varDoc = Parse.parse("w.md", source);
+        Plan.ExecutionPlan plan = Plan.plan(varDoc, depositWithdrawReg(true));
+        // One planned example (the two paragraphs merged), but two live entries.
+        assertEquals(1, plan.examples().size());
+        assertEquals(
+                List.of(new Drift.BaselineExample("I deposit 100", 1), new Drift.BaselineExample("I withdraw 40", 3)),
+                Drift.liveExamples(varDoc, plan));
+    }
+
+    @Test
+    void deletingOneStepDefOfAMergedExampleDriftsOnlyTheNowProseParagraph() {
+        String source = "I deposit 100.\n\nI withdraw 40.";
+        Ast.VarDoc varDoc = Parse.parse("w.md", source);
+        Drift.SpecBaseline baseline =
+                Drift.deriveSpecBaseline(source, varDoc, Plan.plan(varDoc, depositWithdrawReg(true)));
+        // The deposit step is gone: its paragraph becomes prose, splitting the example. The
+        // withdraw paragraph is still live; the deposit one drifts.
+        List<Drift.Drifted> drift = Drift.detectDrift(baseline, varDoc, Plan.plan(varDoc, depositWithdrawReg(false)));
+        assertEquals(List.of("I deposit 100@1"), bare(drift));
+    }
 }

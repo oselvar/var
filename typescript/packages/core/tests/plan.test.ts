@@ -67,7 +67,7 @@ test('hard line breaks inside the paragraph collapse to single spaces in the nam
   expect(result.examples[0]?.name).toBe('I withdraw 40. I should have 60 left')
 })
 
-test('plan emits an ambiguous-match diagnostic and does NOT include the example steps', () => {
+test('plan emits an ambiguous-match diagnostic and produces no runnable example', () => {
   let r = createRegistry()
   r = addStep(r, {
     expression: 'I have {int} cukes',
@@ -87,7 +87,9 @@ test('plan emits an ambiguous-match diagnostic and does NOT include the example 
   const result = plan(varDoc, r)
   expect(result.diagnostics).toHaveLength(1)
   expect(result.diagnostics[0]?.code).toBe('ambiguous-match')
-  expect(result.examples[0]?.steps).toHaveLength(0)
+  // An ambiguous candidate has no runnable step, so it is prose (a delimiter),
+  // not an example — the diagnostic is the signal. See ADR 0012.
+  expect(result.examples).toHaveLength(0)
 })
 
 test('plan skips an example heading whose body has no matches and no keyword-led sentences', () => {
@@ -98,7 +100,7 @@ test('plan skips an example heading whose body has no matches and no keyword-led
   expect(result.diagnostics).toHaveLength(0)
 })
 
-test('plan turns each list item into its own example (one matched step per item)', () => {
+test('plan merges consecutive list items into one example (a scenario as a bullet list)', () => {
   let r = createRegistry()
   r = addStep(r, {
     expression: 'I have {int} in my account',
@@ -114,12 +116,14 @@ test('plan turns each list item into its own example (one matched step per item)
     kind: 'stimulus',
     handler: () => {},
   })
+  // Two list items, no delimiter between them → one example, shared state (ADR
+  // 0012). A bulleted scenario reads as Given/When/Then bullets.
   const source = '# Bullets\n\n- Given I have 100 in my account\n- When I withdraw 40'
   const result = plan(parse('b.md', source), r)
-  expect(result.examples).toHaveLength(2)
-  expect(result.examples.map((e) => e.steps.map((s) => s.text))).toEqual([
-    ['I have 100 in my account'],
-    ['I withdraw 40'],
+  expect(result.examples).toHaveLength(1)
+  expect(result.examples[0]?.steps.map((s) => s.text)).toEqual([
+    'I have 100 in my account',
+    'I withdraw 40',
   ])
 })
 
@@ -514,4 +518,88 @@ the payload is:
   expect(ds.content).toBe('{ "ok": true }\n')
   // The span slices back to the exact body content (trailing newline included).
   expect(source.slice(ds.span.startOffset, ds.span.endOffset)).toBe('{ "ok": true }\n')
+})
+
+// ---- Example delimiters (ADR 0012) ----------------------------------------
+
+test('consecutive matching paragraphs with no delimiter merge into one example', () => {
+  const source = 'I have 100 in my account.\n\nI withdraw 40.\n\nI should have 60 left.'
+  const result = plan(parse('m.md', source), reg())
+  expect(result.examples).toHaveLength(1)
+  expect(result.examples[0]?.steps.map((s) => s.text)).toEqual([
+    'I have 100 in my account',
+    'I withdraw 40',
+    'I should have 60 left',
+  ])
+  // The name is the first matching paragraph's text.
+  expect(result.examples[0]?.name).toBe('I have 100 in my account')
+})
+
+test('a thematic break (---) between matching paragraphs splits them into two examples', () => {
+  const source = 'I have 100 in my account.\n\n---\n\nI withdraw 40.'
+  const result = plan(parse('h.md', source), reg())
+  expect(result.examples).toHaveLength(2)
+  expect(result.examples.map((e) => e.steps.map((s) => s.text))).toEqual([
+    ['I have 100 in my account'],
+    ['I withdraw 40'],
+  ])
+})
+
+test('a heading between matching paragraphs splits them into two examples', () => {
+  const source = 'I have 100 in my account.\n\n## Next\n\nI withdraw 40.'
+  const result = plan(parse('hd.md', source), reg())
+  expect(result.examples).toHaveLength(2)
+  expect(result.examples[1]?.scopeStack).toEqual(['Next'])
+})
+
+test('a non-matching paragraph (prose) between matching paragraphs splits the example', () => {
+  const source = 'I have 100 in my account.\n\nJust explaining what happens next.\n\nI withdraw 40.'
+  const result = plan(parse('p.md', source), reg())
+  expect(result.examples).toHaveLength(2)
+  expect(result.examples.map((e) => e.steps.map((s) => s.text))).toEqual([
+    ['I have 100 in my account'],
+    ['I withdraw 40'],
+  ])
+})
+
+test('leading and trailing prose does not merge into an example', () => {
+  const source = 'A preamble that matches nothing.\n\nI withdraw 40.\n\nA closing remark.'
+  const result = plan(parse('pp.md', source), reg())
+  expect(result.examples).toHaveLength(1)
+  expect(result.examples[0]?.steps.map((s) => s.text)).toEqual(['I withdraw 40'])
+})
+
+test('the multi-table shape from issue #61: two tables in one example survive blank lines', () => {
+  let r = createRegistry()
+  r = addStep(r, {
+    expression: 'the following users have been imported',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 1,
+    kind: 'stimulus',
+    handler: () => {},
+  })
+  r = addStep(r, {
+    expression: 'the following assets have been imported',
+    expressionSourceFile: 's.ts',
+    expressionSourceLine: 2,
+    kind: 'stimulus',
+    handler: () => {},
+  })
+  const source = `Given the following users have been imported:
+
+| email | name |
+| ----- | ---- |
+| a@b.c | Ada  |
+
+And the following assets have been imported:
+
+| name  |
+| ----- |
+| Moose |`
+  const result = plan(parse('basket.md', source), r)
+  expect(result.examples).toHaveLength(1)
+  const ex = result.examples[0]
+  expect(ex?.steps).toHaveLength(2)
+  expect(ex?.steps[0]?.dataTable?.rows).toHaveLength(1)
+  expect(ex?.steps[1]?.dataTable?.rows).toHaveLength(1)
 })

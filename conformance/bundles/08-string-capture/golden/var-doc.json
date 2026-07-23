@@ -21,6 +21,7 @@
           "text": "I greet \"world\"."
         }
       ],
+      "precededByDelimiter": true,
       "scopeStack": [
         "Greeting",
         "It captures a quoted string"

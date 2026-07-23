@@ -84,3 +84,17 @@ def test_heading_between_paragraph_and_fence_makes_fence_an_orphan() -> None:
     var_doc = structure("h.md", source, scan(source))
     assert len(var_doc.orphan_attachments) == 1
     assert not any(b.kind == "fence" for b in var_doc.examples[0].body)
+
+
+def test_preceded_by_delimiter_marks_candidates_after_heading_or_thematic_break() -> None:
+    # ADR 0012: precededByDelimiter is true for the first candidate and any
+    # candidate after a heading or a thematic break (`---`), false for an
+    # adjacent paragraph with nothing between.
+    source = "First para.\n\nSecond para.\n\n---\n\nThird para.\n\n## H\n\nFourth para."
+    var_doc = structure("d.md", source, scan(source))
+    assert [e.preceded_by_delimiter for e in var_doc.examples] == [
+        True,  # first candidate in the file
+        False,  # adjacent paragraph, no delimiter between
+        True,  # after `---`
+        True,  # after a heading
+    ]

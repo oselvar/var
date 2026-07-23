@@ -1,7 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "ignoreExportsUsedInFile": true,
-  "ignoreWorkspaces": ["packages/cucumber"],
   "workspaces": {
     "packages/config": {
       "project": ["src/**/*.ts", "tests/**/*.ts"]

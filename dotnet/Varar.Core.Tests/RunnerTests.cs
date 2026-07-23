@@ -101,8 +101,10 @@ public class RunnerTests
     [Fact]
     public void ExampleNamesDeduplicateSharedBaseNames()
     {
-        // Two examples under the same innermost heading get a [1] suffix on the second.
-        var plan = Runner.Runner.PlanSpec("w.md", "# Withdrawals\n\nI withdraw 40.\n\nI withdraw 10.", WithdrawReg());
+        // Two examples under the same innermost heading get a [1] suffix on the second. A `---`
+        // delimiter keeps them as two examples (ADR 0012 — adjacent matching paragraphs otherwise
+        // merge into one).
+        var plan = Runner.Runner.PlanSpec("w.md", "# Withdrawals\n\nI withdraw 40.\n\n---\n\nI withdraw 10.", WithdrawReg());
         var names = Runner.Runner.ExampleNames(plan);
         Assert.Equal(new[] { "Withdrawals", "Withdrawals[1]" }, names);
     }

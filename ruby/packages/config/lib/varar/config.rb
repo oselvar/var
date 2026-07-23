@@ -10,13 +10,13 @@ module Varar
     VERSION = '0.6.1'
 
     # The parsed config. All fields default to empty.
-    VarConfig = Data.define(:docs_include, :docs_exclude, :steps, :snippets, :scanner_plugins) do
-      def initialize(docs_include: [], docs_exclude: [], steps: [], snippets: {}, scanner_plugins: [])
+    VarConfig = Data.define(:docs_include, :docs_exclude, :steps, :snippets) do
+      def initialize(docs_include: [], docs_exclude: [], steps: [], snippets: {})
         super
       end
     end
 
-    KNOWN_KEYS = %w[$schema docs steps snippets scannerPlugins].freeze
+    KNOWN_KEYS = %w[$schema docs steps snippets].freeze
     KNOWN_DOCS_KEYS = %w[include exclude].freeze
 
     module_function
@@ -50,8 +50,7 @@ module Varar
         docs_include: string_array(docs['include'], 'docs.include', path),
         docs_exclude: string_array(docs['exclude'], 'docs.exclude', path),
         steps: string_array(data['steps'], 'steps', path),
-        snippets: snippets,
-        scanner_plugins: string_array(data['scannerPlugins'], 'scannerPlugins', path)
+        snippets: snippets
       )
     end
 

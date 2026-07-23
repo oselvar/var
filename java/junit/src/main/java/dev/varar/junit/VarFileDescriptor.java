@@ -71,6 +71,23 @@ final class VarFileDescriptor extends AbstractTestDescriptor implements Node<Var
         return Type.CONTAINER;
     }
 
+    /**
+     * Keeps this file container in the tree even with no example children, as long as its plan
+     * carries a diagnostic to surface. Under ADR 0012 an ambiguous-only (or
+     * error-fence-without-step) file plans to zero examples, but its {@code ambiguous-match} /
+     * {@code error-fence-without-step} diagnostic must still reach JUnit reporting via {@link
+     * #before} (see {@link #publishDiagnostics}). The hierarchical engine's default {@code prune()}
+     * removes any childless non-root container before execution, which would silently drop the
+     * diagnostic — so a childless-but-diagnostic container opts out of that pruning.
+     */
+    @Override
+    public void prune() {
+        if (getChildren().isEmpty() && !plan.diagnostics().isEmpty()) {
+            return;
+        }
+        super.prune();
+    }
+
     /** This file's raw source text, as read at discovery time. */
     String content() {
         return content;

@@ -456,6 +456,7 @@ public final class Conformance {
         out.put("scopeStack", List.copyOf(example.scopeStack()));
         out.put("span", span(example.span()));
         out.put("body", example.body().stream().map(Conformance::block).toList());
+        out.put("precededByDelimiter", example.precededByDelimiter());
         return out;
     }
 

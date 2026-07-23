@@ -59,7 +59,6 @@ export type Store = {
 // no varar.lock.json — drift there is shown via the run pipeline, not the LSP).
 async function driftDiagnosticRefs(
   fs: FileSystem,
-  config: VarConfig,
   varFiles: ReadonlyArray<{ readonly path: string; readonly source: string }>,
   registry: Registry,
 ): Promise<DiagnosticRef[]> {
@@ -81,7 +80,7 @@ async function driftDiagnosticRefs(
     const specPath = toSpecPath(root, vf.path)
     const baseline = lock.specs[specPath]
     if (!baseline) continue
-    const varDoc = parse(vf.path, vf.source, config.scannerPlugins)
+    const varDoc = parse(vf.path, vf.source)
     const executionPlan = plan(varDoc, registry)
     for (const drift of detectDrift(baseline, varDoc, executionPlan)) {
       const diag = driftDetected({ name: drift.name, span: drift.span })
@@ -157,14 +156,13 @@ export function createStore(deps: StoreDeps): Store {
       current = buildWorkspaceIndex({
         stepFiles,
         varFiles,
-        scannerPlugins: config.scannerPlugins,
         scanner,
       })
       // Drift is a run-result concern, but the LSP surfaces it live: a
       // paragraph the committed varar.lock.json recorded as an example that now
       // matches no step gets a warning squiggle. Additive to the index's own
       // parse/plan diagnostics.
-      const drift = await driftDiagnosticRefs(fs, config, varFiles, current.registry)
+      const drift = await driftDiagnosticRefs(fs, varFiles, current.registry)
       if (drift.length > 0)
         current = { ...current, diagnostics: [...current.diagnostics, ...drift] }
     },
@@ -186,7 +184,7 @@ export function createStore(deps: StoreDeps): Store {
         .replace(/[/\\]+$/, '')
       const specPath = toSpecPath(root, varPath)
       const source = await fs.read(varPath)
-      const varDoc = parse(varPath, source, config.scannerPlugins)
+      const varDoc = parse(varPath, source)
       const baseline = deriveSpecBaseline(source, varDoc, plan(varDoc, current.registry))
       const next: VarLock = {
         version: 1,

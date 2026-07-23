@@ -262,13 +262,18 @@ public static class DriftDetection
         return new SpecBaseline(hash.GetString()!, examples.ToImmutable());
     }
 
-    // Is inner within outer (offset containment)?
-    private static bool Within(Span inner, Span outer) =>
-        inner.StartOffset >= outer.StartOffset && inner.EndOffset <= outer.EndOffset;
+    // Do the two spans overlap at all (offset ranges intersect)? A candidate paragraph relates to
+    // its planned example either way round: a header-bound row sits *inside* its binding paragraph,
+    // while a merged example's span *covers* each of the candidates it absorbed (ADR 0012). Overlap
+    // catches both.
+    private static bool Overlaps(Span a, Span b) =>
+        a.StartOffset < b.EndOffset && b.StartOffset < a.EndOffset;
 
-    // A candidate is live if at least one planned example falls within it.
+    // A candidate is live if it overlaps at least one planned example. A now-prose paragraph — one
+    // whose step def was renamed or deleted — overlaps none (it became a delimiter, splitting any
+    // example it was part of), so drift catches it.
     private static bool IsLive(Span candidateSpan, ExecutionPlan plan) =>
-        plan.Examples.Any(pe => Within(pe.Span, candidateSpan));
+        plan.Examples.Any(pe => Overlaps(pe.Span, candidateSpan));
 
     // Lower-cased Unicode letter/digit word tokens.
     private static HashSet<string> Tokenize(string text)

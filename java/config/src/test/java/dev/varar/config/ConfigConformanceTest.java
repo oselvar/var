@@ -51,7 +51,6 @@ class ConfigConformanceTest {
         artifact.put("docs", docs);
         artifact.put("steps", config.steps());
         artifact.put("snippets", config.snippets());
-        artifact.put("scannerPlugins", config.scannerPlugins());
         String actual = CanonicalJson.canonicalStringify(artifact);
         String expected = Files.readString(caseDir.resolve("golden.json"), StandardCharsets.UTF_8);
         assertEquals(expected, actual, () -> caseDir.getFileName() + " mismatch");

@@ -106,179 +106,291 @@ public final class Plan {
 
     /** Plans {@code doc} against {@code registry}: mirrors {@code plan()} in plan.ts exactly. */
     public static ExecutionPlan plan(Ast.VarDoc doc, Registry registry) {
-        List<PlannedExample> examples = new ArrayList<>();
         List<Diagnostics.Diagnostic> diagnostics = new ArrayList<>();
 
+        // Phase 1: plan each candidate paragraph independently into a "unit".
+        List<CandidateUnit> units = new ArrayList<>(doc.examples().size());
         for (Ast.Example ex : doc.examples()) {
-            boolean hadAmbiguous = false;
-            List<Ast.Block> body = ex.body();
-
-            // Pass 1: plan each text-bearing block and collect steps per body index.
-            Map<Integer, List<PlannedStep>> stepsByBlock = new LinkedHashMap<>();
-            for (int idx = 0; idx < body.size(); idx++) {
-                Ast.Block block = body.get(idx);
-                if (!isTextBearing(block)) continue;
-                String text = textOf(block);
-                BlockPlan result = planBlock(text, registry);
-                for (Ambiguity collision : result.ambiguities()) {
-                    Span span = liftSpan(doc.source(), block, collision.matchStart(), collision.matchEnd());
-                    diagnostics.add(Diagnostics.ambiguousMatch(span));
-                    hadAmbiguous = true;
-                }
-                if (!hadAmbiguous && !result.steps().isEmpty()) {
-                    List<PlannedStep> blockSteps =
-                            new ArrayList<>(result.steps().size());
-                    for (Matcher.Hit hit : result.steps()) {
-                        List<Span> paramSpans = new ArrayList<>(hit.paramSpans().size());
-                        for (Matcher.ParamSpan p : hit.paramSpans()) {
-                            paramSpans.add(liftSpan(doc.source(), block, p.start(), p.end()));
-                        }
-                        blockSteps.add(new PlannedStep(
-                                text.substring(hit.matchStart(), hit.matchEnd()),
-                                liftSpan(doc.source(), block, hit.matchStart(), hit.matchEnd()),
-                                paramSpans,
-                                hit.stepDef(),
-                                hit.args(),
-                                hit.formats(),
-                                null,
-                                null));
-                    }
-                    stepsByBlock.put(idx, blockSteps);
-                }
-            }
-
-            // Header-bound table: a table whose every header cell is named (whole word,
-            // case-sensitive) in the matched paragraph above it iterates row by row. The matched
-            // step runs once per data row, receiving the row as an object keyed by header cell,
-            // and each row becomes its own example.
-            HeaderBoundResult bound = hadAmbiguous ? null : detectHeaderBound(body, stepsByBlock, doc.source());
-            if (bound != null) {
-                HeaderBinding headerBinding = new HeaderBinding(
-                        bound.step().matchSpan(),
-                        bound.headerSpans(),
-                        bound.step().stepDef());
-                List<String> headerCells = bound.table().header().cells();
-                for (Ast.Row row : bound.table().rows()) {
-                    Map<String, String> rowObject = new LinkedHashMap<>();
-                    for (int i = 0; i < headerCells.size(); i++) {
-                        rowObject.put(headerCells.get(i), cellAt(row, i));
-                    }
-                    List<Object> rowArgs = new ArrayList<>(bound.step().args());
-                    rowArgs.add(rowObject);
-                    PlannedStep rowStep = new PlannedStep(
-                            bound.step().text(),
-                            row.span(),
-                            bound.step().paramSpans(),
-                            bound.step().stepDef(),
-                            rowArgs,
-                            bound.step().formats(),
-                            null,
-                            null);
-                    List<CellDiff.RowCheck> rowChecks = new ArrayList<>(headerCells.size());
-                    for (int i = 0; i < headerCells.size(); i++) {
-                        rowChecks.add(new CellDiff.RowCheck(headerCells.get(i), cellAt(row, i), cellSpanAt(row, i)));
-                    }
-                    List<String> nestedScope = new ArrayList<>(ex.scopeStack());
-                    nestedScope.add(bound.step().text());
-                    examples.add(new PlannedExample(
-                            String.join(" / ", row.cells()),
-                            nestedScope,
-                            row.span(),
-                            List.of(rowStep),
-                            headerBinding,
-                            rowChecks,
-                            null,
-                            null));
-                }
-                continue;
-            }
-
-            // An ```error fence anywhere in this example marks it expected-to-fail and is consumed
-            // here (never attached to a step as a doc string).
-            Ast.Fence errorFence = null;
-            for (Ast.Block b : body) {
-                if (b instanceof Ast.Fence f && "error".equals(f.info())) {
-                    errorFence = f;
-                    break;
-                }
-            }
-
-            // Pass 2: look for table/fence immediately after a step-bearing block.
-            Map<Integer, Attachment> attachments = new LinkedHashMap<>();
-            for (int idx = 1; idx < body.size(); idx++) {
-                Ast.Block here = body.get(idx);
-                if (here instanceof Ast.Table table && stepsByBlock.containsKey(idx - 1)) {
-                    Attachment prev = attachments.get(idx - 1);
-                    attachments.put(idx - 1, new Attachment(table, prev == null ? null : prev.docString()));
-                } else if (here instanceof Ast.Fence fence
-                        && !"error".equals(fence.info())
-                        && stepsByBlock.containsKey(idx - 1)) {
-                    Attachment prev = attachments.get(idx - 1);
-                    attachments.put(idx - 1, new Attachment(prev == null ? null : prev.dataTable(), fence));
-                }
-            }
-
-            // Pass 3: rebuild final step list, applying attachments to the last step of each block.
-            List<PlannedStep> finalSteps = new ArrayList<>();
-            for (int idx = 0; idx < body.size(); idx++) {
-                List<PlannedStep> stepsAtIdx = stepsByBlock.getOrDefault(idx, List.of());
-                Attachment attachAt = attachments.get(idx);
-                for (int s = 0; s < stepsAtIdx.size(); s++) {
-                    PlannedStep step = stepsAtIdx.get(s);
-                    if (s == stepsAtIdx.size() - 1 && attachAt != null) {
-                        finalSteps.add(new PlannedStep(
-                                step.text(),
-                                step.matchSpan(),
-                                step.paramSpans(),
-                                step.stepDef(),
-                                step.args(),
-                                step.formats(),
-                                attachAt.dataTable(),
-                                attachAt.docString()));
-                    } else {
-                        finalSteps.add(step);
-                    }
-                }
-            }
-
-            List<PlannedStep> runnableSteps = hadAmbiguous ? List.of() : finalSteps;
-
-            // An `error` fence declares the example expected-to-fail, but here there's no
-            // runnable step to produce that failure (nothing matched, or the match was
-            // ambiguous). That's an author mistake, not silent Markdown — flag it.
-            if (errorFence != null && runnableSteps.isEmpty()) {
-                diagnostics.add(Diagnostics.errorFenceWithoutStep(errorFence.span()));
-            }
-
-            if (finalSteps.isEmpty() && !hadAmbiguous) {
-                // Example has no matches — drop it (docs). Any `error`-fence mistake was already
-                // reported just above.
-                continue;
-            }
-
-            String expectedOutcome = null;
-            String expectedErrorMessage = null;
-            if (errorFence != null) {
-                expectedOutcome = "fail";
-                String trimmed = errorFence.body().strip();
-                if (!trimmed.isEmpty()) expectedErrorMessage = trimmed;
-            }
-
-            examples.add(new PlannedExample(
-                    deriveExampleName(body),
-                    ex.scopeStack(),
-                    ex.span(),
-                    runnableSteps,
-                    null,
-                    null,
-                    expectedOutcome,
-                    expectedErrorMessage));
+            units.add(planCandidate(ex, doc, registry, diagnostics));
         }
+
+        // Phase 2: group adjacent candidates into examples. A matching candidate continues the open
+        // example when no delimiter (heading / `---`) precedes it; otherwise it starts a new one. A
+        // non-matching candidate (prose) is a delimiter: it closes the open example and is dropped.
+        // A header-bound table candidate is standalone — it already emits one example per row. See
+        // ADR 0012.
+        List<PlannedExample> examples = new ArrayList<>();
+        MergedExample open = null;
+        for (CandidateUnit unit : units) {
+            if (unit instanceof HeaderBoundUnit hb) {
+                if (open != null) {
+                    examples.add(finishMerged(open, doc.source()));
+                    open = null;
+                }
+                examples.addAll(hb.rows());
+                continue;
+            }
+            StepsUnit su = (StepsUnit) unit;
+            if (!su.matched()) {
+                // Prose paragraph — a delimiter. Drop it and end the open example.
+                if (open != null) {
+                    examples.add(finishMerged(open, doc.source()));
+                    open = null;
+                }
+                continue;
+            }
+            if (open != null && !su.precededByDelimiter()) {
+                mergeInto(open, su);
+            } else {
+                if (open != null) examples.add(finishMerged(open, doc.source()));
+                open = startMerged(su);
+            }
+        }
+        if (open != null) examples.add(finishMerged(open, doc.source()));
 
         // A table or fence that doesn't attach to a step is just Markdown content, not a mistake
         // — it produces no diagnostic.
 
         return new ExecutionPlan(doc, examples, diagnostics);
+    }
+
+    // -----------------------------------------------------------------------------------------
+    // Internal: two-phase grouping (ADR 0012)
+    // -----------------------------------------------------------------------------------------
+
+    /** One candidate paragraph, planned in isolation. */
+    private sealed interface CandidateUnit permits HeaderBoundUnit, StepsUnit {}
+
+    /** A header-bound table candidate — standalone, one planned example per data row. */
+    private record HeaderBoundUnit(List<PlannedExample> rows) implements CandidateUnit {}
+
+    /** A step-bearing candidate (or a non-matching prose paragraph, {@code matched == false}). */
+    private record StepsUnit(
+            boolean matched,
+            boolean precededByDelimiter,
+            String name,
+            List<String> scopeStack,
+            Span span,
+            List<PlannedStep> steps,
+            String expectedOutcome,
+            String expectedErrorMessage)
+            implements CandidateUnit {}
+
+    /**
+     * A step-bearing candidate accumulating into one example while adjacent matching candidates
+     * keep merging in. Mutable — the grouping loop appends steps and extends the end offset in
+     * place; {@link #finishMerged} freezes it into an immutable {@link PlannedExample}.
+     */
+    private static final class MergedExample {
+        String name;
+        List<String> scopeStack;
+        int startOffset;
+        int endOffset;
+        List<PlannedStep> steps;
+        String expectedOutcome; // null or "fail"
+        String expectedErrorMessage; // null when absent
+    }
+
+    private static MergedExample startMerged(StepsUnit unit) {
+        MergedExample m = new MergedExample();
+        m.name = unit.name();
+        m.scopeStack = unit.scopeStack();
+        m.startOffset = unit.span().startOffset();
+        m.endOffset = unit.span().endOffset();
+        m.steps = new ArrayList<>(unit.steps());
+        m.expectedOutcome = unit.expectedOutcome();
+        m.expectedErrorMessage = unit.expectedErrorMessage();
+        return m;
+    }
+
+    private static void mergeInto(MergedExample open, StepsUnit unit) {
+        open.endOffset = unit.span().endOffset();
+        open.steps.addAll(unit.steps());
+        // Any error fence in a merged part marks the whole example expected-to-fail; keep the first
+        // message we see.
+        if ("fail".equals(unit.expectedOutcome())) {
+            open.expectedOutcome = "fail";
+            if (open.expectedErrorMessage == null && unit.expectedErrorMessage() != null) {
+                open.expectedErrorMessage = unit.expectedErrorMessage();
+            }
+        }
+    }
+
+    private static PlannedExample finishMerged(MergedExample open, String source) {
+        Span span = Span.spanFromOffsets(source, open.startOffset, open.endOffset);
+        return new PlannedExample(
+                open.name,
+                open.scopeStack,
+                span,
+                open.steps,
+                null,
+                null,
+                open.expectedOutcome,
+                open.expectedErrorMessage);
+    }
+
+    /**
+     * Plans a single candidate paragraph (plus its attached tables/fences) in isolation. Emits
+     * ambiguity / error-fence diagnostics into {@code diagnostics}. Uses the same per-candidate
+     * logic the old single-pass planner ran per example; grouping is Phase 2's job.
+     */
+    private static CandidateUnit planCandidate(
+            Ast.Example ex, Ast.VarDoc doc, Registry registry, List<Diagnostics.Diagnostic> diagnostics) {
+        boolean hadAmbiguous = false;
+        List<Ast.Block> body = ex.body();
+
+        // Pass 1: plan each text-bearing block and collect steps per body index.
+        Map<Integer, List<PlannedStep>> stepsByBlock = new LinkedHashMap<>();
+        for (int idx = 0; idx < body.size(); idx++) {
+            Ast.Block block = body.get(idx);
+            if (!isTextBearing(block)) continue;
+            String text = textOf(block);
+            BlockPlan result = planBlock(text, registry);
+            for (Ambiguity collision : result.ambiguities()) {
+                Span span = liftSpan(doc.source(), block, collision.matchStart(), collision.matchEnd());
+                diagnostics.add(Diagnostics.ambiguousMatch(span));
+                hadAmbiguous = true;
+            }
+            if (!hadAmbiguous && !result.steps().isEmpty()) {
+                List<PlannedStep> blockSteps = new ArrayList<>(result.steps().size());
+                for (Matcher.Hit hit : result.steps()) {
+                    List<Span> paramSpans = new ArrayList<>(hit.paramSpans().size());
+                    for (Matcher.ParamSpan p : hit.paramSpans()) {
+                        paramSpans.add(liftSpan(doc.source(), block, p.start(), p.end()));
+                    }
+                    blockSteps.add(new PlannedStep(
+                            text.substring(hit.matchStart(), hit.matchEnd()),
+                            liftSpan(doc.source(), block, hit.matchStart(), hit.matchEnd()),
+                            paramSpans,
+                            hit.stepDef(),
+                            hit.args(),
+                            hit.formats(),
+                            null,
+                            null));
+                }
+                stepsByBlock.put(idx, blockSteps);
+            }
+        }
+
+        // Header-bound table: a table whose every header cell is named (whole word, case-sensitive)
+        // in the matched paragraph above it iterates row by row. The matched step runs once per
+        // data row, receiving the row as an object keyed by header cell, and each row becomes its
+        // own example.
+        HeaderBoundResult bound = hadAmbiguous ? null : detectHeaderBound(body, stepsByBlock, doc.source());
+        if (bound != null) {
+            HeaderBinding headerBinding = new HeaderBinding(
+                    bound.step().matchSpan(), bound.headerSpans(), bound.step().stepDef());
+            List<String> headerCells = bound.table().header().cells();
+            List<PlannedExample> rows = new ArrayList<>(bound.table().rows().size());
+            for (Ast.Row row : bound.table().rows()) {
+                Map<String, String> rowObject = new LinkedHashMap<>();
+                for (int i = 0; i < headerCells.size(); i++) {
+                    rowObject.put(headerCells.get(i), cellAt(row, i));
+                }
+                List<Object> rowArgs = new ArrayList<>(bound.step().args());
+                rowArgs.add(rowObject);
+                PlannedStep rowStep = new PlannedStep(
+                        bound.step().text(),
+                        row.span(),
+                        bound.step().paramSpans(),
+                        bound.step().stepDef(),
+                        rowArgs,
+                        bound.step().formats(),
+                        null,
+                        null);
+                List<CellDiff.RowCheck> rowChecks = new ArrayList<>(headerCells.size());
+                for (int i = 0; i < headerCells.size(); i++) {
+                    rowChecks.add(new CellDiff.RowCheck(headerCells.get(i), cellAt(row, i), cellSpanAt(row, i)));
+                }
+                List<String> nestedScope = new ArrayList<>(ex.scopeStack());
+                nestedScope.add(bound.step().text());
+                rows.add(new PlannedExample(
+                        String.join(" / ", row.cells()),
+                        nestedScope,
+                        row.span(),
+                        List.of(rowStep),
+                        headerBinding,
+                        rowChecks,
+                        null,
+                        null));
+            }
+            return new HeaderBoundUnit(rows);
+        }
+
+        // An ```error fence anywhere in this candidate marks it expected-to-fail and is consumed
+        // here (never attached to a step as a doc string).
+        Ast.Fence errorFence = null;
+        for (Ast.Block b : body) {
+            if (b instanceof Ast.Fence f && "error".equals(f.info())) {
+                errorFence = f;
+                break;
+            }
+        }
+
+        // Pass 2: look for table/fence immediately after a step-bearing block.
+        Map<Integer, Attachment> attachments = new LinkedHashMap<>();
+        for (int idx = 1; idx < body.size(); idx++) {
+            Ast.Block here = body.get(idx);
+            if (here instanceof Ast.Table table && stepsByBlock.containsKey(idx - 1)) {
+                Attachment prev = attachments.get(idx - 1);
+                attachments.put(idx - 1, new Attachment(table, prev == null ? null : prev.docString()));
+            } else if (here instanceof Ast.Fence fence
+                    && !"error".equals(fence.info())
+                    && stepsByBlock.containsKey(idx - 1)) {
+                Attachment prev = attachments.get(idx - 1);
+                attachments.put(idx - 1, new Attachment(prev == null ? null : prev.dataTable(), fence));
+            }
+        }
+
+        // Pass 3: rebuild final step list, applying attachments to the last step of each block.
+        List<PlannedStep> finalSteps = new ArrayList<>();
+        for (int idx = 0; idx < body.size(); idx++) {
+            List<PlannedStep> stepsAtIdx = stepsByBlock.getOrDefault(idx, List.of());
+            Attachment attachAt = attachments.get(idx);
+            for (int s = 0; s < stepsAtIdx.size(); s++) {
+                PlannedStep step = stepsAtIdx.get(s);
+                if (s == stepsAtIdx.size() - 1 && attachAt != null) {
+                    finalSteps.add(new PlannedStep(
+                            step.text(),
+                            step.matchSpan(),
+                            step.paramSpans(),
+                            step.stepDef(),
+                            step.args(),
+                            step.formats(),
+                            attachAt.dataTable(),
+                            attachAt.docString()));
+                } else {
+                    finalSteps.add(step);
+                }
+            }
+        }
+
+        List<PlannedStep> runnableSteps = hadAmbiguous ? List.of() : finalSteps;
+
+        // An `error` fence declares the candidate expected-to-fail, but here there's no runnable
+        // step to produce that failure (nothing matched, or the match was ambiguous). That's an
+        // author mistake, not silent Markdown — flag it.
+        if (errorFence != null && runnableSteps.isEmpty()) {
+            diagnostics.add(Diagnostics.errorFenceWithoutStep(errorFence.span()));
+        }
+
+        String expectedOutcome = null;
+        String expectedErrorMessage = null;
+        if (errorFence != null) {
+            expectedOutcome = "fail";
+            String trimmed = errorFence.body().strip();
+            if (!trimmed.isEmpty()) expectedErrorMessage = trimmed;
+        }
+
+        return new StepsUnit(
+                !runnableSteps.isEmpty(),
+                ex.precededByDelimiter(),
+                deriveExampleName(body),
+                ex.scopeStack(),
+                ex.span(),
+                runnableSteps,
+                expectedOutcome,
+                expectedErrorMessage);
     }
 
     // -----------------------------------------------------------------------------------------

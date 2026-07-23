@@ -1,0 +1,283 @@
+{
+  "diagnostics": [],
+  "examples": [
+    {
+      "expectedOutcome": "pass",
+      "name": "Given the following users have been imported:",
+      "scopeStack": [
+        "A basket imports users and assets"
+      ],
+      "span": {
+        "endCol": 45,
+        "endLine": 15,
+        "endOffset": 257,
+        "startCol": 1,
+        "startLine": 3,
+        "startOffset": 37
+      },
+      "steps": [
+        {
+          "args": [],
+          "dataTable": {
+            "header": {
+              "cellSpans": [
+                {
+                  "endCol": 8,
+                  "endLine": 5,
+                  "endOffset": 91,
+                  "startCol": 3,
+                  "startLine": 5,
+                  "startOffset": 86
+                },
+                {
+                  "endCol": 15,
+                  "endLine": 5,
+                  "endOffset": 98,
+                  "startCol": 11,
+                  "startLine": 5,
+                  "startOffset": 94
+                }
+              ],
+              "cells": [
+                "email",
+                "name"
+              ],
+              "span": {
+                "endCol": 17,
+                "endLine": 5,
+                "endOffset": 100,
+                "startCol": 1,
+                "startLine": 5,
+                "startOffset": 84
+              }
+            },
+            "kind": "table",
+            "rows": [
+              {
+                "cellSpans": [
+                  {
+                    "endCol": 8,
+                    "endLine": 7,
+                    "endOffset": 125,
+                    "startCol": 3,
+                    "startLine": 7,
+                    "startOffset": 120
+                  },
+                  {
+                    "endCol": 14,
+                    "endLine": 7,
+                    "endOffset": 131,
+                    "startCol": 11,
+                    "startLine": 7,
+                    "startOffset": 128
+                  }
+                ],
+                "cells": [
+                  "a@b.c",
+                  "Ada"
+                ],
+                "span": {
+                  "endCol": 17,
+                  "endLine": 7,
+                  "endOffset": 134,
+                  "startCol": 1,
+                  "startLine": 7,
+                  "startOffset": 118
+                }
+              }
+            ],
+            "span": {
+              "endCol": 17,
+              "endLine": 7,
+              "endOffset": 134,
+              "startCol": 1,
+              "startLine": 5,
+              "startOffset": 84
+            }
+          },
+          "matchSpan": {
+            "endCol": 45,
+            "endLine": 3,
+            "endOffset": 81,
+            "startCol": 7,
+            "startLine": 3,
+            "startOffset": 43
+          },
+          "matchedExpression": "the following users have been imported",
+          "paramSpans": [],
+          "text": "the following users have been imported"
+        },
+        {
+          "args": [],
+          "dataTable": {
+            "header": {
+              "cellSpans": [
+                {
+                  "endCol": 7,
+                  "endLine": 11,
+                  "endOffset": 188,
+                  "startCol": 3,
+                  "startLine": 11,
+                  "startOffset": 184
+                }
+              ],
+              "cells": [
+                "name"
+              ],
+              "span": {
+                "endCol": 10,
+                "endLine": 11,
+                "endOffset": 191,
+                "startCol": 1,
+                "startLine": 11,
+                "startOffset": 182
+              }
+            },
+            "kind": "table",
+            "rows": [
+              {
+                "cellSpans": [
+                  {
+                    "endCol": 8,
+                    "endLine": 13,
+                    "endOffset": 209,
+                    "startCol": 3,
+                    "startLine": 13,
+                    "startOffset": 204
+                  }
+                ],
+                "cells": [
+                  "Moose"
+                ],
+                "span": {
+                  "endCol": 10,
+                  "endLine": 13,
+                  "endOffset": 211,
+                  "startCol": 1,
+                  "startLine": 13,
+                  "startOffset": 202
+                }
+              }
+            ],
+            "span": {
+              "endCol": 10,
+              "endLine": 13,
+              "endOffset": 211,
+              "startCol": 1,
+              "startLine": 11,
+              "startOffset": 182
+            }
+          },
+          "matchSpan": {
+            "endCol": 44,
+            "endLine": 9,
+            "endOffset": 179,
+            "startCol": 5,
+            "startLine": 9,
+            "startOffset": 140
+          },
+          "matchedExpression": "the following assets have been imported",
+          "paramSpans": [],
+          "text": "the following assets have been imported"
+        },
+        {
+          "args": [
+            {
+              "parameterType": "int",
+              "value": "1"
+            },
+            {
+              "parameterType": "int",
+              "value": "1"
+            }
+          ],
+          "matchSpan": {
+            "endCol": 44,
+            "endLine": 15,
+            "endOffset": 256,
+            "startCol": 6,
+            "startLine": 15,
+            "startOffset": 218
+          },
+          "matchedExpression": "the basket contains {int} user(s) and {int} asset(s)",
+          "paramSpans": [
+            {
+              "endCol": 27,
+              "endLine": 15,
+              "endOffset": 239,
+              "startCol": 26,
+              "startLine": 15,
+              "startOffset": 238
+            },
+            {
+              "endCol": 38,
+              "endLine": 15,
+              "endOffset": 250,
+              "startCol": 37,
+              "startLine": 15,
+              "startOffset": 249
+            }
+          ],
+          "text": "the basket contains 1 user and 1 asset"
+        }
+      ]
+    },
+    {
+      "expectedOutcome": "pass",
+      "name": "Then the basket contains 0 users and 0 assets",
+      "scopeStack": [
+        "A basket imports users and assets"
+      ],
+      "span": {
+        "endCol": 47,
+        "endLine": 19,
+        "endOffset": 381,
+        "startCol": 1,
+        "startLine": 19,
+        "startOffset": 335
+      },
+      "steps": [
+        {
+          "args": [
+            {
+              "parameterType": "int",
+              "value": "0"
+            },
+            {
+              "parameterType": "int",
+              "value": "0"
+            }
+          ],
+          "matchSpan": {
+            "endCol": 46,
+            "endLine": 19,
+            "endOffset": 380,
+            "startCol": 6,
+            "startLine": 19,
+            "startOffset": 340
+          },
+          "matchedExpression": "the basket contains {int} user(s) and {int} asset(s)",
+          "paramSpans": [
+            {
+              "endCol": 27,
+              "endLine": 19,
+              "endOffset": 361,
+              "startCol": 26,
+              "startLine": 19,
+              "startOffset": 360
+            },
+            {
+              "endCol": 39,
+              "endLine": 19,
+              "endOffset": 373,
+              "startCol": 38,
+              "startLine": 19,
+              "startOffset": 372
+            }
+          ],
+          "text": "the basket contains 0 users and 0 assets"
+        }
+      ]
+    }
+  ]
+}

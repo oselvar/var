@@ -17,20 +17,14 @@ import java.util.TreeSet;
  * {@code docs.include} has no default (empty discovers nothing),
  * {@code docs.exclude} removes matches, both are plain globs (no {@code !}
  * prefix); {@code steps} globs step-definition files; {@code snippets} maps
- * language id to snippet template; {@code scannerPlugins} carries plugin
- * NAMES (resolution is a per-language concern — the Java port defines none
- * yet). Contract: conformance/config/README.md. All keys optional; unknown
+ * language id to snippet template. Contract: conformance/config/README.md. All keys optional; unknown
  * keys, wrong types, and malformed JSON fail loudly (a typo'd config must
  * never silently discover nothing); a {@code $schema} key is ignored.
  */
 public record VarConfig(
-        List<String> docsInclude,
-        List<String> docsExclude,
-        List<String> steps,
-        Map<String, String> snippets,
-        List<String> scannerPlugins) {
+        List<String> docsInclude, List<String> docsExclude, List<String> steps, Map<String, String> snippets) {
 
-    private static final Set<String> KNOWN_KEYS = Set.of("$schema", "docs", "steps", "snippets", "scannerPlugins");
+    private static final Set<String> KNOWN_KEYS = Set.of("$schema", "docs", "steps", "snippets");
     private static final Set<String> KNOWN_DOCS_KEYS = Set.of("include", "exclude");
 
     public VarConfig {
@@ -38,11 +32,10 @@ public record VarConfig(
         docsExclude = List.copyOf(docsExclude);
         steps = List.copyOf(steps);
         snippets = Map.copyOf(snippets);
-        scannerPlugins = List.copyOf(scannerPlugins);
     }
 
     public static VarConfig empty() {
-        return new VarConfig(List.of(), List.of(), List.of(), Map.of(), List.of());
+        return new VarConfig(List.of(), List.of(), List.of(), Map.of());
     }
 
     /** Reads {@code <root>/varar.config.json}; a missing file is the empty config. */
@@ -107,12 +100,7 @@ public record VarConfig(
                 snippets.put((String) entry.getKey(), value);
             }
         }
-        return new VarConfig(
-                docsInclude,
-                docsExclude,
-                stringList(map.get("steps"), "steps", sourceName),
-                snippets,
-                stringList(map.get("scannerPlugins"), "scannerPlugins", sourceName));
+        return new VarConfig(docsInclude, docsExclude, stringList(map.get("steps"), "steps", sourceName), snippets);
     }
 
     private static List<String> stringList(Object value, String key, String sourceName) {

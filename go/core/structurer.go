@@ -1,11 +1,12 @@
 package core
 
-import "regexp"
-
 // Groups the flat scanner output into Examples, tracking a heading scope stack —
 // port of structurer.ts / structurer.rs.
-
-var blankLineRE = regexp.MustCompile(`\n\s*\n`)
+//
+// This is pure syntax — it does NOT decide where one example ends and the next
+// begins. Each candidate records PrecededByDelimiter (a heading or `---` sits
+// before it), and the planner groups adjacent matching candidates into examples
+// using that flag plus which candidates match a step. See ADR 0012.
 
 type scopeEntry struct {
 	level int
@@ -19,6 +20,10 @@ func structure(path, source string, blocks []Block) VarDoc {
 	var scopeStack []scopeEntry
 	lastExampleIdx := -1
 	attachmentOpen := false
+	// A heading or thematic break seen since the previous candidate — the next
+	// candidate is then delimiter-preceded. Starts true so the first candidate in
+	// the file counts as delimiter-preceded (nothing to merge into).
+	delimiterPending := true
 
 	for _, block := range blocks {
 		switch b := block.(type) {
@@ -29,31 +34,18 @@ func structure(path, source string, blocks []Block) VarDoc {
 			}
 			scopeStack = append(scopeStack, scopeEntry{level: b.Level, text: b.Text})
 			attachmentOpen = false
+			delimiterPending = true
 		case Paragraph, ListItem, Blockquote:
 			blockSpan := blockSpanOf(block)
-			doMerge := false
-			if attachmentOpen && lastExampleIdx >= 0 {
-				body := examples[lastExampleIdx].Body
-				if len(body) > 0 && isTableOrFence(body[len(body)-1]) {
-					gap := utf16Slice(source, examples[lastExampleIdx].Span.EndOffset, blockSpan.StartOffset)
-					if !blankLineRE.MatchString(gap) {
-						doMerge = true
-					}
-				}
-			}
-			if doMerge {
-				idx := lastExampleIdx
-				examples[idx].Span = spanFromOffsets(source, examples[idx].Span.StartOffset, blockSpan.EndOffset)
-				examples[idx].Body = append(examples[idx].Body, block)
-			} else {
-				examples = append(examples, Example{
-					ScopeStack: scopeTexts(scopeStack),
-					Span:       blockSpan,
-					Body:       []Block{block},
-				})
-				lastExampleIdx = len(examples) - 1
-				attachmentOpen = true
-			}
+			examples = append(examples, Example{
+				ScopeStack:          scopeTexts(scopeStack),
+				Span:                blockSpan,
+				Body:                []Block{block},
+				PrecededByDelimiter: delimiterPending,
+			})
+			lastExampleIdx = len(examples) - 1
+			attachmentOpen = true
+			delimiterPending = false
 		case Table, Fence:
 			target := -1
 			if attachmentOpen {
@@ -68,6 +60,7 @@ func structure(path, source string, blocks []Block) VarDoc {
 			}
 		case ThematicBreak:
 			attachmentOpen = false
+			delimiterPending = true
 		}
 	}
 
@@ -80,14 +73,6 @@ func structure(path, source string, blocks []Block) VarDoc {
 		Examples:          examples,
 		OrphanAttachments: orphanAttachments,
 	}
-}
-
-func isTableOrFence(b Block) bool {
-	switch b.(type) {
-	case Table, Fence:
-		return true
-	}
-	return false
 }
 
 func scopeTexts(scopeStack []scopeEntry) []string {

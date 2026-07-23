@@ -71,7 +71,7 @@ fn plan_produces_a_planned_example_with_steps_in_document_order() {
 }
 
 #[test]
-fn plan_emits_an_ambiguous_match_diagnostic_and_does_not_include_the_example_steps() {
+fn plan_emits_an_ambiguous_match_diagnostic_and_produces_no_runnable_example() {
     let r = create_registry();
     let r = step(&r, "I have {int} cukes", "a.ts", 3);
     let r = step(&r, "I have {int} {word}", "a.ts", 8);
@@ -79,7 +79,9 @@ fn plan_emits_an_ambiguous_match_diagnostic_and_does_not_include_the_example_ste
     let result = plan(&var_doc, &r);
     assert_eq!(1, result.diagnostics.len());
     assert_eq!(DiagnosticCode::AmbiguousMatch, result.diagnostics[0].code);
-    assert_eq!(0, result.examples[0].steps.len());
+    // An ambiguous candidate has no runnable step, so it is prose (a delimiter),
+    // not an example — the diagnostic is the signal. See ADR 0012.
+    assert_eq!(0, result.examples.len());
 }
 
 #[test]
@@ -91,20 +93,21 @@ fn plan_skips_an_example_heading_whose_body_has_no_matches_and_no_keyword_led_se
 }
 
 #[test]
-fn plan_turns_each_list_item_into_its_own_example_one_matched_step_per_item() {
+fn plan_merges_consecutive_list_items_into_one_example() {
     let r = create_registry();
     let r = step(&r, "I have {int} in my account", "s.ts", 1);
     let r = step(&r, "I withdraw {int}", "s.ts", 2);
+    // Two list items, no delimiter between them → one example, shared state (ADR
+    // 0012). A bulleted scenario reads as Given/When/Then bullets.
     let source = "# Bullets\n\n- Given I have 100 in my account\n- When I withdraw 40";
     let result = plan(&parse("b.md", source), &r);
-    assert_eq!(2, result.examples.len());
-    let texts: Vec<Vec<String>> = result.examples.iter().map(step_texts).collect();
+    assert_eq!(1, result.examples.len());
     assert_eq!(
         vec![
-            vec!["I have 100 in my account".to_string()],
-            vec!["I withdraw 40".to_string()]
+            "I have 100 in my account".to_string(),
+            "I withdraw 40".to_string()
         ],
-        texts
+        step_texts(&result.examples[0])
     );
 }
 
@@ -397,4 +400,84 @@ fn a_doc_string_step_carries_the_fence_body_span_on_its_plan() {
         "{ \"ok\": true }\n",
         utf16_slice(source, doc.body_span.start_offset, doc.body_span.end_offset)
     );
+}
+
+// ---- Example delimiters (ADR 0012) ----------------------------------------
+
+#[test]
+fn consecutive_matching_paragraphs_with_no_delimiter_merge_into_one_example() {
+    let source = "I have 100 in my account.\n\nI withdraw 40.\n\nI should have 60 left.";
+    let result = plan(&parse("m.md", source), &reg());
+    assert_eq!(1, result.examples.len());
+    assert_eq!(
+        vec![
+            "I have 100 in my account".to_string(),
+            "I withdraw 40".to_string(),
+            "I should have 60 left".to_string()
+        ],
+        step_texts(&result.examples[0])
+    );
+    // The name is the first matching paragraph's text.
+    assert_eq!("I have 100 in my account", result.examples[0].name);
+}
+
+#[test]
+fn a_thematic_break_between_matching_paragraphs_splits_them_into_two_examples() {
+    let source = "I have 100 in my account.\n\n---\n\nI withdraw 40.";
+    let result = plan(&parse("h.md", source), &reg());
+    assert_eq!(2, result.examples.len());
+    let texts: Vec<Vec<String>> = result.examples.iter().map(step_texts).collect();
+    assert_eq!(
+        vec![
+            vec!["I have 100 in my account".to_string()],
+            vec!["I withdraw 40".to_string()]
+        ],
+        texts
+    );
+}
+
+#[test]
+fn a_heading_between_matching_paragraphs_splits_them_into_two_examples() {
+    let source = "I have 100 in my account.\n\n## Next\n\nI withdraw 40.";
+    let result = plan(&parse("hd.md", source), &reg());
+    assert_eq!(2, result.examples.len());
+    assert_eq!(vec!["Next".to_string()], result.examples[1].scope_stack);
+}
+
+#[test]
+fn a_non_matching_paragraph_prose_between_matching_paragraphs_splits_the_example() {
+    let source =
+        "I have 100 in my account.\n\nJust explaining what happens next.\n\nI withdraw 40.";
+    let result = plan(&parse("p.md", source), &reg());
+    assert_eq!(2, result.examples.len());
+    let texts: Vec<Vec<String>> = result.examples.iter().map(step_texts).collect();
+    assert_eq!(
+        vec![
+            vec!["I have 100 in my account".to_string()],
+            vec!["I withdraw 40".to_string()]
+        ],
+        texts
+    );
+}
+
+#[test]
+fn leading_and_trailing_prose_does_not_merge_into_an_example() {
+    let source = "A preamble that matches nothing.\n\nI withdraw 40.\n\nA closing remark.";
+    let result = plan(&parse("pp.md", source), &reg());
+    assert_eq!(1, result.examples.len());
+    assert_eq!(vec!["I withdraw 40".to_string()], step_texts(&result.examples[0]));
+}
+
+#[test]
+fn the_multi_table_shape_two_tables_in_one_example_survive_blank_lines() {
+    let r = create_registry();
+    let r = step(&r, "the following users have been imported", "s.ts", 1);
+    let r = step(&r, "the following assets have been imported", "s.ts", 2);
+    let source = "Given the following users have been imported:\n\n| email | name |\n| ----- | ---- |\n| a@b.c | Ada  |\n\nAnd the following assets have been imported:\n\n| name  |\n| ----- |\n| Moose |";
+    let result = plan(&parse("basket.md", source), &r);
+    assert_eq!(1, result.examples.len());
+    let ex = &result.examples[0];
+    assert_eq!(2, ex.steps.len());
+    assert_eq!(1, ex.steps[0].data_table.as_ref().unwrap().rows.len());
+    assert_eq!(1, ex.steps[1].data_table.as_ref().unwrap().rows.len());
 }

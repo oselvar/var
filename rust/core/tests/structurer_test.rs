@@ -91,3 +91,23 @@ fn a_heading_between_a_paragraph_and_a_fence_makes_the_fence_an_orphan() {
     let example = &var_doc.examples[0];
     assert!(!example.body.iter().any(|b| matches!(b, Block::Fence(_))));
 }
+
+#[test]
+fn preceded_by_delimiter_marks_candidates_after_a_heading_or_thematic_break() {
+    let source = "First para.\n\nSecond para.\n\n---\n\nThird para.\n\n## H\n\nFourth para.";
+    let var_doc = structure("d.md", source, scan(source));
+    let flags: Vec<bool> = var_doc
+        .examples
+        .iter()
+        .map(|e| e.preceded_by_delimiter)
+        .collect();
+    assert_eq!(
+        vec![
+            true,  // first candidate in the file
+            false, // adjacent paragraph, no delimiter between
+            true,  // after `---`
+            true,  // after a heading
+        ],
+        flags
+    );
+}

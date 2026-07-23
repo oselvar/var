@@ -5,13 +5,12 @@ import { expect, test } from 'vitest'
 import { loadVarConfig, parseVarConfig } from '../src/config.ts'
 import { findFiles } from '../src/find-files.ts'
 
-test('parseVarConfig reads all four keys', () => {
+test('parseVarConfig reads all keys', () => {
   const parsed = parseVarConfig(
     `{
       "docs": { "include": ["specs/**/*.md"], "exclude": ["specs/wip/**"] },
       "steps": ["**/*.steps.ts"],
-      "snippets": { "typescript": "T" },
-      "scannerPlugins": ["gherkinTables"]
+      "snippets": { "typescript": "T" }
     }`,
     'varar.config.json',
   )
@@ -19,7 +18,6 @@ test('parseVarConfig reads all four keys', () => {
     docs: { include: ['specs/**/*.md'], exclude: ['specs/wip/**'] },
     steps: ['**/*.steps.ts'],
     snippets: { typescript: 'T' },
-    scannerPlugins: ['gherkinTables'],
   })
 })
 
@@ -29,20 +27,18 @@ test('all keys are optional and default to empty; $schema is ignored', () => {
     docs: { include: [], exclude: [] },
     steps: [],
     snippets: {},
-    scannerPlugins: [],
   })
 })
 
 test('null values are treated as absent, not errors', () => {
   const parsed = parseVarConfig(
-    '{ "docs": { "include": null, "exclude": null }, "steps": null, "snippets": null, "scannerPlugins": null }',
+    '{ "docs": { "include": null, "exclude": null }, "steps": null, "snippets": null }',
     'varar.config.json',
   )
   expect(parsed).toEqual({
     docs: { include: [], exclude: [] },
     steps: [],
     snippets: {},
-    scannerPlugins: [],
   })
 })
 
@@ -66,18 +62,13 @@ test('a wrong-typed value throws naming the key', () => {
   ).toThrowError(/snippets/)
 })
 
-test('loadVarConfig resolves plugin names and keeps the names', async () => {
+test('loadVarConfig reads docs/steps/snippets', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'var-cfg-'))
   try {
-    writeFileSync(
-      join(dir, 'varar.config.json'),
-      '{ "docs": { "include": ["**/*.md"] }, "scannerPlugins": ["gherkinTables"] }\n',
-    )
+    writeFileSync(join(dir, 'varar.config.json'), '{ "docs": { "include": ["**/*.md"] } }\n')
     const cfg = await loadVarConfig(dir)
     expect(cfg.docs).toEqual({ include: ['**/*.md'], exclude: [] })
     expect(cfg.steps).toEqual([])
-    expect(cfg.scannerPluginNames).toEqual(['gherkinTables'])
-    expect(cfg.scannerPlugins.map((p) => p.name)).toEqual(['gherkin/tables'])
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }
@@ -90,18 +81,6 @@ test('missing varar.config.json yields the empty config (no default steps glob)'
     expect(cfg.docs).toEqual({ include: [], exclude: [] })
     expect(cfg.steps).toEqual([])
     expect(cfg.snippets).toEqual({})
-    expect(cfg.scannerPlugins).toEqual([])
-    expect(cfg.scannerPluginNames).toEqual([])
-  } finally {
-    rmSync(dir, { recursive: true, force: true })
-  }
-})
-
-test('loadVarConfig rejects an unknown plugin name', async () => {
-  const dir = mkdtempSync(join(tmpdir(), 'var-cfg-badplugin-'))
-  try {
-    writeFileSync(join(dir, 'varar.config.json'), '{ "scannerPlugins": ["nope"] }\n')
-    await expect(loadVarConfig(dir)).rejects.toThrowError(/unknown scanner plugin "nope"/i)
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }

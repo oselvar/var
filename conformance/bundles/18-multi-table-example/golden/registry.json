@@ -1,0 +1,20 @@
+{
+  "parameterTypes": [],
+  "steps": [
+    {
+      "expression": "the following users have been imported",
+      "parameterTypeNames": []
+    },
+    {
+      "expression": "the following assets have been imported",
+      "parameterTypeNames": []
+    },
+    {
+      "expression": "the basket contains {int} user(s) and {int} asset(s)",
+      "parameterTypeNames": [
+        "int",
+        "int"
+      ]
+    }
+  ]
+}

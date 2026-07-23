@@ -2,31 +2,15 @@ import type { Block, SegmentOffset } from './ast.ts'
 import { type Span, spanFromOffsets } from './span.ts'
 import { parseRowCells } from './table-cells.ts'
 
-// A scanner-line representation that plugins receive verbatim. Plugins use
-// the offsets to materialize span info on the blocks they produce.
-export type RawLine = {
+// A scanned source line with the offsets needed to materialize spans on the
+// blocks built from it.
+type RawLine = {
   readonly text: string
   readonly startOffset: number
   readonly endOffset: number
 }
 
-// A plugin extension that participates in block recognition. Plugins are
-// tried at each non-blank line BEFORE the built-in rules; this lets a
-// Gherkin-table plugin grab `| a | b |` rows without a `|---|` separator
-// before the built-in paragraph fallback consumes them.
-export type ScannerPlugin = {
-  readonly name: string
-  tryScan(input: {
-    readonly source: string
-    readonly lines: ReadonlyArray<RawLine>
-    readonly startIdx: number
-  }): { readonly block: Block; readonly next: number } | undefined
-}
-
-export function scan(
-  source: string,
-  plugins: ReadonlyArray<ScannerPlugin> = [],
-): ReadonlyArray<Block> {
+export function scan(source: string): ReadonlyArray<Block> {
   const blocks: Block[] = []
   const lines = splitLines(source)
 
@@ -39,12 +23,6 @@ export function scan(
     }
     if (line.text.trim().length === 0) {
       i++
-      continue
-    }
-    const matched = runPlugins(source, lines, i, plugins)
-    if (matched) {
-      blocks.push(matched.block)
-      i = matched.next
       continue
     }
     const fence = tryFence(source, lines, i)
@@ -83,24 +61,11 @@ export function scan(
       i++
       continue
     }
-    const { paragraph, next } = consumeParagraph(source, lines, i, plugins)
+    const { paragraph, next } = consumeParagraph(source, lines, i)
     blocks.push(paragraph)
     i = next
   }
   return blocks
-}
-
-function runPlugins(
-  source: string,
-  lines: ReadonlyArray<RawLine>,
-  startIdx: number,
-  plugins: ReadonlyArray<ScannerPlugin>,
-): { block: Block; next: number } | undefined {
-  for (const p of plugins) {
-    const r = p.tryScan({ source, lines, startIdx })
-    if (r) return r
-  }
-  return undefined
 }
 
 function splitLines(source: string): ReadonlyArray<RawLine> {
@@ -227,7 +192,6 @@ function consumeParagraph(
   source: string,
   lines: ReadonlyArray<RawLine>,
   startIdx: number,
-  plugins: ReadonlyArray<ScannerPlugin>,
 ): { paragraph: Block; next: number } {
   const first = lines[startIdx]
   if (!first) throw new Error('invariant: startIdx out of range')
@@ -244,9 +208,6 @@ function consumeParagraph(
     if (FENCE_RE.test(candidate.text)) break
     if (ROW_RE.test(candidate.text)) break
     if (THEMATIC_RE.test(candidate.text)) break
-    // Plugins also get a vote: if any plugin would recognise a block starting
-    // at this line, end the paragraph here so the plugin can run next round.
-    if (runPlugins(source, lines, candidateIdx, plugins)) break
     endIdx++
   }
   const last = lines[endIdx]

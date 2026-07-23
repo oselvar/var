@@ -271,6 +271,60 @@ fn parse_rejects_malformed_input() {
     assert!(parse_var_lock("{\"version\":1,\"specs\":{\"a.md\":{\"examples\":[]}}}").is_none());
 }
 
+// ---- Merged examples keep per-paragraph drift granularity (ADR 0012) -------
+
+fn deposit_withdraw_reg(with_deposit: bool) -> Registry {
+    let mut r = create_registry();
+    if with_deposit {
+        r = add_step(
+            &r,
+            "I deposit {int}",
+            "steps.ts",
+            1,
+            Handler::noop(),
+            Some(StepKind::Stimulus),
+        )
+        .unwrap();
+    }
+    add_step(&r, "I withdraw {int}", "steps.ts", 2, Handler::noop(), Some(StepKind::Stimulus))
+        .unwrap()
+}
+
+#[test]
+fn two_paragraphs_that_merge_into_one_example_are_each_a_live_baseline_entry() {
+    let source = "I deposit 100.\n\nI withdraw 40.";
+    let var_doc = parse("w.md", source);
+    let plan1 = plan(&var_doc, &deposit_withdraw_reg(true));
+    // One planned example (the two paragraphs merged), but two live entries.
+    assert_eq!(1, plan1.examples.len());
+    assert_eq!(
+        vec![
+            BaselineExample {
+                name: "I deposit 100".to_string(),
+                line: 1
+            },
+            BaselineExample {
+                name: "I withdraw 40".to_string(),
+                line: 3
+            },
+        ],
+        live_examples(&var_doc, &plan1)
+    );
+}
+
+#[test]
+fn deleting_one_step_def_of_a_merged_example_drifts_only_the_now_prose_paragraph() {
+    let source = "I deposit 100.\n\nI withdraw 40.";
+    let var_doc = parse("w.md", source);
+    let baseline =
+        derive_spec_baseline(source, &var_doc, &plan(&var_doc, &deposit_withdraw_reg(true)));
+    // The deposit step is gone: its paragraph becomes prose, splitting the
+    // example. The withdraw paragraph is still live; the deposit one drifts.
+    let drift =
+        detect_drift(Some(&baseline), &var_doc, &plan(&var_doc, &deposit_withdraw_reg(false)));
+    assert_eq!(vec!["I deposit 100@1".to_string()], bare(&drift));
+}
+
 #[test]
 fn drift_message_names_the_paragraph() {
     let d = Drifted {

@@ -74,10 +74,18 @@ public sealed record ThematicBreak(Span Span) : Block
 }
 
 /// <summary>
-/// A candidate example: the chain of enclosing heading texts (outer→inner), the span, and a
-/// non-empty body (a primary block, then any attached tables/fences).
+/// A candidate example: the chain of enclosing heading texts (outer→inner), the span, a
+/// non-empty body (a primary block, then any attached tables/fences), and whether a syntactic
+/// delimiter (heading or thematic break) sits between this candidate and the previous one (also
+/// true for the first candidate). The planner uses <c>PrecededByDelimiter</c> to group adjacent
+/// matching candidates: a matching candidate with it <c>false</c> merges into the open example
+/// rather than starting a new one. See ADR 0012.
 /// </summary>
-public sealed record Example(ImmutableArray<string> ScopeStack, Span Span, ImmutableArray<Block> Body);
+public sealed record Example(
+    ImmutableArray<string> ScopeStack,
+    Span Span,
+    ImmutableArray<Block> Body,
+    bool PrecededByDelimiter);
 
 /// <summary>The parsed document. <c>Source</c> is kept for the runner but not projected to var-doc.json.</summary>
 public sealed record VarDoc(
@@ -86,19 +94,5 @@ public sealed record VarDoc(
     ImmutableArray<Example> Examples,
     ImmutableArray<Block> OrphanAttachments);
 
-/// <summary>A raw source line handed to scanner plugins verbatim.</summary>
+/// <summary>A raw source line: its text and source offsets.</summary>
 public sealed record RawLine(string Text, int StartOffset, int EndOffset);
-
-/// <summary>Result of a plugin recognising a block: the block plus the next line index to resume at.</summary>
-public sealed record PluginMatch(Block Block, int Next);
-
-/// <summary>
-/// A scanner plugin: tried at each non-blank line before the built-in rules (so, e.g., a
-/// Gherkin-table plugin can grab rows without a <c>|---|</c> separator).
-/// </summary>
-public interface IScannerPlugin
-{
-    string Name { get; }
-
-    PluginMatch? TryScan(string source, IReadOnlyList<RawLine> lines, int startIdx);
-}

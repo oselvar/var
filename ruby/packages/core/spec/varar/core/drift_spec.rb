@@ -139,6 +139,40 @@ module Varar
           .to eq([['Each row gives a decimal and a roman number:', 1]])
       end
 
+      # ---- Merged examples keep per-paragraph drift granularity (ADR 0012) ----
+
+      def deposit_withdraw_reg(with_deposit: true)
+        r = Registries.create_registry
+        if with_deposit
+          r = Registries.add_step(r, expression: 'I deposit {int}', expression_source_file: 'steps.rb',
+                                     expression_source_line: 1, handler: noop, kind: 'stimulus')
+        end
+        Registries.add_step(r, expression: 'I withdraw {int}', expression_source_file: 'steps.rb',
+                               expression_source_line: 2, handler: noop, kind: 'stimulus')
+      end
+
+      it 'two paragraphs that merge into one example are each recorded as a live baseline entry' do
+        source = "I deposit 100.\n\nI withdraw 40."
+        var_doc, plan = plan_for(source, deposit_withdraw_reg)
+        # One planned example (the two paragraphs merged), but two live entries.
+        expect(plan.examples.length).to eq(1)
+        expect(described_class.live_examples(var_doc, plan)).to eq([
+                                                                     BaselineExample.new(name: 'I deposit 100',
+                                                                                         line: 1),
+                                                                     BaselineExample.new(name: 'I withdraw 40', line: 3)
+                                                                   ])
+      end
+
+      it 'deleting one step def of a merged example drifts only the now-prose paragraph' do
+        source = "I deposit 100.\n\nI withdraw 40."
+        var_doc, plan_with = plan_for(source, deposit_withdraw_reg(with_deposit: true))
+        baseline = described_class.derive_spec_baseline(source, var_doc, plan_with)
+        # The deposit step is gone: its paragraph becomes prose, splitting the
+        # example. The withdraw paragraph stays live; the deposit one drifts.
+        _doc, plan_without = plan_for(source, deposit_withdraw_reg(with_deposit: false))
+        expect(bare(described_class.detect_drift(baseline, var_doc, plan_without))).to eq([['I deposit 100', 1]])
+      end
+
       it 'drift diagnostics are error severity' do
         source = 'I withdraw 40.'
         var_doc, plan_with = plan_for(source, reg)

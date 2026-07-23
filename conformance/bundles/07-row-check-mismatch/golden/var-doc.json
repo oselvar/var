@@ -98,6 +98,7 @@
           }
         }
       ],
+      "precededByDelimiter": true,
       "scopeStack": [
         "Scoring",
         "A wrong score is caught"

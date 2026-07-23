@@ -19,7 +19,6 @@ def _artifact(cfg) -> dict:
         "docs": {"include": list(cfg.docs_include), "exclude": list(cfg.docs_exclude)},
         "steps": list(cfg.steps),
         "snippets": dict(cfg.snippets),
-        "scannerPlugins": list(cfg.scanner_plugins),
     }
 
 

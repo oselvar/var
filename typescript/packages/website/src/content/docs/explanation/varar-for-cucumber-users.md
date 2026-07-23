@@ -22,38 +22,41 @@ bound by matching phrases in the text.
 
 | Cucumber | Varar |
 | --- | --- |
-| `.feature` files in Gherkin | Plain Markdown. No new dialect — a file is a spec iff it matches the globs in `varar.config.json`. |
+| `.feature` files in Gherkin | Plain Markdown specs. Varar has no Gherkin parser and does not run `.feature` files — a spec is any file matching the `docs` globs in `varar.config.json`. |
 | `Given` / `When` / `Then` step types | Two roles — `stimulus` and `sensor` — chosen by what a step *does*, not by a keyword. Keywords in prose are narration for the reader; they're never matched. |
 | Assertions inside step bodies | Steps *return* what the software did; Varar compares it against what the document claims, and failures are anchored to the exact span in the source. |
 | `DataTable` and doc-string APIs | Native Markdown tables and fenced code blocks, checked by [return-based comparison](/how-to/tables-and-doc-strings/). |
+| `Scenario Outline` + `Examples:` table | A [**header-bound table**](/reference/examples/#header-bound-tables): one step whose parameters name every column, and each data row runs as its own example. |
 | `World` and untyped state | `steps` — a typed state factory per spec; every example starts fresh. |
 | `Before` / `After` hooks | None in Varar. Use your test runner's own `beforeEach` / `afterEach`. |
+| `Background:` | No equivalent. Inline its steps into the examples that need them. |
 | Tags | Not in v1. |
 | A separate test-run artefact | The document *is* the test. There is no report that drifts from the docs, because the docs are what ran. |
 
-## Migration
+## Migrating from Cucumber
 
-Varar runs existing `.feature` files **unchanged**. That falls out of the model
-rather than being a compatibility layer: a file is a spec because it matches the
-configured globs, not because of its extension, and keywords are narration the
-matcher ignores — so `Feature:` and `Rule:` lines read as prose, `Given`/`When`/
-`Then` are ignored, and each scenario's contiguous step lines are one paragraph,
-which is one Varar example. Two scanner plugins teach the parser Gherkin's
-separator-less tables and `"""` doc strings.
+Varar does not run `.feature` files, and there is no Gherkin compatibility layer
+to configure — a Varar spec is just Markdown. To migrate, hand your `.feature`
+files and step definitions to a coding agent and ask it to translate them into
+Markdown specs and Varar step definitions. Agents are good at this mechanical
+translation, and the result reads as documentation rather than a dialect only
+the test suite parses.
 
-So a migration ports the step definitions and leaves the features alone — you
-can keep cucumber running against the same files while you do it. The steps are
-in [Run your existing `.feature` files](/how-to/run-existing-feature-files/).
+What to expect in the translated result:
 
-Two habits do not survive the move: `Background:` has no equivalent (it becomes
-its own example with its own state), and an example is named after its whole
-paragraph, which changes name-based test filtering.
-
-There is deliberately no undefined-step report. In Cucumber an unmatched step is
-an error with a generated snippet; in Varar an unmatched sentence is simply
-prose, which is what lets the document be a document. The failure that actually
-matters — a paragraph that *used* to be an example and quietly stopped being one
-— is caught by drift detection, which fails the run.
+- **Each `Scenario:` becomes one example** — a paragraph, or several paragraphs
+  sharing state, under a heading. Its steps become `stimulus` / `sensor` calls.
+- **A `Scenario Outline` with an `Examples:` table becomes a
+  [header-bound table](/reference/examples/#header-bound-tables)** — a single
+  step whose parameters name the columns, with each row running as its own test.
+- **`Background:` is inlined** into the examples that need it (there are no
+  lifecycle hooks in the BDD layer).
+- **Unmatched lines become prose.** There is no undefined-step report: in
+  Cucumber an unmatched step is an error with a generated snippet; in Varar an
+  unmatched sentence is simply prose, which is what lets the document be a
+  document. The failure that actually matters — a paragraph that *used* to be an
+  example and quietly stopped being one — is caught by drift detection, which
+  fails the run.
 
 ## If you loved Cucumber
 

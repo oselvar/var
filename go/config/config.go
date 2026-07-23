@@ -1,7 +1,7 @@
 // Package config is the strict, fail-loud reader for varar.config.json.
 //
 // Port of @varar/config / var_config / varar-config. The canonical shape is
-// { docs: { include, exclude }, steps, snippets, scannerPlugins }; every key is
+// { docs: { include, exclude }, steps, snippets }; every key is
 // optional and defaults to empty. A missing file yields the empty config;
 // malformed JSON, wrong types, or unknown keys fail loudly with the file path.
 // Proven by the shared corpus at conformance/config/cases/.
@@ -16,26 +16,24 @@ import (
 	"strings"
 )
 
-var knownKeys = map[string]bool{"$schema": true, "docs": true, "steps": true, "snippets": true, "scannerPlugins": true}
+var knownKeys = map[string]bool{"$schema": true, "docs": true, "steps": true, "snippets": true}
 var knownDocsKeys = map[string]bool{"include": true, "exclude": true}
 
 // VarConfig is the parsed configuration. All fields default to empty.
 type VarConfig struct {
-	DocsInclude    []string
-	DocsExclude    []string
-	Steps          []string
-	Snippets       map[string]string
-	ScannerPlugins []string
+	DocsInclude []string
+	DocsExclude []string
+	Steps       []string
+	Snippets    map[string]string
 }
 
 // Default is the empty configuration (all fields empty).
 func Default() VarConfig {
 	return VarConfig{
-		DocsInclude:    []string{},
-		DocsExclude:    []string{},
-		Steps:          []string{},
-		Snippets:       map[string]string{},
-		ScannerPlugins: []string{},
+		DocsInclude: []string{},
+		DocsExclude: []string{},
+		Steps:       []string{},
+		Snippets:    map[string]string{},
 	}
 }
 
@@ -108,9 +106,6 @@ func ReadVarConfig(root string) (VarConfig, error) {
 		return VarConfig{}, err
 	}
 	if cfg.Snippets, err = stringMap(obj["snippets"], path); err != nil {
-		return VarConfig{}, err
-	}
-	if cfg.ScannerPlugins, err = stringArray(obj["scannerPlugins"], "scannerPlugins", path); err != nil {
 		return VarConfig{}, err
 	}
 	return cfg, nil

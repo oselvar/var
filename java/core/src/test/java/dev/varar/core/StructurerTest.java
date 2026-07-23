@@ -102,4 +102,17 @@ class StructurerTest {
         Example example = varDoc.examples().get(0);
         assertFalse(example.body().stream().anyMatch(b -> b instanceof Ast.Fence));
     }
+
+    @Test
+    void precededByDelimiterMarksCandidatesAfterAHeadingOrThematicBreak() {
+        String source = "First para.\n\nSecond para.\n\n---\n\nThird para.\n\n## H\n\nFourth para.";
+        VarDoc varDoc = Structurer.structure("d.md", source, Scanner.scan(source));
+        assertEquals(
+                List.of(
+                        true, // first candidate in the file
+                        false, // adjacent paragraph, no delimiter between
+                        true, // after `---`
+                        true), // after a heading
+                varDoc.examples().stream().map(Example::precededByDelimiter).toList());
+    }
 }

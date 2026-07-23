@@ -93,7 +93,8 @@ module Varar
         {
           'scopeStack' => example.scope_stack,
           'span' => span_hash(example.span),
-          'body' => example.body.map { |b| block_hash(b) }
+          'body' => example.body.map { |b| block_hash(b) },
+          'precededByDelimiter' => example.preceded_by_delimiter
         }
       end
 

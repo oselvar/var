@@ -18,13 +18,12 @@ public sealed record VarGlobs(ImmutableArray<string> Include, ImmutableArray<str
 
 /// <summary>
 /// The parsed, unresolved shape of <c>varar.config.json</c> — pure data, shared byte-for-byte with
-/// every port's reader. Scanner plugins are names here. Port of <c>config-types.ts</c>.
+/// every port's reader. Port of <c>config-types.ts</c>.
 /// </summary>
 public sealed record ParsedVarConfig(
     VarGlobs Docs,
     ImmutableArray<string> Steps,
-    ImmutableDictionary<string, string> Snippets,
-    ImmutableArray<string> ScannerPlugins);
+    ImmutableDictionary<string, string> Snippets);
 
 /// <summary>
 /// Strict, fail-loud reader of <c>varar.config.json</c>. Port of <c>config.ts</c>: no defaults for
@@ -33,7 +32,7 @@ public sealed record ParsedVarConfig(
 public static class VarConfig
 {
     private static readonly HashSet<string> KnownKeys =
-        new(StringComparer.Ordinal) { "$schema", "docs", "steps", "snippets", "scannerPlugins" };
+        new(StringComparer.Ordinal) { "$schema", "docs", "steps", "snippets" };
 
     private static readonly HashSet<string> KnownDocsKeys =
         new(StringComparer.Ordinal) { "include", "exclude" };
@@ -41,8 +40,7 @@ public static class VarConfig
     public static readonly ParsedVarConfig Empty = new(
         new VarGlobs([], []),
         [],
-        ImmutableDictionary<string, string>.Empty,
-        []);
+        ImmutableDictionary<string, string>.Empty);
 
     /// <summary>Parses config text (no filesystem). Fails loudly with the path prefixed.</summary>
     public static ParsedVarConfig Parse(string jsonText, string sourcePath)
@@ -70,7 +68,7 @@ public static class VarConfig
                 if (!KnownKeys.Contains(prop.Name))
                 {
                     throw new VarConfigException(
-                        $"{sourcePath}: unknown key \"{prop.Name}\" (known keys: docs, steps, snippets, scannerPlugins)");
+                        $"{sourcePath}: unknown key \"{prop.Name}\" (known keys: docs, steps, snippets)");
                 }
             }
 
@@ -116,8 +114,7 @@ public static class VarConfig
             return new ParsedVarConfig(
                 docs,
                 StringArray(root, "steps", "steps", sourcePath),
-                snippets,
-                StringArray(root, "scannerPlugins", "scannerPlugins", sourcePath));
+                snippets);
         }
     }
 
@@ -136,7 +133,6 @@ public static class VarConfig
         ])),
         new("steps", Value.List(config.Steps.Select(Value.Of))),
         new("snippets", Value.Map(config.Snippets.Select(kv => new KeyValuePair<string, Value>(kv.Key, Value.Of(kv.Value))))),
-        new("scannerPlugins", Value.List(config.ScannerPlugins.Select(Value.Of))),
     ]);
 
     private static ImmutableArray<string> StringArray(JsonElement parent, string key, string label, string sourcePath)

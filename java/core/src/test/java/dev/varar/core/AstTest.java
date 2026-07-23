@@ -129,10 +129,11 @@ class AstTest {
     void exampleExposesFieldsAndDefensivelyCopiesScopeStackAndBody() {
         List<String> scopeStack = new ArrayList<>(List.of("Feature", "Scenario"));
         List<Ast.Block> body = new ArrayList<>(List.of(new Ast.ThematicBreak(SPAN)));
-        Ast.Example example = new Ast.Example(scopeStack, SPAN, body);
+        Ast.Example example = new Ast.Example(scopeStack, SPAN, body, true);
 
         assertEquals(List.of("Feature", "Scenario"), example.scopeStack());
         assertEquals(SPAN, example.span());
+        assertTrue(example.precededByDelimiter());
         assertEquals(1, example.body().size());
         assertThrows(
                 UnsupportedOperationException.class, () -> example.scopeStack().add("Nope"));
@@ -141,7 +142,7 @@ class AstTest {
 
     @Test
     void varDocExposesFieldsAndDefensivelyCopiesExamplesAndOrphanAttachments() {
-        Ast.Example example = new Ast.Example(List.of(), SPAN, List.of(new Ast.ThematicBreak(SPAN)));
+        Ast.Example example = new Ast.Example(List.of(), SPAN, List.of(new Ast.ThematicBreak(SPAN)), true);
         List<Ast.Example> examples = new ArrayList<>(List.of(example));
         List<Ast.TableOrFence> orphanAttachments = new ArrayList<>(List.of(new Ast.Fence(SPAN, "", "", SPAN)));
         Ast.VarDoc doc = new Ast.VarDoc("spec.md", "# Title", examples, orphanAttachments);

@@ -54,13 +54,21 @@ type BaselineStore interface {
 
 var tokenRE = regexp.MustCompile(`[\p{L}\p{N}]+`)
 
-func within(inner, outer Span) bool {
-	return inner.StartOffset >= outer.StartOffset && inner.EndOffset <= outer.EndOffset
+// overlaps reports whether the two spans' offset ranges intersect. A candidate
+// paragraph relates to its planned example either way round: a header-bound row
+// sits inside its binding paragraph, while a merged example's span covers each
+// of the candidates it absorbed (ADR 0012). Overlap catches both.
+func overlaps(a, b Span) bool {
+	return a.StartOffset < b.EndOffset && b.StartOffset < a.EndOffset
 }
 
+// isLive reports whether a candidate paragraph is still an example: it overlaps
+// at least one planned example. A now-prose paragraph — one whose step def was
+// renamed or deleted — overlaps none (it became a delimiter, splitting any
+// example it was part of), so drift catches it.
 func isLive(candidateSpan Span, plan ExecutionPlan) bool {
 	for _, pe := range plan.Examples {
-		if within(pe.Span, candidateSpan) {
+		if overlaps(pe.Span, candidateSpan) {
 			return true
 		}
 	}

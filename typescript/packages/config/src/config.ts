@@ -1,6 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { resolveScannerPlugins } from '@varar/core'
 import type { ParsedVarConfig, VarConfig, VarGlobs } from './config-types.ts'
 
 export type { ParsedVarConfig, VarConfig, VarGlobs } from './config-types.ts'
@@ -12,10 +11,9 @@ const EMPTY_PARSED: ParsedVarConfig = {
   docs: { include: [], exclude: [] },
   steps: [],
   snippets: {},
-  scannerPlugins: [],
 }
 
-const KNOWN_KEYS = new Set(['$schema', 'docs', 'steps', 'snippets', 'scannerPlugins'])
+const KNOWN_KEYS = new Set(['$schema', 'docs', 'steps', 'snippets'])
 const KNOWN_DOCS_KEYS = new Set(['include', 'exclude'])
 
 function isRecord(v: unknown): v is Record<string, unknown> {
@@ -44,9 +42,7 @@ export function parseVarConfig(jsonText: string, sourcePath: string): ParsedVarC
   if (!isRecord(data)) throw new Error(`${sourcePath}: top level must be an object`)
   for (const key of Object.keys(data)) {
     if (!KNOWN_KEYS.has(key)) {
-      throw new Error(
-        `${sourcePath}: unknown key "${key}" (known keys: docs, steps, snippets, scannerPlugins)`,
-      )
+      throw new Error(`${sourcePath}: unknown key "${key}" (known keys: docs, steps, snippets)`)
     }
   }
   let docs: VarGlobs = EMPTY_PARSED.docs
@@ -76,7 +72,6 @@ export function parseVarConfig(jsonText: string, sourcePath: string): ParsedVarC
     docs,
     steps: stringArray(data.steps, 'steps', sourcePath),
     snippets,
-    scannerPlugins: stringArray(data.scannerPlugins, 'scannerPlugins', sourcePath),
   }
 }
 
@@ -87,7 +82,5 @@ export async function loadVarConfig(cwd: string): Promise<VarConfig> {
     docs: parsed.docs,
     steps: parsed.steps,
     snippets: parsed.snippets,
-    scannerPlugins: resolveScannerPlugins(parsed.scannerPlugins),
-    scannerPluginNames: parsed.scannerPlugins,
   }
 }

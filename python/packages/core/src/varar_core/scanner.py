@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Protocol
 
 from varar_core.ast import (
     Block,
@@ -41,18 +40,6 @@ class RawLine:
     end_offset: int
 
 
-class ScannerPlugin(Protocol):
-    """Extension point: participates in block recognition before built-in rules."""
-
-    def try_scan(
-        self,
-        *,
-        source: str,
-        lines: tuple[RawLine, ...],
-        start_idx: int,
-    ) -> tuple[Block, int] | None: ...
-
-
 # ── Regexes (verbatim port of the TS constants) ───────────────────────────────
 
 THEMATIC_RE = re.compile(r"^\s*([-*_])(\s*\1){2,}\s*$")
@@ -66,10 +53,7 @@ DELIM_RE = re.compile(r"^\|\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|\s*$")
 
 # ── Public API ────────────────────────────────────────────────────────────────
 
-def scan(
-    source: str,
-    plugins: tuple[ScannerPlugin, ...] = (),
-) -> tuple[Block, ...]:
+def scan(source: str) -> tuple[Block, ...]:
     """Scan *source* into an immutable sequence of Block nodes."""
     blocks: list[Block] = []
     lines = split_lines(source)
@@ -79,12 +63,6 @@ def scan(
         line = lines[i]
         if line.text.strip() == "":
             i += 1
-            continue
-
-        matched = run_plugins(source, lines, i, plugins)
-        if matched is not None:
-            blocks.append(matched[0])
-            i = matched[1]
             continue
 
         fence_result = try_fence(source, lines, i)
@@ -123,7 +101,7 @@ def scan(
             i += 1
             continue
 
-        paragraph, next_i = consume_paragraph(source, lines, i, plugins)
+        paragraph, next_i = consume_paragraph(source, lines, i)
         blocks.append(paragraph)
         i = next_i
 
@@ -131,19 +109,6 @@ def scan(
 
 
 # ── Internal helpers ──────────────────────────────────────────────────────────
-
-def run_plugins(
-    source: str,
-    lines: tuple[RawLine, ...],
-    start_idx: int,
-    plugins: tuple[ScannerPlugin, ...],
-) -> tuple[Block, int] | None:
-    for p in plugins:
-        r = p.try_scan(source=source, lines=lines, start_idx=start_idx)
-        if r is not None:
-            return r
-    return None
-
 
 def split_lines(source: str) -> tuple[RawLine, ...]:
     """Split *source* into RawLines with UTF-16 start/end offsets.
@@ -304,7 +269,6 @@ def consume_paragraph(
     source: str,
     lines: tuple[RawLine, ...],
     start_idx: int,
-    plugins: tuple[ScannerPlugin, ...],
 ) -> tuple[Block, int]:
     if start_idx >= len(lines):
         raise ValueError("invariant: start_idx out of range")
@@ -329,9 +293,6 @@ def consume_paragraph(
         if ROW_RE.match(candidate.text):
             break
         if THEMATIC_RE.match(candidate.text):
-            break
-        # Plugins also vote: if any would claim this line, stop the paragraph.
-        if run_plugins(source, lines, candidate_idx, plugins):
             break
         end_idx += 1
 

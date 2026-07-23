@@ -67,13 +67,20 @@ public final class Drift {
 
     private static final Pattern TOKEN = Pattern.compile("[\\p{L}\\p{N}]+");
 
-    private static boolean within(Span inner, Span outer) {
-        return inner.startOffset() >= outer.startOffset() && inner.endOffset() <= outer.endOffset();
+    // Do the two spans overlap at all (offset ranges intersect)? A candidate paragraph relates to
+    // its planned example either way round: a header-bound row sits *inside* its binding paragraph,
+    // while a merged example's span *covers* each of the candidates it absorbed (ADR 0012). Overlap
+    // catches both.
+    private static boolean overlaps(Span a, Span b) {
+        return a.startOffset() < b.endOffset() && b.startOffset() < a.endOffset();
     }
 
+    // A candidate paragraph is "live" (still an example) if it overlaps at least one planned
+    // example. A now-prose paragraph — one whose step def was renamed or deleted — overlaps none (it
+    // became a delimiter, splitting any example it was part of), so drift catches it.
     private static boolean isLive(Span candidateSpan, Plan.ExecutionPlan plan) {
         for (Plan.PlannedExample pe : plan.examples()) {
-            if (within(pe.span(), candidateSpan)) return true;
+            if (overlaps(pe.span(), candidateSpan)) return true;
         }
         return false;
     }

@@ -21,6 +21,7 @@
           "text": "I warm up my mental math. The square of 7 is 49."
         }
       ],
+      "precededByDelimiter": true,
       "scopeStack": [
         "Stateless steps",
         "Squaring in my head"

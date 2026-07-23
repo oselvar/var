@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Mapping
 
-_KNOWN_KEYS = {"$schema", "docs", "steps", "snippets", "scannerPlugins"}
+_KNOWN_KEYS = {"$schema", "docs", "steps", "snippets"}
 _KNOWN_DOCS_KEYS = {"include", "exclude"}
 
 
@@ -15,7 +15,6 @@ class VarConfig:
     docs_exclude: tuple[str, ...] = ()
     steps: tuple[str, ...] = ()
     snippets: Mapping[str, str] = field(default_factory=dict)
-    scanner_plugins: tuple[str, ...] = ()
 
 
 def _string_tuple(value: object, key: str, path: Path) -> tuple[str, ...]:
@@ -45,7 +44,10 @@ def read_varar_config(root: str | Path) -> VarConfig:
         raise ValueError(f"{path}: top level must be an object")
     unknown = set(data) - _KNOWN_KEYS
     if unknown:
-        raise ValueError(f"{path}: unknown key(s): {', '.join(sorted(unknown))}")
+        raise ValueError(
+            f"{path}: unknown key(s): {', '.join(sorted(unknown))} "
+            "(known keys: docs, steps, snippets)"
+        )
     docs = data.get("docs")
     if docs is None:
         docs = {}
@@ -66,5 +68,4 @@ def read_varar_config(root: str | Path) -> VarConfig:
         docs_exclude=_string_tuple(docs.get("exclude"), "docs.exclude", path),
         steps=_string_tuple(data.get("steps"), "steps", path),
         snippets=dict(snippets),
-        scanner_plugins=_string_tuple(data.get("scannerPlugins"), "scannerPlugins", path),
     )

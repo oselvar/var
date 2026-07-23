@@ -35,10 +35,9 @@ func toConfigArtifact(cfg config.VarConfig) core.Value {
 		"exclude": strList(cfg.DocsExclude),
 	})
 	return core.MapValue(map[string]core.Value{
-		"docs":           docs,
-		"steps":          strList(cfg.Steps),
-		"snippets":       core.MapValue(snippets),
-		"scannerPlugins": strList(cfg.ScannerPlugins),
+		"docs":     docs,
+		"steps":    strList(cfg.Steps),
+		"snippets": core.MapValue(snippets),
 	})
 }
 

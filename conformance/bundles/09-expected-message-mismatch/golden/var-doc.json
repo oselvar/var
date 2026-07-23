@@ -42,6 +42,7 @@
           }
         }
       ],
+      "precededByDelimiter": true,
       "scopeStack": [
         "Message mismatch",
         "A non-matching expected message still fails"

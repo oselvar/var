@@ -106,8 +106,14 @@ public final class Ast {
      *     (paragraph / list_item / blockquote). Any trailing tables or fences are
      *     appended by the structurer so the planner can attach them to the last
      *     matched step.
+     * @param precededByDelimiter true when a heading or thematic break ({@code
+     *     ---}) sits between this candidate and the previous one — i.e. a
+     *     syntactic delimiter separates them (also true for the first candidate).
+     *     The planner uses it to decide grouping: a matching candidate with this
+     *     false merges into the open example rather than starting a new one. See
+     *     ADR 0012.
      */
-    public record Example(List<String> scopeStack, Span span, List<Block> body) {
+    public record Example(List<String> scopeStack, Span span, List<Block> body, boolean precededByDelimiter) {
         public Example {
             scopeStack = List.copyOf(scopeStack);
             body = List.copyOf(body);

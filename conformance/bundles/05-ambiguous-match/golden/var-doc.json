@@ -21,6 +21,7 @@
           "text": "I have 5 cukes."
         }
       ],
+      "precededByDelimiter": true,
       "scopeStack": [
         "Cukes"
       ],

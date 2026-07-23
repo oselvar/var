@@ -21,6 +21,7 @@
           "text": "The late fee is £2.55."
         }
       ],
+      "precededByDelimiter": true,
       "scopeStack": [
         "Custom parameter format",
         "A wrong fee renders in document notation"

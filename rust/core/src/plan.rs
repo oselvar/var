@@ -63,197 +63,321 @@ static WORD_CHAR_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^[\p{L}\p{N
 /// Plans `doc` against `registry`. Port of `plan()`.
 pub fn plan(doc: &VarDoc, registry: &Registry) -> ExecutionPlan {
     let source = &doc.source;
-    let mut examples = Vec::new();
     let mut diagnostics = Vec::new();
 
-    for ex in &doc.examples {
-        let mut had_ambiguous = false;
-        let body = &ex.body;
+    // Phase 1: plan each candidate paragraph independently into a "unit".
+    let units: Vec<CandidateUnit> = doc
+        .examples
+        .iter()
+        .map(|ex| plan_candidate(ex, doc, registry, &mut diagnostics))
+        .collect();
 
-        // Pass 1: plan each text-bearing block, collecting steps per body index.
-        let mut steps_by_block: BTreeMap<usize, Vec<PlannedStep>> = BTreeMap::new();
-        for (idx, block) in body.iter().enumerate() {
-            if !is_text_bearing(block) {
-                continue;
-            }
-            let text = text_of(block);
-            let (block_hits, ambiguities) = plan_block(text, registry);
-            for collision in &ambiguities {
-                let span = lift_span(source, block, collision.match_start, collision.match_end);
-                diagnostics.push(ambiguous_match(span));
-                had_ambiguous = true;
-            }
-            if !had_ambiguous && !block_hits.is_empty() {
-                let block_steps: Vec<PlannedStep> = block_hits
-                    .into_iter()
-                    .map(|hit| PlannedStep {
-                        text: crate::offsets::utf16_slice(text, hit.match_start, hit.match_end)
-                            .to_string(),
-                        match_span: lift_span(source, block, hit.match_start, hit.match_end),
-                        param_spans: hit
-                            .param_spans
-                            .iter()
-                            .map(|p| lift_span(source, block, p.start, p.end))
-                            .collect(),
-                        step_def: hit.step_def,
-                        args: hit.args,
-                        formats: hit.formats,
-                        data_table: None,
-                        doc_string: None,
-                    })
-                    .collect();
-                steps_by_block.insert(idx, block_steps);
-            }
-        }
-
-        // Header-bound table: iterate row by row.
-        let bound = if had_ambiguous {
-            None
-        } else {
-            detect_header_bound(body, &steps_by_block, source)
-        };
-        if let Some(bound) = bound {
-            let header_binding = HeaderBinding {
-                match_span: bound.step.match_span,
-                param_spans: bound.header_spans.clone(),
-                step_def: bound.step.step_def.clone(),
-            };
-            let header_cells = &bound.table.header.cells;
-            for row in &bound.table.rows {
-                let mut row_object = BTreeMap::new();
-                for (i, header) in header_cells.iter().enumerate() {
-                    row_object.insert(header.clone(), Value::from(cell_at(row, i)));
+    // Phase 2: group adjacent candidates into examples. A matching candidate
+    // continues the open example when no delimiter (heading / `---`) precedes it;
+    // otherwise it starts a new one. A non-matching candidate (prose) is a
+    // delimiter: it closes the open example and is dropped. A header-bound table
+    // candidate is standalone — it already emits one example per row. See ADR 0012.
+    let mut examples: Vec<PlannedExample> = Vec::new();
+    let mut open: Option<MergedExample> = None;
+    for unit in units {
+        match unit {
+            CandidateUnit::HeaderBound { rows } => {
+                if let Some(m) = open.take() {
+                    examples.push(finish_merged(m, source));
                 }
-                let mut row_args = bound.step.args.clone();
-                row_args.push(Value::Map(row_object));
-                let row_step = PlannedStep {
-                    text: bound.step.text.clone(),
-                    match_span: row.span,
-                    param_spans: bound.step.param_spans.clone(),
-                    step_def: bound.step.step_def.clone(),
-                    args: row_args,
-                    formats: bound.step.formats.clone(),
-                    data_table: None,
-                    doc_string: None,
-                };
-                let row_checks: Vec<RowCheck> = header_cells
-                    .iter()
-                    .enumerate()
-                    .map(|(i, header)| {
-                        RowCheck::new(header.clone(), cell_at(row, i), cell_span_at(row, i))
-                    })
-                    .collect();
-                let mut nested_scope = ex.scope_stack.clone();
-                nested_scope.push(bound.step.text.clone());
-                examples.push(PlannedExample {
-                    name: row.cells.join(" / "),
-                    scope_stack: nested_scope,
-                    span: row.span,
-                    steps: vec![row_step],
-                    header_binding: Some(HeaderBinding {
-                        match_span: header_binding.match_span,
-                        param_spans: header_binding.param_spans.clone(),
-                        step_def: header_binding.step_def.clone(),
-                    }),
-                    row_checks: Some(row_checks),
-                    expected_outcome: None,
-                    expected_error_message: None,
-                });
+                examples.extend(rows);
             }
-            continue;
-        }
-
-        // An ```error fence anywhere marks the example expected-to-fail.
-        let error_fence: Option<&Fence> = body.iter().find_map(|b| match b {
-            Block::Fence(f) if f.info == "error" => Some(f),
-            _ => None,
-        });
-
-        // Pass 2: table/fence immediately after a step-bearing block.
-        let mut attachments: BTreeMap<usize, (Option<Table>, Option<Fence>)> = BTreeMap::new();
-        for (idx, here) in body.iter().enumerate().skip(1) {
-            match here {
-                Block::Table(table) if steps_by_block.contains_key(&(idx - 1)) => {
-                    attachments.entry(idx - 1).or_default().0 = Some(table.clone());
+            CandidateUnit::Steps(unit) => {
+                if !unit.matched {
+                    // Prose paragraph — a delimiter. Drop it and end the open example.
+                    if let Some(m) = open.take() {
+                        examples.push(finish_merged(m, source));
+                    }
+                    continue;
                 }
-                Block::Fence(fence)
-                    if fence.info != "error" && steps_by_block.contains_key(&(idx - 1)) =>
-                {
-                    attachments.entry(idx - 1).or_default().1 = Some(fence.clone());
-                }
-                _ => {}
-            }
-        }
-
-        // Pass 3: rebuild the final step list, applying attachments to the last
-        // step of each block.
-        let mut final_steps = Vec::new();
-        for idx in 0..body.len() {
-            let Some(steps_at_idx) = steps_by_block.get(&idx) else {
-                continue;
-            };
-            let attach = attachments.get(&idx);
-            let last = steps_at_idx.len() - 1;
-            for (s, step) in steps_at_idx.iter().enumerate() {
-                if s == last {
-                    if let Some((data_table, doc_string)) = attach {
-                        let mut with_attach = step.clone();
-                        with_attach.data_table = data_table.clone();
-                        with_attach.doc_string = doc_string.clone();
-                        final_steps.push(with_attach);
-                        continue;
+                match open.as_mut() {
+                    Some(m) if !unit.preceded_by_delimiter => merge_into(m, unit),
+                    _ => {
+                        if let Some(m) = open.take() {
+                            examples.push(finish_merged(m, source));
+                        }
+                        open = Some(start_merged(unit));
                     }
                 }
-                final_steps.push(step.clone());
             }
         }
-
-        let runnable_steps = if had_ambiguous {
-            Vec::new()
-        } else {
-            final_steps.clone()
-        };
-
-        if let Some(fence) = error_fence {
-            if runnable_steps.is_empty() {
-                diagnostics.push(error_fence_without_step(fence.span));
-            }
-        }
-
-        if final_steps.is_empty() && !had_ambiguous {
-            continue;
-        }
-
-        let (expected_outcome, expected_error_message) = match error_fence {
-            Some(fence) => {
-                let trimmed = java_trim(&fence.body);
-                let msg = if trimmed.is_empty() {
-                    None
-                } else {
-                    Some(trimmed.to_string())
-                };
-                (Some("fail".to_string()), msg)
-            }
-            None => (None, None),
-        };
-
-        examples.push(PlannedExample {
-            name: derive_example_name(body),
-            scope_stack: ex.scope_stack.clone(),
-            span: ex.span,
-            steps: runnable_steps,
-            header_binding: None,
-            row_checks: None,
-            expected_outcome,
-            expected_error_message,
-        });
     }
+    if let Some(m) = open.take() {
+        examples.push(finish_merged(m, source));
+    }
+
+    // A table or fence that doesn't attach to a step is just Markdown content,
+    // not a mistake — it produces no diagnostic.
 
     ExecutionPlan {
         var_doc: doc.clone(),
         examples,
         diagnostics,
     }
+}
+
+/// A step-bearing candidate accumulating into one example while adjacent matching
+/// candidates keep merging in.
+struct MergedExample {
+    name: String,
+    scope_stack: Vec<String>,
+    start_offset: usize,
+    end_offset: usize,
+    steps: Vec<PlannedStep>,
+    expected_outcome: Option<String>,
+    expected_error_message: Option<String>,
+}
+
+/// One candidate paragraph, planned in isolation.
+enum CandidateUnit {
+    HeaderBound { rows: Vec<PlannedExample> },
+    Steps(StepsUnit),
+}
+
+struct StepsUnit {
+    matched: bool,
+    preceded_by_delimiter: bool,
+    name: String,
+    scope_stack: Vec<String>,
+    span: Span,
+    steps: Vec<PlannedStep>,
+    expected_outcome: Option<String>,
+    expected_error_message: Option<String>,
+}
+
+fn start_merged(unit: StepsUnit) -> MergedExample {
+    MergedExample {
+        name: unit.name,
+        scope_stack: unit.scope_stack,
+        start_offset: unit.span.start_offset,
+        end_offset: unit.span.end_offset,
+        steps: unit.steps,
+        expected_outcome: unit.expected_outcome,
+        expected_error_message: unit.expected_error_message,
+    }
+}
+
+fn merge_into(open: &mut MergedExample, unit: StepsUnit) {
+    open.end_offset = unit.span.end_offset;
+    open.steps.extend(unit.steps);
+    // Any error fence in a merged part marks the whole example expected-to-fail;
+    // keep the first message we see.
+    if unit.expected_outcome.as_deref() == Some("fail") {
+        open.expected_outcome = Some("fail".to_string());
+        if open.expected_error_message.is_none() && unit.expected_error_message.is_some() {
+            open.expected_error_message = unit.expected_error_message;
+        }
+    }
+}
+
+fn finish_merged(open: MergedExample, source: &str) -> PlannedExample {
+    let span = Span::from_offsets(source, open.start_offset, open.end_offset);
+    PlannedExample {
+        name: open.name,
+        scope_stack: open.scope_stack,
+        span,
+        steps: open.steps,
+        header_binding: None,
+        row_checks: None,
+        expected_outcome: open.expected_outcome,
+        expected_error_message: open.expected_error_message,
+    }
+}
+
+/// Plan a single candidate paragraph (plus its attached tables/fences) in
+/// isolation. Emits ambiguity / error-fence diagnostics into `diagnostics`.
+fn plan_candidate(
+    ex: &crate::ast::Example,
+    doc: &VarDoc,
+    registry: &Registry,
+    diagnostics: &mut Vec<Diagnostic>,
+) -> CandidateUnit {
+    let source = &doc.source;
+    let mut had_ambiguous = false;
+    let body = &ex.body;
+
+    // Pass 1: plan each text-bearing block, collecting steps per body index.
+    let mut steps_by_block: BTreeMap<usize, Vec<PlannedStep>> = BTreeMap::new();
+    for (idx, block) in body.iter().enumerate() {
+        if !is_text_bearing(block) {
+            continue;
+        }
+        let text = text_of(block);
+        let (block_hits, ambiguities) = plan_block(text, registry);
+        for collision in &ambiguities {
+            let span = lift_span(source, block, collision.match_start, collision.match_end);
+            diagnostics.push(ambiguous_match(span));
+            had_ambiguous = true;
+        }
+        if !had_ambiguous && !block_hits.is_empty() {
+            let block_steps: Vec<PlannedStep> = block_hits
+                .into_iter()
+                .map(|hit| PlannedStep {
+                    text: crate::offsets::utf16_slice(text, hit.match_start, hit.match_end)
+                        .to_string(),
+                    match_span: lift_span(source, block, hit.match_start, hit.match_end),
+                    param_spans: hit
+                        .param_spans
+                        .iter()
+                        .map(|p| lift_span(source, block, p.start, p.end))
+                        .collect(),
+                    step_def: hit.step_def,
+                    args: hit.args,
+                    formats: hit.formats,
+                    data_table: None,
+                    doc_string: None,
+                })
+                .collect();
+            steps_by_block.insert(idx, block_steps);
+        }
+    }
+
+    // Header-bound table: iterate row by row.
+    let bound = if had_ambiguous {
+        None
+    } else {
+        detect_header_bound(body, &steps_by_block, source)
+    };
+    if let Some(bound) = bound {
+        let header_binding = HeaderBinding {
+            match_span: bound.step.match_span,
+            param_spans: bound.header_spans.clone(),
+            step_def: bound.step.step_def.clone(),
+        };
+        let header_cells = &bound.table.header.cells;
+        let mut rows = Vec::new();
+        for row in &bound.table.rows {
+            let mut row_object = BTreeMap::new();
+            for (i, header) in header_cells.iter().enumerate() {
+                row_object.insert(header.clone(), Value::from(cell_at(row, i)));
+            }
+            let mut row_args = bound.step.args.clone();
+            row_args.push(Value::Map(row_object));
+            let row_step = PlannedStep {
+                text: bound.step.text.clone(),
+                match_span: row.span,
+                param_spans: bound.step.param_spans.clone(),
+                step_def: bound.step.step_def.clone(),
+                args: row_args,
+                formats: bound.step.formats.clone(),
+                data_table: None,
+                doc_string: None,
+            };
+            let row_checks: Vec<RowCheck> = header_cells
+                .iter()
+                .enumerate()
+                .map(|(i, header)| {
+                    RowCheck::new(header.clone(), cell_at(row, i), cell_span_at(row, i))
+                })
+                .collect();
+            let mut nested_scope = ex.scope_stack.clone();
+            nested_scope.push(bound.step.text.clone());
+            rows.push(PlannedExample {
+                name: row.cells.join(" / "),
+                scope_stack: nested_scope,
+                span: row.span,
+                steps: vec![row_step],
+                header_binding: Some(HeaderBinding {
+                    match_span: header_binding.match_span,
+                    param_spans: header_binding.param_spans.clone(),
+                    step_def: header_binding.step_def.clone(),
+                }),
+                row_checks: Some(row_checks),
+                expected_outcome: None,
+                expected_error_message: None,
+            });
+        }
+        return CandidateUnit::HeaderBound { rows };
+    }
+
+    // An ```error fence anywhere marks the candidate expected-to-fail.
+    let error_fence: Option<&Fence> = body.iter().find_map(|b| match b {
+        Block::Fence(f) if f.info == "error" => Some(f),
+        _ => None,
+    });
+
+    // Pass 2: table/fence immediately after a step-bearing block.
+    let mut attachments: BTreeMap<usize, (Option<Table>, Option<Fence>)> = BTreeMap::new();
+    for (idx, here) in body.iter().enumerate().skip(1) {
+        match here {
+            Block::Table(table) if steps_by_block.contains_key(&(idx - 1)) => {
+                attachments.entry(idx - 1).or_default().0 = Some(table.clone());
+            }
+            Block::Fence(fence)
+                if fence.info != "error" && steps_by_block.contains_key(&(idx - 1)) =>
+            {
+                attachments.entry(idx - 1).or_default().1 = Some(fence.clone());
+            }
+            _ => {}
+        }
+    }
+
+    // Pass 3: rebuild the final step list, applying attachments to the last
+    // step of each block.
+    let mut final_steps = Vec::new();
+    for idx in 0..body.len() {
+        let Some(steps_at_idx) = steps_by_block.get(&idx) else {
+            continue;
+        };
+        let attach = attachments.get(&idx);
+        let last = steps_at_idx.len() - 1;
+        for (s, step) in steps_at_idx.iter().enumerate() {
+            if s == last {
+                if let Some((data_table, doc_string)) = attach {
+                    let mut with_attach = step.clone();
+                    with_attach.data_table = data_table.clone();
+                    with_attach.doc_string = doc_string.clone();
+                    final_steps.push(with_attach);
+                    continue;
+                }
+            }
+            final_steps.push(step.clone());
+        }
+    }
+
+    let runnable_steps = if had_ambiguous {
+        Vec::new()
+    } else {
+        final_steps
+    };
+
+    // An `error` fence declares the candidate expected-to-fail, but here there's
+    // no runnable step to produce that failure (nothing matched, or the match was
+    // ambiguous). That's an author mistake, not silent Markdown — flag it.
+    if let Some(fence) = error_fence {
+        if runnable_steps.is_empty() {
+            diagnostics.push(error_fence_without_step(fence.span));
+        }
+    }
+
+    let (expected_outcome, expected_error_message) = match error_fence {
+        Some(fence) => {
+            let trimmed = java_trim(&fence.body);
+            let msg = if trimmed.is_empty() {
+                None
+            } else {
+                Some(trimmed.to_string())
+            };
+            (Some("fail".to_string()), msg)
+        }
+        None => (None, None),
+    };
+
+    CandidateUnit::Steps(StepsUnit {
+        matched: !runnable_steps.is_empty(),
+        preceded_by_delimiter: ex.preceded_by_delimiter,
+        name: derive_example_name(body),
+        scope_stack: ex.scope_stack.clone(),
+        span: ex.span,
+        steps: runnable_steps,
+        expected_outcome,
+        expected_error_message,
+    })
 }
 
 struct Ambiguity {

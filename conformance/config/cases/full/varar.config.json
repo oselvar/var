@@ -2,6 +2,5 @@
   "$schema": "../../varar.config.schema.json",
   "docs": { "include": ["specs/**/*.md", "docs/**/*.md"], "exclude": ["specs/wip/**"] },
   "steps": ["steps/**/*.steps.ts", "steps/**/*_steps.py"],
-  "snippets": { "typescript": "// {{expression}}", "python": "# {{expression}}" },
-  "scannerPlugins": ["gherkinTables", "gherkinDocStrings"]
+  "snippets": { "typescript": "// {{expression}}", "python": "# {{expression}}" }
 }

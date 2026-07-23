@@ -173,6 +173,7 @@ public static class Conformance
     private static Value ExampleValue(Example example) => Map(
         ("scopeStack", Value.List(example.ScopeStack.Select(Value.Of))),
         ("span", SpanValue(example.Span)),
+        ("precededByDelimiter", Value.Of(example.PrecededByDelimiter)),
         ("body", List(example.Body, BlockValue)));
 
     private static Value BlockValue(Block block) => block switch

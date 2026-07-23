@@ -19,8 +19,7 @@ module Varar
       {
         'docs' => { 'include' => cfg.docs_include, 'exclude' => cfg.docs_exclude },
         'steps' => cfg.steps,
-        'snippets' => cfg.snippets,
-        'scannerPlugins' => cfg.scanner_plugins
+        'snippets' => cfg.snippets
       }
     end
 

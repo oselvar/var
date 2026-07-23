@@ -1,7 +1,7 @@
 //! `varar-config` — the strict, fail-loud reader for `varar.config.json`.
 //!
 //! Port of `@varar/config` / Python `var_config`. The canonical shape is
-//! `{ docs: { include, exclude }, steps, snippets, scannerPlugins }`; every key
+//! `{ docs: { include, exclude }, steps, snippets }`; every key
 //! is optional and defaults to empty. A missing file yields the empty config
 //! (tools no-op); malformed JSON, wrong types, or unknown keys fail loudly with
 //! the file path. Proven by the shared corpus at `conformance/config/cases/`.
@@ -9,7 +9,7 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
-const KNOWN_KEYS: &[&str] = &["$schema", "docs", "steps", "snippets", "scannerPlugins"];
+const KNOWN_KEYS: &[&str] = &["$schema", "docs", "steps", "snippets"];
 const KNOWN_DOCS_KEYS: &[&str] = &["include", "exclude"];
 
 /// The parsed configuration. All fields default to empty.
@@ -19,7 +19,6 @@ pub struct VarConfig {
     pub docs_exclude: Vec<String>,
     pub steps: Vec<String>,
     pub snippets: BTreeMap<String, String>,
-    pub scanner_plugins: Vec<String>,
 }
 
 /// Read `<root>/varar.config.json`. Missing file → empty config. Any malformed
@@ -72,7 +71,6 @@ pub fn read_var_config(root: &Path) -> Result<VarConfig, String> {
         docs_exclude,
         steps: string_array(obj.get("steps"), "steps", &loc)?,
         snippets: string_map(obj.get("snippets"), &loc)?,
-        scanner_plugins: string_array(obj.get("scannerPlugins"), "scannerPlugins", &loc)?,
     })
 }
 

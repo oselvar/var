@@ -21,6 +21,7 @@
           "text": "I fly to LHR. The destination code is lhr."
         }
       ],
+      "precededByDelimiter": true,
       "scopeStack": [
         "Custom parameter types",
         "Flying to London"

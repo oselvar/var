@@ -107,6 +107,7 @@
           }
         }
       ],
+      "precededByDelimiter": true,
       "scopeStack": [
         "😀 Emoji World",
         "It greets after an emoji"

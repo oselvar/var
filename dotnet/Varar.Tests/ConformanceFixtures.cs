@@ -30,6 +30,7 @@ public static class ConformanceFixtures
             ["15-custom-parameter-format"] = Corpus.B15.MoneySteps.Register,
             ["16-stimulus-state-replacement"] = Corpus.B16.ReplaceSteps.Register,
             ["17-unexpected-pass"] = Corpus.B17.QuietSteps.Register,
+            ["18-multi-table-example"] = Corpus.B18.BasketSteps.Register,
         };
 
     /// <summary>Locate the shared corpus directory by walking up from the test binary.</summary>
@@ -97,6 +98,7 @@ public static class ConformanceFixtures
             ["15-custom-parameter-format"] = Corpus.B15.MoneySteps.State,
             ["16-stimulus-state-replacement"] = Corpus.B16.ReplaceSteps.State,
             ["17-unexpected-pass"] = Corpus.B17.QuietSteps.State,
+            ["18-multi-table-example"] = Corpus.B18.BasketSteps.State,
         };
 
     /// <summary>The bundle's initial-state factory, or a loud failure if none is wired.</summary>

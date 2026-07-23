@@ -5,7 +5,6 @@ import {
   parse,
   plan,
   type Registry,
-  type ScannerPlugin,
 } from '@varar/core'
 import type { StepDefScanner } from './scanner.ts'
 import type { Range, StepDef } from './step-defs.ts'
@@ -13,9 +12,6 @@ import type { Range, StepDef } from './step-defs.ts'
 export type WorkspaceInput = {
   readonly stepFiles: ReadonlyArray<{ readonly path: string; readonly source: string }>
   readonly varFiles: ReadonlyArray<{ readonly path: string; readonly source: string }>
-  // Optional: opt-in scanner extensions (e.g. Gherkin tables, Gherkin doc
-  // strings) sourced from varar.config.json. Empty/omitted = pure markdown.
-  readonly scannerPlugins?: ReadonlyArray<ScannerPlugin>
   // The step-def scanner. Always the tree-sitter scanner
   // (createTreeSitterScanner); callers build it at their async shell edge with
   // an environment-specific GrammarLoader and pass the resolved instance here.
@@ -103,7 +99,7 @@ export function buildWorkspaceIndex(input: WorkspaceInput): WorkspaceIndex {
   const diagnostics: DiagnosticRef[] = []
 
   for (const file of input.varFiles) {
-    const varDoc = parse(file.path, file.source, input.scannerPlugins ?? [])
+    const varDoc = parse(file.path, file.source)
     const result = plan(varDoc, registry)
     // Header-bound tables expand to one example per row, all sharing the same
     // binding paragraph. For highlighting we want the paragraph (with its

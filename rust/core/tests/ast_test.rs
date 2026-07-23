@@ -159,10 +159,12 @@ fn example_exposes_fields() {
         scope_stack: vec!["Feature".to_string(), "Scenario".to_string()],
         span: SPAN,
         body: vec![Block::ThematicBreak(ThematicBreak { span: SPAN })],
+        preceded_by_delimiter: true,
     };
     assert_eq!(vec!["Feature".to_string(), "Scenario".to_string()], example.scope_stack);
     assert_eq!(SPAN, example.span);
     assert_eq!(1, example.body.len());
+    assert!(example.preceded_by_delimiter);
 }
 
 #[test]
@@ -171,6 +173,7 @@ fn var_doc_exposes_fields() {
         scope_stack: vec![],
         span: SPAN,
         body: vec![Block::ThematicBreak(ThematicBreak { span: SPAN })],
+        preceded_by_delimiter: true,
     };
     let orphan = TableOrFence::Fence(Fence {
         span: SPAN,

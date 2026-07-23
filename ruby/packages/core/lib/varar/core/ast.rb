@@ -40,7 +40,11 @@ module Varar
       def kind = 'thematic_break'
     end
 
-    Example = Data.define(:scope_stack, :span, :body)
+    # +preceded_by_delimiter+ is true when a heading or thematic break (`---`)
+    # sits between this candidate and the previous one (also true for the first
+    # candidate). The planner uses it to group adjacent matching candidates into
+    # one example. See ADR 0012.
+    Example = Data.define(:scope_stack, :span, :body, :preceded_by_delimiter)
 
     VarDoc = Data.define(:path, :source, :examples, :orphan_attachments)
   end

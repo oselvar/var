@@ -8,10 +8,8 @@ package must implement the same harness rule over `cases/`:
   for humans and is not asserted against).
 - Otherwise, load the config (a missing `varar.config.json` — see
   `no-config-file/` — is legal and yields the empty config), project it to
-  `{ docs: { include, exclude }, steps, snippets, scannerPlugins }` with
-  scanner-plugin NAMES (strings, never resolved functions), serialize with
-  the port's canonical-JSON helper, and compare byte-for-byte against
-  `golden.json`.
+  `{ docs: { include, exclude }, steps, snippets }`, serialize with the port's
+  canonical-JSON helper, and compare byte-for-byte against `golden.json`.
 
 `varar.config.schema.json` is the machine-readable schema (reference it from a
 config file via `"$schema"` for editor validation). Readers enforce the same

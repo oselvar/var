@@ -1,9 +1,3 @@
 {
-  "examples": [
-    {
-      "name": "I have 5 cukes",
-      "outcome": "pass",
-      "steps": []
-    }
-  ]
+  "examples": []
 }

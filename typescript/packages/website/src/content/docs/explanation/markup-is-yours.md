@@ -53,15 +53,15 @@ become example boundaries and `describe` scopes), prose blocks (paragraphs,
 list items, blockquotes), tables, and fenced blocks (doc strings and
 `error` fences). All of it is *block* structure. None of it is inline.
 
-That boundary is what makes the format pluggable. The scanner already
-accepts block-recognition plugins — the Gherkin-table plugin adds `| a | b |`
-tables without separator rows — and Markdown's own block rules are on by
-default for `.md` and `.mdx` files. A block marker like a list bullet or a
-blockquote's `>` prefix belongs to the format, so it never reaches the
-matcher; everything after it is your text, untouched.
+That boundary is what keeps the format separable from the matching. The scanner
+recognises Markdown's block structure — headings, paragraphs, list items,
+blockquotes, tables, fences — and hands the matcher only the text inside each
+block. A block marker like a list bullet or a blockquote's `>` prefix belongs to
+the format, so it never reaches the matcher; everything after it is your text,
+untouched.
 
 Nothing about sentences, matching or comparison knows Markdown exists. A
-future AsciiDoc plugin (`==` headings, `|===` tables, `----` blocks) would
-slot into the same seam without changing how a single expression matches —
-and your emphasis parameter type would simply use AsciiDoc's notation:
-`/_[^_]+_/`.
+different block syntax — AsciiDoc's `==` headings, `|===` tables, `----` blocks —
+would be a different scanner in front of the same matcher, without changing how a
+single expression matches; your emphasis parameter type would simply use
+AsciiDoc's notation: `/_[^_]+_/`.

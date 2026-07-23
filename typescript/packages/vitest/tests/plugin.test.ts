@@ -23,7 +23,6 @@ describe('generateVirtualModule', () => {
       varPath: '/abs/foo.md',
       stepImports: ['/abs/account.steps.ts'],
       source: 'Narration.\n\nThe answer is 42.\n',
-      scannerPluginNames: [],
       examples: [{ name: 'The answer is 42', line: 3, col: 1 }],
     })
     const lines = out.split('\n')
@@ -39,7 +38,6 @@ describe('generateVirtualModule', () => {
     expect(lines[0]).not.toContain("from '@varar/core'")
     expect(lines[0]).toContain('import "/abs/account.steps.ts"')
     expect(lines[0]).toContain('const PATH = "/abs/foo.md"')
-    expect(lines[0]).toContain('scannerPlugins: []')
     // Line 2 is filler, line 3 carries the static test registration: a string
     // literal name (so editors can discover it without running anything) and a
     // body looked up by index at runtime.
@@ -54,7 +52,6 @@ describe('generateVirtualModule', () => {
       varPath: '/abs/foo.md',
       stepImports: [],
       source: '- The answer is 42.\n',
-      scannerPluginNames: [],
       examples: [{ name: 'The answer is 42', line: 2, col: 3 }],
     })
     expect(out.split('\n')[1]).toBe(
@@ -67,7 +64,6 @@ describe('generateVirtualModule', () => {
       varPath: '/abs/foo.md',
       stepImports: [],
       source: 'The answer is 42.\n',
-      scannerPluginNames: [],
       examples: [{ name: 'The answer is 42', line: 1, col: 1 }],
     })
     const first = out.split('\n')[0] ?? ''
@@ -80,7 +76,6 @@ describe('generateVirtualModule', () => {
       varPath: '/abs/foo.md',
       stepImports: [],
       source: 'The answer is 42.\n',
-      scannerPluginNames: [],
       examples: [{ name: 'The answer is 42', line: 1, col: 1 }],
     })
     expect(out).toContain('expectedCount: 1')
@@ -94,7 +89,6 @@ describe('generateVirtualModule', () => {
       varPath: '/abs/foo.md',
       stepImports: [],
       source: 'The answer is 42.\n',
-      scannerPluginNames: [],
       examples: [{ name: 'The answer is 42', line: 1, col: 1 }],
       baseline: { sourceHash: 'fnv1a:00000000', examples: [{ name: 'The answer is 42', line: 1 }] },
     })
@@ -106,20 +100,9 @@ describe('generateVirtualModule', () => {
     const out = generateVirtualModule({
       varPath: '/abs/foo.md',
       stepImports: [],
-      scannerPluginNames: [],
       examples: [],
     })
     expect(out).toContain('baseline: null')
-  })
-
-  test('inlines configured scanner-plugin names so the runtime can resolve them via var-core', () => {
-    const out = generateVirtualModule({
-      varPath: '/abs/foo.md',
-      stepImports: [],
-      scannerPluginNames: ['gherkinTables', 'gherkinDocStrings'],
-      examples: [],
-    })
-    expect(out).toContain('scannerPlugins: ["gherkinTables","gherkinDocStrings"]')
   })
 })
 

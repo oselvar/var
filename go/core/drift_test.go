@@ -152,6 +152,53 @@ func TestRewrittenPastRecognitionIsNotDrift(t *testing.T) {
 	}
 }
 
+// depositWithdrawReg registers I withdraw, plus I deposit when withDeposit.
+func depositWithdrawReg(t *testing.T, withDeposit bool) Registry {
+	t.Helper()
+	r := CreateRegistry()
+	if withDeposit {
+		next, err := AddStep(r, "I deposit {int}", "steps.ts", 1, NoopHandler(), stimulusKind())
+		if err != nil {
+			t.Fatal(err)
+		}
+		r = next
+	}
+	next, err := AddStep(r, "I withdraw {int}", "steps.ts", 2, NoopHandler(), stimulusKind())
+	if err != nil {
+		t.Fatal(err)
+	}
+	return next
+}
+
+// Two paragraphs that merge into one example are each a live baseline entry, and
+// deleting one step def drifts only the now-prose paragraph (ADR 0012).
+func TestMergedExampleParagraphsAreEachLive(t *testing.T) {
+	source := "I deposit 100.\n\nI withdraw 40."
+	varDoc := Parse("w.md", source)
+	plan := Plan(varDoc, depositWithdrawReg(t, true))
+	// One planned example (the two paragraphs merged), but two live entries.
+	if len(plan.Examples) != 1 {
+		t.Fatalf("expected 1 planned example, got %d", len(plan.Examples))
+	}
+	got := LiveExamples(varDoc, plan)
+	want := []BaselineExample{{Name: "I deposit 100", Line: 1}, {Name: "I withdraw 40", Line: 3}}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("live got %v, want %v", got, want)
+	}
+}
+
+func TestDeletingOneStepOfMergedExampleDriftsOnlyNowProseParagraph(t *testing.T) {
+	source := "I deposit 100.\n\nI withdraw 40."
+	varDoc := Parse("w.md", source)
+	baseline := DeriveSpecBaseline(source, varDoc, Plan(varDoc, depositWithdrawReg(t, true)))
+	// The deposit step is gone: its paragraph becomes prose, splitting the
+	// example. The withdraw paragraph is still live; the deposit one drifts.
+	got := bare(DetectDrift(&baseline, varDoc, Plan(varDoc, depositWithdrawReg(t, false))))
+	if !reflect.DeepEqual(got, []string{"I deposit 100@1"}) {
+		t.Errorf("got %v", got)
+	}
+}
+
 const roman = "Each row gives a decimal and a roman number:\n\n| decimal | roman |\n| ------: | :---- |\n| 3 | III |\n| 9 | IX |\n"
 
 func TestHeaderBoundRecordsBindingOnce(t *testing.T) {

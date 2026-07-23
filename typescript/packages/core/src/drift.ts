@@ -46,18 +46,20 @@ export type Drift = {
   readonly span: Span
 }
 
-// Is `inner` positioned within `outer` (offset containment)? A planned
-// example's span sits inside its structural candidate's span — exactly for the
-// 1:1 case, strictly inside for header-bound rows nested in the binding
-// paragraph.
-function within(inner: Span, outer: Span): boolean {
-  return inner.startOffset >= outer.startOffset && inner.endOffset <= outer.endOffset
+// Do the two spans overlap at all (offset ranges intersect)? A candidate
+// paragraph relates to its planned example either way round: a header-bound row
+// sits *inside* its binding paragraph, while a merged example's span *covers*
+// each of the candidates it absorbed (ADR 0012). Overlap catches both.
+function overlaps(a: Span, b: Span): boolean {
+  return a.startOffset < b.endOffset && b.startOffset < a.endOffset
 }
 
-// A candidate paragraph is "live" (still an example) if at least one planned
-// example falls within it.
+// A candidate paragraph is "live" (still an example) if it overlaps at least one
+// planned example. A now-prose paragraph — one whose step def was renamed or
+// deleted — overlaps none (it became a delimiter, splitting any example it was
+// part of), so drift catches it.
 function isLive(candidateSpan: Span, plan: ExecutionPlan): boolean {
-  return plan.examples.some((pe) => within(pe.span, candidateSpan))
+  return plan.examples.some((pe) => overlaps(pe.span, candidateSpan))
 }
 
 // Lower-cased word tokens (Unicode letters/digits) of a paragraph name. The

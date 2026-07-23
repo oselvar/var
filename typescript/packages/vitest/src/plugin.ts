@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { relative, resolve, sep } from 'node:path'
 import { findFiles, loadVarConfig } from '@varar/config'
-import { parseVarLock, type ScannerPlugin, type SpecBaseline } from '@varar/core'
+import { parseVarLock, type SpecBaseline } from '@varar/core'
 import type { Plugin } from 'vite'
 import { configDefaults } from 'vitest/config'
 import { discoverStaticExamples, type StaticExample } from './static-examples.ts'
@@ -25,13 +25,6 @@ export function vararVitestPlugin(options: VararVitestPluginOptions = {}): Plugi
   // hook transforms only these into virtual test modules — there is no longer
   // a `.md` extension to key off of.
   let specFiles: ReadonlySet<string> = new Set()
-  // Scanner plugins from varar.config.json, in both forms: the resolved
-  // instances feed the static planner in this process, and the names are
-  // inlined into the generated virtual module so it can re-resolve them via
-  // var-core's registry (functions can't be serialized into generated
-  // source, names can).
-  let scannerPlugins: ReadonlyArray<ScannerPlugin> = []
-  let pluginNames: ReadonlyArray<string> = []
   // Absolute path to varar.config.json when one exists — watched so a config
   // edit re-transforms specs in watch mode.
   let configJsonPath: string | undefined
@@ -66,8 +59,6 @@ export function vararVitestPlugin(options: VararVitestPluginOptions = {}): Plugi
       const cfg = await loadVarConfig(cwd)
       stepFiles = findFiles(cwd, cfg.steps)
       specFiles = new Set(findFiles(cwd, cfg.docs.include, cfg.docs.exclude))
-      scannerPlugins = cfg.scannerPlugins
-      pluginNames = cfg.scannerPluginNames
       const abs = resolve(cwd, 'varar.config.json')
       configJsonPath = existsSync(abs) ? abs : undefined
     },
@@ -86,7 +77,6 @@ export function vararVitestPlugin(options: VararVitestPluginOptions = {}): Plugi
         varPath,
         source,
         stepFiles: stepFiles.map((path) => ({ path, source: readFileSync(path, 'utf8') })),
-        scannerPlugins,
       })
       // This spec's baseline entry from varar.lock.json (POSIX path, relative to
       // cwd), injected so the runtime can run the read-only drift gate.
@@ -97,7 +87,6 @@ export function vararVitestPlugin(options: VararVitestPluginOptions = {}): Plugi
         varPath,
         stepImports: stepFiles,
         source,
-        scannerPluginNames: pluginNames,
         examples,
         baseline,
       })
@@ -109,10 +98,6 @@ export type GenerateInput = {
   readonly varPath: string
   readonly stepImports: ReadonlyArray<string>
   readonly source?: string
-  // Scanner-plugin NAMES from varar.config.json. The generated module passes
-  // them to collectVararExamples, which resolves them against var-core's
-  // registry — functions can't be serialized into generated source, names can.
-  readonly scannerPluginNames: ReadonlyArray<string>
   // Statically discovered examples (see discoverStaticExamples). Each one
   // becomes a `test("literal name", ...)` call placed at its own markdown
   // line/column.
@@ -131,7 +116,6 @@ export type GenerateInput = {
 export function generateVirtualModule(input: GenerateInput): string {
   const sourceJson = JSON.stringify(input.source ?? '')
   const pathJson = JSON.stringify(input.varPath)
-  const pluginNamesJson = JSON.stringify(input.scannerPluginNames)
   const baselineJson = JSON.stringify(input.baseline ?? null)
   const examples = input.examples ?? []
   const header: string[] = [
@@ -148,7 +132,7 @@ export function generateVirtualModule(input: GenerateInput): string {
     // collectVararExamples, so the only `test(...)` callsites in this module
     // are the real per-example ones below — static AST discovery sees an
     // exact test tree.
-    `const EXAMPLES = collectVararExamples(PATH, ${sourceJson}, { scannerPlugins: ${pluginNamesJson}, expectedCount: ${examples.length}, baseline: ${baselineJson} })`,
+    `const EXAMPLES = collectVararExamples(PATH, ${sourceJson}, { expectedCount: ${examples.length}, baseline: ${baselineJson} })`,
   ]
   const testCall = (ex: StaticExample, i: number): string => {
     const nameJson = JSON.stringify(ex.name)

@@ -91,6 +91,12 @@ type Example struct {
 	ScopeStack []string
 	Span       Span
 	Body       []Block
+	// PrecededByDelimiter is true when a heading or thematic break (`---`) sits
+	// between this candidate and the previous one — a syntactic delimiter
+	// separates them (also true for the first candidate). The planner uses it to
+	// decide grouping: a matching candidate with this false merges into the open
+	// example rather than starting a new one. See ADR 0012.
+	PrecededByDelimiter bool
 }
 
 // VarDoc is a parsed source file: its matched examples plus unattached
