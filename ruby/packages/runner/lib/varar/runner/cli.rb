@@ -6,14 +6,14 @@ module Varar
   module Runner
     # The `var` command-line entry point (exposed by the `exe/var`
     # executable). Today it offers a single sub-command, `varar init`, which
-    # scaffolds a new project: a `varar.config.json`, one Markdown spec, its
-    # step definitions, and a framework bridge that turns the specs into
+    # scaffolds a new project: a `varar.config.json`, one Markdown oath, its
+    # step definitions, and a framework bridge that turns the oaths into
     # RSpec examples or Minitest tests.
     #
-    # The config, spec and steps mirror the TypeScript CLI (`@varar/cli`)
+    # The config, oath and steps mirror the TypeScript CLI (`@varar/cli`)
     # so a project started with `varar init` looks the same in every language;
     # only the bridge is Ruby-specific, because RSpec/Minitest — unlike
-    # pytest — need an explicit generator call to discover the specs.
+    # pytest — need an explicit generator call to discover the oaths.
     module CLI
       CONFIG = <<~JSON
         {
@@ -23,10 +23,13 @@ module Varar
       JSON
 
       EXAMPLE_MD = <<~MARKDOWN
-        # Hello, BDD
+        # Deep Thought
 
-        Given I greet "world"
-        Then the greeting is "Hello, world!"
+        You're really not going to like it.
+
+        The answer to the great question of life, the universe and everything is 42.
+
+        It was a tough assignment.
       MARKDOWN
 
       EXAMPLE_STEPS = <<~RUBY
@@ -34,16 +37,15 @@ module Varar
 
         require 'varar'
 
-        steps(-> { { greeting: '' } }) do
-          stimulus('I greet {string}') { |_state, name| { greeting: "Hello, \#{name}!" } }
-          sensor('the greeting is {string}') { |state, _expected| state[:greeting] }
+        steps do
+          sensor('life, the universe and everything is {int}') { 42 }
         end
       RUBY
 
       RSPEC_BRIDGE = <<~RUBY
         # frozen_string_literal: true
 
-        # Turn every Markdown spec matched by varar.config.json into RSpec examples —
+        # Turn every Markdown oath matched by varar.config.json into RSpec examples —
         # one `it` per Markdown example, discovered when this file loads.
         require 'varar/rspec'
 
@@ -57,13 +59,13 @@ module Varar
         require 'minitest/autorun'
         require 'varar/minitest'
 
-        # Turn every Markdown spec matched by varar.config.json into Minitest tests —
+        # Turn every Markdown oath matched by varar.config.json into Minitest tests —
         # varar.config.json lives at the project root (the parent of test/).
         Varar::Minitest.generate_tests(Object, root: File.expand_path('..', __dir__))
       RUBY
 
       USAGE = <<~TEXT
-        varar — scaffold and run Markdown specs
+        varar — scaffold and run Markdown oaths
 
         Usage:
           varar init               scaffold a new project
@@ -85,8 +87,8 @@ module Varar
       def self.run_init(cwd, out, framework: detect_framework)
         files = [
           ['varar.config.json', CONFIG],
-          ['varar-examples/01-hello.md', EXAMPLE_MD],
-          ['varar-examples/steps/01-hello.steps.rb', EXAMPLE_STEPS]
+          ['varar-examples/deep-thought.md', EXAMPLE_MD],
+          ['varar-examples/steps/deep-thought.steps.rb', EXAMPLE_STEPS]
         ]
         files << if framework == :minitest
                    ['test/var_test.rb', MINITEST_BRIDGE]
