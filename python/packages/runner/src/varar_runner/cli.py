@@ -17,8 +17,8 @@ from pathlib import Path
 from typing import Callable
 
 _CONFIG = """{
-  "docs": { "include": ["varar-examples/**/*.md"], "exclude": [] },
-  "steps": ["varar-examples/**/*.steps.py"]
+  "docs": { "include": ["varar/**/*.md"], "exclude": [] },
+  "steps": ["tests/varar/**/*.steps.py"]
 }
 """
 
@@ -43,8 +43,8 @@ def _(state, answer):
 
 _FILES: tuple[tuple[str, str], ...] = (
     ("varar.config.json", _CONFIG),
-    ("varar-examples/deep-thought.md", _EXAMPLE_MD),
-    ("varar-examples/steps/deep-thought.steps.py", _EXAMPLE_STEPS),
+    ("varar/deep-thought.md", _EXAMPLE_MD),
+    ("tests/varar/deep_thought.steps.py", _EXAMPLE_STEPS),
 )
 
 _USAGE = """varar — scaffold and run Markdown oaths
