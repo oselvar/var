@@ -18,7 +18,7 @@
     <!-- On trunk this is the SNAPSHOT that `mvn install` (run from java/)
          puts into the local repository, so the sample always tests the code
          in this repo. In your own project: pin the latest release. -->
-    <var.version>0.7.0</var.version>
+    <var.version>0.7.1-SNAPSHOT</var.version>
   </properties>
 
   <dependencies>
