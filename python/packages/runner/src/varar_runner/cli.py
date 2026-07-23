@@ -1,13 +1,13 @@
 """The `var` command-line entry point.
 
 Today it offers a single sub-command, `varar init`, which scaffolds a new
-project: a `varar.config.json`, one Markdown spec, and its step definitions.
-Specs then run through pytest (`pytest-varar`) or unittest — there is no
+project: a `varar.config.json`, one Markdown oath, and its step definitions.
+Oaths then run through pytest (`pytest-varar`) or unittest — there is no
 `varar run` in the Python port; the test framework is the runner.
 
 The scaffold mirrors the TypeScript CLI (`@varar/varar-cli`) byte-for-byte
 except for the steps file, so a project started with `varar init` looks the same
-in every language. The `01-hello.md` spec is language-neutral.
+in every language. The `deep-thought.md` oath is language-neutral.
 """
 
 from __future__ import annotations
@@ -22,34 +22,32 @@ _CONFIG = """{
 }
 """
 
-_EXAMPLE_MD = """# Hello, BDD
+_EXAMPLE_MD = """# Deep Thought
 
-Given I greet "world"
-Then the greeting is "Hello, world!"
+You're really not going to like it.
+
+The answer to the great question of life, the universe and everything is 42.
+
+It was a tough assignment.
 """
 
 _EXAMPLE_STEPS = '''from varar import steps
 
-param, stimulus, sensor = steps(lambda: {"greeting": ""})
+param, stimulus, sensor = steps()
 
 
-@stimulus("I greet {string}")
-def _(state, name):
-    return {"greeting": f"Hello, {name}!"}
-
-
-@sensor("the greeting is {string}")
-def _(state, expected):
-    return state["greeting"]
+@sensor("life, the universe and everything is {int}")
+def _(state, answer):
+    return 42
 '''
 
 _FILES: tuple[tuple[str, str], ...] = (
     ("varar.config.json", _CONFIG),
-    ("varar-examples/01-hello.md", _EXAMPLE_MD),
-    ("varar-examples/steps/01-hello.steps.py", _EXAMPLE_STEPS),
+    ("varar-examples/deep-thought.md", _EXAMPLE_MD),
+    ("varar-examples/steps/deep-thought.steps.py", _EXAMPLE_STEPS),
 )
 
-_USAGE = """varar — scaffold and run Markdown specs
+_USAGE = """varar — scaffold and run Markdown oaths
 
 Usage:
   varar init               scaffold a new project
